@@ -7,6 +7,7 @@ systems work. One repo, one harness, one rung at a time.
 
 - **[docs/ladder.md](docs/ladder.md)** — the rungs (generated from the spec).
 - **[docs/reading-list.md](docs/reading-list.md)** — the paper/book/course list that goes with them.
+- **[parts/a_classical/](parts/a_classical/)** — part A is written up with its results; the rest are stubs.
 
 ## Quick start
 
@@ -37,6 +38,7 @@ everything CI runs.
 ```
 src/mlladder/      shared harness: experiment runner, tracking, metrics, plotting
   ladder.py        the ladder spec — single source of truth for parts and rungs
+  datasets.py      numpy-only synthetic datasets (blobs, moons, spirals, Friedman #1)
 parts/             one package per part, one module per rung (mirrors the spec 1:1)
 examples/          harness demo, end to end, no ML content worth reading
 rust/              Cargo workspace stub for the Candle ports (rung G3)

@@ -6,12 +6,12 @@ All helpers return the ``Figure`` so a caller can keep tweaking it, and
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 
 import matplotlib
 import numpy as np
-from numpy.typing import ArrayLike
+from numpy.typing import ArrayLike, NDArray
 
 matplotlib.use("Agg")  # figures are written to disk, never shown
 
@@ -55,18 +55,28 @@ def save_fig(fig: Figure, path: str | Path, *, close: bool = True) -> Path:
 def plot_curves(
     series: Mapping[str, Sequence[float]],
     *,
+    x: Sequence[float] | None = None,
     title: str = "",
     xlabel: str = "step",
     ylabel: str = "value",
     logy: bool = False,
+    logx: bool = False,
+    marker: str | None = None,
 ) -> Figure:
-    """Training/validation curves — one line per key."""
+    """Training/validation curves — one line per key.
+
+    ``x`` gives explicit x values (a depth or size sweep); without it the
+    series are plotted against their index, as training curves want.
+    """
     use_house_style()
     fig, ax = plt.subplots()
     for label, values in series.items():
-        ax.plot(range(len(values)), values, label=label, linewidth=1.8)
+        positions = list(x) if x is not None else list(range(len(values)))
+        ax.plot(positions, values, label=label, linewidth=1.8, marker=marker)
     if logy:
         ax.set_yscale("log")
+    if logx:
+        ax.set_xscale("log")
     ax.set(title=title, xlabel=xlabel, ylabel=ylabel)
     if len(series) > 1:
         ax.legend()
@@ -107,6 +117,86 @@ def plot_comparison(scores: Mapping[str, float], *, title: str = "", ylabel: str
     ax.bar(names, [scores[name] for name in names], color=PALETTE[0], width=0.6)
     ax.set(title=title, ylabel=ylabel)
     ax.tick_params(axis="x", rotation=20)
+    return fig
+
+
+def plot_scatter(
+    features: ArrayLike,
+    labels: ArrayLike | None = None,
+    *,
+    title: str = "",
+    xlabel: str = "x0",
+    ylabel: str = "x1",
+    centers: ArrayLike | None = None,
+) -> Figure:
+    """2-D scatter, coloured by label, with optional cluster centres marked."""
+    use_house_style()
+    points = np.asarray(features)
+    fig, ax = plt.subplots(figsize=(5.4, 4.6))
+    if labels is None:
+        ax.scatter(points[:, 0], points[:, 1], s=14, alpha=0.85, color=PALETTE[0])
+    else:
+        tags = np.asarray(labels)
+        for index, value in enumerate(np.unique(tags)):
+            mask = tags == value
+            ax.scatter(
+                points[mask, 0],
+                points[mask, 1],
+                s=14,
+                alpha=0.85,
+                color=PALETTE[index % len(PALETTE)],
+                label=str(value),
+            )
+        ax.legend(title="class", fontsize=8)
+    if centers is not None:
+        marks = np.asarray(centers)
+        ax.scatter(
+            marks[:, 0], marks[:, 1], s=180, marker="X", edgecolor="black", linewidth=1.2, color="white", zorder=3
+        )
+    ax.set(title=title, xlabel=xlabel, ylabel=ylabel)
+    return fig
+
+
+def plot_decision_boundary(
+    predict: Callable[[NDArray[np.float64]], ArrayLike],
+    features: ArrayLike,
+    labels: ArrayLike,
+    *,
+    title: str = "",
+    resolution: int = 200,
+    margin: float = 0.5,
+) -> Figure:
+    """Shade a 2-D classifier's decision regions behind the training points.
+
+    ``predict`` takes an ``(n, 2)`` array and returns hard labels.
+    """
+    use_house_style()
+    points = np.asarray(features, dtype=np.float64)
+    tags = np.asarray(labels)
+    x_min, y_min = points.min(axis=0) - margin
+    x_max, y_max = points.max(axis=0) + margin
+    xx, yy = np.meshgrid(np.linspace(x_min, x_max, resolution), np.linspace(y_min, y_max, resolution))
+    grid = np.column_stack([xx.ravel(), yy.ravel()])
+    regions = np.asarray(predict(grid)).reshape(xx.shape)
+
+    classes = np.unique(tags)
+    cmap = matplotlib.colors.ListedColormap([PALETTE[i % len(PALETTE)] for i in range(len(classes))])
+    fig, ax = plt.subplots(figsize=(5.4, 4.6))
+    ax.contourf(xx, yy, regions, levels=len(classes) - 1 if len(classes) > 1 else 1, cmap=cmap, alpha=0.18)
+    for index, value in enumerate(classes):
+        mask = tags == value
+        ax.scatter(
+            points[mask, 0],
+            points[mask, 1],
+            s=16,
+            color=PALETTE[index % len(PALETTE)],
+            edgecolor="white",
+            linewidth=0.4,
+            label=str(value),
+        )
+    ax.set(title=title, xlabel="x0", ylabel="x1")
+    ax.legend(title="class", fontsize=8)
+    ax.grid(False)
     return fig
 
 

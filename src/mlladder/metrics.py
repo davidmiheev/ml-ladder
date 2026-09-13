@@ -50,6 +50,44 @@ def precision_recall_f1(
     return {"precision": precision, "recall": recall, "f1": f1}
 
 
+def cluster_purity(y_true: ArrayLike, cluster_ids: ArrayLike) -> float:
+    """Fraction of points in the majority class of their own cluster.
+
+    Label-permutation invariant, so it can score clusterings against ground
+    truth — but it rises with the number of clusters, so read it next to the
+    adjusted Rand index rather than alone.
+    """
+    matrix = _contingency(y_true, cluster_ids)
+    return float(matrix.max(axis=0).sum() / matrix.sum())
+
+
+def adjusted_rand_index(y_true: ArrayLike, cluster_ids: ArrayLike) -> float:
+    """Rand index corrected for chance: 1.0 is exact, 0.0 is a random split."""
+    matrix = _contingency(y_true, cluster_ids).astype(np.float64)
+    pairs = _choose_two(matrix).sum()
+    rows = _choose_two(matrix.sum(axis=1)).sum()
+    columns = _choose_two(matrix.sum(axis=0)).sum()
+    total = _choose_two(np.array([matrix.sum()]))[0]
+    expected = rows * columns / total
+    maximum = (rows + columns) / 2
+    return float((pairs - expected) / (maximum - expected)) if maximum != expected else 0.0
+
+
+def _contingency(y_true: ArrayLike, cluster_ids: ArrayLike) -> NDArray[np.int64]:
+    true = np.asarray(y_true).ravel()
+    clusters = np.asarray(cluster_ids).ravel()
+    true_labels, true_index = np.unique(true, return_inverse=True)
+    _, cluster_index = np.unique(clusters, return_inverse=True)
+    matrix = np.zeros((len(true_labels), cluster_index.max() + 1), dtype=np.int64)
+    np.add.at(matrix, (true_index, cluster_index), 1)
+    return matrix
+
+
+def _choose_two(counts: NDArray[np.float64]) -> NDArray[np.float64]:
+    values = np.asarray(counts, dtype=np.float64)
+    return values * (values - 1) / 2
+
+
 def mse(y_true: ArrayLike, y_pred: ArrayLike) -> float:
     true, pred = _as_1d(y_true), _as_1d(y_pred)
     return float(np.mean((true - pred) ** 2))
