@@ -15,6 +15,13 @@ together, and how it connects to the parts before it.
 
 **Question.** TODO(writeup): what is this rung actually asking?
 
+### The math
+
+TODO(writeup): the objective, its gradient or optimality condition, and the one
+property that explains the behaviour you measured. Derive rather than cite;
+`$inline$` and `$$display$$` render on GitHub. Say what the math predicts before the results
+section says what happened.
+
 **What I built.** TODO(writeup): design decisions and the non-obvious details.
 
 **Results.** TODO(writeup): a table with per-seed ranges, and the figures from
@@ -31,6 +38,13 @@ together, and how it connects to the parts before it.
 ## F2 — GCN and GraphSAGE on a node-classification benchmark
 
 **Question.** TODO(writeup): what is this rung actually asking?
+
+### The math
+
+TODO(writeup): the objective, its gradient or optimality condition, and the one
+property that explains the behaviour you measured. Derive rather than cite;
+`$inline$` and `$$display$$` render on GitHub. Say what the math predicts before the results
+section says what happened.
 
 **What I built.** TODO(writeup): design decisions and the non-obvious details.
 

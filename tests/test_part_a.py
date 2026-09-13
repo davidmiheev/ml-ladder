@@ -244,6 +244,43 @@ def test_stochastic_boosting_runs_on_a_subsample():
     assert booster.train_loss_[-1] < booster.train_loss_[0]
 
 
+def test_boosting_is_the_same_algorithm_as_xgboost_for_squared_loss():
+    """With squared loss and no regularization, the two are one algorithm.
+
+    XGBoost's Newton leaf weight -sum(g)/(sum(h) + lambda) collapses to the mean
+    residual when h == 1 and lambda == 0, and its split gain becomes half the
+    variance-reduction identity A2's tree already maximizes. Line the remaining
+    defaults up (min_child_weight, base_score, exact splits) and the predictions
+    must agree to floating-point noise -- float32 in the library, float64 here.
+    """
+    xgb = pytest.importorskip("xgboost", reason="uv sync --extra boost")
+
+    features, targets = datasets.make_friedman1(400, n_features=8, noise=1.0, rng=21)
+    x_train, x_test, y_train, _ = datasets.train_test_split(features, targets, rng=21)
+
+    ours = GradientBoostingRegressor(n_estimators=50, learning_rate=0.1, max_depth=3, min_samples_leaf=5, rng=21).fit(
+        x_train, y_train
+    )
+    parameters = {
+        "objective": "reg:squarederror",
+        "eta": 0.1,
+        "max_depth": 3,
+        "reg_lambda": 0.0,
+        "min_child_weight": 5,  # h == 1, so this is min_samples_leaf
+        "base_score": float(y_train.mean()),
+        "tree_method": "exact",
+        "nthread": 1,
+        "seed": 21,
+        "verbosity": 0,
+    }
+    booster = xgb.train(parameters, xgb.DMatrix(x_train, label=y_train), num_boost_round=50)
+
+    ours_predictions = ours.predict(x_test)
+    xgb_predictions = booster.predict(xgb.DMatrix(x_test))
+    scale = float(np.std(targets))
+    assert np.max(np.abs(ours_predictions - xgb_predictions)) < 1e-4 * scale
+
+
 def test_xgboost_baseline_is_optional():
     features, targets = datasets.make_friedman1(150, noise=1.0, rng=20)
     x_train, x_test, y_train, y_test = datasets.train_test_split(features, targets, rng=20)

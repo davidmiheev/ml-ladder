@@ -49,6 +49,20 @@ def test_completed_parts_have_finished_writeups(part):
 
 
 @pytest.mark.parametrize("part", COMPLETE_PARTS, ids=lambda part: part.id)
+def test_finished_writeups_carry_the_math(part):
+    """Every rung's section must derive the algorithm, not just report it."""
+    text = (ROOT / spec.writeup_path(part)).read_text()
+    sections = text.split("\n## ")
+    for item in part.items:
+        if not item.is_code:
+            continue
+        section = next((chunk for chunk in sections if chunk.startswith(f"{item.id} —")), None)
+        assert section is not None, f"no section for {item.id}"
+        assert "### The math" in section, f"{item.id}'s section has no math"
+        assert "$$" in section, f"{item.id}'s math has no display equations"
+
+
+@pytest.mark.parametrize("part", COMPLETE_PARTS, ids=lambda part: part.id)
 def test_writeup_figures_exist(part):
     """Every image a writeup references must be committed next to it."""
     writeup = ROOT / spec.writeup_path(part)

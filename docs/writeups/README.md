@@ -29,10 +29,12 @@ comparable across parts:
 2. **Through-line** — the one idea that ties the part's rungs together. Written
    last, but it is the part worth reading.
 3. **One section per rung**, each with: *Question* (what the rung is actually
-   asking), *What I built* (design decisions and the non-obvious details),
-   *Results* (a table with per-seed ranges, plus figures), *What surprised me*,
-   *Open threads*, and *Reading* — the entries from
-   [the reading list](../reading-list.md) that belong with the rung.
+   asking), **The math** (the objective, its gradient or optimality condition,
+   and the property that explains what you measured), *What I built* (design
+   decisions and the non-obvious details), *Results* (a table with per-seed
+   ranges, plus figures), *What surprised me*, *Open threads*, and *Reading* —
+   the entries from [the reading list](../reading-list.md) that belong with the
+   rung.
 4. **What the part settled** — the numbered takeaways, including the ones that
    are about method rather than about the algorithms.
 
@@ -47,6 +49,17 @@ comparable across parts:
 - **Figures come from the reference seed** and live in `figures/<part>/`.
 - **Surprises are recorded, including the wrong turns.** A writeup with no
   retractions in it is usually a writeup that stopped looking.
+- **The math comes before the results, and is derived rather than cited.** The
+  point is not to decorate the document with formulas — it is that the
+  derivation should *predict* the measurement, and the measurement should audit
+  the derivation. Part A's three examples: the SGD variance floor predicts an
+  $|B|^{-1/2}$ scaling and the fit gives $-0.54$; the k-means/PCA constraint-set
+  argument forces $E_{\text{k-means}}(k) \ge E_{\text{PCA}}(k-1)$ and it holds at
+  every $k$; XGBoost's Newton leaf weight collapses to the mean residual at
+  $\lambda = 0$, so the two boosters must agree — and they do, to $6\times10^{-6}$.
+  Where a derivation makes a checkable claim, it becomes a test.
+- **Math renders with GitHub's MathJax:** `$inline$` and `$$display$$` blocks,
+  the latter surrounded by blank lines.
 
 ## Regenerating
 
