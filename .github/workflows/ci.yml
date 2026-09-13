@@ -22,6 +22,8 @@ jobs:
         run: uv run python tools/scaffold.py --check
       - name: Tests
         run: uv run pytest
+      - name: Writeups cover every finished part
+        run: uv run pytest tests/test_writeups.py -q
       - name: Harness demo
         env:
           MLLADDER_TRACKER: jsonl

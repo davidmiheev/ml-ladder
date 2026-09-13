@@ -210,6 +210,9 @@ LADDER: tuple[Part, ...] = (
 )
 
 PARTS_DIR_NAME = "parts"
+WRITEUPS_DIR = "docs/writeups"
+FIGURES_DIR = "docs/writeups/figures"
+DATA_DIR = "docs/writeups/data"
 
 
 def parts() -> tuple[Part, ...]:
@@ -234,6 +237,23 @@ def get_item(item_id: str) -> Item:
         if item.id == key:
             return item
     raise KeyError(f"no such ladder item: {item_id!r}")
+
+
+def part_slug(part: Part) -> str:
+    """Filename stem for a part's writeup and figure folder, e.g. ``a-classical``."""
+    return (part.package or f"part-{part.id}").replace("_", "-")
+
+
+def writeup_path(part: Part) -> str:
+    return f"{WRITEUPS_DIR}/{part_slug(part)}.md"
+
+
+def figures_dir(part: Part) -> str:
+    return f"{FIGURES_DIR}/{part.id.lower()}"
+
+
+def metrics_path(part: Part) -> str:
+    return f"{DATA_DIR}/{part.id.lower()}-metrics.json"
 
 
 def module_path(item: Item) -> str:

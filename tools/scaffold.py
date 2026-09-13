@@ -58,6 +58,47 @@ if __name__ == "__main__":
     raise SystemExit(main())
 '''
 
+WRITEUP_TEMPLATE = """# Part {part_id} — {title}
+
+> **Status:** not started · TODO(writeup): remove this line when the part is done
+> **Numbers:** TODO(writeup): seeds used, e.g. seeds 0-2, reference seed 0 · raw values in [`data/{part_lower}-metrics.json`](data/{part_lower}-metrics.json)
+> **Reproduce:** `ladder run {first_code_id}` … , or `uv run python tools/writeup_figures.py {part_id}`
+{note}
+TODO(writeup): the through-line — the one idea that ties this part's rungs
+together, and how it connects to the parts before it.
+
+---
+{sections}
+## What part {part_id} settled
+
+TODO(writeup): numbered takeaways, including the methodological ones.
+
+---
+
+*Figures regenerate with `uv run python tools/writeup_figures.py {part_id}`; the
+numbers they are quoted against live in [`data/{part_lower}-metrics.json`](data/{part_lower}-metrics.json).
+See [the writeup conventions](README.md) for the structure this follows.*
+"""
+
+WRITEUP_SECTION_TEMPLATE = """
+## {item_id} — {short_title}
+
+**Question.** TODO(writeup): what is this rung actually asking?
+
+**What I built.** TODO(writeup): design decisions and the non-obvious details.
+
+**Results.** TODO(writeup): a table with per-seed ranges, and the figures from
+`figures/{part_lower}/{item_lower}_*.png`.
+
+**What surprised me.** TODO(writeup)
+
+**Open threads.** TODO(writeup)
+
+**Reading:** TODO(writeup): the entries from [the reading list](../reading-list.md) that belong here.
+
+---
+"""
+
 PART_README_TEMPLATE = """# {part_id}. {title}
 {note}
 {lab}
@@ -93,6 +134,28 @@ def part_readme(part: Part) -> str:
     )
 
 
+def writeup(part: Part) -> str:
+    """Outline for a part's writeup, filled in once its rungs are done."""
+    code_items = [item for item in part.items if item.is_code]
+    sections = "".join(
+        WRITEUP_SECTION_TEMPLATE.format(
+            item_id=item.id,
+            short_title=item.title.split(" (")[0].split(" — ")[0],
+            part_lower=part.id.lower(),
+            item_lower=item.id.lower(),
+        )
+        for item in code_items
+    )
+    return WRITEUP_TEMPLATE.format(
+        part_id=part.id,
+        title=part.title,
+        part_lower=part.id.lower(),
+        first_code_id=code_items[0].id if code_items else part.items[0].id,
+        note=f"\n*{part.note}*\n" if part.note else "",
+        sections=sections,
+    )
+
+
 def expected_files() -> dict[Path, str]:
     """Every file the spec implies, mapped to the content it would be created with."""
     files: dict[Path, str] = {}
@@ -107,6 +170,7 @@ def expected_files() -> dict[Path, str]:
         for item in part.items:
             if item.module:
                 files[package_dir / f"{item.module}.py"] = stub_source(part, item)
+        files[ROOT / spec.writeup_path(part)] = writeup(part)
     return files
 
 

@@ -1,8 +1,10 @@
 # Thin wrappers over uv/cargo — everything here also works as a plain command.
 .DEFAULT_GOAL := help
 UV ?= uv
+# Parts whose rungs are all implemented — the ones with figures to regenerate.
+COMPLETE_PARTS ?= $(shell $(UV) run ladder status --complete)
 
-.PHONY: help setup test lint fmt check scaffold docs status demo rust clean
+.PHONY: help setup test lint fmt check scaffold docs status demo rust writeups writeups-check clean
 
 help:  ## Show this help
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  %-10s %s\n", $$1, $$2}'
@@ -34,6 +36,14 @@ docs:  ## Regenerate docs/ladder.md from the spec
 
 docs-check: docs  ## Fail if docs/ladder.md was stale
 	@git diff --quiet docs/ladder.md || { echo "docs/ladder.md was stale; commit the regenerated file"; exit 1; }
+
+writeups: $(addprefix writeup-,$(COMPLETE_PARTS))  ## Regenerate figures and metrics for every complete part
+
+writeup-%:  ## Regenerate one part's writeup figures and metrics, e.g. make writeup-A
+	$(UV) run python tools/writeup_figures.py $*
+
+writeups-check:  ## Fail if a complete part's committed metrics have drifted
+	@for part in $(COMPLETE_PARTS); do $(UV) run python tools/writeup_figures.py $$part --check || exit 1; done
 
 status:  ## Progress across the ladder
 	$(UV) run ladder status

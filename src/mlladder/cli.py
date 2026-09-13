@@ -76,6 +76,11 @@ def _print_part_header(part: Part) -> None:
 
 
 def cmd_status(args: argparse.Namespace) -> int:
+    if args.complete:
+        # Machine-readable: the parts whose code rungs are all implemented.
+        print(" ".join(part.id for part in spec.parts() if part.package and _part_is_complete(part)))
+        return 0
+
     total = implemented = 0
     for part in spec.parts():
         counts = {"done": 0, "stub": 0, "missing": 0, "setup": 0}
@@ -90,6 +95,10 @@ def cmd_status(args: argparse.Namespace) -> int:
         print(f"{part.id}  {bar}  {part_done}/{part_total}  {part.title}{missing}")
     print(f"\ntotal: {implemented}/{total} rungs done ({100 * implemented // total}%)")
     return 0
+
+
+def _part_is_complete(part: Part) -> bool:
+    return all(item_status(item) == "done" for item in part.items if item.is_code)
 
 
 def _bar(done: int, total: int, width: int = 20) -> str:
@@ -142,6 +151,7 @@ def build_parser() -> argparse.ArgumentParser:
     listing.set_defaults(func=cmd_list)
 
     status = sub.add_parser("status", help="progress per part")
+    status.add_argument("--complete", action="store_true", help="print just the ids of parts whose rungs are all done")
     status.set_defaults(func=cmd_status)
 
     run = sub.add_parser("run", help="run one rung by id, e.g. ladder run B2 --epochs 5")
