@@ -1,0 +1,25 @@
+# Run outputs and datasets — regenerate, never commit
+artifacts/
+data/
+wandb/
+*.ckpt
+*.pt
+*.pth
+*.npz
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+*.egg-info/
+
+# Rust
+rust/target/
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/

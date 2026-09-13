@@ -1,0 +1,106 @@
+# ml-ladder
+
+Hands-on ladder through broader machine learning: classical algorithms from
+scratch, deep learning foundations, sequence models, self-supervised and
+generative modelling, geometric/equivariant nets, and a bridge into scaling and
+systems work. One repo, one harness, one rung at a time.
+
+- **[docs/ladder.md](docs/ladder.md)** — the rungs (generated from the spec).
+- **[docs/reading-list.md](docs/reading-list.md)** — the paper/book/course list that goes with them.
+
+## Quick start
+
+```sh
+uv sync --group dev            # environment + dev tools
+uv run ladder status           # progress across the ladder
+uv run ladder list B           # the rungs in one part
+uv run ladder run B2 --help    # flags for a rung
+uv run ladder run B2 --epochs 5
+```
+
+Heavy dependencies are opt-in per part, so part A never waits on a CUDA wheel:
+
+```sh
+uv sync --extra torch          # B, C, D, E, F, G
+uv sync --extra boost          # A4 (XGBoost benchmark)
+uv sync --extra graph          # F2 (PyTorch Geometric)
+uv sync --extra equivariant    # F1 (escnn)
+uv sync --extra tracking       # W&B
+uv sync --extra all            # everything except escnn
+```
+
+`make help` lists the same commands as Make targets; `make check` runs
+everything CI runs.
+
+## Layout
+
+```
+src/mlladder/      shared harness: experiment runner, tracking, metrics, plotting
+  ladder.py        the ladder spec — single source of truth for parts and rungs
+parts/             one package per part, one module per rung (mirrors the spec 1:1)
+examples/          harness demo, end to end, no ML content worth reading
+rust/              Cargo workspace stub for the Candle ports (rung G3)
+tools/scaffold.py  creates parts/ files from the spec; --check asserts no drift
+docs/              generated ladder + reading list (HTML originals in docs/source/)
+artifacts/         run outputs (git-ignored)
+data/              datasets (git-ignored)
+```
+
+## Writing a rung
+
+Every rung is a module that defines `run(exp)` and gets its CLI, seeding, run
+directory and tracking from the harness:
+
+```python
+from mlladder import Experiment, experiment, metrics, plotting
+
+
+@experiment("b2_mlp_mnist", defaults={"epochs": 10, "lr": 1e-3, "batch_size": 128})
+def run(exp: Experiment) -> dict[str, float]:
+    """MLP on MNIST — manual backprop vs. autograd."""
+    for step in range(exp["epochs"]):
+        exp.log({"train/loss": ...}, step=step)
+    exp.log_figure("loss", plotting.plot_curves({"train": losses}))
+    return {"test/accuracy": metrics.accuracy(y_true, y_pred)}
+
+
+main = run
+```
+
+Each `defaults` entry becomes a typed `--flag`. A run writes to
+`artifacts/<rung>/<timestamp>/`: `config.json`, `metrics.jsonl`, `summary.json`
+and any figures. A rung that still calls `todo(...)` counts as a stub in
+`ladder status` and exits with code 2.
+
+Adding a rung: add it to `src/mlladder/ladder.py`, run `make scaffold`, then
+`make docs`. CI fails if `parts/` or `docs/ladder.md` drifts from the spec.
+
+## Run tracking
+
+Tracking goes through one interface with a local fallback, so a run never
+depends on network or credentials:
+
+| backend | when |
+| --- | --- |
+| `wandb` | wandb installed *and* configured (`WANDB_API_KEY`, `~/.netrc`, or `WANDB_MODE=offline`) |
+| `jsonl` | default otherwise — `metrics.jsonl` + figures in the run directory |
+| `none`  | tests and throwaway runs |
+
+Force one with `--track wandb|jsonl|none` or `MLLADDER_TRACKER`. The W&B project
+defaults to `ml-ladder` (`WANDB_PROJECT` to change it), and W&B runs mirror their
+metrics to disk as well.
+
+Other environment variables: `MLLADDER_DATA_DIR` and `MLLADDER_ARTIFACTS_DIR`
+relocate the two writable directories — useful for a shared dataset cache.
+
+## Rust side
+
+`rust/` is a Cargo workspace holding `ignite-port`, where rung G3 (a Candle port
+of one transformer-block forward pass) lands, as the comprehension bridge into
+`ignite-catalog`. It is dependency-free until then, so `cargo test` works
+offline; uncomment the Candle lines in the workspace and crate manifests when
+starting G3.
+
+## License
+
+BSD 2-Clause. See [LICENSE](LICENSE).

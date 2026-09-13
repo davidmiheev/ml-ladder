@@ -1,0 +1,16 @@
+# Cargo workspace stub reserved for the Rust/Candle ports (ladder rung 04, G3).
+# Kept dependency-free for now so `cargo check` works offline; uncomment the
+# candle lines in crates/ignite-port/Cargo.toml when starting G3.
+[workspace]
+resolver = "2"
+members = ["crates/ignite-port"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+license = "BSD-2-Clause"
+
+[workspace.dependencies]
+# candle-core = "0.9"
+# candle-nn = "0.9"

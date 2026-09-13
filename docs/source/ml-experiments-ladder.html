@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Broader ML experiments ladder</title>
+<style>
+  :root{
+    --bg:#EFEEE8;
+    --paper:#FBFAF7;
+    --ink:#232A26;
+    --ink-soft:#5C645F;
+    --ink-faint:#9CA39D;
+    --line:#DAD8D0;
+    --blue:#33628E;
+    --blue-dark:#20415F;
+    --blue-tint:#E4EBF2;
+    --gold:#A9812F;
+    --gold-tint:#F3E9D2;
+    --done:#B9C4BC;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    line-height:1.5;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:2.5rem 1.5rem 5rem;}
+
+  header.top{margin-bottom:2rem;}
+  .eyebrow{
+    font-size:12.5px;color:var(--blue-dark);font-weight:600;letter-spacing:.02em;
+    display:flex;align-items:center;gap:8px;margin-bottom:.6rem;
+  }
+  .eyebrow .rung{
+    width:16px;height:16px;border:1.5px solid var(--blue-dark);border-radius:3px;
+    display:inline-flex;align-items:center;justify-content:center;font-size:10px;
+  }
+  h1{
+    font-family:Georgia,"Source Serif Pro",serif;
+    font-weight:600;font-size:2rem;margin:0 0 .5rem;color:var(--ink);letter-spacing:-.01em;
+  }
+  .sub{color:var(--ink-soft);font-size:15px;max-width:60ch;margin:0;}
+
+  .progress-row{
+    display:flex;align-items:center;gap:14px;margin:1.6rem 0 2.2rem;
+    background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px;
+  }
+  .progress-track{flex:1;height:8px;background:var(--line);border-radius:6px;overflow:hidden;}
+  .progress-fill{height:100%;background:var(--blue);width:0%;transition:width .3s ease;}
+  .progress-label{font-size:13px;color:var(--ink-soft);white-space:nowrap;font-variant-numeric:tabular-nums;}
+
+  .part{margin-bottom:2.3rem;}
+  .part-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:.7rem;}
+  .part-num{
+    font-family:Georgia,serif;font-weight:700;font-size:15px;color:var(--paper);
+    background:var(--blue);width:26px;height:26px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;
+  }
+  .part-titles{flex:1;min-width:0;}
+  .part-title{font-size:16.5px;font-weight:700;color:var(--ink);}
+  .part-note{font-size:13px;color:var(--ink-faint);margin-top:1px;}
+  .part-progress{font-size:12px;color:var(--ink-soft);white-space:nowrap;font-variant-numeric:tabular-nums;margin-top:3px;}
+
+  .lab-line{
+    display:flex;gap:8px;align-items:baseline;margin:0 0 .8rem 38px;
+    font-size:12.5px;color:var(--ink-soft);
+  }
+  .lab-tag{
+    font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;
+    color:var(--gold);background:var(--gold-tint);padding:1px 7px;border-radius:5px;flex-shrink:0;
+  }
+  .lab-line a{color:var(--blue-dark);font-weight:600;text-decoration:none;}
+  .lab-line a:hover{text-decoration:underline;}
+
+  .item{
+    display:flex;gap:12px;align-items:flex-start;margin-left:38px;
+    background:var(--paper);border:1px solid var(--line);border-radius:8px;
+    padding:11px 13px;margin-bottom:6px;transition:opacity .2s ease;
+  }
+  .item.done{opacity:.55;}
+  .item.done .item-title{text-decoration:line-through;text-decoration-color:var(--done);}
+
+  .box{
+    width:18px;height:18px;border:1.5px solid var(--ink-faint);border-radius:5px;
+    flex-shrink:0;margin-top:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    background:var(--paper);transition:all .15s ease;
+  }
+  .box svg{width:11px;height:11px;opacity:0;transition:opacity .15s ease;}
+  .item.done .box{background:var(--blue);border-color:var(--blue);}
+  .item.done .box svg{opacity:1;}
+
+  .item-body{flex:1;min-width:0;}
+  .item-title{font-size:14.5px;font-weight:500;color:var(--ink);}
+  .item-desc{font-size:12.5px;color:var(--ink-soft);margin-top:3px;}
+
+  footer{margin-top:2.5rem;font-size:12.5px;color:var(--ink-faint);border-top:1px solid var(--line);padding-top:1rem;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="eyebrow"><span class="rung">M</span> experiments ladder</div>
+    <h1>Broader ML — hands-on ladder</h1>
+    <p class="sub">Classical ML through generative and geometric deep learning, built from scratch before reaching for libraries. Each part carries a practical-lab reference; the last part bridges into ignite-catalog.</p>
+  </header>
+
+  <div class="progress-row">
+    <div class="progress-track"><div class="progress-fill" id="fill"></div></div>
+    <div class="progress-label" id="progress-label">0 / 0 done</div>
+  </div>
+
+  <div id="parts"></div>
+
+  <footer>Progress resets on reload — this ladder doesn't save state between sessions.</footer>
+</div>
+
+<script>
+const CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+
+const data = [
+  {
+    id: "0",
+    title: "Setup",
+    note: "one shared repo, mirrors the RL ladder scaffolding",
+    lab: { text: "lightning-hydra-template — structural reference", url: "https://github.com/ashleve/lightning-hydra-template" },
+    items: [
+      { t: "Repo scaffolding — uv-managed Python env, folder structure mirroring this ladder 1:1" },
+      { t: "Shared eval/plotting harness package used across all parts" },
+      { t: "W&B (or equivalent) run tracking wired in from part A onward" },
+      { t: "Cargo workspace stub reserved for later Rust/Candle ports, tied to [[ignite-catalog]]" },
+    ]
+  },
+  {
+    id: "A",
+    title: "Classical ML from scratch",
+    note: "numpy only — no sklearn",
+    lab: { text: "Stanford CS229 problem sets", url: "https://cs229.stanford.edu/" },
+    items: [
+      { t: "Linear & logistic regression via batch/mini-batch gradient descent" },
+      { t: "Decision tree + random forest from scratch (Gini/entropy splits, bagging)" },
+      { t: "k-means and PCA from scratch, compared against each other on the same toy dataset" },
+      { t: "Minimal gradient-boosting implementation, benchmarked against XGBoost" },
+    ]
+  },
+  {
+    id: "B",
+    title: "Deep learning foundations",
+    lab: { text: "karpathy/micrograd — autodiff reference implementation", url: "https://github.com/karpathy/micrograd" },
+    items: [
+      { t: "Scalar autodiff engine (micrograd-style) plus a tiny MLP trained on it" },
+      { t: "MLP on MNIST — manual backprop, then repeat with PyTorch autograd and diff the gradients" },
+      { t: "CNN on CIFAR-10 with a batchnorm/dropout ablation" },
+      { t: "ResNet block implementation, trained on CIFAR-10/100" },
+      { t: "Optimizer bake-off — SGD vs Adam vs AdamW, with LR-schedule comparison" },
+    ]
+  },
+  {
+    id: "C",
+    title: "Sequence models & attention",
+    lab: { text: "Annotated Transformer / nanoGPT", url: "https://nlp.seas.harvard.edu/annotated-transformer/" },
+    items: [
+      { t: "Char-level RNN/LSTM language model" },
+      { t: "Seq2seq with attention on a toy translation task" },
+      { t: "Transformer from scratch (attention, positional encoding, causal masking)" },
+      { t: "Fine-tune a small ViT on a custom image-classification task" },
+    ]
+  },
+  {
+    id: "D",
+    title: "Self-supervised & representation learning",
+    lab: { text: "lightly-ai — contrastive-learning reference implementations", url: "https://github.com/lightly-ai/lightly" },
+    items: [
+      { t: "SimCLR-style contrastive pretraining on CIFAR-10" },
+      { t: "Masked autoencoder (MAE) on a small image dataset" },
+      { t: "Linear probing of the learned representations against a supervised baseline" },
+    ]
+  },
+  {
+    id: "E",
+    title: "Generative models",
+    lab: { text: "lucidrains/denoising-diffusion-pytorch — diffusion reference", url: "https://github.com/lucidrains/denoising-diffusion-pytorch" },
+    items: [
+      { t: "VAE on MNIST/FashionMNIST" },
+      { t: "DCGAN on a small image dataset" },
+      { t: "DDPM diffusion model from scratch" },
+      { t: "Compare sample quality and training stability across VAE, GAN, and diffusion" },
+    ]
+  },
+  {
+    id: "F",
+    title: "Geometric & equivariant nets",
+    note: "ties directly to your algebraic topology / equivariant cohomology background",
+    lab: { text: "escnn — equivariant CNN library, and PyTorch Geometric tutorials", url: "https://github.com/QUVA-Lab/escnn" },
+    items: [
+      { t: "Rotation-equivariant CNN on a rotated-MNIST task, compared against a standard CNN" },
+      { t: "GCN and GraphSAGE on a node-classification benchmark (Cora/PubMed)" },
+    ]
+  },
+  {
+    id: "G",
+    title: "Scaling & systems",
+    note: "bridges into ignite-catalog",
+    lab: { text: "PyTorch mixed-precision & profiler docs", url: "https://pytorch.org/docs/stable/notes/amp_examples.html" },
+    items: [
+      { t: "Fit your own scaling-law curve (loss vs. params/data/compute) on a small model family" },
+      { t: "Mixed-precision + gradient-accumulation training, profiled for throughput and memory" },
+      { t: "Rust/Candle port of one transformer-block forward pass, as a comprehension exercise for [[ignite-catalog]]" },
+    ]
+  },
+];
+
+const partsEl = document.getElementById('parts');
+
+data.forEach((part) => {
+  const section = document.createElement('div');
+  section.className = 'part';
+  section.dataset.part = part.id;
+
+  const head = document.createElement('div');
+  head.className = 'part-head';
+  head.innerHTML = `
+    <div class="part-num">${part.id}</div>
+    <div class="part-titles">
+      <div class="part-title">${part.title}</div>
+      ${part.note ? `<div class="part-note">${part.note}</div>` : ''}
+    </div>
+    <div class="part-progress" data-part-progress="${part.id}"></div>
+  `;
+  section.appendChild(head);
+
+  if (part.lab) {
+    const lab = document.createElement('div');
+    lab.className = 'lab-line';
+    lab.innerHTML = `<span class="lab-tag">lab</span><span><a href="${part.lab.url}" target="_blank" rel="noopener">${part.lab.text}</a></span>`;
+    section.appendChild(lab);
+  }
+
+  part.items.forEach((it, ii) => {
+    const row = document.createElement('div');
+    row.className = 'item';
+    row.dataset.part = part.id;
+    row.innerHTML = `
+      <div class="box" role="checkbox" aria-checked="false" tabindex="0">${CHECK_SVG}</div>
+      <div class="item-body">
+        <div class="item-title">${part.id}${ii+1}. ${it.t}</div>
+        ${it.d ? `<div class="item-desc">${it.d}</div>` : ''}
+      </div>
+    `;
+    section.appendChild(row);
+  });
+
+  partsEl.appendChild(section);
+});
+
+function updateProgress(){
+  const all = document.querySelectorAll('.item');
+  const done = document.querySelectorAll('.item.done');
+  const pct = all.length ? Math.round((done.length/all.length)*100) : 0;
+  document.getElementById('fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `${done.length} / ${all.length} done`;
+
+  data.forEach(part => {
+    const partItems = document.querySelectorAll(`.item[data-part="${part.id}"]`);
+    const partDone = document.querySelectorAll(`.item[data-part="${part.id}"].done`);
+    const label = document.querySelector(`[data-part-progress="${part.id}"]`);
+    if (label) label.textContent = `${partDone.length} / ${partItems.length}`;
+  });
+}
+
+function toggleItem(row){
+  row.classList.toggle('done');
+  const box = row.querySelector('.box');
+  box.setAttribute('aria-checked', row.classList.contains('done'));
+  updateProgress();
+}
+
+partsEl.addEventListener('click', (e) => {
+  const box = e.target.closest('.box');
+  if(!box) return;
+  toggleItem(box.closest('.item'));
+});
+partsEl.addEventListener('keydown', (e) => {
+  if(e.key === 'Enter' || e.key === ' '){
+    const box = e.target.closest('.box');
+    if(!box) return;
+    e.preventDefault();
+    toggleItem(box.closest('.item'));
+  }
+});
+
+updateProgress();
+</script>
+</body>
+</html>

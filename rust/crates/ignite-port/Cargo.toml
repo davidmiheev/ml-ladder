@@ -1,0 +1,11 @@
+[package]
+name = "ignite-port"
+description = "Rust ports of ladder rungs — the comprehension bridge into ignite-catalog"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+# candle-core = { workspace = true }
+# candle-nn = { workspace = true }

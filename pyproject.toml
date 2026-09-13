@@ -1,0 +1,63 @@
+[project]
+name = "ml-ladder"
+version = "0.1.0"
+description = "Hands-on ladder through broader machine learning — classical ML to generative and geometric deep learning, built from scratch."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+authors = [{ name = "David Miheev" }]
+dependencies = [
+    "numpy>=1.26",
+    "matplotlib>=3.8",
+]
+
+[project.optional-dependencies]
+# Installed per part, so an afternoon on part A never waits on a CUDA wheel.
+torch = ["torch>=2.2", "torchvision>=0.17"]
+tracking = ["wandb>=0.17"]
+boost = ["xgboost>=2.0"]          # A4 benchmark baseline
+graph = ["torch-geometric>=2.5"]  # F2
+equivariant = ["escnn>=1.0"]      # F1
+datasets = ["datasets>=2.19", "tokenizers>=0.19"]  # C, D
+all = [
+    "ml-ladder[torch,tracking,boost,graph,datasets]",
+]
+
+[project.scripts]
+ladder = "mlladder.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mlladder", "parts"]
+
+[tool.uv]
+package = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["error::DeprecationWarning:mlladder.*"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+src = ["src", "parts", "tools", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+ignore = [
+    "E501",   # long lines in docstrings and reference links are fine
+    "B008",   # argparse/dataclass defaults
+]
+
+[tool.ruff.lint.per-file-ignores]
+"parts/**" = ["F401"]  # stubs import the harness before they use it

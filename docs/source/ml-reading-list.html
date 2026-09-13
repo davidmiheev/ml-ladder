@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Broader ML reading list</title>
+<style>
+  :root{
+    --bg:#EFEEE8;
+    --paper:#FBFAF7;
+    --ink:#232A26;
+    --ink-soft:#5C645F;
+    --ink-faint:#9CA39D;
+    --line:#DAD8D0;
+    --blue:#33628E;
+    --blue-dark:#20415F;
+    --blue-tint:#E4EBF2;
+    --gold:#A9812F;
+    --gold-tint:#F3E9D2;
+    --done:#B9C4BC;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    line-height:1.5;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:2.5rem 1.5rem 5rem;}
+
+  header.top{margin-bottom:2rem;}
+  .eyebrow{
+    font-size:12.5px;color:var(--blue-dark);font-weight:600;letter-spacing:.02em;
+    display:flex;align-items:center;gap:8px;margin-bottom:.6rem;
+  }
+  .eyebrow .rung{
+    width:16px;height:16px;border:1.5px solid var(--blue-dark);border-radius:3px;
+    display:inline-flex;align-items:center;justify-content:center;font-size:10px;
+  }
+  h1{
+    font-family:Georgia,"Source Serif Pro",serif;
+    font-weight:600;font-size:2rem;margin:0 0 .5rem;color:var(--ink);letter-spacing:-.01em;
+  }
+  .sub{color:var(--ink-soft);font-size:15px;max-width:58ch;margin:0;}
+
+  .anchors{display:flex;flex-direction:column;gap:10px;margin:1.6rem 0 2.2rem;}
+  .anchor-book{
+    display:flex;gap:14px;align-items:flex-start;
+    background:var(--blue-tint);border:1px solid var(--blue);border-radius:10px;
+    padding:16px 18px;
+  }
+  .anchor-spine{width:6px;align-self:stretch;border-radius:3px;background:var(--blue);flex-shrink:0;}
+  .anchor-body .k{font-size:11px;font-weight:700;color:var(--blue-dark);letter-spacing:.03em;text-transform:uppercase;}
+  .anchor-body .t{font-size:15.5px;font-weight:600;margin:.2rem 0 .15rem;}
+  .anchor-body .d{font-size:13px;color:var(--ink-soft);}
+  .anchor-body a{color:var(--blue-dark);}
+
+  .progress-row{
+    display:flex;align-items:center;gap:14px;margin:0 0 1.4rem;
+    background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px;
+  }
+  .progress-track{flex:1;height:8px;background:var(--line);border-radius:6px;overflow:hidden;}
+  .progress-fill{height:100%;background:var(--blue);width:0%;transition:width .3s ease;}
+  .progress-label{font-size:13px;color:var(--ink-soft);white-space:nowrap;font-variant-numeric:tabular-nums;}
+
+  .filters{display:flex;gap:8px;margin-bottom:2rem;flex-wrap:wrap;}
+  .chip{
+    border:1px solid var(--line);background:var(--paper);color:var(--ink-soft);
+    padding:6px 13px;border-radius:999px;font-size:13px;cursor:pointer;user-select:none;
+    transition:all .15s ease;
+  }
+  .chip:hover{border-color:var(--blue);}
+  .chip.active{background:var(--blue-tint);border-color:var(--blue);color:var(--blue-dark);font-weight:600;}
+
+  .track{margin-bottom:2rem;}
+  .track-head{display:flex;align-items:baseline;gap:10px;margin-bottom:.9rem;}
+  .track-num{font-family:Georgia,serif;font-size:14px;color:var(--gold);font-weight:700;min-width:20px;}
+  .track-title{font-size:16px;font-weight:600;color:var(--ink);}
+  .track-note{font-size:13px;color:var(--ink-faint);margin-left:auto;text-align:right;}
+
+  .item{
+    display:flex;gap:12px;align-items:flex-start;
+    background:var(--paper);border:1px solid var(--line);border-radius:8px;
+    padding:11px 13px;margin-bottom:6px;transition:opacity .2s ease, border-color .2s ease;
+  }
+  .item.hidden{display:none;}
+  .item.done{opacity:.55;}
+  .item.done .item-title{text-decoration:line-through;text-decoration-color:var(--done);}
+
+  .box{
+    width:18px;height:18px;border:1.5px solid var(--ink-faint);border-radius:5px;
+    flex-shrink:0;margin-top:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    background:var(--paper);transition:all .15s ease;
+  }
+  .box svg{width:11px;height:11px;opacity:0;transition:opacity .15s ease;}
+  .item.done .box{background:var(--blue);border-color:var(--blue);}
+  .item.done .box svg{opacity:1;}
+
+  .item-body{flex:1;min-width:0;}
+  .item-title-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .item-title{font-size:14.5px;font-weight:500;color:var(--ink);}
+  .item-link{font-size:12px;color:var(--blue-dark);text-decoration:none;font-weight:600;white-space:nowrap;}
+  .item-link:hover{text-decoration:underline;}
+  .item-meta{display:flex;gap:8px;align-items:center;margin-top:3px;flex-wrap:wrap;}
+  .tag{font-size:11px;padding:2px 8px;border-radius:5px;font-weight:600;letter-spacing:.01em;}
+  .tag.paper{background:var(--blue-tint);color:var(--blue-dark);}
+  .tag.book{background:#EFE3EC;color:#8A3D6E;}
+  .tag.course{background:var(--gold-tint);color:var(--gold);}
+  .featured-badge{
+    font-size:11px;padding:2px 8px;border-radius:5px;font-weight:600;
+    background:#FDEFD8;color:#8A5A16;
+  }
+  .item-desc{font-size:12.5px;color:var(--ink-soft);margin-top:3px;}
+
+  footer{margin-top:2.5rem;font-size:12.5px;color:var(--ink-faint);border-top:1px solid var(--line);padding-top:1rem;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="eyebrow"><span class="rung">M</span> reading list</div>
+    <h1>Broader machine learning</h1>
+    <p class="sub">Statistical foundations through geometric deep learning and ML systems — the ground beneath the post-training and safety tracks. Nine sections, filterable by format.</p>
+  </header>
+
+  <div class="anchors">
+    <div class="anchor-book">
+      <div class="anchor-spine"></div>
+      <div class="anchor-body">
+        <div class="k">Anchor book · modern</div>
+        <div class="t">Understanding Deep Learning — Simon J. D. Prince</div>
+        <div class="d">MIT Press, 2023 — free web/PDF version at <a href="https://udlbook.github.io/udlbook/" target="_blank" rel="noopener">udlbook.github.io</a>. Rigorous, notation-heavy, good fit for a math background.</div>
+      </div>
+    </div>
+    <div class="anchor-book">
+      <div class="anchor-spine"></div>
+      <div class="anchor-body">
+        <div class="k">Anchor book · classical</div>
+        <div class="t">The Elements of Statistical Learning — Hastie, Tibshirani, Friedman</div>
+        <div class="d">Springer, 2nd ed. — free PDF at <a href="https://hastie.su.domains/ElemStatLearn/" target="_blank" rel="noopener">hastie.su.domains</a>. The classical-statistics grounding under everything else here.</div>
+      </div>
+    </div>
+    <div class="anchor-book">
+      <div class="anchor-spine"></div>
+      <div class="anchor-body">
+        <div class="k">Anchor book · probabilistic</div>
+        <div class="t">Machine Learning: A Probabilistic Perspective — Kevin P. Murphy</div>
+        <div class="d">MIT Press, 2012 (see also the newer two-volume "Probabilistic Machine Learning" at <a href="https://probml.github.io/pml-book/" target="_blank" rel="noopener">probml.github.io</a>). Treats every method as inference under a probabilistic model — the throughline from Bayesian foundations to graphical models, HMMs, and Gaussian processes that the other two anchors don't cover.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="progress-row">
+    <div class="progress-track"><div class="progress-fill" id="fill"></div></div>
+    <div class="progress-label" id="progress-label">0 / 0 read</div>
+  </div>
+
+  <div class="filters" id="filters">
+    <div class="chip active" data-filter="all">All</div>
+    <div class="chip" data-filter="paper">Papers</div>
+    <div class="chip" data-filter="book">Books</div>
+    <div class="chip" data-filter="course">Courses</div>
+  </div>
+
+  <div id="tracks"></div>
+
+  <footer>Progress resets on reload — this list doesn't save state between sessions.</footer>
+</div>
+
+<script>
+const CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+
+const data = [
+  {
+    title: "Statistical learning foundations",
+    items: [
+      { t: "A Few Useful Things to Know about Machine Learning", k: "paper", d: "Domingos — the informal survey of what actually matters in practice.", url: "https://homes.cs.washington.edu/~pedrod/papers/cacm12.pdf" },
+      { t: "A Theory of the Learnable", k: "paper", d: "Valiant — origin of PAC learning.", url: "https://web.mit.edu/6.435/www/Valiant84.pdf" },
+      { t: "The Lack of A Priori Distinctions Between Learning Algorithms", k: "paper", d: "Wolpert — the No Free Lunch theorems.", url: "https://direct.mit.edu/neco/article-abstract/8/7/1341/6016" },
+      { t: "Stanford CS229 — Machine Learning", k: "course", d: "Andrew Ng / Tengyu Ma. Bias-variance, VC dimension, regularization from first principles.", url: "https://cs229.stanford.edu/" },
+    ]
+  },
+  {
+    title: "Classical ML algorithms",
+    items: [
+      { t: "Support-Vector Networks", k: "paper", d: "Cortes & Vapnik, 1995.", url: "https://link.springer.com/article/10.1007/BF00994018" },
+      { t: "Random Forests", k: "paper", d: "Breiman, 2001.", url: "https://link.springer.com/article/10.1023/A:1010933404324" },
+      { t: "XGBoost: A Scalable Tree Boosting System", k: "paper", url: "https://arxiv.org/abs/1603.02754" },
+      { t: "Mathematics for Machine Learning", k: "book", d: "Deisenroth, Faisal, Ong — free PDF; linear algebra, PCA, optimization, all worked from scratch.", url: "https://mml-book.github.io/" },
+    ]
+  },
+  {
+    title: "Deep learning foundations",
+    items: [
+      { t: "Learning representations by back-propagating errors", k: "paper", d: "Rumelhart, Hinton, Williams, 1986.", url: "https://www.nature.com/articles/323533a0" },
+      { t: "Deep Learning", k: "book", d: "Goodfellow, Bengio, Courville — free web version.", url: "https://www.deeplearningbook.org/" },
+      { t: "Batch Normalization", k: "paper", url: "https://arxiv.org/abs/1502.03167" },
+      { t: "Dropout: A Simple Way to Prevent Neural Networks from Overfitting", k: "paper", url: "https://jmlr.org/papers/v15/srivastava14a.html" },
+      { t: "Adam: A Method for Stochastic Optimization", k: "paper", url: "https://arxiv.org/abs/1412.6980" },
+      { t: "Deep Residual Learning for Image Recognition", k: "paper", d: "ResNet.", url: "https://arxiv.org/abs/1512.03385" },
+    ]
+  },
+  {
+    title: "Representation & self-supervised learning",
+    items: [
+      { t: "Efficient Estimation of Word Representations in Vector Space", k: "paper", d: "word2vec.", url: "https://arxiv.org/abs/1301.3781" },
+      { t: "BERT: Pre-training of Deep Bidirectional Transformers", k: "paper", url: "https://arxiv.org/abs/1810.04805" },
+      { t: "A Simple Framework for Contrastive Learning of Visual Representations", k: "paper", d: "SimCLR.", url: "https://arxiv.org/abs/2002.05709" },
+      { t: "Momentum Contrast for Unsupervised Visual Representation Learning", k: "paper", d: "MoCo.", url: "https://arxiv.org/abs/1911.05722" },
+      { t: "Masked Autoencoders Are Scalable Vision Learners", k: "paper", d: "MAE.", url: "https://arxiv.org/abs/2111.06377" },
+    ]
+  },
+  {
+    title: "Sequence models & attention",
+    items: [
+      { t: "Long Short-Term Memory", k: "paper", d: "Hochreiter & Schmidhuber, 1997.", url: "https://www.bioinf.jku.at/publications/older/2604.pdf" },
+      { t: "Sequence to Sequence Learning with Neural Networks", k: "paper", url: "https://arxiv.org/abs/1409.3215" },
+      { t: "Attention Is All You Need", k: "paper", url: "https://arxiv.org/abs/1706.03762" },
+      { t: "An Image is Worth 16x16 Words", k: "paper", d: "ViT.", url: "https://arxiv.org/abs/2010.11929" },
+      { t: "The Annotated Transformer", k: "course", d: "Harvard NLP — line-by-line implementation walkthrough.", url: "https://nlp.seas.harvard.edu/annotated-transformer/" },
+    ]
+  },
+  {
+    title: "Generative models",
+    items: [
+      { t: "Auto-Encoding Variational Bayes", k: "paper", d: "VAE.", url: "https://arxiv.org/abs/1312.6114" },
+      { t: "Generative Adversarial Networks", k: "paper", url: "https://arxiv.org/abs/1406.2661" },
+      { t: "Density Estimation Using Real NVP", k: "paper", d: "Normalizing flows.", url: "https://arxiv.org/abs/1605.08803" },
+      { t: "Denoising Diffusion Probabilistic Models", k: "paper", d: "DDPM.", url: "https://arxiv.org/abs/2006.11239" },
+      { t: "Score-Based Generative Modeling through Stochastic Differential Equations", k: "paper", url: "https://arxiv.org/abs/2011.13456" },
+    ]
+  },
+  {
+    title: "Geometric & equivariant deep learning",
+    note: "matches your algebraic topology / equivariant cohomology background",
+    items: [
+      { t: "Geometric Deep Learning: Grids, Groups, Graphs, Geodesics, and Gauges", k: "book", d: "Bronstein, Bruna, Cohen, Velickovic — the unifying survey/proto-textbook.", url: "https://geometricdeeplearning.com/" },
+      { t: "Group Equivariant Convolutional Networks", k: "paper", d: "Cohen & Welling.", url: "https://arxiv.org/abs/1602.07576" },
+      { t: "Semi-Supervised Classification with Graph Convolutional Networks", k: "paper", d: "Kipf & Welling.", url: "https://arxiv.org/abs/1609.02907" },
+      { t: "Inductive Representation Learning on Large Graphs", k: "paper", d: "GraphSAGE.", url: "https://arxiv.org/abs/1706.02216" },
+    ]
+  },
+  {
+    title: "Scaling & ML systems",
+    note: "adjacent to ignite-catalog",
+    items: [
+      { t: "Scaling Laws for Neural Language Models", k: "paper", d: "Kaplan et al.", url: "https://arxiv.org/abs/2001.08361" },
+      { t: "Training Compute-Optimal Large Language Models", k: "paper", d: "Chinchilla.", url: "https://arxiv.org/abs/2203.15556" },
+      { t: "ZeRO: Memory Optimizations Toward Training Trillion Parameter Models", k: "paper", url: "https://arxiv.org/abs/1910.02054" },
+      { t: "Megatron-LM: Training Multi-Billion Parameter Language Models Using Model Parallelism", k: "paper", url: "https://arxiv.org/abs/1909.08053" },
+      { t: "Mixed Precision Training", k: "paper", url: "https://arxiv.org/abs/1710.03740" },
+    ]
+  },
+  {
+    title: "Companion courses",
+    items: [
+      { t: "Stanford CS231n — CNNs for Visual Recognition", k: "course", url: "http://cs231n.stanford.edu/" },
+      { t: "Stanford CS224n — NLP with Deep Learning", k: "course", url: "https://web.stanford.edu/class/cs224n/" },
+      { t: "fast.ai — Practical Deep Learning for Coders", k: "course", url: "https://course.fast.ai/" },
+    ]
+  },
+];
+
+const tracksEl = document.getElementById('tracks');
+let currentFilter = 'all';
+
+data.forEach((track, ti) => {
+  const section = document.createElement('div');
+  section.className = 'track';
+
+  const head = document.createElement('div');
+  head.className = 'track-head';
+  head.innerHTML = `<span class="track-num">${ti+1}</span><span class="track-title">${track.title}</span>` +
+    (track.note ? `<span class="track-note">${track.note}</span>` : '');
+  section.appendChild(head);
+
+  track.items.forEach(it => {
+    const row = document.createElement('div');
+    row.className = 'item';
+    row.dataset.kind = it.k;
+    row.innerHTML = `
+      <div class="box" role="checkbox" aria-checked="false" tabindex="0">${CHECK_SVG}</div>
+      <div class="item-body">
+        <div class="item-title-row">
+          <span class="item-title">${it.t}</span>
+          ${it.url ? `<a class="item-link" href="${it.url}" target="_blank" rel="noopener">↗ open</a>` : ''}
+        </div>
+        <div class="item-meta">
+          <span class="tag ${it.k}">${it.k}</span>
+        </div>
+        ${it.d ? `<div class="item-desc">${it.d}</div>` : ''}
+      </div>
+    `;
+    section.appendChild(row);
+  });
+
+  tracksEl.appendChild(section);
+});
+
+function updateProgress(){
+  const all = document.querySelectorAll('.item');
+  const done = document.querySelectorAll('.item.done');
+  const pct = all.length ? Math.round((done.length/all.length)*100) : 0;
+  document.getElementById('fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `${done.length} / ${all.length} read`;
+}
+
+function toggleItem(row){
+  row.classList.toggle('done');
+  const box = row.querySelector('.box');
+  box.setAttribute('aria-checked', row.classList.contains('done'));
+  updateProgress();
+}
+
+tracksEl.addEventListener('click', (e) => {
+  if (e.target.closest('.item-link')) return;
+  const box = e.target.closest('.box');
+  const item = e.target.closest('.item');
+  if (box) { toggleItem(box.closest('.item')); return; }
+});
+tracksEl.addEventListener('keydown', (e) => {
+  if(e.key === 'Enter' || e.key === ' '){
+    const box = e.target.closest('.box');
+    if(!box) return;
+    e.preventDefault();
+    toggleItem(box.closest('.item'));
+  }
+});
+
+document.getElementById('filters').addEventListener('click', (e) => {
+  const chip = e.target.closest('.chip');
+  if(!chip) return;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  currentFilter = chip.dataset.filter;
+  document.querySelectorAll('.item').forEach(row => {
+    row.classList.toggle('hidden', currentFilter !== 'all' && row.dataset.kind !== currentFilter);
+  });
+});
+
+updateProgress();
+</script>
+</body>
+</html>
