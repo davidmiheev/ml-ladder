@@ -13,7 +13,7 @@ dependencies = [
 
 [project.optional-dependencies]
 # Installed per part, so an afternoon on part A never waits on a CUDA wheel.
-torch = ["torch>=2.2", "torchvision>=0.17"]
+torch = ["torch>=2.2", "torchvision>=0.17", "pyarrow>=16"]
 tracking = ["wandb>=0.17"]
 boost = ["xgboost>=2.0"]          # A4 benchmark baseline
 graph = ["torch-geometric>=2.5"]  # F2
