@@ -66,7 +66,7 @@ def test_finished_writeups_carry_the_math(part):
 def test_writeup_figures_exist(part):
     """Every image a writeup references must be committed next to it."""
     writeup = ROOT / spec.writeup_path(part)
-    references = re.findall(r"!\[[^\]]*\]\(([^)]+)\)", writeup.read_text())
+    references = figure_references(writeup)
     assert references, f"part {part.id}'s writeup has no figures"
     for reference in references:
         assert (writeup.parent / reference).exists(), (
@@ -97,6 +97,45 @@ def test_finished_writeups_are_also_committed_as_pdf(part):
     assert pdf.exists(), f"missing {pdf.name}; run `make pdf-{part.id}`"
     assert pdf.read_bytes()[:5] == b"%PDF-", f"{pdf.name} is not a PDF"
     assert pdf.stat().st_size > 50_000, f"{pdf.name} looks truncated"
+
+
+@pytest.mark.parametrize("part", COMPLETE_PARTS, ids=lambda part: part.id)
+def test_writeup_assets_are_tracked_by_git(part):
+    """On disk is not the same as in the repo.
+
+    A ``data/`` line in .gitignore silently swallowed docs/writeups/data/ once,
+    so the metrics file a writeup links to existed locally and nowhere else.
+    Everything a published writeup points at has to be tracked.
+    """
+    tracked = git_tracked_files()
+    if tracked is None:
+        pytest.skip("not a git checkout")
+
+    writeup = ROOT / spec.writeup_path(part)
+    expected = [
+        spec.writeup_path(part),
+        spec.metrics_path(part),
+        f"{spec.WRITEUPS_DIR}/pdf/{spec.part_slug(part)}.pdf",
+        *(str((writeup.parent / reference).relative_to(ROOT)) for reference in figure_references(writeup)),
+    ]
+    missing = [path for path in expected if path not in tracked]
+    assert not missing, f"referenced but not tracked by git (check .gitignore): {missing}"
+
+
+def git_tracked_files() -> set[str] | None:
+    import subprocess
+
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(ROOT), "ls-files"], capture_output=True, text=True, check=True, timeout=30
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return set(result.stdout.split())
+
+
+def figure_references(writeup) -> list[str]:
+    return re.findall(r"!\[[^\]]*\]\(([^)]+)\)", writeup.read_text())
 
 
 def test_writeup_index_lists_every_part():

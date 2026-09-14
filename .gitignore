@@ -1,6 +1,8 @@
-# Run outputs and datasets — regenerate, never commit
-artifacts/
-data/
+# Run outputs and datasets — regenerate, never commit.
+# Anchored to the repo root: an unanchored "data/" also swallows
+# docs/writeups/data/, which is committed on purpose.
+/artifacts/
+/data/
 wandb/
 *.ckpt
 *.pt
@@ -20,7 +22,7 @@ __pycache__/
 docs/writeups/pdf/*.tex
 
 # Rust
-rust/target/
+/rust/target/
 
 # Editors / OS
 .DS_Store

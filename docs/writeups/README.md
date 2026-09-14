@@ -9,7 +9,7 @@ left open.
 | Part | Writeup | PDF | Status |
 | --- | --- | --- | --- |
 | A — Classical ML from scratch | [a-classical.md](a-classical.md) | [pdf/a-classical.pdf](pdf/a-classical.pdf) | complete |
-| B — Deep learning foundations | [b-deep-learning.md](b-deep-learning.md) | — | stub |
+| B — Deep learning foundations | [b-deep-learning.md](b-deep-learning.md) | [pdf/b-deep-learning.pdf](pdf/b-deep-learning.pdf) | complete |
 | C — Sequence models & attention | [c-sequence-attention.md](c-sequence-attention.md) | — | stub |
 | D — Self-supervised & representation learning | [d-self-supervised.md](d-self-supervised.md) | — | stub |
 | E — Generative models | [e-generative.md](e-generative.md) | — | stub |

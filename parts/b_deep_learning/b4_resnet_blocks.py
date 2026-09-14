@@ -108,15 +108,15 @@ def first_layer_gradient_norms(model, loader) -> list[float]:
 @experiment(
     "b4_resnet_blocks",
     defaults={
-        "train_samples": 4000,
+        "train_samples": 6000,
         "test_samples": 2000,
         "depths": [2, 4, 8],
-        "epochs": 6,
+        "epochs": 8,
         "lr": 0.05,
         "batch_size": 128,
         "width": 16,
         "cifar100_depth": 4,
-        "cifar100_epochs": 6,
+        "cifar100_epochs": 8,
     },
     description="Plain vs residual networks at increasing depth on CIFAR-10, plus gradient flow and a CIFAR-100 run.",
 )

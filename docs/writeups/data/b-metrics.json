@@ -1,0 +1,785 @@
+{
+  "part": "B",
+  "title": "Deep learning foundations",
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "reference_seed": 0,
+  "rungs": {
+    "B1": {
+      "title": "Scalar autodiff engine (micrograd-style) plus a tiny MLP trained on it",
+      "metrics": {
+        "gradient/max_relative_error": {
+          "reference": 9.447529929491502e-09,
+          "median": 1.8590762218504802e-08,
+          "min": 9.447529929491502e-09,
+          "max": 1.3748258952664518e-07,
+          "n_seeds": 3
+        },
+        "graph_nodes": {
+          "reference": 18380.0,
+          "median": 18368.0,
+          "min": 18364.0,
+          "max": 18380.0,
+          "n_seeds": 3
+        },
+        "nodes_per_sample": {
+          "reference": 204.22222222222223,
+          "median": 204.0888888888889,
+          "min": 204.04444444444445,
+          "max": 204.22222222222223,
+          "n_seeds": 3
+        },
+        "numpy/seconds": {
+          "reference": 0.005378865000011501,
+          "median": 0.00521684600005301,
+          "min": 0.004987306999964858,
+          "max": 0.005378865000011501,
+          "n_seeds": 3
+        },
+        "numpy/test_accuracy": {
+          "reference": 0.8333333333333334,
+          "median": 0.8333333333333334,
+          "min": 0.8333333333333334,
+          "max": 0.8666666666666667,
+          "n_seeds": 3
+        },
+        "parameters": {
+          "reference": 105.0,
+          "median": 105.0,
+          "min": 105.0,
+          "max": 105.0,
+          "n_seeds": 3
+        },
+        "scalar/seconds": {
+          "reference": 17.52994211300006,
+          "median": 18.09364852300007,
+          "min": 17.52994211300006,
+          "max": 18.543285173000072,
+          "n_seeds": 3
+        },
+        "scalar/test_accuracy": {
+          "reference": 0.8333333333333334,
+          "median": 0.8333333333333334,
+          "min": 0.8,
+          "max": 0.8666666666666667,
+          "n_seeds": 3
+        },
+        "slowdown_vs_numpy": {
+          "reference": 3259.0411012290842,
+          "median": 3554.5011627354243,
+          "min": 3259.0411012290842,
+          "max": 3627.9395920739516,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 23.119
+    },
+    "B2": {
+      "title": "MLP on MNIST \u2014 manual backprop, then repeat with PyTorch autograd and diff the gradients",
+      "metrics": {
+        "accuracy_gap": {
+          "reference": 0.00019999999999997797,
+          "median": 0.00039999999999995595,
+          "min": 0.00019999999999997797,
+          "max": 0.0013999999999999568,
+          "n_seeds": 3
+        },
+        "gradient/relative": {
+          "reference": 1.7084429370662583e-06,
+          "median": 1.7084429370662583e-06,
+          "min": 1.6862466444862779e-06,
+          "max": 2.3823275369815405e-06,
+          "n_seeds": 3
+        },
+        "gradient/scale": {
+          "reference": 0.17444142699241638,
+          "median": 0.10007800161838531,
+          "min": 0.07953193038702011,
+          "max": 0.17444142699241638,
+          "n_seeds": 3
+        },
+        "gradient/worst_abs_difference": {
+          "reference": 2.980232238769531e-07,
+          "median": 2.384185791015625e-07,
+          "min": 1.341104507446289e-07,
+          "max": 2.980232238769531e-07,
+          "n_seeds": 3
+        },
+        "loss/abs_difference": {
+          "reference": 0.0,
+          "median": 2.384185791015625e-07,
+          "min": 0.0,
+          "max": 2.384185791015625e-07,
+          "n_seeds": 3
+        },
+        "manual/seconds": {
+          "reference": 2.1752207720001024,
+          "median": 1.8903402219998497,
+          "min": 1.8189647839996042,
+          "max": 2.1752207720001024,
+          "n_seeds": 3
+        },
+        "manual/test_accuracy": {
+          "reference": 0.9638,
+          "median": 0.9638,
+          "min": 0.9514,
+          "max": 0.9658,
+          "n_seeds": 3
+        },
+        "torch/seconds": {
+          "reference": 2.3641381320001074,
+          "median": 2.3641381320001074,
+          "min": 2.330860318999953,
+          "max": 2.3874952410000105,
+          "n_seeds": 3
+        },
+        "torch/test_accuracy": {
+          "reference": 0.9636,
+          "median": 0.9636,
+          "min": 0.9528,
+          "max": 0.9662,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 7.32
+    },
+    "B3": {
+      "title": "CNN on CIFAR-10 with a batchnorm/dropout ablation",
+      "metrics": {
+        "batchnorm/best_test_accuracy": {
+          "reference": 0.5635,
+          "median": 0.5635,
+          "min": 0.544,
+          "max": 0.5835,
+          "n_seeds": 3
+        },
+        "batchnorm/generalization_gap": {
+          "reference": 0.1301,
+          "median": 0.1301,
+          "min": 0.10330000000000006,
+          "max": 0.14949999999999997,
+          "n_seeds": 3
+        },
+        "batchnorm/seconds_per_epoch": {
+          "reference": 6.591202572874991,
+          "median": 5.9980448924999905,
+          "min": 5.873689867999985,
+          "max": 6.591202572874991,
+          "n_seeds": 3
+        },
+        "batchnorm/test_accuracy": {
+          "reference": 0.5635,
+          "median": 0.5635,
+          "min": 0.5285,
+          "max": 0.5835,
+          "n_seeds": 3
+        },
+        "batchnorm/train_accuracy": {
+          "reference": 0.6936,
+          "median": 0.6936,
+          "min": 0.6318,
+          "max": 0.733,
+          "n_seeds": 3
+        },
+        "batchnorm_minus_plain": {
+          "reference": 0.15899999999999997,
+          "median": 0.137,
+          "min": 0.09699999999999998,
+          "max": 0.15899999999999997,
+          "n_seeds": 3
+        },
+        "best_arm_accuracy": {
+          "reference": 0.5635,
+          "median": 0.5635,
+          "min": 0.5285,
+          "max": 0.5835,
+          "n_seeds": 3
+        },
+        "both/best_test_accuracy": {
+          "reference": 0.5095,
+          "median": 0.509,
+          "min": 0.485,
+          "max": 0.5095,
+          "n_seeds": 3
+        },
+        "both/generalization_gap": {
+          "reference": 0.0393,
+          "median": 0.053200000000000025,
+          "min": 0.0393,
+          "max": 0.05720000000000003,
+          "n_seeds": 3
+        },
+        "both/seconds_per_epoch": {
+          "reference": 6.711157615250016,
+          "median": 6.618436038625049,
+          "min": 6.613516900250033,
+          "max": 6.711157615250016,
+          "n_seeds": 3
+        },
+        "both/test_accuracy": {
+          "reference": 0.5095,
+          "median": 0.509,
+          "min": 0.48,
+          "max": 0.5095,
+          "n_seeds": 3
+        },
+        "both/train_accuracy": {
+          "reference": 0.5488,
+          "median": 0.5488,
+          "min": 0.5332,
+          "max": 0.5662,
+          "n_seeds": 3
+        },
+        "dropout/best_test_accuracy": {
+          "reference": 0.42,
+          "median": 0.4695,
+          "min": 0.42,
+          "max": 0.4925,
+          "n_seeds": 3
+        },
+        "dropout/generalization_gap": {
+          "reference": 0.032799999999999996,
+          "median": 0.06219999999999998,
+          "min": 0.032799999999999996,
+          "max": 0.09309999999999996,
+          "n_seeds": 3
+        },
+        "dropout/seconds_per_epoch": {
+          "reference": 5.7206675619999885,
+          "median": 5.5825817643749645,
+          "min": 5.39669228850002,
+          "max": 5.7206675619999885,
+          "n_seeds": 3
+        },
+        "dropout/test_accuracy": {
+          "reference": 0.42,
+          "median": 0.4565,
+          "min": 0.42,
+          "max": 0.46,
+          "n_seeds": 3
+        },
+        "dropout/train_accuracy": {
+          "reference": 0.4528,
+          "median": 0.5222,
+          "min": 0.4528,
+          "max": 0.5496,
+          "n_seeds": 3
+        },
+        "dropout_minus_plain": {
+          "reference": 0.015499999999999958,
+          "median": 0.015499999999999958,
+          "min": 0.013500000000000012,
+          "max": 0.025000000000000022,
+          "n_seeds": 3
+        },
+        "plain/best_test_accuracy": {
+          "reference": 0.4405,
+          "median": 0.4405,
+          "min": 0.434,
+          "max": 0.4465,
+          "n_seeds": 3
+        },
+        "plain/generalization_gap": {
+          "reference": 0.059299999999999964,
+          "median": 0.06609999999999994,
+          "min": 0.059299999999999964,
+          "max": 0.1169,
+          "n_seeds": 3
+        },
+        "plain/seconds_per_epoch": {
+          "reference": 4.910724111875027,
+          "median": 4.867950740250052,
+          "min": 4.751050853500033,
+          "max": 4.910724111875027,
+          "n_seeds": 3
+        },
+        "plain/test_accuracy": {
+          "reference": 0.4045,
+          "median": 0.4315,
+          "min": 0.4045,
+          "max": 0.4465,
+          "n_seeds": 3
+        },
+        "plain/train_accuracy": {
+          "reference": 0.4638,
+          "median": 0.5126,
+          "min": 0.4638,
+          "max": 0.5484,
+          "n_seeds": 3
+        },
+        "probe/batchnorm_minus_plain": {
+          "reference": 0.089,
+          "median": 0.04949999999999999,
+          "min": 0.0,
+          "max": 0.089,
+          "n_seeds": 3
+        },
+        "probe/batchnorm_test_accuracy": {
+          "reference": 0.1865,
+          "median": 0.1465,
+          "min": 0.094,
+          "max": 0.1865,
+          "n_seeds": 3
+        },
+        "probe/plain_test_accuracy": {
+          "reference": 0.0975,
+          "median": 0.097,
+          "min": 0.094,
+          "max": 0.0975,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 241.86
+    },
+    "B4": {
+      "title": "ResNet block implementation, trained on CIFAR-10/100",
+      "metrics": {
+        "cifar100/test_accuracy": {
+          "reference": 0.09,
+          "median": 0.112,
+          "min": 0.09,
+          "max": 0.127,
+          "n_seeds": 3
+        },
+        "cifar100/times_chance": {
+          "reference": 9.0,
+          "median": 11.200000000000001,
+          "min": 9.0,
+          "max": 12.7,
+          "n_seeds": 3
+        },
+        "gradient/plain_first_tensor": {
+          "reference": 0.5995762944221497,
+          "median": 0.7826357483863831,
+          "min": 0.5995762944221497,
+          "max": 0.9218093752861023,
+          "n_seeds": 3
+        },
+        "gradient/plain_ratio_first_to_last": {
+          "reference": 5.016029912513739,
+          "median": 5.3596513284378355,
+          "min": 5.016029912513739,
+          "max": 9.030755755390432,
+          "n_seeds": 3
+        },
+        "gradient/residual_first_tensor": {
+          "reference": 0.6892206072807312,
+          "median": 0.6878167390823364,
+          "min": 0.45253986120224,
+          "max": 0.6892206072807312,
+          "n_seeds": 3
+        },
+        "gradient/residual_ratio_first_to_last": {
+          "reference": 3.913241808242673,
+          "median": 3.1178346224961833,
+          "min": 2.9457568140927157,
+          "max": 3.913241808242673,
+          "n_seeds": 3
+        },
+        "plain-2/parameters": {
+          "reference": 19994.0,
+          "median": 19994.0,
+          "min": 19994.0,
+          "max": 19994.0,
+          "n_seeds": 3
+        },
+        "plain-2/seconds_per_epoch": {
+          "reference": 3.7706207103750273,
+          "median": 3.540752401375073,
+          "min": 3.3823492093749223,
+          "max": 3.7706207103750273,
+          "n_seeds": 3
+        },
+        "plain-2/test_accuracy": {
+          "reference": 0.4045,
+          "median": 0.451,
+          "min": 0.4045,
+          "max": 0.459,
+          "n_seeds": 3
+        },
+        "plain-2/train_accuracy": {
+          "reference": 0.4175,
+          "median": 0.4776666666666667,
+          "min": 0.4175,
+          "max": 0.48033333333333333,
+          "n_seeds": 3
+        },
+        "plain-4/parameters": {
+          "reference": 82714.0,
+          "median": 82714.0,
+          "min": 82714.0,
+          "max": 82714.0,
+          "n_seeds": 3
+        },
+        "plain-4/seconds_per_epoch": {
+          "reference": 5.3745046978750395,
+          "median": 5.520581423124895,
+          "min": 5.3745046978750395,
+          "max": 5.538070441000116,
+          "n_seeds": 3
+        },
+        "plain-4/test_accuracy": {
+          "reference": 0.403,
+          "median": 0.492,
+          "min": 0.403,
+          "max": 0.555,
+          "n_seeds": 3
+        },
+        "plain-4/train_accuracy": {
+          "reference": 0.42766666666666664,
+          "median": 0.5395,
+          "min": 0.42766666666666664,
+          "max": 0.6016666666666667,
+          "n_seeds": 3
+        },
+        "plain-8/parameters": {
+          "reference": 198490.0,
+          "median": 198490.0,
+          "min": 198490.0,
+          "max": 198490.0,
+          "n_seeds": 3
+        },
+        "plain-8/seconds_per_epoch": {
+          "reference": 9.559633045500021,
+          "median": 9.559633045500021,
+          "min": 9.551626021249945,
+          "max": 9.61377785124995,
+          "n_seeds": 3
+        },
+        "plain-8/test_accuracy": {
+          "reference": 0.3675,
+          "median": 0.4185,
+          "min": 0.3675,
+          "max": 0.492,
+          "n_seeds": 3
+        },
+        "plain-8/train_accuracy": {
+          "reference": 0.3975,
+          "median": 0.4525,
+          "min": 0.3975,
+          "max": 0.538,
+          "n_seeds": 3
+        },
+        "residual-2/parameters": {
+          "reference": 19994.0,
+          "median": 19994.0,
+          "min": 19994.0,
+          "max": 19994.0,
+          "n_seeds": 3
+        },
+        "residual-2/seconds_per_epoch": {
+          "reference": 4.075252123374952,
+          "median": 3.9178562447499985,
+          "min": 3.907742870999982,
+          "max": 4.075252123374952,
+          "n_seeds": 3
+        },
+        "residual-2/test_accuracy": {
+          "reference": 0.421,
+          "median": 0.433,
+          "min": 0.421,
+          "max": 0.439,
+          "n_seeds": 3
+        },
+        "residual-2/train_accuracy": {
+          "reference": 0.45016666666666666,
+          "median": 0.4623333333333333,
+          "min": 0.45016666666666666,
+          "max": 0.482,
+          "n_seeds": 3
+        },
+        "residual-4/parameters": {
+          "reference": 82714.0,
+          "median": 82714.0,
+          "min": 82714.0,
+          "max": 82714.0,
+          "n_seeds": 3
+        },
+        "residual-4/seconds_per_epoch": {
+          "reference": 6.010048466000001,
+          "median": 6.119928912500029,
+          "min": 6.010048466000001,
+          "max": 6.215671265749961,
+          "n_seeds": 3
+        },
+        "residual-4/test_accuracy": {
+          "reference": 0.5055,
+          "median": 0.512,
+          "min": 0.5055,
+          "max": 0.516,
+          "n_seeds": 3
+        },
+        "residual-4/train_accuracy": {
+          "reference": 0.546,
+          "median": 0.5651666666666667,
+          "min": 0.546,
+          "max": 0.5795,
+          "n_seeds": 3
+        },
+        "residual-8/parameters": {
+          "reference": 198490.0,
+          "median": 198490.0,
+          "min": 198490.0,
+          "max": 198490.0,
+          "n_seeds": 3
+        },
+        "residual-8/seconds_per_epoch": {
+          "reference": 10.19759695199997,
+          "median": 10.19759695199997,
+          "min": 9.96502920162493,
+          "max": 10.449167390000014,
+          "n_seeds": 3
+        },
+        "residual-8/test_accuracy": {
+          "reference": 0.458,
+          "median": 0.4765,
+          "min": 0.458,
+          "max": 0.4905,
+          "n_seeds": 3
+        },
+        "residual-8/train_accuracy": {
+          "reference": 0.541,
+          "median": 0.5451666666666667,
+          "min": 0.541,
+          "max": 0.5913333333333334,
+          "n_seeds": 3
+        },
+        "residual_minus_plain/depth2": {
+          "reference": 0.01649999999999996,
+          "median": -0.01200000000000001,
+          "min": -0.026000000000000023,
+          "max": 0.01649999999999996,
+          "n_seeds": 3
+        },
+        "residual_minus_plain/depth4": {
+          "reference": 0.10249999999999992,
+          "median": 0.020000000000000018,
+          "min": -0.039000000000000035,
+          "max": 0.10249999999999992,
+          "n_seeds": 3
+        },
+        "residual_minus_plain/depth8": {
+          "reference": 0.09050000000000002,
+          "median": 0.07200000000000001,
+          "min": -0.015500000000000014,
+          "max": 0.09050000000000002,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 378.455
+    },
+    "B5": {
+      "title": "Optimizer bake-off \u2014 SGD vs Adam vs AdamW, with LR-schedule comparison",
+      "metrics": {
+        "adam (constant)/best_test_accuracy": {
+          "reference": 0.7912,
+          "median": 0.7912,
+          "min": 0.7884,
+          "max": 0.7916,
+          "n_seeds": 3
+        },
+        "adam (constant)/test_accuracy": {
+          "reference": 0.7886,
+          "median": 0.7884,
+          "min": 0.7796,
+          "max": 0.7886,
+          "n_seeds": 3
+        },
+        "adam (cosine)/best_test_accuracy": {
+          "reference": 0.8052,
+          "median": 0.799,
+          "min": 0.7986,
+          "max": 0.8052,
+          "n_seeds": 3
+        },
+        "adam (cosine)/test_accuracy": {
+          "reference": 0.8018,
+          "median": 0.799,
+          "min": 0.7986,
+          "max": 0.8018,
+          "n_seeds": 3
+        },
+        "adamw (constant)/best_test_accuracy": {
+          "reference": 0.8676,
+          "median": 0.8628,
+          "min": 0.8588,
+          "max": 0.8676,
+          "n_seeds": 3
+        },
+        "adamw (constant)/test_accuracy": {
+          "reference": 0.8676,
+          "median": 0.8606,
+          "min": 0.8588,
+          "max": 0.8676,
+          "n_seeds": 3
+        },
+        "adamw (cosine)/best_test_accuracy": {
+          "reference": 0.8706,
+          "median": 0.8672,
+          "min": 0.8628,
+          "max": 0.8706,
+          "n_seeds": 3
+        },
+        "adamw (cosine)/test_accuracy": {
+          "reference": 0.8706,
+          "median": 0.8672,
+          "min": 0.8628,
+          "max": 0.8706,
+          "n_seeds": 3
+        },
+        "adamw_minus_adam": {
+          "reference": 0.06880000000000008,
+          "median": 0.0686,
+          "min": 0.06379999999999997,
+          "max": 0.06880000000000008,
+          "n_seeds": 3
+        },
+        "best_arm_accuracy": {
+          "reference": 0.874,
+          "median": 0.8738,
+          "min": 0.8666,
+          "max": 0.874,
+          "n_seeds": 3
+        },
+        "cosine_minus_constant/adamw": {
+          "reference": 0.0030000000000000027,
+          "median": 0.0040000000000000036,
+          "min": 0.0030000000000000027,
+          "max": 0.006599999999999939,
+          "n_seeds": 3
+        },
+        "cosine_minus_constant/sgd+momentum": {
+          "reference": 0.020000000000000018,
+          "median": 0.020000000000000018,
+          "min": 0.011399999999999966,
+          "max": 0.022199999999999998,
+          "n_seeds": 3
+        },
+        "sgd (constant)/best_test_accuracy": {
+          "reference": 0.8484,
+          "median": 0.843,
+          "min": 0.8152,
+          "max": 0.8484,
+          "n_seeds": 3
+        },
+        "sgd (constant)/test_accuracy": {
+          "reference": 0.8078,
+          "median": 0.813,
+          "min": 0.8078,
+          "max": 0.843,
+          "n_seeds": 3
+        },
+        "sgd (cosine)/best_test_accuracy": {
+          "reference": 0.8572,
+          "median": 0.852,
+          "min": 0.8488,
+          "max": 0.8572,
+          "n_seeds": 3
+        },
+        "sgd (cosine)/test_accuracy": {
+          "reference": 0.8548,
+          "median": 0.852,
+          "min": 0.8488,
+          "max": 0.8548,
+          "n_seeds": 3
+        },
+        "sgd+momentum (constant)/best_test_accuracy": {
+          "reference": 0.8578,
+          "median": 0.8578,
+          "min": 0.855,
+          "max": 0.8624,
+          "n_seeds": 3
+        },
+        "sgd+momentum (constant)/test_accuracy": {
+          "reference": 0.854,
+          "median": 0.854,
+          "min": 0.8444,
+          "max": 0.8624,
+          "n_seeds": 3
+        },
+        "sgd+momentum (cosine)/best_test_accuracy": {
+          "reference": 0.874,
+          "median": 0.8738,
+          "min": 0.8666,
+          "max": 0.874,
+          "n_seeds": 3
+        },
+        "sgd+momentum (cosine)/test_accuracy": {
+          "reference": 0.874,
+          "median": 0.8738,
+          "min": 0.8666,
+          "max": 0.874,
+          "n_seeds": 3
+        },
+        "sweep/adam/best": {
+          "reference": 0.775,
+          "median": 0.773,
+          "min": 0.7682,
+          "max": 0.775,
+          "n_seeds": 3
+        },
+        "sweep/adam/usable_lrs": {
+          "reference": 3.0,
+          "median": 3.0,
+          "min": 3.0,
+          "max": 3.0,
+          "n_seeds": 3
+        },
+        "sweep/adamw/best": {
+          "reference": 0.8426,
+          "median": 0.8406,
+          "min": 0.8392,
+          "max": 0.8426,
+          "n_seeds": 3
+        },
+        "sweep/adamw/usable_lrs": {
+          "reference": 4.0,
+          "median": 3.0,
+          "min": 3.0,
+          "max": 4.0,
+          "n_seeds": 3
+        },
+        "sweep/sgd+momentum/best": {
+          "reference": 0.8424,
+          "median": 0.832,
+          "min": 0.821,
+          "max": 0.8424,
+          "n_seeds": 3
+        },
+        "sweep/sgd+momentum/usable_lrs": {
+          "reference": 3.0,
+          "median": 3.0,
+          "min": 3.0,
+          "max": 3.0,
+          "n_seeds": 3
+        },
+        "sweep/sgd/best": {
+          "reference": 0.7344,
+          "median": 0.7366,
+          "min": 0.7344,
+          "max": 0.7696,
+          "n_seeds": 3
+        },
+        "sweep/sgd/usable_lrs": {
+          "reference": 3.0,
+          "median": 3.0,
+          "min": 3.0,
+          "max": 3.0,
+          "n_seeds": 3
+        },
+        "weight_norm_ratio_adam_over_adamw": {
+          "reference": 0.23689714936624567,
+          "median": 0.23689714936624567,
+          "min": 0.23445765260265838,
+          "max": 0.23760011293334898,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 50.933
+    }
+  },
+  "figures": 24
+}

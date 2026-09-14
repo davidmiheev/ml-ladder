@@ -1,0 +1,359 @@
+{
+  "part": "A",
+  "title": "Classical ML from scratch",
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "reference_seed": 0,
+  "rungs": {
+    "A1": {
+      "title": "Linear & logistic regression via batch/mini-batch gradient descent",
+      "metrics": {
+        "linear/batch/excess_train_loss": {
+          "reference": 1.100044152990698e-09,
+          "median": 2.8763583181934393e-10,
+          "min": 6.662165263904285e-11,
+          "max": 1.100044152990698e-09,
+          "n_seeds": 3
+        },
+        "linear/batch/test_r2": {
+          "reference": 0.8803658369987306,
+          "median": 0.9612550212119679,
+          "min": 0.8803658369987306,
+          "max": 0.9914766826894178,
+          "n_seeds": 3
+        },
+        "linear/batch/test_rmse": {
+          "reference": 0.3031242423943559,
+          "median": 0.30335019076945624,
+          "min": 0.3031242423943559,
+          "max": 0.32254747664904565,
+          "n_seeds": 3
+        },
+        "linear/batch/weight_error": {
+          "reference": 0.017936138089316354,
+          "median": 0.02319174648368097,
+          "min": 0.017936138089316354,
+          "max": 0.04590779299121678,
+          "n_seeds": 3
+        },
+        "linear/mini-batch/excess_train_loss": {
+          "reference": 0.0023938988934067706,
+          "median": 0.0023938988934067706,
+          "min": 0.0007179612996426055,
+          "max": 0.002665419532829505,
+          "n_seeds": 3
+        },
+        "linear/mini-batch/test_r2": {
+          "reference": 0.8741158992735385,
+          "median": 0.9619996409555295,
+          "min": 0.8741158992735385,
+          "max": 0.9915925212029014,
+          "n_seeds": 3
+        },
+        "linear/mini-batch/test_rmse": {
+          "reference": 0.3109413670952392,
+          "median": 0.3109413670952392,
+          "min": 0.3012817562674395,
+          "max": 0.3194330034787733,
+          "n_seeds": 3
+        },
+        "linear/mini-batch/weight_error": {
+          "reference": 0.05145987094620726,
+          "median": 0.05145987094620726,
+          "min": 0.026051539796720164,
+          "max": 0.06092110111571682,
+          "n_seeds": 3
+        },
+        "linear/normal_eq/test_rmse": {
+          "reference": 0.3031206668680906,
+          "median": 0.30334991259411864,
+          "min": 0.3031206668680906,
+          "max": 0.32254768241298437,
+          "n_seeds": 3
+        },
+        "linear/normal_eq/weight_error": {
+          "reference": 0.017943268334295208,
+          "median": 0.023189134576407977,
+          "min": 0.017943268334295208,
+          "max": 0.04590071756753206,
+          "n_seeds": 3
+        },
+        "linear/sgd/excess_train_loss": {
+          "reference": 0.00030395168383670623,
+          "median": 0.00116712600014382,
+          "min": 0.00030395168383670623,
+          "max": 0.0015907166508089543,
+          "n_seeds": 3
+        },
+        "linear/sgd/test_r2": {
+          "reference": 0.8773137761035484,
+          "median": 0.9613678658649565,
+          "min": 0.8773137761035484,
+          "max": 0.9916325266926322,
+          "n_seeds": 3
+        },
+        "linear/sgd/test_rmse": {
+          "reference": 0.3069664859866415,
+          "median": 0.3069664859866415,
+          "min": 0.30056410376811565,
+          "max": 0.32207742478719364,
+          "n_seeds": 3
+        },
+        "linear/sgd/weight_error": {
+          "reference": 0.026441603967912276,
+          "median": 0.03725224860958008,
+          "min": 0.026441603967912276,
+          "max": 0.07096534775477012,
+          "n_seeds": 3
+        },
+        "logistic/batch/test_accuracy": {
+          "reference": 0.8133333333333334,
+          "median": 0.88,
+          "min": 0.8133333333333334,
+          "max": 0.8933333333333333,
+          "n_seeds": 3
+        },
+        "logistic/batch/test_log_loss": {
+          "reference": 0.49354250398994554,
+          "median": 0.282324104424054,
+          "min": 0.24818360237006962,
+          "max": 0.49354250398994554,
+          "n_seeds": 3
+        },
+        "logistic/mini-batch/test_accuracy": {
+          "reference": 0.8066666666666666,
+          "median": 0.8866666666666667,
+          "min": 0.8066666666666666,
+          "max": 0.8866666666666667,
+          "n_seeds": 3
+        },
+        "logistic/mini-batch/test_log_loss": {
+          "reference": 0.49423050863369034,
+          "median": 0.28747385667790437,
+          "min": 0.2293212495464268,
+          "max": 0.49423050863369034,
+          "n_seeds": 3
+        },
+        "logistic/sgd/test_accuracy": {
+          "reference": 0.8133333333333334,
+          "median": 0.8866666666666667,
+          "min": 0.8133333333333334,
+          "max": 0.8933333333333333,
+          "n_seeds": 3
+        },
+        "logistic/sgd/test_log_loss": {
+          "reference": 0.4906418756592848,
+          "median": 0.28750638146845936,
+          "min": 0.22716132671005984,
+          "max": 0.4906418756592848,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 1.673
+    },
+    "A2": {
+      "title": "Decision tree + random forest from scratch (Gini/entropy splits, bagging)",
+      "metrics": {
+        "forest/oob_accuracy": {
+          "reference": 0.8355555555555556,
+          "median": 0.8511111111111112,
+          "min": 0.8355555555555556,
+          "max": 0.8688888888888889,
+          "n_seeds": 3
+        },
+        "forest/test_accuracy": {
+          "reference": 0.8866666666666667,
+          "median": 0.86,
+          "min": 0.7933333333333333,
+          "max": 0.8866666666666667,
+          "n_seeds": 3
+        },
+        "forest_minus_tree": {
+          "reference": 0.10666666666666669,
+          "median": 0.07333333333333336,
+          "min": 0.00666666666666671,
+          "max": 0.10666666666666669,
+          "n_seeds": 3
+        },
+        "tree/best_depth": {
+          "reference": 5.0,
+          "median": 5.0,
+          "min": 3.0,
+          "max": 8.0,
+          "n_seeds": 3
+        },
+        "tree/entropy/test_accuracy": {
+          "reference": 0.78,
+          "median": 0.7866666666666666,
+          "min": 0.78,
+          "max": 0.7866666666666666,
+          "n_seeds": 3
+        },
+        "tree/gini/test_accuracy": {
+          "reference": 0.76,
+          "median": 0.76,
+          "min": 0.76,
+          "max": 0.7733333333333333,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 6.615
+    },
+    "A3": {
+      "title": "k-means and PCA from scratch, compared against each other on the same toy dataset",
+      "metrics": {
+        "ari/pca_subspace": {
+          "reference": 0.9604100111797143,
+          "median": 0.9911111030464326,
+          "min": 0.9604100111797143,
+          "max": 0.9955481068859018,
+          "n_seeds": 3
+        },
+        "ari/raw_features": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "kmeans/best_ari": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "kmeans/best_k_by_ari": {
+          "reference": 4.0,
+          "median": 4.0,
+          "min": 4.0,
+          "max": 4.0,
+          "n_seeds": 3
+        },
+        "kmeans/inertia_at_true_k": {
+          "reference": 1443.8758600594688,
+          "median": 1183.40040727414,
+          "min": 963.6445706755381,
+          "max": 1443.8758600594688,
+          "n_seeds": 3
+        },
+        "kmeans/purity_at_true_k": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "pca/components_for_90pct": {
+          "reference": 5.0,
+          "median": 5.0,
+          "min": 4.0,
+          "max": 5.0,
+          "n_seeds": 3
+        },
+        "pca/variance_in_2d": {
+          "reference": 0.5883314268906736,
+          "median": 0.7698540085646435,
+          "min": 0.5883314268906736,
+          "max": 0.7745241041735689,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 1.481
+    },
+    "A4": {
+      "title": "Minimal gradient-boosting implementation, benchmarked against XGBoost",
+      "metrics": {
+        "baseline/forest_test_rmse": {
+          "reference": 2.333098228351672,
+          "median": 2.333098228351672,
+          "min": 2.2562498093714196,
+          "max": 2.3564576978098453,
+          "n_seeds": 3
+        },
+        "baseline/tree_test_rmse": {
+          "reference": 3.4568126639226753,
+          "median": 3.32728763676307,
+          "min": 3.1951437341251356,
+          "max": 3.4568126639226753,
+          "n_seeds": 3
+        },
+        "boosting/best_lr": {
+          "reference": 0.3,
+          "median": 0.1,
+          "min": 0.1,
+          "max": 0.3,
+          "n_seeds": 3
+        },
+        "gap_vs_xgboost_rmse": {
+          "reference": 0.030156889708798262,
+          "median": -0.007695105676157388,
+          "min": -0.03125041344104007,
+          "max": 0.030156889708798262,
+          "n_seeds": 3
+        },
+        "ours/fit_seconds": {
+          "reference": 0.654759791999993,
+          "median": 0.6244457800000305,
+          "min": 0.584126179000009,
+          "max": 0.654759791999993,
+          "n_seeds": 3
+        },
+        "ours/stochastic_test_rmse": {
+          "reference": 1.4608738300696558,
+          "median": 1.492365698829199,
+          "min": 1.4608738300696558,
+          "max": 1.5916991229965347,
+          "n_seeds": 3
+        },
+        "ours/test_r2": {
+          "reference": 0.9175657458019979,
+          "median": 0.8967424809510922,
+          "min": 0.8904620701375958,
+          "max": 0.9175657458019979,
+          "n_seeds": 3
+        },
+        "ours/test_rmse": {
+          "reference": 1.4820097118352167,
+          "median": 1.5875533751555733,
+          "min": 1.4820097118352167,
+          "max": 1.6140918052194368,
+          "n_seeds": 3
+        },
+        "signal_share_x0_x4": {
+          "reference": 0.7408880034623758,
+          "median": 0.7834131554459078,
+          "min": 0.7408880034623758,
+          "max": 0.787260301644643,
+          "n_seeds": 3
+        },
+        "slowdown_vs_xgboost": {
+          "reference": 10.422275010999932,
+          "median": 10.422275010999932,
+          "min": 9.568880445070345,
+          "max": 11.704259325906897,
+          "n_seeds": 3
+        },
+        "xgboost/fit_seconds": {
+          "reference": 0.06282311600000412,
+          "median": 0.06282311600000412,
+          "min": 0.04990714600000956,
+          "max": 0.06525797699998748,
+          "n_seeds": 3
+        },
+        "xgboost/test_rmse": {
+          "reference": 1.4518528221264184,
+          "median": 1.5952484808317307,
+          "min": 1.4518528221264184,
+          "max": 1.645342218660477,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 5.91
+    }
+  },
+  "figures": 19
+}
