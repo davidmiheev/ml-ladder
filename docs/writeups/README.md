@@ -6,15 +6,15 @@ and what the runs show; the writeup here is the long version — why each design
 decision, what the numbers say across seeds, what was surprising, and what is
 left open.
 
-| Part | Writeup | Status |
-| --- | --- | --- |
-| A — Classical ML from scratch | [a-classical.md](a-classical.md) | complete |
-| B — Deep learning foundations | [b-deep-learning.md](b-deep-learning.md) | stub |
-| C — Sequence models & attention | [c-sequence-attention.md](c-sequence-attention.md) | stub |
-| D — Self-supervised & representation learning | [d-self-supervised.md](d-self-supervised.md) | stub |
-| E — Generative models | [e-generative.md](e-generative.md) | stub |
-| F — Geometric & equivariant nets | [f-geometric.md](f-geometric.md) | stub |
-| G — Scaling & systems | [g-scaling-systems.md](g-scaling-systems.md) | stub |
+| Part | Writeup | PDF | Status |
+| --- | --- | --- | --- |
+| A — Classical ML from scratch | [a-classical.md](a-classical.md) | [pdf/a-classical.pdf](pdf/a-classical.pdf) | complete |
+| B — Deep learning foundations | [b-deep-learning.md](b-deep-learning.md) | — | stub |
+| C — Sequence models & attention | [c-sequence-attention.md](c-sequence-attention.md) | — | stub |
+| D — Self-supervised & representation learning | [d-self-supervised.md](d-self-supervised.md) | — | stub |
+| E — Generative models | [e-generative.md](e-generative.md) | — | stub |
+| F — Geometric & equivariant nets | [f-geometric.md](f-geometric.md) | — | stub |
+| G — Scaling & systems | [g-scaling-systems.md](g-scaling-systems.md) | — | stub |
 
 Stubs are created by `tools/scaffold.py` from the ladder spec, so a new part
 arrives with its writeup outline already in place.
@@ -74,6 +74,26 @@ make writeups                                        # every complete part
 Each rung is run once per seed into a scratch directory; the reference seed's
 figures are copied to `figures/<part>/` and every run's metrics are collected
 into `data/<part>-metrics.json`.
+
+## PDFs
+
+Each finished writeup is also committed as a PDF, typeset through LaTeX so the
+derivations set properly and the figures become numbered floats with captions:
+
+```sh
+make pdf-A                                  # docs/writeups/pdf/a-classical.pdf
+make pdf                                    # every finished part
+uv run python tools/build_pdf.py A --keep   # also keep the intermediate .tex
+```
+
+The pipeline is markdown → LaTeX (pandoc) → PDF (XeLaTeX), which needs
+`pandoc texlive-xetex texlive-latex-extra texlive-fonts-recommended` installed;
+readers need none of it, since the PDF is in the repo. The build fails rather
+than silently dropping glyphs: XeTeX reports unmapped characters as *Missing
+character* log lines, and `tools/build_pdf.py` turns those into an error — so
+if a writeup introduces a symbol the font lacks, the build says so instead of
+shipping a PDF with a hole in it. Prefer real math (`$\ge$`) over the bare
+unicode character in prose for the same reason.
 
 ## The check
 

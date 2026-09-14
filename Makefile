@@ -4,7 +4,7 @@ UV ?= uv
 # Parts whose rungs are all implemented — the ones with figures to regenerate.
 COMPLETE_PARTS ?= $(shell $(UV) run ladder status --complete)
 
-.PHONY: help setup test lint fmt check scaffold docs status demo rust writeups writeups-check clean
+.PHONY: help setup test lint fmt check scaffold docs status demo rust writeups writeups-check pdf clean
 
 help:  ## Show this help
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  %-10s %s\n", $$1, $$2}'
@@ -41,6 +41,12 @@ writeups: $(addprefix writeup-,$(COMPLETE_PARTS))  ## Regenerate figures and met
 
 writeup-%:  ## Regenerate one part's writeup figures and metrics, e.g. make writeup-A
 	$(UV) run python tools/writeup_figures.py $*
+
+pdf:  ## Compile every finished writeup to PDF (needs pandoc + xelatex)
+	$(UV) run python tools/build_pdf.py --all
+
+pdf-%:  ## Compile one part's writeup to PDF, e.g. make pdf-A
+	$(UV) run python tools/build_pdf.py $*
 
 writeups-check:  ## Fail if a complete part's committed metrics have drifted
 	@for part in $(COMPLETE_PARTS); do $(UV) run python tools/writeup_figures.py $$part --check || exit 1; done

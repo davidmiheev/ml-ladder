@@ -99,7 +99,7 @@ drives the loss to zero — which is what the L2 term quietly prevents.)
 
 **Results** (test RMSE and distance to the true weights, seeds 0–2):
 
-| schedule | test RMSE (seed 0) | ‖w − w\*‖ median | with constant step |
+| schedule | test RMSE (seed 0) | $\lVert w - w^\star\rVert$ median | with constant step |
 | --- | --- | --- | --- |
 | full batch | 0.3031 | 0.023 | 0.023 |
 | mini-batch (32) | 0.3109 | 0.051 | **0.214** |
@@ -179,7 +179,7 @@ $\sigma^2$ and pairwise correlation $\rho$,
 $$\operatorname{Var}\left(\frac{1}{B}\sum_{b=1}^{B} T_b\right) = \rho\sigma^2 + \frac{1-\rho}{B}\sigma^2 .$$
 
 Averaging only kills the second term; the floor $\rho\sigma^2$ is why
-`max_features = √d` exists — decorrelating the trees attacks the term that
+`max_features` $= \sqrt{d}$ exists — decorrelating the trees attacks the term that
 $B \to \infty$ cannot. Bias is essentially unchanged (each deep tree is close to
 unbiased), so the entire gain is variance reduction.
 
@@ -211,7 +211,7 @@ feature subset per split, and scores itself out-of-bag.
 | forest, 80 trees | 0.887 | 0.860 |
 | forest out-of-bag estimate | 0.836 | 0.851 |
 
-`forest − tree` is **+0.073 median (+0.007 to +0.107)**. Bagging reliably helps;
+`forest - tree` is **+0.073 median (+0.007 to +0.107)**. Bagging reliably helps;
 *how much* is itself seed-dependent, which is the honest version of the claim.
 
 **What surprised me.** Two things. First, Gini versus entropy is a coin flip
@@ -298,8 +298,7 @@ projecting orthogonally onto the best one, which forces the sandwich
 
 $$E_{\text{k-means}}(k) \;\ge\; E_{\text{PCA}}(k-1) \;\ge\; E_{\text{PCA}}(k).$$
 
-Measured on this dataset, it holds at every $k$ tested (e.g. $k=4$: 2.406 ≥
-1.754 ≥ 0.929). Ding & He (2004) sharpen the connection: the continuous
+Measured on this dataset, it holds at every $k$ tested (e.g. $k=4$: $2.406 \ge 1.754 \ge 0.929$). Ding & He (2004) sharpen the connection: the continuous
 relaxation of the k-means indicator matrix is spanned by the principal
 components — PCA *is* relaxed k-means.
 
@@ -321,7 +320,7 @@ components are reproducible across runs.
 
 **Results** (4 gaussian blobs in 8-D, standardized):
 
-| k | k-means reconstruction | PCA(k) reconstruction | PCA(k−1) | ARI vs true labels |
+| k | k-means reconstruction | PCA(k) reconstruction | PCA(k-1) | ARI vs true labels |
 | --- | --- | --- | --- | --- |
 | 2 | 5.692 | 3.293 | 5.152 | +0.495 |
 | 3 | 4.000 | 1.754 | 3.293 | +0.713 |
@@ -402,7 +401,7 @@ algorithm*, and any difference must come from defaults, arithmetic, or
 engineering.
 
 That is a testable claim, so it is now a test. Matching the defaults that
-differ — `min_child_weight = min_samples_leaf = 5`, `base_score = ȳ`, exact
+differ — `min_child_weight = min_samples_leaf = 5`, `base_score` $= \bar{y}$, exact
 splits, $\lambda = 0$ — the two implementations agree on held-out predictions to
 
 $$\max_i \lvert \hat{y}^{\text{ours}}_i - \hat{y}^{\text{xgb}}_i \rvert \approx 6\times10^{-6}$$
@@ -440,7 +439,7 @@ bans it. (That was not a guess; `XGBRegressor` raised
 
 **What surprised me — and a claim I had to retract.** On seed 0, XGBoost wins by
 2% and it is tempting to write "we land within 2% of the library". Across seeds
-0–2 the gap is **−0.008 median, range −0.031 to +0.030**: our implementation is
+0–2 the gap is **$-0.008$ median, range $-0.031$ to $+0.030$**: our implementation is
 ahead on two of three seeds. There is no measurable accuracy difference — and
 once the derivation above is in hand, there *cannot* be one, because at
 $\lambda=0$ with squared loss the algorithms coincide. What the library buys is

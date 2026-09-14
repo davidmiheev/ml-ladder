@@ -7,7 +7,7 @@ systems work. One repo, one harness, one rung at a time.
 
 - **[docs/ladder.md](docs/ladder.md)** — the rungs (generated from the spec).
 - **[docs/reading-list.md](docs/reading-list.md)** — the paper/book/course list that goes with them.
-- **[docs/writeups/](docs/writeups/)** — one writeup per finished part; [part A](docs/writeups/a-classical.md) is done, the rest are outlines.
+- **[docs/writeups/](docs/writeups/)** — one writeup per finished part, in markdown and [PDF](docs/writeups/pdf/a-classical.pdf); [part A](docs/writeups/a-classical.md) is done, the rest are outlines.
 
 ## Quick start
 
@@ -87,6 +87,7 @@ A part is not done when its rungs run — it is done when it is written up:
 uv run python tools/writeup_figures.py A   # run every rung across seeds 0-2,
                                            # commit the figures and metrics
 $EDITOR docs/writeups/a-classical.md       # fill in the outline the scaffold made
+make pdf-A                                 # typeset it (needs pandoc + xelatex)
 ```
 
 Numbers in a writeup carry a range across seeds, and come from the committed

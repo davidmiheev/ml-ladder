@@ -90,6 +90,15 @@ def test_metrics_file_covers_every_rung(part):
             assert record["rungs"][item.id]["metrics"], f"{item.id} recorded no metrics"
 
 
+@pytest.mark.parametrize("part", COMPLETE_PARTS, ids=lambda part: part.id)
+def test_finished_writeups_are_also_committed_as_pdf(part):
+    """Readers without a LaTeX toolchain get the PDF from the repo."""
+    pdf = ROOT / spec.WRITEUPS_DIR / "pdf" / f"{spec.part_slug(part)}.pdf"
+    assert pdf.exists(), f"missing {pdf.name}; run `make pdf-{part.id}`"
+    assert pdf.read_bytes()[:5] == b"%PDF-", f"{pdf.name} is not a PDF"
+    assert pdf.stat().st_size > 50_000, f"{pdf.name} looks truncated"
+
+
 def test_writeup_index_lists_every_part():
     index = (ROOT / spec.WRITEUPS_DIR / "README.md").read_text()
     for part in DOCUMENTED_PARTS:

@@ -173,7 +173,9 @@ def run(exp: Experiment) -> dict[str, float]:
     features, labels, true_centers = datasets.make_blobs(
         exp["samples"], centers=exp["clusters"], n_features=exp["features"], cluster_std=exp["cluster_std"], rng=rng
     )
-    (features,) = datasets.standardize(features)
+    # The true centres go through the same transform as the data, or they would
+    # be plotted in the pre-standardization frame.
+    features, true_centers = datasets.standardize(features, true_centers)
 
     # -- k-means: how many clusters does the data support? ----------------
     inertias, purities, rand_scores = [], [], []
@@ -274,7 +276,7 @@ def run(exp: Experiment) -> dict[str, float]:
             title="PCA projection — true labels",
             xlabel="PC1",
             ylabel="PC2",
-            centers=pca.transform(true_centers, n_components=2) if exp["features"] == true_centers.shape[1] else None,
+            centers=pca.transform(true_centers, n_components=2),
         ),
     )
     exp.log_figure(
