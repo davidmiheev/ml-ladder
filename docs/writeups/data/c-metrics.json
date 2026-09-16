@@ -1,0 +1,660 @@
+{
+  "part": "C",
+  "title": "Sequence models & attention",
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "reference_seed": 0,
+  "rungs": {
+    "C1": {
+      "title": "Char-level RNN/LSTM language model",
+      "metrics": {
+        "lstm/bits_per_char": {
+          "reference": 2.3190620473937025,
+          "median": 2.3337683483624754,
+          "min": 2.3190620473937025,
+          "max": 2.336487265085628,
+          "n_seeds": 3
+        },
+        "lstm/effective_horizon": {
+          "reference": 63.0,
+          "median": 63.0,
+          "min": 63.0,
+          "max": 63.0,
+          "n_seeds": 3
+        },
+        "lstm/gradient_at_max_distance": {
+          "reference": 0.009377633221447468,
+          "median": 0.009377633221447468,
+          "min": 0.0012680934742093086,
+          "max": 0.010496219620108604,
+          "n_seeds": 3
+        },
+        "lstm/gradient_reach_ratio": {
+          "reference": 1.797524145988117e-05,
+          "median": 1.797524145988117e-05,
+          "min": 2.530736226984424e-06,
+          "max": 1.9466595139664803e-05,
+          "n_seeds": 3
+        },
+        "lstm/parameters": {
+          "reference": 319550.0,
+          "median": 319550.0,
+          "min": 319550.0,
+          "max": 319550.0,
+          "n_seeds": 3
+        },
+        "lstm/val_loss": {
+          "reference": 1.607451319694519,
+          "median": 1.61764495074749,
+          "min": 1.607451319694519,
+          "max": 1.6195295602083206,
+          "n_seeds": 3
+        },
+        "lstm_minus_rnn_bpc": {
+          "reference": -0.05335589760367787,
+          "median": -0.03193788769365824,
+          "min": -0.05335589760367787,
+          "max": -0.0112548026464383,
+          "n_seeds": 3
+        },
+        "reach_ratio_lstm_over_rnn": {
+          "reference": 2350049386.8867645,
+          "median": 952007830.872387,
+          "min": 42126490.42901464,
+          "max": 2350049386.8867645,
+          "n_seeds": 3
+        },
+        "recall/lstm@15": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "recall/lstm@30": {
+          "reference": 0.115234375,
+          "median": 0.115234375,
+          "min": 0.11328125,
+          "max": 0.13671875,
+          "n_seeds": 3
+        },
+        "recall/lstm@5": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "recall/lstm@60": {
+          "reference": 0.115234375,
+          "median": 0.115234375,
+          "min": 0.11328125,
+          "max": 0.13671875,
+          "n_seeds": 3
+        },
+        "recall/rnn@15": {
+          "reference": 0.115234375,
+          "median": 0.126953125,
+          "min": 0.115234375,
+          "max": 0.13671875,
+          "n_seeds": 3
+        },
+        "recall/rnn@30": {
+          "reference": 0.115234375,
+          "median": 0.126953125,
+          "min": 0.115234375,
+          "max": 0.13671875,
+          "n_seeds": 3
+        },
+        "recall/rnn@5": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "recall/rnn@60": {
+          "reference": 0.115234375,
+          "median": 0.126953125,
+          "min": 0.115234375,
+          "max": 0.13671875,
+          "n_seeds": 3
+        },
+        "recall_lstm_minus_rnn_at_max": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": -0.013671875,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "rnn-wide/bits_per_char": {
+          "reference": 2.2743869955901563,
+          "median": 2.263493077038722,
+          "min": 2.261449622176833,
+          "max": 2.2743869955901563,
+          "n_seeds": 3
+        },
+        "rnn-wide/effective_horizon": {
+          "reference": 27.0,
+          "median": 27.0,
+          "min": 26.0,
+          "max": 29.0,
+          "n_seeds": 3
+        },
+        "rnn-wide/gradient_at_max_distance": {
+          "reference": 6.832400617495793e-11,
+          "median": 6.07708258715256e-11,
+          "min": 3.8300182469974686e-11,
+          "max": 6.832400617495793e-11,
+          "n_seeds": 3
+        },
+        "rnn-wide/gradient_reach_ratio": {
+          "reference": 1.2859664131241423e-13,
+          "median": 1.0834083894539717e-13,
+          "min": 6.40756615169118e-14,
+          "max": 1.2859664131241423e-13,
+          "n_seeds": 3
+        },
+        "rnn-wide/parameters": {
+          "reference": 342974.0,
+          "median": 342974.0,
+          "min": 342974.0,
+          "max": 342974.0,
+          "n_seeds": 3
+        },
+        "rnn-wide/val_loss": {
+          "reference": 1.5764849334955215,
+          "median": 1.5689338445663452,
+          "min": 1.5675174295902252,
+          "max": 1.5764849334955215,
+          "n_seeds": 3
+        },
+        "rnn/bits_per_char": {
+          "reference": 2.3724179449973803,
+          "median": 2.3657062360561336,
+          "min": 2.3477420677320664,
+          "max": 2.3724179449973803,
+          "n_seeds": 3
+        },
+        "rnn/effective_horizon": {
+          "reference": 27.0,
+          "median": 27.0,
+          "min": 26.0,
+          "max": 27.0,
+          "n_seeds": 3
+        },
+        "rnn/gradient_at_max_distance": {
+          "reference": 5.3700446867033236e-12,
+          "median": 1.3923770122992174e-11,
+          "min": 5.3700446867033236e-12,
+          "max": 3.798816469724464e-11,
+          "n_seeds": 3
+        },
+        "rnn/gradient_reach_ratio": {
+          "reference": 7.648878172596163e-15,
+          "median": 2.044793593958811e-14,
+          "min": 7.648878172596163e-15,
+          "max": 6.007469887027138e-14,
+          "n_seeds": 3
+        },
+        "rnn/parameters": {
+          "reference": 97790.0,
+          "median": 97790.0,
+          "min": 97790.0,
+          "max": 97790.0,
+          "n_seeds": 3
+        },
+        "rnn/val_loss": {
+          "reference": 1.6444348096847534,
+          "median": 1.6397826075553894,
+          "min": 1.627330794930458,
+          "max": 1.6444348096847534,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 66.829
+    },
+    "C2": {
+      "title": "Seq2seq with attention on a toy translation task",
+      "metrics": {
+        "attention/alignment_score": {
+          "reference": 0.625,
+          "median": 0.7708333333333334,
+          "min": 0.625,
+          "max": 0.7916666666666666,
+          "n_seeds": 3
+        },
+        "attention/mean_exact": {
+          "reference": 0.9963333333333333,
+          "median": 1.0,
+          "min": 0.9963333333333333,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "attention@0/character_accuracy": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "attention@0/exact_match": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "attention@0/train_loss": {
+          "reference": 0.00015196580445379058,
+          "median": 0.00015503153027818004,
+          "min": 0.00015196580445379058,
+          "max": 0.00017536620973569757,
+          "n_seeds": 3
+        },
+        "attention@10/character_accuracy": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "attention@10/exact_match": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "attention@10/train_loss": {
+          "reference": 0.00019975701805843198,
+          "median": 0.00020133933789924066,
+          "min": 0.00019975701805843198,
+          "max": 0.0002190584205078615,
+          "n_seeds": 3
+        },
+        "attention@24/character_accuracy": {
+          "reference": 0.9987,
+          "median": 1.0,
+          "min": 0.9987,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "attention@24/exact_match": {
+          "reference": 0.989,
+          "median": 1.0,
+          "min": 0.989,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "attention@24/train_loss": {
+          "reference": 0.004518866433732291,
+          "median": 0.00025409921611153934,
+          "min": 0.00019836168475523394,
+          "max": 0.004518866433732291,
+          "n_seeds": 3
+        },
+        "attention_minus_bottleneck@0": {
+          "reference": 0.0014999999999999458,
+          "median": 0.0034999999999999476,
+          "min": 0.0014999999999999458,
+          "max": 0.0040000000000000036,
+          "n_seeds": 3
+        },
+        "attention_minus_bottleneck@10": {
+          "reference": 0.5845,
+          "median": 0.637,
+          "min": 0.5845,
+          "max": 0.925,
+          "n_seeds": 3
+        },
+        "attention_minus_bottleneck@24": {
+          "reference": 0.9335,
+          "median": 0.9885,
+          "min": 0.9335,
+          "max": 0.9935,
+          "n_seeds": 3
+        },
+        "bottleneck/mean_exact": {
+          "reference": 0.4898333333333334,
+          "median": 0.45683333333333337,
+          "min": 0.35933333333333334,
+          "max": 0.4898333333333334,
+          "n_seeds": 3
+        },
+        "bottleneck@0/character_accuracy": {
+          "reference": 0.99975,
+          "median": 0.99945,
+          "min": 0.9992,
+          "max": 0.99975,
+          "n_seeds": 3
+        },
+        "bottleneck@0/exact_match": {
+          "reference": 0.9985,
+          "median": 0.9965,
+          "min": 0.996,
+          "max": 0.9985,
+          "n_seeds": 3
+        },
+        "bottleneck@0/train_loss": {
+          "reference": 0.0070657960951645326,
+          "median": 0.00837875994546537,
+          "min": 0.0070657960951645326,
+          "max": 0.011460355725733841,
+          "n_seeds": 3
+        },
+        "bottleneck@10/character_accuracy": {
+          "reference": 0.9087,
+          "median": 0.9041,
+          "min": 0.82945,
+          "max": 0.9087,
+          "n_seeds": 3
+        },
+        "bottleneck@10/exact_match": {
+          "reference": 0.4155,
+          "median": 0.363,
+          "min": 0.075,
+          "max": 0.4155,
+          "n_seeds": 3
+        },
+        "bottleneck@10/train_loss": {
+          "reference": 0.18597824395971096,
+          "median": 0.22938839758330204,
+          "min": 0.18597824395971096,
+          "max": 0.44984691732741416,
+          "n_seeds": 3
+        },
+        "bottleneck@24/character_accuracy": {
+          "reference": 0.8438,
+          "median": 0.7461,
+          "min": 0.71115,
+          "max": 0.8438,
+          "n_seeds": 3
+        },
+        "bottleneck@24/exact_match": {
+          "reference": 0.0555,
+          "median": 0.0115,
+          "min": 0.0065,
+          "max": 0.0555,
+          "n_seeds": 3
+        },
+        "bottleneck@24/train_loss": {
+          "reference": 0.42295815304238743,
+          "median": 0.6175821772281159,
+          "min": 0.42295815304238743,
+          "max": 0.6845275125604995,
+          "n_seeds": 3
+        },
+        "source_length@0": {
+          "reference": 18.0,
+          "median": 18.0,
+          "min": 18.0,
+          "max": 18.0,
+          "n_seeds": 3
+        },
+        "source_length@10": {
+          "reference": 101.0,
+          "median": 101.0,
+          "min": 100.0,
+          "max": 101.0,
+          "n_seeds": 3
+        },
+        "source_length@24": {
+          "reference": 193.0,
+          "median": 193.0,
+          "min": 193.0,
+          "max": 194.0,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 25.237
+    },
+    "C3": {
+      "title": "Transformer from scratch (attention, positional encoding, causal masking)",
+      "metrics": {
+        "best_bits_per_char": {
+          "reference": 2.2909976174562705,
+          "median": 2.3087904695622465,
+          "min": 2.2909976174562705,
+          "max": 2.322548522687656,
+          "n_seeds": 3
+        },
+        "causal/leak": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "causal/upper_triangular_mass": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "learned/bits_per_char": {
+          "reference": 2.2909976174562705,
+          "median": 2.3087904695622465,
+          "min": 2.2909976174562705,
+          "max": 2.322548522687656,
+          "n_seeds": 3
+        },
+        "learned/parameters": {
+          "reference": 1815936.0,
+          "median": 1815936.0,
+          "min": 1815936.0,
+          "max": 1815936.0,
+          "n_seeds": 3
+        },
+        "learned/val_loss": {
+          "reference": 1.5879985392093658,
+          "median": 1.6003316044807434,
+          "min": 1.5879985392093658,
+          "max": 1.6098679602146149,
+          "n_seeds": 3
+        },
+        "learned_minus_sinusoidal_bpc": {
+          "reference": -0.0950939801806081,
+          "median": -0.03975430569489102,
+          "min": -0.0950939801806081,
+          "max": -0.014867126245160733,
+          "n_seeds": 3
+        },
+        "matched/bits_per_char": {
+          "reference": 2.503832038304788,
+          "median": 2.507629845192466,
+          "min": 2.503832038304788,
+          "max": 2.5342692053870177,
+          "n_seeds": 3
+        },
+        "matched/parameters": {
+          "reference": 241920.0,
+          "median": 241920.0,
+          "min": 241920.0,
+          "max": 241920.0,
+          "n_seeds": 3
+        },
+        "matched/val_loss": {
+          "reference": 1.7355241179466248,
+          "median": 1.7381565570831299,
+          "min": 1.7355241179466248,
+          "max": 1.7566215544939041,
+          "n_seeds": 3
+        },
+        "matched_minus_full_bpc": {
+          "reference": 0.21283442084851734,
+          "median": 0.21283442084851734,
+          "min": 0.1850813225048098,
+          "max": 0.22547873582477118,
+          "n_seeds": 3
+        },
+        "none/bits_per_char": {
+          "reference": 2.734036986362257,
+          "median": 2.6412378566834365,
+          "min": 2.6131288402437685,
+          "max": 2.734036986362257,
+          "n_seeds": 3
+        },
+        "none/parameters": {
+          "reference": 1803648.0,
+          "median": 1803648.0,
+          "min": 1803648.0,
+          "max": 1803648.0,
+          "n_seeds": 3
+        },
+        "none/val_loss": {
+          "reference": 1.895090028643608,
+          "median": 1.830766573548317,
+          "min": 1.8112828880548477,
+          "max": 1.895090028643608,
+          "n_seeds": 3
+        },
+        "none_minus_sinusoidal_bpc": {
+          "reference": 0.3479453887253783,
+          "median": 0.30382220775061963,
+          "min": 0.2645840649866309,
+          "max": 0.3479453887253783,
+          "n_seeds": 3
+        },
+        "sinusoidal/bits_per_char": {
+          "reference": 2.3860915976368786,
+          "median": 2.3485447752571376,
+          "min": 2.337415648932817,
+          "max": 2.3860915976368786,
+          "n_seeds": 3
+        },
+        "sinusoidal/parameters": {
+          "reference": 1803648.0,
+          "median": 1803648.0,
+          "min": 1803648.0,
+          "max": 1803648.0,
+          "n_seeds": 3
+        },
+        "sinusoidal/val_loss": {
+          "reference": 1.6539126634597778,
+          "median": 1.6278871893882751,
+          "min": 1.620173066854477,
+          "max": 1.6539126634597778,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 33.449
+    },
+    "C4": {
+      "title": "Fine-tune a small ViT on a custom image-classification task",
+      "metrics": {
+        "best_accuracy": {
+          "reference": 0.956,
+          "median": 0.955,
+          "min": 0.951,
+          "max": 0.956,
+          "n_seeds": 3
+        },
+        "finetune/best_test_accuracy": {
+          "reference": 0.958,
+          "median": 0.955,
+          "min": 0.951,
+          "max": 0.958,
+          "n_seeds": 3
+        },
+        "finetune/seconds": {
+          "reference": 13.112223674000006,
+          "median": 12.77253381699984,
+          "min": 12.65733235000016,
+          "max": 13.112223674000006,
+          "n_seeds": 3
+        },
+        "finetune/test_accuracy": {
+          "reference": 0.956,
+          "median": 0.955,
+          "min": 0.951,
+          "max": 0.956,
+          "n_seeds": 3
+        },
+        "finetune/trainable_parameters": {
+          "reference": 5525188.0,
+          "median": 5525188.0,
+          "min": 5525188.0,
+          "max": 5525188.0,
+          "n_seeds": 3
+        },
+        "finetune_minus_probe": {
+          "reference": 0.08999999999999997,
+          "median": 0.08999999999999997,
+          "min": 0.07299999999999995,
+          "max": 0.09999999999999998,
+          "n_seeds": 3
+        },
+        "probe/best_test_accuracy": {
+          "reference": 0.866,
+          "median": 0.866,
+          "min": 0.855,
+          "max": 0.878,
+          "n_seeds": 3
+        },
+        "probe/seconds": {
+          "reference": 5.645894501000157,
+          "median": 5.549098123000022,
+          "min": 5.514454083999908,
+          "max": 5.645894501000157,
+          "n_seeds": 3
+        },
+        "probe/test_accuracy": {
+          "reference": 0.866,
+          "median": 0.866,
+          "min": 0.855,
+          "max": 0.878,
+          "n_seeds": 3
+        },
+        "probe/trainable_parameters": {
+          "reference": 772.0,
+          "median": 772.0,
+          "min": 772.0,
+          "max": 772.0,
+          "n_seeds": 3
+        },
+        "probe_minus_scratch": {
+          "reference": 0.452,
+          "median": 0.452,
+          "min": 0.421,
+          "max": 0.458,
+          "n_seeds": 3
+        },
+        "scratch/best_test_accuracy": {
+          "reference": 0.414,
+          "median": 0.42,
+          "min": 0.414,
+          "max": 0.434,
+          "n_seeds": 3
+        },
+        "scratch/seconds": {
+          "reference": 13.13404752800011,
+          "median": 12.844411735999984,
+          "min": 12.614043996999953,
+          "max": 13.13404752800011,
+          "n_seeds": 3
+        },
+        "scratch/test_accuracy": {
+          "reference": 0.414,
+          "median": 0.42,
+          "min": 0.414,
+          "max": 0.434,
+          "n_seeds": 3
+        },
+        "scratch/trainable_parameters": {
+          "reference": 5525188.0,
+          "median": 5525188.0,
+          "min": 5525188.0,
+          "max": 5525188.0,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 35.359
+    }
+  },
+  "figures": 15
+}
