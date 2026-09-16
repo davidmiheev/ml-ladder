@@ -10,7 +10,7 @@ left open.
 | --- | --- | --- | --- |
 | A — Classical ML from scratch | [a-classical.md](a-classical.md) | [pdf/a-classical.pdf](pdf/a-classical.pdf) | complete |
 | B — Deep learning foundations | [b-deep-learning.md](b-deep-learning.md) | [pdf/b-deep-learning.pdf](pdf/b-deep-learning.pdf) | complete |
-| C — Sequence models & attention | [c-sequence-attention.md](c-sequence-attention.md) | — | stub |
+| C — Sequence models & attention | [c-sequence-attention.md](c-sequence-attention.md) | [pdf/c-sequence-attention.pdf](pdf/c-sequence-attention.pdf) | complete |
 | D — Self-supervised & representation learning | [d-self-supervised.md](d-self-supervised.md) | — | stub |
 | E — Generative models | [e-generative.md](e-generative.md) | — | stub |
 | F — Geometric & equivariant nets | [f-geometric.md](f-geometric.md) | — | stub |
@@ -68,6 +68,8 @@ uv run python tools/writeup_figures.py A            # figures + metrics, seeds 0
 uv run python tools/writeup_figures.py A --seeds 0 1 2 3 4
 uv run python tools/writeup_figures.py A --check    # fail if the committed metrics drifted
                                                     # (wall-clock metrics excluded — they vary per run)
+                                                    # run it on the device the metrics came from: the
+                                                    # same seed gives different numbers on CPU and GPU
 make writeups                                        # every complete part
 ```
 

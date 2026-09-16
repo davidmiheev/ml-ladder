@@ -215,22 +215,22 @@
           "n_seeds": 3
         }
       },
-      "elapsed_sec_median": 66.829
+      "elapsed_sec_median": 64.561
     },
     "C2": {
       "title": "Seq2seq with attention on a toy translation task",
       "metrics": {
         "attention/alignment_score": {
-          "reference": 0.625,
-          "median": 0.7708333333333334,
-          "min": 0.625,
+          "reference": 0.7291666666666666,
+          "median": 0.7291666666666666,
+          "min": 0.7291666666666666,
           "max": 0.7916666666666666,
           "n_seeds": 3
         },
         "attention/mean_exact": {
-          "reference": 0.9963333333333333,
+          "reference": 0.9674999999999999,
           "median": 1.0,
-          "min": 0.9963333333333333,
+          "min": 0.9674999999999999,
           "max": 1.0,
           "n_seeds": 3
         },
@@ -270,31 +270,31 @@
           "n_seeds": 3
         },
         "attention@10/train_loss": {
-          "reference": 0.00019975701805843198,
-          "median": 0.00020133933789924066,
-          "min": 0.00019975701805843198,
-          "max": 0.0002190584205078615,
+          "reference": 0.00019975672918743395,
+          "median": 0.00020116716614017817,
+          "min": 0.00019975672918743395,
+          "max": 0.00021905848800397894,
           "n_seeds": 3
         },
         "attention@24/character_accuracy": {
-          "reference": 0.9987,
+          "reference": 0.98585,
           "median": 1.0,
-          "min": 0.9987,
+          "min": 0.98585,
           "max": 1.0,
           "n_seeds": 3
         },
         "attention@24/exact_match": {
-          "reference": 0.989,
+          "reference": 0.9025,
           "median": 1.0,
-          "min": 0.989,
+          "min": 0.9025,
           "max": 1.0,
           "n_seeds": 3
         },
         "attention@24/train_loss": {
-          "reference": 0.004518866433732291,
-          "median": 0.00025409921611153934,
-          "min": 0.00019836168475523394,
-          "max": 0.004518866433732291,
+          "reference": 0.003097784991544533,
+          "median": 0.00025252366554304125,
+          "min": 0.00019834768101374835,
+          "max": 0.003097784991544533,
           "n_seeds": 3
         },
         "attention_minus_bottleneck@0": {
@@ -305,24 +305,24 @@
           "n_seeds": 3
         },
         "attention_minus_bottleneck@10": {
-          "reference": 0.5845,
-          "median": 0.637,
-          "min": 0.5845,
-          "max": 0.925,
+          "reference": 0.622,
+          "median": 0.6739999999999999,
+          "min": 0.622,
+          "max": 0.9185,
           "n_seeds": 3
         },
         "attention_minus_bottleneck@24": {
-          "reference": 0.9335,
-          "median": 0.9885,
-          "min": 0.9335,
-          "max": 0.9935,
+          "reference": 0.833,
+          "median": 0.995,
+          "min": 0.833,
+          "max": 0.9955,
           "n_seeds": 3
         },
         "bottleneck/mean_exact": {
-          "reference": 0.4898333333333334,
-          "median": 0.45683333333333337,
-          "min": 0.35933333333333334,
-          "max": 0.4898333333333334,
+          "reference": 0.48200000000000004,
+          "median": 0.4423333333333333,
+          "min": 0.36083333333333334,
+          "max": 0.48200000000000004,
           "n_seeds": 3
         },
         "bottleneck@0/character_accuracy": {
@@ -347,45 +347,45 @@
           "n_seeds": 3
         },
         "bottleneck@10/character_accuracy": {
-          "reference": 0.9087,
-          "median": 0.9041,
-          "min": 0.82945,
-          "max": 0.9087,
+          "reference": 0.91205,
+          "median": 0.8992,
+          "min": 0.83125,
+          "max": 0.91205,
           "n_seeds": 3
         },
         "bottleneck@10/exact_match": {
-          "reference": 0.4155,
-          "median": 0.363,
-          "min": 0.075,
-          "max": 0.4155,
+          "reference": 0.378,
+          "median": 0.326,
+          "min": 0.0815,
+          "max": 0.378,
           "n_seeds": 3
         },
         "bottleneck@10/train_loss": {
-          "reference": 0.18597824395971096,
-          "median": 0.22938839758330204,
-          "min": 0.18597824395971096,
-          "max": 0.44984691732741416,
+          "reference": 0.19950517584034738,
+          "median": 0.24495352979036086,
+          "min": 0.19950517584034738,
+          "max": 0.44999283235123816,
           "n_seeds": 3
         },
         "bottleneck@24/character_accuracy": {
-          "reference": 0.8438,
-          "median": 0.7461,
-          "min": 0.71115,
-          "max": 0.8438,
+          "reference": 0.8493,
+          "median": 0.7101,
+          "min": 0.70575,
+          "max": 0.8493,
           "n_seeds": 3
         },
         "bottleneck@24/exact_match": {
-          "reference": 0.0555,
-          "median": 0.0115,
-          "min": 0.0065,
-          "max": 0.0555,
+          "reference": 0.0695,
+          "median": 0.005,
+          "min": 0.0045,
+          "max": 0.0695,
           "n_seeds": 3
         },
         "bottleneck@24/train_loss": {
-          "reference": 0.42295815304238743,
-          "median": 0.6175821772281159,
-          "min": 0.42295815304238743,
-          "max": 0.6845275125604995,
+          "reference": 0.4230360984802246,
+          "median": 0.6766395093278682,
+          "min": 0.4230360984802246,
+          "max": 0.7008324125979809,
           "n_seeds": 3
         },
         "source_length@0": {
@@ -410,7 +410,7 @@
           "n_seeds": 3
         }
       },
-      "elapsed_sec_median": 25.237
+      "elapsed_sec_median": 23.722
     },
     "C3": {
       "title": "Transformer from scratch (attention, positional encoding, causal masking)",
@@ -542,7 +542,7 @@
           "n_seeds": 3
         }
       },
-      "elapsed_sec_median": 33.449
+      "elapsed_sec_median": 34.398
     },
     "C4": {
       "title": "Fine-tune a small ViT on a custom image-classification task",
@@ -562,10 +562,10 @@
           "n_seeds": 3
         },
         "finetune/seconds": {
-          "reference": 13.112223674000006,
-          "median": 12.77253381699984,
-          "min": 12.65733235000016,
-          "max": 13.112223674000006,
+          "reference": 13.658411825999792,
+          "median": 13.555788541000311,
+          "min": 13.438626128000124,
+          "max": 13.658411825999792,
           "n_seeds": 3
         },
         "finetune/test_accuracy": {
@@ -597,10 +597,10 @@
           "n_seeds": 3
         },
         "probe/seconds": {
-          "reference": 5.645894501000157,
-          "median": 5.549098123000022,
-          "min": 5.514454083999908,
-          "max": 5.645894501000157,
+          "reference": 5.98532407499988,
+          "median": 5.90389878499991,
+          "min": 5.872157516000243,
+          "max": 5.98532407499988,
           "n_seeds": 3
         },
         "probe/test_accuracy": {
@@ -621,26 +621,26 @@
           "reference": 0.452,
           "median": 0.452,
           "min": 0.421,
-          "max": 0.458,
+          "max": 0.457,
           "n_seeds": 3
         },
         "scratch/best_test_accuracy": {
           "reference": 0.414,
-          "median": 0.42,
+          "median": 0.421,
           "min": 0.414,
           "max": 0.434,
           "n_seeds": 3
         },
         "scratch/seconds": {
-          "reference": 13.13404752800011,
-          "median": 12.844411735999984,
-          "min": 12.614043996999953,
-          "max": 13.13404752800011,
+          "reference": 13.592006883999602,
+          "median": 13.42617023799994,
+          "min": 13.335622840999804,
+          "max": 13.592006883999602,
           "n_seeds": 3
         },
         "scratch/test_accuracy": {
           "reference": 0.414,
-          "median": 0.42,
+          "median": 0.421,
           "min": 0.414,
           "max": 0.434,
           "n_seeds": 3
@@ -653,7 +653,7 @@
           "n_seeds": 3
         }
       },
-      "elapsed_sec_median": 35.359
+      "elapsed_sec_median": 37.143
     }
   },
   "figures": 15

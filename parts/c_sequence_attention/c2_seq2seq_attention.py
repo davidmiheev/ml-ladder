@@ -229,7 +229,10 @@ def run(exp: Experiment) -> dict[str, float]:
                 f"exact={exact:.4f}  char={character:.4f}  loss={losses[-1]:.4f}"
             )
 
-            if name == "attention" and context_words == exp["context_words"][-1] and weights is not None:
+            # Keep the shortest source for the figure: the alignment is the
+            # point, and at 193 characters it is a thin unreadable band. The
+            # long-context behaviour is already quantified in the table above.
+            if name == "attention" and context_words == exp["context_words"][0] and weights is not None:
                 example_weights = weights[:6].cpu().numpy()
                 example_pairs = test_pairs[:6]
 
@@ -244,10 +247,11 @@ def run(exp: Experiment) -> dict[str, float]:
         best = example_pairs[0]
         exp.log_figure(
             "attention_map",
-            plotting.plot_confusion_matrix(
+            plotting.plot_attention(
                 example_weights[0][:, : len(best.source)],
-                labels=list(best.source),
-                title=f"Attention: {best.source!r} -> {best.target!r}",
+                source_labels=list(best.source),
+                target_labels=list(best.target),
+                title=f"Attention: {best.source[:40]!r} -> {best.target!r}",
             ),
         )
 

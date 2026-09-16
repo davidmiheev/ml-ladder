@@ -339,8 +339,11 @@ def run(exp: Experiment) -> dict[str, float]:
     )
     exp.log_figure(
         "attention_map",
-        plotting.plot_confusion_matrix(
-            weights[0, 0, :48, :48].cpu().numpy(), title="Head 0, last block — attention (causal)", normalize=False
+        plotting.plot_attention(
+            weights[0, 0, :48, :48].cpu().numpy(),
+            title="Head 0, last block — causal self-attention",
+            xlabel="key position (attended to)",
+            ylabel="query position",
         ),
     )
     table = sinusoidal_encoding(exp["block_size"], exp["width"])
@@ -352,10 +355,15 @@ def run(exp: Experiment) -> dict[str, float]:
         ),
     )
 
-    summary["none_minus_sinusoidal_bpc"] = summary["none/bits_per_char"] - summary["sinusoidal/bits_per_char"]
-    if "learned/bits_per_char" in summary:
-        summary["matched_minus_full_bpc"] = summary["matched/bits_per_char"] - summary["learned/bits_per_char"]
-    summary["learned_minus_sinusoidal_bpc"] = summary["learned/bits_per_char"] - summary["sinusoidal/bits_per_char"]
+    # Every comparison below is only defined when both of its arms were run,
+    # and --encodings lets a caller run any subset.
+    def difference(name: str, left: str, right: str) -> None:
+        if f"{left}/bits_per_char" in summary and f"{right}/bits_per_char" in summary:
+            summary[name] = summary[f"{left}/bits_per_char"] - summary[f"{right}/bits_per_char"]
+
+    difference("none_minus_sinusoidal_bpc", "none", "sinusoidal")
+    difference("learned_minus_sinusoidal_bpc", "learned", "sinusoidal")
+    difference("matched_minus_full_bpc", "matched", "learned")
     summary["best_bits_per_char"] = min(summary[f"{encoding}/bits_per_char"] for encoding in curves)
     return summary
 

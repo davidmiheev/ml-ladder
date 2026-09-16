@@ -109,6 +109,39 @@ def plot_confusion_matrix(
     return fig
 
 
+def plot_attention(
+    weights: ArrayLike,
+    *,
+    title: str = "",
+    source_labels: Sequence[str] | None = None,
+    target_labels: Sequence[str] | None = None,
+    xlabel: str = "source position (key)",
+    ylabel: str = "output step (query)",
+    max_ticks: int = 40,
+) -> Figure:
+    """An attention map, with the axes attention actually has.
+
+    Rows are decoding steps (queries), columns are the positions attended to
+    (keys) — not a confusion matrix, whose "true"/"predicted" axes say something
+    quite different. Character labels are drawn only while they still fit.
+    """
+    use_house_style()
+    matrix = np.asarray(weights, dtype=np.float64)
+    fig, ax = plt.subplots(figsize=(6.0, 4.4))
+    image = ax.imshow(matrix, cmap="Blues", aspect="auto", vmin=0.0, interpolation="nearest")
+    fig.colorbar(image, ax=ax, shrink=0.85, label="attention weight")
+
+    if source_labels is not None and len(source_labels) <= max_ticks:
+        ax.set_xticks(range(len(source_labels)))
+        ax.set_xticklabels(source_labels, fontsize=7)
+    if target_labels is not None and len(target_labels) <= max_ticks:
+        ax.set_yticks(range(len(target_labels)))
+        ax.set_yticklabels(target_labels, fontsize=7)
+    ax.set(title=title, xlabel=xlabel, ylabel=ylabel)
+    ax.grid(False)
+    return fig
+
+
 def plot_comparison(scores: Mapping[str, float], *, title: str = "", ylabel: str = "score") -> Figure:
     """Bar chart for the bake-off rungs (B5, E4, F1, A4)."""
     use_house_style()
