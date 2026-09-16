@@ -167,6 +167,11 @@ def make_transformer():
         "eval_batches": 8,
         "sample_chars": 240,
         "encodings": ["sinusoidal", "learned", "none"],
+        # A second, much smaller model sized to C1's LSTM (~0.32 M parameters),
+        # so "transformer vs LSTM" compares like with like instead of
+        # comparing 5x the parameter budget.
+        "matched_width": 96,
+        "matched_depth": 2,
     },
     description="A decoder-only transformer written from scratch, ablated against its positional encoding.",
 )
@@ -247,6 +252,47 @@ def run(exp: Experiment) -> dict[str, float]:
             f"params={torchkit.count_parameters(model):,}"
         )
 
+    # -- the same architecture at C1's parameter budget ---------------------
+    torchkit.seed_torch(exp.seed)
+    matched = CharTransformer(
+        tokenizer.vocab_size,
+        width=exp["matched_width"],
+        heads=exp["heads"],
+        depth=exp["matched_depth"],
+        block_size=exp["block_size"],
+        positional="learned",
+    ).to(device)
+    optimizer = torch.optim.AdamW(matched.parameters(), lr=exp["lr"], weight_decay=0.1)
+    batch_rng = np.random.default_rng(exp.seed)
+    matched_losses = []
+    for step in range(1, exp["steps"] + 1):
+        matched.train()
+        inputs, targets = text.lm_batch(
+            train_ids, batch_size=exp["batch_size"], block_size=exp["block_size"], rng=batch_rng
+        )
+        logits, _ = matched(torch.from_numpy(inputs).to(device))
+        loss = torch.nn.functional.cross_entropy(
+            logits.reshape(-1, tokenizer.vocab_size), torch.from_numpy(targets).to(device).reshape(-1)
+        )
+        optimizer.zero_grad(set_to_none=True)
+        loss.backward()
+        torch.nn.utils.clip_grad_norm_(matched.parameters(), 1.0)
+        optimizer.step()
+        if step % exp["eval_every"] == 0 or step == 1:
+            matched_losses.append(evaluate(matched))
+    curves["matched"] = matched_losses
+    models["matched"] = matched
+    matched_parameters = torchkit.count_parameters(matched)
+    summary |= {
+        "matched/val_loss": matched_losses[-1],
+        "matched/bits_per_char": matched_losses[-1] / math.log(2),
+        "matched/parameters": float(matched_parameters),
+    }
+    print(
+        f"[c3] parameter-matched  val loss={matched_losses[-1]:.4f}  "
+        f"bits/char={matched_losses[-1] / math.log(2):.4f}  params={matched_parameters:,}"
+    )
+
     best = min(curves, key=lambda key: curves[key][-1])
     sample = models[best].sample(tokenizer, length=exp["sample_chars"], device=device)
     print(f"\n[c3] --- sample ({best}) ---\n{sample}\n")
@@ -307,6 +353,8 @@ def run(exp: Experiment) -> dict[str, float]:
     )
 
     summary["none_minus_sinusoidal_bpc"] = summary["none/bits_per_char"] - summary["sinusoidal/bits_per_char"]
+    if "learned/bits_per_char" in summary:
+        summary["matched_minus_full_bpc"] = summary["matched/bits_per_char"] - summary["learned/bits_per_char"]
     summary["learned_minus_sinusoidal_bpc"] = summary["learned/bits_per_char"] - summary["sinusoidal/bits_per_char"]
     summary["best_bits_per_char"] = min(summary[f"{encoding}/bits_per_char"] for encoding in curves)
     return summary

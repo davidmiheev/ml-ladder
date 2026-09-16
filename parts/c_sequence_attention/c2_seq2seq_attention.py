@@ -9,8 +9,13 @@ eyeballed.
 
 The comparison is the one the attention paper was written to make: an
 encoder-decoder whose entire source sentence must fit through one fixed-size
-vector, against the same model allowed to look back at the encoder states. The
-bottleneck's cost should grow with input length, and that is measurable.
+vector, against the same model allowed to look back at the encoder states.
+
+The length that matters is *content*, not padding. The first version of this
+rung swept the pad width and found nothing — zeros cost a fixed-size vector
+nothing to carry, so both arms scored 0.99+ everywhere. Here the date is buried
+in filler words instead, so the distance the bottleneck must actually carry
+information really does grow.
 
 Run with ``ladder run C2`` (``--help`` for flags).
 """
@@ -136,13 +141,15 @@ def alignment_score(weights, sources: list[str], targets: list[str]) -> float:
         "train_samples": 12000,
         "test_samples": 2000,
         "embedding": 48,
-        "hidden": 96,
+        # Deliberately small: the decoder's entire view of the source is one
+        # 2*hidden vector, and that vector is the quantity under test.
+        "hidden": 64,
         "epochs": 6,
         "batch_size": 128,
         "lr": 3e-3,
-        "pad_lengths": [20, 40, 60],
+        "context_words": [0, 10, 24],
     },
-    description="Encoder-decoder with and without attention on date normalization, across source lengths.",
+    description="Encoder-decoder with and without attention on date normalization, across content lengths.",
 )
 def run(exp: Experiment) -> dict[str, float]:
     """Seq2seq with attention on a toy translation task."""
@@ -157,9 +164,13 @@ def run(exp: Experiment) -> dict[str, float]:
     example_weights = None
     example_pairs = None
 
-    for source_length in exp["pad_lengths"]:
-        train_pairs = text.make_date_pairs(exp["train_samples"], rng=rng)
-        test_pairs = text.make_date_pairs(exp["test_samples"], rng=rng)
+    source_lengths: list[int] = []
+    for context_words in exp["context_words"]:
+        train_pairs = text.make_date_pairs(exp["train_samples"], context_words=context_words, rng=rng)
+        test_pairs = text.make_date_pairs(exp["test_samples"], context_words=context_words, rng=rng)
+        # Pad to whatever this content length actually needs, no further.
+        source_length = max(len(pair.source) for pair in (*train_pairs, *test_pairs))
+        source_lengths.append(source_length)
         x_train, y_train, source_tokenizer, target_tokenizer = text.encode_pairs(
             train_pairs, source_length=source_length
         )
@@ -205,7 +216,7 @@ def run(exp: Experiment) -> dict[str, float]:
             exact = float((predicted.cpu().numpy() == y_test).all(axis=1).mean())
             character = float((predicted.cpu().numpy() == y_test).mean())
 
-            arm = f"{name}@{source_length}"
+            arm = f"{name}@{context_words}"
             curves[arm] = losses
             accuracy_by_length[name].append(exact)
             summary |= {
@@ -214,10 +225,11 @@ def run(exp: Experiment) -> dict[str, float]:
                 f"{arm}/train_loss": losses[-1],
             }
             print(
-                f"[c2] len={source_length:<3} {name:<11} exact={exact:.4f}  char={character:.4f}  loss={losses[-1]:.4f}"
+                f"[c2] context={context_words:<3} (len {source_length:>3}) {name:<11} "
+                f"exact={exact:.4f}  char={character:.4f}  loss={losses[-1]:.4f}"
             )
 
-            if name == "attention" and source_length == exp["pad_lengths"][0] and weights is not None:
+            if name == "attention" and context_words == exp["context_words"][-1] and weights is not None:
                 example_weights = weights[:6].cpu().numpy()
                 example_pairs = test_pairs[:6]
 
@@ -244,9 +256,9 @@ def run(exp: Experiment) -> dict[str, float]:
         "accuracy_by_length",
         plotting.plot_curves(
             accuracy_by_length,
-            x=exp["pad_lengths"],
-            title="Exact-match accuracy vs. padded source length",
-            xlabel="source length",
+            x=source_lengths,
+            title="Exact-match accuracy vs. source length (filler words around the date)",
+            xlabel="source characters",
             ylabel="exact match",
             marker="o",
         ),
@@ -263,8 +275,9 @@ def run(exp: Experiment) -> dict[str, float]:
         ),
     )
 
-    for index, source_length in enumerate(exp["pad_lengths"]):
-        summary[f"attention_minus_bottleneck@{source_length}"] = (
+    for index, context_words in enumerate(exp["context_words"]):
+        summary[f"source_length@{context_words}"] = float(source_lengths[index])
+        summary[f"attention_minus_bottleneck@{context_words}"] = (
             accuracy_by_length["attention"][index] - accuracy_by_length["bottleneck"][index]
         )
     summary["attention/mean_exact"] = float(np.mean(accuracy_by_length["attention"]))

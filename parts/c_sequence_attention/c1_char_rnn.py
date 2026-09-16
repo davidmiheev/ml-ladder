@@ -9,8 +9,10 @@ path along which the state is *added to* rather than multiplied. That is the
 same trick as B4's residual connection, one year earlier and in time rather
 than depth.
 
-The measurement that separates them is not the loss — it is how far back a
-gradient still carries.
+The measurement that separates them is not the language-model loss — at a
+64-character context that turns out to be dominated by short-range structure —
+but how far back a gradient still carries, and a synthetic recall task built so
+that *only* long-range information can solve it.
 
 Run with ``ladder run C1`` (``--help`` for flags).
 """
@@ -150,6 +152,56 @@ def gradient_reach(model, ids, *, device) -> list[float]:
     return [float(value) for value in norms]
 
 
+def recall_probe(
+    CharLanguageModel, *, lengths, cell: str, seed: int, device, n_symbols: int = 8, steps: int = 120, hidden: int = 64
+):
+    """Train a fresh cell on the recall task at each length; return accuracies.
+
+    The label is the sequence's first symbol and nothing else carries signal,
+    so chance is 1/n_symbols and anything above it means gradient reached the
+    start of the sequence.
+    """
+    torch = vision.require_torch()
+    accuracies = []
+    for length in lengths:
+        torchkit.seed_torch(seed)
+        model = CharLanguageModel(n_symbols + 1, hidden, cell=cell, layers=1).to(device)
+        head = torch.nn.Linear(hidden, n_symbols).to(device)
+        optimizer = torch.optim.AdamW([*model.parameters(), *head.parameters()], lr=3e-3)
+        batch_rng = np.random.default_rng(seed)
+
+        for _ in range(steps):
+            sequences, labels = text.make_recall_task(128, length=length, n_symbols=n_symbols, rng=batch_rng)
+            ids = torch.from_numpy(sequences).to(device)
+            embedded = model.embedding(ids)
+            states = [cell_module.initial_state(len(ids), device) for cell_module in model.cells]
+            x = None
+            for step in range(length):
+                x = embedded[:, step]
+                for index, cell_module in enumerate(model.cells):
+                    x, states[index] = cell_module(x, states[index])
+            loss = torch.nn.functional.cross_entropy(head(x), torch.from_numpy(labels).to(device))
+            optimizer.zero_grad(set_to_none=True)
+            loss.backward()
+            torch.nn.utils.clip_grad_norm_([*model.parameters(), *head.parameters()], 1.0)
+            optimizer.step()
+
+        with torch.no_grad():
+            sequences, labels = text.make_recall_task(
+                512, length=length, n_symbols=n_symbols, rng=np.random.default_rng(seed + 1)
+            )
+            ids = torch.from_numpy(sequences).to(device)
+            embedded = model.embedding(ids)
+            states = [cell_module.initial_state(len(ids), device) for cell_module in model.cells]
+            for step in range(length):
+                x = embedded[:, step]
+                for index, cell_module in enumerate(model.cells):
+                    x, states[index] = cell_module(x, states[index])
+            accuracy = float((head(x).argmax(dim=1).cpu().numpy() == labels).mean())
+        accuracies.append(accuracy)
+    return accuracies
+
+
 @experiment(
     "c1_char_rnn",
     defaults={
@@ -163,6 +215,8 @@ def gradient_reach(model, ids, *, device) -> list[float]:
         "eval_every": 50,
         "eval_batches": 8,
         "sample_chars": 240,
+        "recall_lengths": [5, 15, 30, 60],
+        "recall_steps": 120,
     },
     description="Vanilla RNN vs LSTM as char-level language models, compared on loss and on gradient reach.",
 )
@@ -272,6 +326,30 @@ def run(exp: Experiment) -> dict[str, float]:
             f"(final step {norms[-1]:.3e}, ratio {relative:.2e}, horizon {horizon:.0f} steps)"
         )
 
+    # -- where the reach actually matters -----------------------------------
+    # Shakespeare at 64 characters does not need long-range memory. This task
+    # needs nothing else: the answer is the first symbol of the sequence.
+    recall: dict[str, list[float]] = {}
+    for cell in ("rnn", "lstm"):
+        accuracies = recall_probe(
+            CharLanguageModel,
+            lengths=exp["recall_lengths"],
+            cell=cell,
+            seed=exp.seed,
+            device=device,
+            steps=exp["recall_steps"],
+        )
+        recall[cell] = accuracies
+        for length, accuracy in zip(exp["recall_lengths"], accuracies, strict=True):
+            summary[f"recall/{cell}@{length}"] = accuracy
+        print(
+            f"[c1] recall {cell:<5} "
+            + "  ".join(
+                f"len{length}:{accuracy:.3f}"
+                for length, accuracy in zip(exp["recall_lengths"], accuracies, strict=True)
+            )
+        )
+
     for arm, model in models.items():
         sample = model.sample(tokenizer, length=exp["sample_chars"], device=device, prompt="\n")
         print(f"\n[c1] --- {arm} sample ---\n{sample}\n")
@@ -305,6 +383,20 @@ def run(exp: Experiment) -> dict[str, float]:
         ),
     )
 
+    exp.log_figure(
+        "recall_accuracy",
+        plotting.plot_curves(
+            recall,
+            x=exp["recall_lengths"],
+            title="Recall the first symbol (chance = 0.125)",
+            xlabel="sequence length",
+            ylabel="accuracy",
+            marker="o",
+        ),
+    )
+
+    longest = exp["recall_lengths"][-1]
+    summary["recall_lstm_minus_rnn_at_max"] = summary[f"recall/lstm@{longest}"] - summary[f"recall/rnn@{longest}"]
     summary["lstm_minus_rnn_bpc"] = summary["lstm/bits_per_char"] - summary["rnn/bits_per_char"]
     summary["reach_ratio_lstm_over_rnn"] = summary["lstm/gradient_reach_ratio"] / max(
         summary["rnn/gradient_reach_ratio"], 1e-30

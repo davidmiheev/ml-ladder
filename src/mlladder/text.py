@@ -95,6 +95,45 @@ MONTHS = (
     "December",
 )
 DATE_INPUT_ALPHABET = "0123456789 /.-,abcdefghijklmnopqrstuvwxyz"
+
+# Filler that surrounds the date when a rung asks for distractor context. The
+# words carry no information about the answer, so everything the decoder needs
+# still sits in one short span — but a fixed-size context vector now has to
+# carry it past all of this.
+FILLER_WORDS = (
+    "please",
+    "confirm",
+    "the",
+    "appointment",
+    "with",
+    "our",
+    "team",
+    "is",
+    "scheduled",
+    "for",
+    "and",
+    "will",
+    "be",
+    "held",
+    "at",
+    "office",
+    "kindly",
+    "note",
+    "that",
+    "we",
+    "have",
+    "moved",
+    "your",
+    "booking",
+    "to",
+    "thanks",
+    "regards",
+    "as",
+    "discussed",
+    "earlier",
+    "this",
+    "week",
+)
 DATE_OUTPUT_ALPHABET = "0123456789-"
 
 
@@ -104,12 +143,19 @@ class DatePair:
     target: str
 
 
-def make_date_pairs(n_samples: int, *, rng: int | np.random.Generator | None = None) -> list[DatePair]:
+def make_date_pairs(
+    n_samples: int, *, context_words: int = 0, rng: int | np.random.Generator | None = None
+) -> list[DatePair]:
     """Human-written dates to ISO-8601, in several formats.
 
     A translation task with an exact answer and a known alignment: every output
     character is a copy of some input span, so an attention map can be checked
     against the truth rather than admired.
+
+    ``context_words`` wraps the date in that many filler words, split randomly
+    before and after it. This is the knob that makes the encoder-decoder
+    bottleneck bite: padding costs a fixed vector nothing, but real tokens
+    between the date and the end of the sentence do.
     """
     generator = as_rng(rng)
     pairs: list[DatePair] = []
@@ -130,6 +176,11 @@ def make_date_pairs(n_samples: int, *, rng: int | np.random.Generator | None = N
             source = f"{name[:3]} {day} {year}"
         else:
             source = f"{day}.{month}.{year}"
+
+        if context_words > 0:
+            before = int(generator.integers(0, context_words + 1))
+            words = generator.choice(FILLER_WORDS, size=context_words, replace=True)
+            source = " ".join([*words[:before], source, *words[before:]])
         pairs.append(DatePair(source.lower(), f"{year:04d}-{month:02d}-{day:02d}"))
     return pairs
 
@@ -151,3 +202,26 @@ def encode_pairs(
         sources[row, : len(source)] = source_tokenizer.encode(source)
         targets[row, : len(pair.target)] = target_tokenizer.encode(pair.target)
     return sources, targets, source_tokenizer, target_tokenizer
+
+
+# -- the long-range recall probe for C1 -------------------------------------
+
+
+def make_recall_task(
+    n_samples: int, *, length: int, n_symbols: int = 8, rng: int | np.random.Generator | None = None
+) -> tuple[NDArray[np.int64], NDArray[np.int64]]:
+    """Sequences whose label is decided by a single symbol at the *start*.
+
+    ``[cue, noise, noise, ..., noise]`` with the label equal to the cue. Nothing
+    in the filler carries information, so a model must route gradient back
+    ``length - 1`` steps to learn anything at all — which turns C1's gradient
+    reach measurement into an accuracy a cell either gets or does not.
+
+    Returns ``(sequences, labels)`` with symbols ``1..n_symbols`` as cues and 0
+    as the filler alphabet's only symbol.
+    """
+    generator = as_rng(rng)
+    cues = generator.integers(1, n_symbols + 1, size=n_samples)
+    sequences = np.zeros((n_samples, length), dtype=np.int64)
+    sequences[:, 0] = cues
+    return sequences, (cues - 1).astype(np.int64)
