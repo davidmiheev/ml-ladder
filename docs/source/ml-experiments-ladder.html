@@ -103,7 +103,7 @@
   <header class="top">
     <div class="eyebrow"><span class="rung">M</span> experiments ladder</div>
     <h1>Broader ML — hands-on ladder</h1>
-    <p class="sub">Classical ML through generative and geometric deep learning, built from scratch before reaching for libraries. Each part carries a practical-lab reference; the last part bridges into ignite-catalog.</p>
+    <p class="sub">Classical ML through generative and geometric deep learning, plus a computer-vision and OCR track, built from scratch before reaching for libraries. Each part carries a practical-lab reference; part G bridges into ignite-catalog.</p>
   </header>
 
   <div class="progress-row">
@@ -207,6 +207,19 @@ const data = [
       { t: "Fit your own scaling-law curve (loss vs. params/data/compute) on a small model family" },
       { t: "Mixed-precision + gradient-accumulation training, profiled for throughput and memory" },
       { t: "Rust/Candle port of one transformer-block forward pass, as a comprehension exercise for [[ignite-catalog]]" },
+    ]
+  },
+  {
+    id: "H",
+    title: "Computer vision & OCR",
+    note: "follows C; independent of D\u2013G, so it can be taken straight after the ViT rung",
+    lab: { text: "open-mmlab/mmocr \u2014 detection and recognition reference implementations", url: "https://github.com/open-mmlab/mmocr" },
+    items: [
+      { t: "Object detection from scratch \u2014 IoU, non-max suppression and mAP implemented by hand", d: "a single-stage detector on a small dataset; the metrics matter more than the backbone" },
+      { t: "Semantic segmentation with a U-Net \u2014 skip connections, Dice vs cross-entropy loss" },
+      { t: "Text recognition with CRNN + CTC \u2014 synthetic text lines, greedy vs beam decoding, CER/WER", d: "CTC's alignment-free loss is the point: no per-character boxes needed" },
+      { t: "Attention-decoder OCR against CTC on the same data, with a pretrained model as the baseline", d: "TrOCR or EasyOCR as the reference; the comparison is decoder design, not dataset" },
+      { t: "Two-stage document pipeline \u2014 detect text regions, then recognize, with end-to-end error attributed to each stage" },
     ]
   },
 ];

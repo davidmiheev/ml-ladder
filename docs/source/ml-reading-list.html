@@ -120,7 +120,7 @@
   <header class="top">
     <div class="eyebrow"><span class="rung">M</span> reading list</div>
     <h1>Broader machine learning</h1>
-    <p class="sub">Statistical foundations through geometric deep learning and ML systems — the ground beneath the post-training and safety tracks. Nine sections, filterable by format.</p>
+    <p class="sub">Statistical foundations through geometric deep learning, ML systems and OCR — the ground beneath the post-training and safety tracks. Ten sections, filterable by format.</p>
   </header>
 
   <div class="anchors">
@@ -249,6 +249,27 @@ const data = [
       { t: "ZeRO: Memory Optimizations Toward Training Trillion Parameter Models", k: "paper", url: "https://arxiv.org/abs/1910.02054" },
       { t: "Megatron-LM: Training Multi-Billion Parameter Language Models Using Model Parallelism", k: "paper", url: "https://arxiv.org/abs/1909.08053" },
       { t: "Mixed Precision Training", k: "paper", url: "https://arxiv.org/abs/1710.03740" },
+    ]
+  },
+  {
+    title: "Computer vision & OCR",
+    note: "ladder part H",
+    items: [
+      { t: "Faster R-CNN: Towards Real-Time Object Detection", k: "paper", d: "Ren et al. \u2014 the two-stage baseline everything is measured against.", url: "https://arxiv.org/abs/1506.01497" },
+      { t: "You Only Look Once: Unified, Real-Time Object Detection", k: "paper", d: "Redmon et al. \u2014 detection as a single regression problem.", url: "https://arxiv.org/abs/1506.02640" },
+      { t: "Focal Loss for Dense Object Detection", k: "paper", d: "RetinaNet \u2014 why one-stage detectors drown in background.", url: "https://arxiv.org/abs/1708.02002" },
+      { t: "End-to-End Object Detection with Transformers", k: "paper", d: "DETR \u2014 set prediction, no anchors and no NMS.", url: "https://arxiv.org/abs/2005.12872" },
+      { t: "U-Net: Convolutional Networks for Biomedical Image Segmentation", k: "paper", d: "Still the default for small datasets.", url: "https://arxiv.org/abs/1505.04597" },
+      { t: "Mask R-CNN", k: "paper", d: "He et al. \u2014 instance segmentation as detection plus a mask head.", url: "https://arxiv.org/abs/1703.06870" },
+      { t: "Segment Anything", k: "paper", d: "Kirillov et al. \u2014 promptable segmentation, and what a 1B-mask dataset buys.", url: "https://arxiv.org/abs/2304.02643" },
+      { t: "Connectionist Temporal Classification", k: "paper", d: "Graves et al., 2006 \u2014 the alignment-free loss behind CRNN.", url: "https://www.cs.toronto.edu/~graves/icml_2006.pdf" },
+      { t: "An End-to-End Trainable Neural Network for Image-based Sequence Recognition", k: "paper", d: "CRNN \u2014 the CNN+RNN+CTC recipe.", url: "https://arxiv.org/abs/1507.05717" },
+      { t: "EAST: An Efficient and Accurate Scene Text Detector", k: "paper", d: "Rotated boxes for text.", url: "https://arxiv.org/abs/1704.03155" },
+      { t: "Character Region Awareness for Text Detection", k: "paper", d: "CRAFT \u2014 per-character affinity instead of word boxes.", url: "https://arxiv.org/abs/1904.01941" },
+      { t: "What Is Wrong With Scene Text Recognition Model Comparisons?", k: "paper", d: "Baek et al. \u2014 read before trusting any OCR leaderboard.", url: "https://arxiv.org/abs/1904.01906" },
+      { t: "TrOCR: Transformer-based Optical Character Recognition", k: "paper", d: "Li et al. \u2014 the attention alternative to CTC.", url: "https://arxiv.org/abs/2109.10282" },
+      { t: "PP-OCR: A Practical Ultra Lightweight OCR System", k: "paper", d: "What a practical pipeline actually contains.", url: "https://arxiv.org/abs/2009.09941" },
+      { t: "OCR-free Document Understanding Transformer", k: "paper", d: "Donut \u2014 skipping recognition entirely.", url: "https://arxiv.org/abs/2111.15664" },
     ]
   },
   {
