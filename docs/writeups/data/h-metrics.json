@@ -1,0 +1,1982 @@
+{
+  "part": "H",
+  "title": "Computer vision & OCR",
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "reference_seed": 0,
+  "swept_rungs": [
+    "H1",
+    "H2",
+    "H3",
+    "H4",
+    "H5"
+  ],
+  "rungs": {
+    "H1": {
+      "title": "Object detection from scratch \u2014 IoU, non-max suppression and mAP implemented by hand",
+      "metrics": {
+        "AP@0.5/ellipse": {
+          "reference": 0.9682412134073246,
+          "median": 0.9682412134073246,
+          "min": 0.9635747586241565,
+          "max": 0.9771131289099668,
+          "n_seeds": 3
+        },
+        "AP@0.5/rectangle": {
+          "reference": 0.9649372912426739,
+          "median": 0.9638990753775647,
+          "min": 0.9430501294478517,
+          "max": 0.9649372912426739,
+          "n_seeds": 3
+        },
+        "AP@0.5/triangle": {
+          "reference": 0.9310862019391035,
+          "median": 0.9467937880568192,
+          "min": 0.9310862019391035,
+          "max": 0.9634793318315773,
+          "n_seeds": 3
+        },
+        "AP@0.75/ellipse": {
+          "reference": 0.6837945856553218,
+          "median": 0.6981289114593128,
+          "min": 0.6837945856553218,
+          "max": 0.7316966435820311,
+          "n_seeds": 3
+        },
+        "AP@0.75/rectangle": {
+          "reference": 0.59983409128188,
+          "median": 0.6286788675660817,
+          "min": 0.59983409128188,
+          "max": 0.6505702732952346,
+          "n_seeds": 3
+        },
+        "AP@0.75/triangle": {
+          "reference": 0.667628071705168,
+          "median": 0.5785615098451896,
+          "min": 0.5685837336090522,
+          "max": 0.667628071705168,
+          "n_seeds": 3
+        },
+        "best/mAP@0.5": {
+          "reference": 0.9547549021963674,
+          "median": 0.9547549021963674,
+          "min": 0.9511395587096092,
+          "max": 0.9681638453730362,
+          "n_seeds": 3
+        },
+        "best/nms_threshold": {
+          "reference": 0.5,
+          "median": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "n_seeds": 3
+        },
+        "boxes_per_image/nms@0.1": {
+          "reference": 1.905,
+          "median": 1.905,
+          "min": 1.8733333333333333,
+          "max": 1.955,
+          "n_seeds": 3
+        },
+        "boxes_per_image/nms@0.3": {
+          "reference": 1.9933333333333334,
+          "median": 1.9933333333333334,
+          "min": 1.9716666666666667,
+          "max": 2.0416666666666665,
+          "n_seeds": 3
+        },
+        "boxes_per_image/nms@0.5": {
+          "reference": 2.1883333333333335,
+          "median": 2.195,
+          "min": 2.1883333333333335,
+          "max": 2.3783333333333334,
+          "n_seeds": 3
+        },
+        "boxes_per_image/nms@0.7": {
+          "reference": 3.33,
+          "median": 3.3833333333333333,
+          "min": 3.33,
+          "max": 3.6816666666666666,
+          "n_seeds": 3
+        },
+        "boxes_per_image/nms@0.9": {
+          "reference": 4.281666666666666,
+          "median": 4.295,
+          "min": 4.281666666666666,
+          "max": 4.593333333333334,
+          "n_seeds": 3
+        },
+        "boxes_per_image/no_nms": {
+          "reference": 4.283333333333333,
+          "median": 4.295,
+          "min": 4.283333333333333,
+          "max": 4.593333333333334,
+          "n_seeds": 3
+        },
+        "cell_collision_rate": {
+          "reference": 0.001666944490748458,
+          "median": 0.0008279516476237788,
+          "min": 0.0,
+          "max": 0.001666944490748458,
+          "n_seeds": 3
+        },
+        "localization_penalty": {
+          "reference": 0.3043359859822441,
+          "median": 0.3160164624194145,
+          "min": 0.3043359859822441,
+          "max": 0.3178802952109303,
+          "n_seeds": 3
+        },
+        "mAP@0.5/nms@0.1": {
+          "reference": 0.9223709534274659,
+          "median": 0.9226782375903806,
+          "min": 0.9223709534274659,
+          "max": 0.9369039340294316,
+          "n_seeds": 3
+        },
+        "mAP@0.5/nms@0.3": {
+          "reference": 0.9534219896030022,
+          "median": 0.9534219896030022,
+          "min": 0.943716331663545,
+          "max": 0.9648476154378572,
+          "n_seeds": 3
+        },
+        "mAP@0.5/nms@0.5": {
+          "reference": 0.9547549021963674,
+          "median": 0.9547549021963674,
+          "min": 0.9511395587096092,
+          "max": 0.9681638453730362,
+          "n_seeds": 3
+        },
+        "mAP@0.5/nms@0.7": {
+          "reference": 0.9081402471215859,
+          "median": 0.9081402471215859,
+          "min": 0.8845262345526729,
+          "max": 0.9084268411414479,
+          "n_seeds": 3
+        },
+        "mAP@0.5/nms@0.9": {
+          "reference": 0.8468785753188862,
+          "median": 0.8468785753188862,
+          "min": 0.8342565932514893,
+          "max": 0.8589232516102053,
+          "n_seeds": 3
+        },
+        "mAP@0.5/no_nms": {
+          "reference": 0.8468666076880664,
+          "median": 0.8468666076880664,
+          "min": 0.8342565932514893,
+          "max": 0.8589232516102053,
+          "n_seeds": 3
+        },
+        "mAP@0.75/nms@0.1": {
+          "reference": 0.6339084735712727,
+          "median": 0.6339084735712727,
+          "min": 0.6239080636551053,
+          "max": 0.6406806723262102,
+          "n_seeds": 3
+        },
+        "mAP@0.75/nms@0.3": {
+          "reference": 0.648976878936078,
+          "median": 0.648976878936078,
+          "min": 0.629159513112182,
+          "max": 0.651979607019142,
+          "n_seeds": 3
+        },
+        "mAP@0.75/nms@0.5": {
+          "reference": 0.6504189162141233,
+          "median": 0.6502835501621059,
+          "min": 0.6351230962901947,
+          "max": 0.6504189162141233,
+          "n_seeds": 3
+        },
+        "mAP@0.75/nms@0.7": {
+          "reference": 0.6741403116396363,
+          "median": 0.672393826880057,
+          "min": 0.6438971498581793,
+          "max": 0.6741403116396363,
+          "n_seeds": 3
+        },
+        "mAP@0.75/nms@0.9": {
+          "reference": 0.6523233848477643,
+          "median": 0.6523233848477643,
+          "min": 0.634192388724296,
+          "max": 0.6589748302413426,
+          "n_seeds": 3
+        },
+        "mAP@0.75/no_nms": {
+          "reference": 0.6523127056784089,
+          "median": 0.6523127056784089,
+          "min": 0.634192388724296,
+          "max": 0.6589748302413426,
+          "n_seeds": 3
+        },
+        "matched_iou/above_0.5": {
+          "reference": 0.9615705931495405,
+          "median": 0.9642560266001663,
+          "min": 0.9615705931495405,
+          "max": 0.9751499571550986,
+          "n_seeds": 3
+        },
+        "matched_iou/above_0.75": {
+          "reference": 0.7435254803675856,
+          "median": 0.743142144638404,
+          "min": 0.7369323050556984,
+          "max": 0.7435254803675856,
+          "n_seeds": 3
+        },
+        "matched_iou/above_0.9": {
+          "reference": 0.14452798663324978,
+          "median": 0.10882604970008569,
+          "min": 0.09808811305070657,
+          "max": 0.14452798663324978,
+          "n_seeds": 3
+        },
+        "matched_iou/mean": {
+          "reference": 0.7927499922270962,
+          "median": 0.792012111165528,
+          "min": 0.7852202443032837,
+          "max": 0.7927499922270962,
+          "n_seeds": 3
+        },
+        "matched_iou/median": {
+          "reference": 0.8281483054161072,
+          "median": 0.8167805671691895,
+          "min": 0.8079911470413208,
+          "max": 0.8281483054161072,
+          "n_seeds": 3
+        },
+        "nms_gain@0.5": {
+          "reference": 0.10788829450830095,
+          "median": 0.1092405937628309,
+          "min": 0.10788829450830095,
+          "max": 0.11688296545811994,
+          "n_seeds": 3
+        },
+        "nms_spread@0.5": {
+          "reference": 0.10787632687748117,
+          "median": 0.1092405937628309,
+          "min": 0.10787632687748117,
+          "max": 0.11688296545811994,
+          "n_seeds": 3
+        },
+        "nms_spread@0.75": {
+          "reference": 0.04023183806836361,
+          "median": 0.03171315455384682,
+          "min": 0.019989086203073936,
+          "max": 0.04023183806836361,
+          "n_seeds": 3
+        },
+        "train_loss": {
+          "reference": 0.08330242581506993,
+          "median": 0.0806371974659727,
+          "min": 0.07347937784296402,
+          "max": 0.08330242581506993,
+          "n_seeds": 3
+        },
+        "width_error_px/abs": {
+          "reference": 1.960599240404223,
+          "median": 2.1239414540384454,
+          "min": 1.960599240404223,
+          "max": 2.176919402683915,
+          "n_seeds": 3
+        },
+        "width_error_px/bias": {
+          "reference": -0.8532467804656192,
+          "median": 0.9520798388019378,
+          "min": -0.8532467804656192,
+          "max": 1.1301775754979255,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 14.053
+    },
+    "H2": {
+      "title": "Semantic segmentation with a U-Net \u2014 skip connections, Dice vs cross-entropy loss",
+      "metrics": {
+        "best/loss_is_dice": {
+          "reference": 0.0,
+          "median": 1.0,
+          "min": 0.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "best/mIoU_foreground": {
+          "reference": 0.9589588120342384,
+          "median": 0.9589588120342384,
+          "min": 0.9572668671646504,
+          "max": 0.9616271039021772,
+          "n_seeds": 3
+        },
+        "loss_spread/mIoU_foreground": {
+          "reference": 0.038786657427074434,
+          "median": 0.012143210488671397,
+          "min": 0.006237594199984264,
+          "max": 0.038786657427074434,
+          "n_seeds": 3
+        },
+        "no_skips/cross_entropy/IoU/background": {
+          "reference": 0.9972388302951873,
+          "median": 0.9972388302951873,
+          "min": 0.9971159344052329,
+          "max": 0.9976292003490344,
+          "n_seeds": 3
+        },
+        "no_skips/cross_entropy/IoU/ellipse": {
+          "reference": 0.8971105180822674,
+          "median": 0.9349139337373817,
+          "min": 0.8971105180822674,
+          "max": 0.9375194009002018,
+          "n_seeds": 3
+        },
+        "no_skips/cross_entropy/IoU/rectangle": {
+          "reference": 0.9551865799383773,
+          "median": 0.9564401267854937,
+          "min": 0.9551865799383773,
+          "max": 0.962215758478887,
+          "n_seeds": 3
+        },
+        "no_skips/cross_entropy/IoU/triangle": {
+          "reference": 0.8694886480826286,
+          "median": 0.9163116905468783,
+          "min": 0.8694886480826286,
+          "max": 0.9330331242920684,
+          "n_seeds": 3
+        },
+        "no_skips/cross_entropy/mDice_foreground": {
+          "reference": 0.951011209027209,
+          "median": 0.9678116114132421,
+          "min": 0.951011209027209,
+          "max": 0.9702813297399467,
+          "n_seeds": 3
+        },
+        "no_skips/cross_entropy/mIoU": {
+          "reference": 0.9297561440996152,
+          "median": 0.952639329292095,
+          "min": 0.9297561440996152,
+          "max": 0.9561554630816995,
+          "n_seeds": 3
+        },
+        "no_skips/cross_entropy/mIoU_boundary": {
+          "reference": 0.8573526193141857,
+          "median": 0.8921249827978371,
+          "min": 0.8573526193141857,
+          "max": 0.8987508608006533,
+          "n_seeds": 3
+        },
+        "no_skips/cross_entropy/mIoU_foreground": {
+          "reference": 0.9072619153677577,
+          "median": 0.9378137942543824,
+          "min": 0.9072619153677577,
+          "max": 0.942330883992588,
+          "n_seeds": 3
+        },
+        "no_skips/cross_entropy/parameters": {
+          "reference": 59812.0,
+          "median": 59812.0,
+          "min": 59812.0,
+          "max": 59812.0,
+          "n_seeds": 3
+        },
+        "no_skips/cross_entropy/pixel_accuracy": {
+          "reference": 0.9924873046875,
+          "median": 0.99444921875,
+          "min": 0.9924873046875,
+          "max": 0.9949326171875,
+          "n_seeds": 3
+        },
+        "no_skips/cross_entropy/pixel_accuracy_boundary": {
+          "reference": 0.9554124380902898,
+          "median": 0.9622692956594352,
+          "min": 0.9554124380902898,
+          "max": 0.9652805707590886,
+          "n_seeds": 3
+        },
+        "pixel_share/background": {
+          "reference": 0.85917236328125,
+          "median": 0.8559334716796875,
+          "min": 0.8549891357421875,
+          "max": 0.85917236328125,
+          "n_seeds": 3
+        },
+        "pixel_share/ellipse": {
+          "reference": 0.0464783935546875,
+          "median": 0.047826416015625,
+          "min": 0.0464783935546875,
+          "max": 0.0494071044921875,
+          "n_seeds": 3
+        },
+        "pixel_share/rectangle": {
+          "reference": 0.0629140625,
+          "median": 0.0629140625,
+          "min": 0.062608154296875,
+          "max": 0.0639208984375,
+          "n_seeds": 3
+        },
+        "pixel_share/triangle": {
+          "reference": 0.0314351806640625,
+          "median": 0.031682861328125,
+          "min": 0.0314351806640625,
+          "max": 0.0336319580078125,
+          "n_seeds": 3
+        },
+        "skip_gain/boundary_over_whole": {
+          "reference": 0.016599135382394214,
+          "median": 0.018395971101354047,
+          "min": 0.016599135382394214,
+          "max": 0.022795497419109134,
+          "n_seeds": 3
+        },
+        "skip_gain/mIoU_boundary": {
+          "reference": 0.029509374621800477,
+          "median": 0.029948506840026923,
+          "min": 0.029509374621800477,
+          "max": 0.03161144981163777,
+          "n_seeds": 3
+        },
+        "skip_gain/mIoU_foreground": {
+          "reference": 0.012910239239406263,
+          "median": 0.012910239239406263,
+          "min": 0.007153009420917789,
+          "max": 0.013215478710283723,
+          "n_seeds": 3
+        },
+        "skip_gain/pixel_accuracy": {
+          "reference": 0.0019096679687500284,
+          "median": 0.0019096679687500284,
+          "min": 0.0013808593749999876,
+          "max": 0.002040039062499943,
+          "n_seeds": 3
+        },
+        "skips/cross_entropy/IoU/background": {
+          "reference": 0.9996762860598102,
+          "median": 0.9998653529967196,
+          "min": 0.9996762860598102,
+          "max": 0.9998712813172556,
+          "n_seeds": 3
+        },
+        "skips/cross_entropy/IoU/ellipse": {
+          "reference": 0.9144929959499127,
+          "median": 0.9450028503705482,
+          "min": 0.9144929959499127,
+          "max": 0.9493305381405376,
+          "n_seeds": 3
+        },
+        "skips/cross_entropy/IoU/rectangle": {
+          "reference": 0.9581921905138394,
+          "median": 0.9581921905138394,
+          "min": 0.953095394924089,
+          "max": 0.9639784830708182,
+          "n_seeds": 3
+        },
+        "skips/cross_entropy/IoU/triangle": {
+          "reference": 0.8878312773577397,
+          "median": 0.9397787976826424,
+          "min": 0.8878312773577397,
+          "max": 0.9503534349458803,
+          "n_seeds": 3
+        },
+        "skips/cross_entropy/mDice_foreground": {
+          "reference": 0.9581900270887327,
+          "median": 0.9740843956352753,
+          "min": 0.9581900270887327,
+          "max": 0.9748734148389405,
+          "n_seeds": 3
+        },
+        "skips/cross_entropy/mIoU": {
+          "reference": 0.9400481874703255,
+          "median": 0.9620792583093093,
+          "min": 0.9400481874703255,
+          "max": 0.9632397750528134,
+          "n_seeds": 3
+        },
+        "skips/cross_entropy/mIoU_boundary": {
+          "reference": 0.8868619939359862,
+          "median": 0.9237364326094749,
+          "min": 0.8868619939359862,
+          "max": 0.9286993676406802,
+          "n_seeds": 3
+        },
+        "skips/cross_entropy/mIoU_foreground": {
+          "reference": 0.920172154607164,
+          "median": 0.9494838934135058,
+          "min": 0.920172154607164,
+          "max": 0.9510292729646661,
+          "n_seeds": 3
+        },
+        "skips/cross_entropy/parameters": {
+          "reference": 66292.0,
+          "median": 66292.0,
+          "min": 66292.0,
+          "max": 66292.0,
+          "n_seeds": 3
+        },
+        "skips/cross_entropy/pixel_accuracy": {
+          "reference": 0.99439697265625,
+          "median": 0.9963134765625,
+          "min": 0.99439697265625,
+          "max": 0.9964892578125,
+          "n_seeds": 3
+        },
+        "skips/cross_entropy/pixel_accuracy_boundary": {
+          "reference": 0.9713727823543707,
+          "median": 0.980631912609281,
+          "min": 0.9713727823543707,
+          "max": 0.9816566702222533,
+          "n_seeds": 3
+        },
+        "skips/dice/IoU/background": {
+          "reference": 0.9997646236188142,
+          "median": 0.9998255269515096,
+          "min": 0.9997646236188142,
+          "max": 0.9999187529082766,
+          "n_seeds": 3
+        },
+        "skips/dice/IoU/ellipse": {
+          "reference": 0.9314868667476025,
+          "median": 0.9551468894297706,
+          "min": 0.9314868667476025,
+          "max": 0.962307025324656,
+          "n_seeds": 3
+        },
+        "skips/dice/IoU/rectangle": {
+          "reference": 0.9486884285271104,
+          "median": 0.9618496728794845,
+          "min": 0.9486884285271104,
+          "max": 0.9662614025289628,
+          "n_seeds": 3
+        },
+        "skips/dice/IoU/triangle": {
+          "reference": 0.9583143615267463,
+          "median": 0.9583143615267463,
+          "min": 0.950392309535218,
+          "max": 0.9607246135023912,
+          "n_seeds": 3
+        },
+        "skips/dice/mDice_foreground": {
+          "reference": 0.9723034893217269,
+          "median": 0.9781551590111607,
+          "min": 0.9723034893217269,
+          "max": 0.9804381139290671,
+          "n_seeds": 3
+        },
+        "skips/dice/mIoU": {
+          "reference": 0.9595635701050684,
+          "median": 0.9679065321113651,
+          "min": 0.9595635701050684,
+          "max": 0.971200016153702,
+          "n_seeds": 3
+        },
+        "skips/dice/mIoU_boundary": {
+          "reference": 0.9183349748442273,
+          "median": 0.9324554911539855,
+          "min": 0.9183349748442273,
+          "max": 0.9396913858611092,
+          "n_seeds": 3
+        },
+        "skips/dice/mIoU_foreground": {
+          "reference": 0.9461632189338198,
+          "median": 0.9572668671646504,
+          "min": 0.9461632189338198,
+          "max": 0.9616271039021772,
+          "n_seeds": 3
+        },
+        "skips/dice/parameters": {
+          "reference": 66292.0,
+          "median": 66292.0,
+          "min": 66292.0,
+          "max": 66292.0,
+          "n_seeds": 3
+        },
+        "skips/dice/pixel_accuracy": {
+          "reference": 0.9956572265625,
+          "median": 0.996873046875,
+          "min": 0.9956572265625,
+          "max": 0.9972216796875,
+          "n_seeds": 3
+        },
+        "skips/dice/pixel_accuracy_boundary": {
+          "reference": 0.9785421572653297,
+          "median": 0.9826641558308765,
+          "min": 0.9785421572653297,
+          "max": 0.9845550562190708,
+          "n_seeds": 3
+        },
+        "skips/sum/IoU/background": {
+          "reference": 0.9998599217858365,
+          "median": 0.9998599217858365,
+          "min": 0.9997168255399336,
+          "max": 0.9999113674133204,
+          "n_seeds": 3
+        },
+        "skips/sum/IoU/ellipse": {
+          "reference": 0.9565798458686957,
+          "median": 0.9546169154228856,
+          "min": 0.9525815597172863,
+          "max": 0.9565798458686957,
+          "n_seeds": 3
+        },
+        "skips/sum/IoU/rectangle": {
+          "reference": 0.9627972928540114,
+          "median": 0.9627972928540114,
+          "min": 0.9581745309695345,
+          "max": 0.9679401993355482,
+          "n_seeds": 3
+        },
+        "skips/sum/IoU/triangle": {
+          "reference": 0.9574992973800082,
+          "median": 0.9501777888034401,
+          "min": 0.94917213880201,
+          "max": 0.9574992973800082,
+          "n_seeds": 3
+        },
+        "skips/sum/mDice_foreground": {
+          "reference": 0.9790474934676316,
+          "median": 0.9781379705482006,
+          "min": 0.9762693534965007,
+          "max": 0.9790474934676316,
+          "n_seeds": 3
+        },
+        "skips/sum/mIoU": {
+          "reference": 0.9691840894721379,
+          "median": 0.9678615197750944,
+          "min": 0.9652113117258952,
+          "max": 0.9691840894721379,
+          "n_seeds": 3
+        },
+        "skips/sum/mIoU_boundary": {
+          "reference": 0.9354434722445967,
+          "median": 0.9326939220791206,
+          "min": 0.9310734833314669,
+          "max": 0.9354434722445967,
+          "n_seeds": 3
+        },
+        "skips/sum/mIoU_foreground": {
+          "reference": 0.9589588120342384,
+          "median": 0.957243084520148,
+          "min": 0.9536446264967536,
+          "max": 0.9589588120342384,
+          "n_seeds": 3
+        },
+        "skips/sum/parameters": {
+          "reference": 66292.0,
+          "median": 66292.0,
+          "min": 66292.0,
+          "max": 66292.0,
+          "n_seeds": 3
+        },
+        "skips/sum/pixel_accuracy": {
+          "reference": 0.99686328125,
+          "median": 0.9968447265625,
+          "min": 0.996673828125,
+          "max": 0.99686328125,
+          "n_seeds": 3
+        },
+        "skips/sum/pixel_accuracy_boundary": {
+          "reference": 0.9833315175945092,
+          "median": 0.9828064070505534,
+          "min": 0.9818930111283424,
+          "max": 0.9833315175945092,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 42.227
+    },
+    "H3": {
+      "title": "Text recognition with CRNN + CTC \u2014 synthetic text lines, greedy vs beam decoding, CER/WER",
+      "metrics": {
+        "beam_gain/cer": {
+          "reference": 0.00017642907551164433,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.00017642907551164433,
+          "n_seeds": 3
+        },
+        "beam_gain/wer": {
+          "reference": 0.0008361204013377926,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0008361204013377926,
+          "n_seeds": 3
+        },
+        "columns": {
+          "reference": 32.0,
+          "median": 32.0,
+          "min": 32.0,
+          "max": 32.0,
+          "n_seeds": 3
+        },
+        "font_gap/cer": {
+          "reference": 0.20429180746797443,
+          "median": 0.1635614475098531,
+          "min": 0.1509737359299625,
+          "max": 0.20429180746797443,
+          "n_seeds": 3
+        },
+        "font_gap/wer": {
+          "reference": 0.39649136520734113,
+          "median": 0.37446808510638296,
+          "min": 0.35404255319148936,
+          "max": 0.39649136520734113,
+          "n_seeds": 3
+        },
+        "held_out/beam1/cer": {
+          "reference": 0.20464466561899772,
+          "median": 0.1635614475098531,
+          "min": 0.1509737359299625,
+          "max": 0.20464466561899772,
+          "n_seeds": 3
+        },
+        "held_out/beam1/exact": {
+          "reference": 0.61375,
+          "median": 0.6325,
+          "min": 0.61375,
+          "max": 0.63875,
+          "n_seeds": 3
+        },
+        "held_out/beam1/wer": {
+          "reference": 0.3981636060100167,
+          "median": 0.37446808510638296,
+          "min": 0.35404255319148936,
+          "max": 0.3981636060100167,
+          "n_seeds": 3
+        },
+        "held_out/beam15/cer": {
+          "reference": 0.2032477737035097,
+          "median": 0.1621282694374776,
+          "min": 0.14990173307128818,
+          "max": 0.2032477737035097,
+          "n_seeds": 3
+        },
+        "held_out/beam15/exact": {
+          "reference": 0.6175,
+          "median": 0.635,
+          "min": 0.6175,
+          "max": 0.63875,
+          "n_seeds": 3
+        },
+        "held_out/beam15/wer": {
+          "reference": 0.39565943238731216,
+          "median": 0.3727659574468085,
+          "min": 0.35404255319148936,
+          "max": 0.39565943238731216,
+          "n_seeds": 3
+        },
+        "held_out/beam5/cer": {
+          "reference": 0.2034223851929457,
+          "median": 0.16266571121461842,
+          "min": 0.15008040021440058,
+          "max": 0.2034223851929457,
+          "n_seeds": 3
+        },
+        "held_out/beam5/exact": {
+          "reference": 0.6175,
+          "median": 0.635,
+          "min": 0.6175,
+          "max": 0.63875,
+          "n_seeds": 3
+        },
+        "held_out/beam5/wer": {
+          "reference": 0.39565943238731216,
+          "median": 0.37361702127659574,
+          "min": 0.35404255319148936,
+          "max": 0.39565943238731216,
+          "n_seeds": 3
+        },
+        "held_out/font/DejaVuSansMono-Oblique/cer": {
+          "reference": 0.0037553648068669528,
+          "median": 0.0037553648068669528,
+          "min": 0.002061855670103093,
+          "max": 0.0062535531552018195,
+          "n_seeds": 3
+        },
+        "held_out/font/DejaVuSerif-Italic/cer": {
+          "reference": 0.003932584269662922,
+          "median": 0.005170630816959669,
+          "min": 0.003932584269662922,
+          "max": 0.012075905692926969,
+          "n_seeds": 3
+        },
+        "held_out/font/cmr10/cer": {
+          "reference": 0.5559289486317811,
+          "median": 0.4666316342616921,
+          "min": 0.4327731092436975,
+          "max": 0.5559289486317811,
+          "n_seeds": 3
+        },
+        "held_out/greedy/cer": {
+          "reference": 0.20464466561899772,
+          "median": 0.1635614475098531,
+          "min": 0.1509737359299625,
+          "max": 0.20464466561899772,
+          "n_seeds": 3
+        },
+        "held_out/greedy/exact": {
+          "reference": 0.61375,
+          "median": 0.6325,
+          "min": 0.61375,
+          "max": 0.63875,
+          "n_seeds": 3
+        },
+        "held_out/greedy/wer": {
+          "reference": 0.3981636060100167,
+          "median": 0.37446808510638296,
+          "min": 0.35404255319148936,
+          "max": 0.3981636060100167,
+          "n_seeds": 3
+        },
+        "seen/beam1/cer": {
+          "reference": 0.00035285815102328866,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.00035285815102328866,
+          "n_seeds": 3
+        },
+        "seen/beam1/exact": {
+          "reference": 0.9975,
+          "median": 1.0,
+          "min": 0.9975,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "seen/beam1/wer": {
+          "reference": 0.0016722408026755853,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0016722408026755853,
+          "n_seeds": 3
+        },
+        "seen/beam15/cer": {
+          "reference": 0.00017642907551164433,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.00017642907551164433,
+          "n_seeds": 3
+        },
+        "seen/beam15/exact": {
+          "reference": 0.99875,
+          "median": 1.0,
+          "min": 0.99875,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "seen/beam15/wer": {
+          "reference": 0.0008361204013377926,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0008361204013377926,
+          "n_seeds": 3
+        },
+        "seen/beam5/cer": {
+          "reference": 0.00017642907551164433,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.00017642907551164433,
+          "n_seeds": 3
+        },
+        "seen/beam5/exact": {
+          "reference": 0.99875,
+          "median": 1.0,
+          "min": 0.99875,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "seen/beam5/wer": {
+          "reference": 0.0008361204013377926,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0008361204013377926,
+          "n_seeds": 3
+        },
+        "seen/font/DejaVuSans-Bold/cer": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "seen/font/DejaVuSans-Oblique/cer": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "seen/font/DejaVuSans/cer": {
+          "reference": 0.001049317943336831,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.001049317943336831,
+          "n_seeds": 3
+        },
+        "seen/font/DejaVuSansMono/cer": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "seen/font/DejaVuSerif-Bold/cer": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "seen/font/DejaVuSerif/cer": {
+          "reference": 0.0011074197120708748,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0011074197120708748,
+          "n_seeds": 3
+        },
+        "seen/greedy/cer": {
+          "reference": 0.00035285815102328866,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.00035285815102328866,
+          "n_seeds": 3
+        },
+        "seen/greedy/exact": {
+          "reference": 0.9975,
+          "median": 1.0,
+          "min": 0.9975,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "seen/greedy/wer": {
+          "reference": 0.0016722408026755853,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0016722408026755853,
+          "n_seeds": 3
+        },
+        "seen/wer_over_cer": {
+          "reference": 4.739130434782608,
+          "median": 4.739130434782608,
+          "min": 4.739130434782608,
+          "max": 4.739130434782608,
+          "n_seeds": 1
+        },
+        "train_loss": {
+          "reference": 0.0013592112834188849,
+          "median": 0.0013592112834188849,
+          "min": 0.0012777672171533265,
+          "max": 0.001385044826670213,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 115.691
+    },
+    "H4": {
+      "title": "Attention-decoder OCR against CTC on the same data, with a pretrained model as the baseline",
+      "metrics": {
+        "2word_wide/attention/cer": {
+          "reference": 0.05997458703939009,
+          "median": 0.13930098063867236,
+          "min": 0.05997458703939009,
+          "max": 0.17207298530157122,
+          "n_seeds": 3
+        },
+        "2word_wide/attention/empty_rate": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "2word_wide/attention/exact": {
+          "reference": 0.875,
+          "median": 0.7125,
+          "min": 0.6525,
+          "max": 0.875,
+          "n_seeds": 3
+        },
+        "2word_wide/attention/length_abs": {
+          "reference": 0.58,
+          "median": 1.3175,
+          "min": 0.58,
+          "max": 1.645,
+          "n_seeds": 3
+        },
+        "2word_wide/attention/length_bias": {
+          "reference": -0.58,
+          "median": -1.3125,
+          "min": -1.645,
+          "max": -0.58,
+          "n_seeds": 3
+        },
+        "2word_wide/attention/overlong_rate": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "2word_wide/attention/seconds": {
+          "reference": 0.13533388200005447,
+          "median": 0.10276685300004829,
+          "min": 0.0976987530000315,
+          "max": 0.13533388200005447,
+          "n_seeds": 3
+        },
+        "2word_wide/attention/wer": {
+          "reference": 0.0625,
+          "median": 0.14625,
+          "min": 0.0625,
+          "max": 0.17375,
+          "n_seeds": 3
+        },
+        "2word_wide/ctc/cer": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "2word_wide/ctc/empty_rate": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "2word_wide/ctc/exact": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "2word_wide/ctc/length_abs": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "2word_wide/ctc/length_bias": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "2word_wide/ctc/overlong_rate": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "2word_wide/ctc/seconds": {
+          "reference": 0.034353511999938746,
+          "median": 0.029796912999927372,
+          "min": 0.028536926000015228,
+          "max": 0.034353511999938746,
+          "n_seeds": 3
+        },
+        "2word_wide/ctc/wer": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "3word_wide/attention/cer": {
+          "reference": 0.3593392214589467,
+          "median": 0.35952848722986247,
+          "min": 0.3593392214589467,
+          "max": 0.36047650130548303,
+          "n_seeds": 3
+        },
+        "3word_wide/attention/empty_rate": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "3word_wide/attention/exact": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "3word_wide/attention/length_abs": {
+          "reference": 5.4375,
+          "median": 5.4375,
+          "min": 5.3825,
+          "max": 5.465,
+          "n_seeds": 3
+        },
+        "3word_wide/attention/length_bias": {
+          "reference": -5.4375,
+          "median": -5.4375,
+          "min": -5.465,
+          "max": -5.3825,
+          "n_seeds": 3
+        },
+        "3word_wide/attention/overlong_rate": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "3word_wide/attention/seconds": {
+          "reference": 0.09269574700010708,
+          "median": 0.09543987199992898,
+          "min": 0.09269574700010708,
+          "max": 0.09778659900007369,
+          "n_seeds": 3
+        },
+        "3word_wide/attention/wer": {
+          "reference": 0.3408333333333333,
+          "median": 0.3416666666666667,
+          "min": 0.3408333333333333,
+          "max": 0.3525,
+          "n_seeds": 3
+        },
+        "3word_wide/ctc/cer": {
+          "reference": 0.0006542361792607131,
+          "median": 0.0003274394237066143,
+          "min": 0.00016318537859007833,
+          "max": 0.0006542361792607131,
+          "n_seeds": 3
+        },
+        "3word_wide/ctc/empty_rate": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "3word_wide/ctc/exact": {
+          "reference": 0.99,
+          "median": 0.995,
+          "min": 0.99,
+          "max": 0.9975,
+          "n_seeds": 3
+        },
+        "3word_wide/ctc/length_abs": {
+          "reference": 0.01,
+          "median": 0.005,
+          "min": 0.0025,
+          "max": 0.01,
+          "n_seeds": 3
+        },
+        "3word_wide/ctc/length_bias": {
+          "reference": -0.01,
+          "median": -0.005,
+          "min": -0.01,
+          "max": -0.0025,
+          "n_seeds": 3
+        },
+        "3word_wide/ctc/overlong_rate": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "3word_wide/ctc/seconds": {
+          "reference": 0.029859951999924306,
+          "median": 0.029859951999924306,
+          "min": 0.029371330999993006,
+          "max": 0.030186511000010796,
+          "n_seeds": 3
+        },
+        "3word_wide/ctc/wer": {
+          "reference": 0.004166666666666667,
+          "median": 0.0016666666666666668,
+          "min": 0.0008333333333333334,
+          "max": 0.004166666666666667,
+          "n_seeds": 3
+        },
+        "3word_wide/trocr/cer": {
+          "reference": 0.0008177952240758914,
+          "median": 0.0008177952240758914,
+          "min": 0.0004911591355599214,
+          "max": 0.0019582245430809398,
+          "n_seeds": 3
+        },
+        "3word_wide/trocr/empty_rate": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "3word_wide/trocr/exact": {
+          "reference": 0.99,
+          "median": 0.99,
+          "min": 0.9725,
+          "max": 0.9925,
+          "n_seeds": 3
+        },
+        "3word_wide/trocr/length_abs": {
+          "reference": 0.005,
+          "median": 0.005,
+          "min": 0.0,
+          "max": 0.005,
+          "n_seeds": 3
+        },
+        "3word_wide/trocr/length_bias": {
+          "reference": 0.005,
+          "median": 0.005,
+          "min": 0.0,
+          "max": 0.005,
+          "n_seeds": 3
+        },
+        "3word_wide/trocr/overlong_rate": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "3word_wide/trocr/seconds": {
+          "reference": 9.432773870000005,
+          "median": 9.432773870000005,
+          "min": 9.163769804999902,
+          "max": 9.682556630000136,
+          "n_seeds": 3
+        },
+        "3word_wide/trocr/wer": {
+          "reference": 0.0033333333333333335,
+          "median": 0.0033333333333333335,
+          "min": 0.0025,
+          "max": 0.009166666666666667,
+          "n_seeds": 3
+        },
+        "attention/parameters": {
+          "reference": 863079.0,
+          "median": 863079.0,
+          "min": 863079.0,
+          "max": 863079.0,
+          "n_seeds": 3
+        },
+        "attention_minus_ctc/length_gap": {
+          "reference": 0.29871039824029594,
+          "median": 0.2199000671674835,
+          "min": 0.18824033062532172,
+          "max": 0.29871039824029594,
+          "n_seeds": 3
+        },
+        "attention_minus_ctc/seen_cer": {
+          "reference": -0.00017642907551164433,
+          "median": -0.00017642907551164433,
+          "min": -0.00034831069313827936,
+          "max": -0.00017280110592707794,
+          "n_seeds": 3
+        },
+        "attention_over_ctc/seconds": {
+          "reference": 2.2161058912750113,
+          "median": 2.1584170948525796,
+          "min": 2.1480044557212654,
+          "max": 2.2161058912750113,
+          "n_seeds": 3
+        },
+        "ctc/parameters": {
+          "reference": 415239.0,
+          "median": 415239.0,
+          "min": 415239.0,
+          "max": 415239.0,
+          "n_seeds": 3
+        },
+        "font_gap/attention": {
+          "reference": 0.13829229963331588,
+          "median": 0.1956405217080579,
+          "min": 0.13829229963331588,
+          "max": 0.23038337513436044,
+          "n_seeds": 3
+        },
+        "font_gap/ctc": {
+          "reference": 0.2893294204093845,
+          "median": 0.17528149098633286,
+          "min": 0.16894221143438107,
+          "max": 0.2893294204093845,
+          "n_seeds": 3
+        },
+        "font_gap/trocr": {
+          "reference": -0.001163994445456954,
+          "median": -0.001163994445456954,
+          "min": -0.0018552507385810948,
+          "max": 0.0026081451048839558,
+          "n_seeds": 3
+        },
+        "held_out/attention/cer": {
+          "reference": 0.13829229963331588,
+          "median": 0.1956405217080579,
+          "min": 0.13829229963331588,
+          "max": 0.23038337513436044,
+          "n_seeds": 3
+        },
+        "held_out/attention/empty_rate": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "held_out/attention/exact": {
+          "reference": 0.7625,
+          "median": 0.70125,
+          "min": 0.67625,
+          "max": 0.7625,
+          "n_seeds": 3
+        },
+        "held_out/attention/length_abs": {
+          "reference": 0.1575,
+          "median": 0.2025,
+          "min": 0.1575,
+          "max": 0.22875,
+          "n_seeds": 3
+        },
+        "held_out/attention/length_bias": {
+          "reference": -0.005,
+          "median": -0.005,
+          "min": -0.03,
+          "max": 0.03875,
+          "n_seeds": 3
+        },
+        "held_out/attention/overlong_rate": {
+          "reference": 0.00125,
+          "median": 0.00375,
+          "min": 0.00125,
+          "max": 0.005,
+          "n_seeds": 3
+        },
+        "held_out/attention/seconds": {
+          "reference": 0.24832103500000358,
+          "median": 0.24647701099991082,
+          "min": 0.2460567190000802,
+          "max": 0.24832103500000358,
+          "n_seeds": 3
+        },
+        "held_out/attention/wer": {
+          "reference": 0.18614357262103506,
+          "median": 0.25957446808510637,
+          "min": 0.18614357262103506,
+          "max": 0.2970212765957447,
+          "n_seeds": 3
+        },
+        "held_out/ctc/cer": {
+          "reference": 0.2895058494848961,
+          "median": 0.17562980167947115,
+          "min": 0.16911501254030814,
+          "max": 0.2895058494848961,
+          "n_seeds": 3
+        },
+        "held_out/ctc/empty_rate": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "held_out/ctc/exact": {
+          "reference": 0.6125,
+          "median": 0.6125,
+          "min": 0.61125,
+          "max": 0.6525,
+          "n_seeds": 3
+        },
+        "held_out/ctc/length_abs": {
+          "reference": 0.2575,
+          "median": 0.2575,
+          "min": 0.19625,
+          "max": 0.3475,
+          "n_seeds": 3
+        },
+        "held_out/ctc/length_bias": {
+          "reference": -0.085,
+          "median": -0.085,
+          "min": -0.3075,
+          "max": -0.05375,
+          "n_seeds": 3
+        },
+        "held_out/ctc/overlong_rate": {
+          "reference": 0.00125,
+          "median": 0.00125,
+          "min": 0.0,
+          "max": 0.00125,
+          "n_seeds": 3
+        },
+        "held_out/ctc/seconds": {
+          "reference": 0.1143340610000223,
+          "median": 0.1143340610000223,
+          "min": 0.11425218899989886,
+          "max": 0.11615525100000923,
+          "n_seeds": 3
+        },
+        "held_out/ctc/wer": {
+          "reference": 0.4357262103505843,
+          "median": 0.4093617021276596,
+          "min": 0.34893617021276596,
+          "max": 0.4357262103505843,
+          "n_seeds": 3
+        },
+        "held_out/trocr/cer": {
+          "reference": 0.010127466387288283,
+          "median": 0.010127466387288283,
+          "min": 0.009290691441843845,
+          "max": 0.010211393765675385,
+          "n_seeds": 3
+        },
+        "held_out/trocr/empty_rate": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "held_out/trocr/exact": {
+          "reference": 0.96125,
+          "median": 0.96125,
+          "min": 0.96125,
+          "max": 0.96375,
+          "n_seeds": 3
+        },
+        "held_out/trocr/length_abs": {
+          "reference": 0.065,
+          "median": 0.065,
+          "min": 0.06125,
+          "max": 0.065,
+          "n_seeds": 3
+        },
+        "held_out/trocr/length_bias": {
+          "reference": 0.065,
+          "median": 0.06,
+          "min": 0.05875,
+          "max": 0.065,
+          "n_seeds": 3
+        },
+        "held_out/trocr/overlong_rate": {
+          "reference": 0.0025,
+          "median": 0.0025,
+          "min": 0.00125,
+          "max": 0.0025,
+          "n_seeds": 3
+        },
+        "held_out/trocr/seconds": {
+          "reference": 16.589727732999904,
+          "median": 16.792076010000073,
+          "min": 16.589727732999904,
+          "max": 17.298236019999877,
+          "n_seeds": 3
+        },
+        "held_out/trocr/wer": {
+          "reference": 0.02587646076794658,
+          "median": 0.02587646076794658,
+          "min": 0.02553191489361702,
+          "max": 0.028085106382978724,
+          "n_seeds": 3
+        },
+        "length_gap/attention": {
+          "reference": 0.29936463441955663,
+          "median": 0.22022750659119011,
+          "min": 0.1884035160039118,
+          "max": 0.29936463441955663,
+          "n_seeds": 3
+        },
+        "length_gap/ctc": {
+          "reference": 0.0006542361792607131,
+          "median": 0.0003274394237066143,
+          "min": 0.00016318537859007833,
+          "max": 0.0006542361792607131,
+          "n_seeds": 3
+        },
+        "seen/attention/cer": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "seen/attention/empty_rate": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "seen/attention/exact": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "seen/attention/length_abs": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "seen/attention/length_bias": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "seen/attention/overlong_rate": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "seen/attention/seconds": {
+          "reference": 0.29274747299996307,
+          "median": 0.2499781679998705,
+          "min": 0.24668113200004882,
+          "max": 0.29274747299996307,
+          "n_seeds": 3
+        },
+        "seen/attention/wer": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "seen/ctc/cer": {
+          "reference": 0.00017642907551164433,
+          "median": 0.00017642907551164433,
+          "min": 0.00017280110592707794,
+          "max": 0.00034831069313827936,
+          "n_seeds": 3
+        },
+        "seen/ctc/empty_rate": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "seen/ctc/exact": {
+          "reference": 0.99875,
+          "median": 0.99875,
+          "min": 0.9975,
+          "max": 0.99875,
+          "n_seeds": 3
+        },
+        "seen/ctc/length_abs": {
+          "reference": 0.00125,
+          "median": 0.00125,
+          "min": 0.00125,
+          "max": 0.0025,
+          "n_seeds": 3
+        },
+        "seen/ctc/length_bias": {
+          "reference": -0.00125,
+          "median": -0.00125,
+          "min": -0.0025,
+          "max": -0.00125,
+          "n_seeds": 3
+        },
+        "seen/ctc/overlong_rate": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "seen/ctc/seconds": {
+          "reference": 0.13209994800001823,
+          "median": 0.11581550600021728,
+          "min": 0.1148420020000458,
+          "max": 0.13209994800001823,
+          "n_seeds": 3
+        },
+        "seen/ctc/wer": {
+          "reference": 0.0008361204013377926,
+          "median": 0.001652892561983471,
+          "min": 0.0008361204013377926,
+          "max": 0.0024793388429752068,
+          "n_seeds": 3
+        },
+        "seen/trocr/cer": {
+          "reference": 0.011291460832745237,
+          "median": 0.01114594218042494,
+          "min": 0.007603248660791429,
+          "max": 0.011291460832745237,
+          "n_seeds": 3
+        },
+        "seen/trocr/empty_rate": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "seen/trocr/exact": {
+          "reference": 0.95375,
+          "median": 0.95625,
+          "min": 0.95375,
+          "max": 0.97,
+          "n_seeds": 3
+        },
+        "seen/trocr/length_abs": {
+          "reference": 0.07125,
+          "median": 0.07125,
+          "min": 0.05125,
+          "max": 0.07625,
+          "n_seeds": 3
+        },
+        "seen/trocr/length_bias": {
+          "reference": 0.06375,
+          "median": 0.06375,
+          "min": 0.04875,
+          "max": 0.06875,
+          "n_seeds": 3
+        },
+        "seen/trocr/overlong_rate": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "seen/trocr/seconds": {
+          "reference": 28.859486241000013,
+          "median": 17.186531940999885,
+          "min": 16.51019999999994,
+          "max": 28.859486241000013,
+          "n_seeds": 3
+        },
+        "seen/trocr/wer": {
+          "reference": 0.03260869565217391,
+          "median": 0.030578512396694214,
+          "min": 0.019834710743801654,
+          "max": 0.03260869565217391,
+          "n_seeds": 3
+        },
+        "trocr/parameters": {
+          "reference": 61596672.0,
+          "median": 61596672.0,
+          "min": 61596672.0,
+          "max": 61596672.0,
+          "n_seeds": 3
+        },
+        "width_gap/attention": {
+          "reference": 0.05997458703939009,
+          "median": 0.13930098063867236,
+          "min": 0.05997458703939009,
+          "max": 0.17207298530157122,
+          "n_seeds": 3
+        },
+        "width_gap/ctc": {
+          "reference": -0.00017642907551164433,
+          "median": -0.00017642907551164433,
+          "min": -0.00034831069313827936,
+          "max": -0.00017280110592707794,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 114.095
+    },
+    "H5": {
+      "title": "Two-stage document pipeline \u2014 detect text regions, then recognize, with end-to-end error attributed to each stage",
+      "metrics": {
+        "augmentation_cost/oracle_page_cer": {
+          "reference": -0.0002090738030524775,
+          "median": -0.00010087763542822556,
+          "min": -0.0002090738030524775,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "augmentation_gain/pipeline_page_cer": {
+          "reference": 0.08718377587288317,
+          "median": 0.14506552006552004,
+          "min": 0.08718377587288317,
+          "max": 0.24351861192373647,
+          "n_seeds": 3
+        },
+        "augmentation_gain/tolerated_px": {
+          "reference": 7.922385608961788,
+          "median": 7.522940112096739,
+          "min": 6.793543481069906,
+          "max": 7.922385608961788,
+          "n_seeds": 3
+        },
+        "cell_collision_rate": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "detection_cost/page_cer": {
+          "reference": 0.5290612586242944,
+          "median": 0.512080262080262,
+          "min": 0.4814889538989206,
+          "max": 0.5290612586242944,
+          "n_seeds": 3
+        },
+        "detection_cost_augmented/page_cer": {
+          "reference": 0.4420865565544637,
+          "median": 0.367014742014742,
+          "min": 0.23807121961061234,
+          "max": 0.4420865565544637,
+          "n_seeds": 3
+        },
+        "detection_share_of_error": {
+          "reference": 0.999604977286194,
+          "median": 0.9997905320485966,
+          "min": 0.999604977286194,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "detection_share_of_error_augmented": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "detector/boxes_per_page": {
+          "reference": 2.686,
+          "median": 3.172,
+          "min": 2.686,
+          "max": 3.384,
+          "n_seeds": 3
+        },
+        "detector/mAP@0.5": {
+          "reference": 0.3593991293570743,
+          "median": 0.7296815185992533,
+          "min": 0.3593991293570743,
+          "max": 0.8069201376240283,
+          "n_seeds": 3
+        },
+        "detector/matched_iou_mean": {
+          "reference": 0.5229385778749587,
+          "median": 0.670856071176333,
+          "min": 0.5229385778749587,
+          "max": 0.7311815841652506,
+          "n_seeds": 3
+        },
+        "detector/parameters": {
+          "reference": 72630.0,
+          "median": 72630.0,
+          "min": 72630.0,
+          "max": 72630.0,
+          "n_seeds": 3
+        },
+        "detector/recall@match": {
+          "reference": 0.6112012987012987,
+          "median": 0.8541832669322709,
+          "min": 0.6112012987012987,
+          "max": 0.9291896144767899,
+          "n_seeds": 3
+        },
+        "detector/spurious_per_page": {
+          "reference": 1.18,
+          "median": 1.18,
+          "min": 0.81,
+          "max": 1.24,
+          "n_seeds": 3
+        },
+        "jitter/0.0/line_cer": {
+          "reference": 0.00022639800769753225,
+          "median": 0.00010938525486764385,
+          "min": 0.0,
+          "max": 0.00022639800769753225,
+          "n_seeds": 3
+        },
+        "jitter/16.0/line_cer": {
+          "reference": 0.8463889517772244,
+          "median": 0.8626428492177965,
+          "min": 0.8463889517772244,
+          "max": 0.8630496609057099,
+          "n_seeds": 3
+        },
+        "jitter/2.0/line_cer": {
+          "reference": 0.30529771338012224,
+          "median": 0.30529771338012224,
+          "min": 0.30234106290913126,
+          "max": 0.3814263837234741,
+          "n_seeds": 3
+        },
+        "jitter/4.0/line_cer": {
+          "reference": 0.5054335521847407,
+          "median": 0.5054335521847407,
+          "min": 0.5012759347609009,
+          "max": 0.5618026690002188,
+          "n_seeds": 3
+        },
+        "jitter/8.0/line_cer": {
+          "reference": 0.7094181571202174,
+          "median": 0.7094181571202174,
+          "min": 0.6833462775990237,
+          "max": 0.7451323561583898,
+          "n_seeds": 3
+        },
+        "jitter/px_at_cer_20pct": {
+          "reference": 1.3096846011131726,
+          "median": 1.3096846011131726,
+          "min": 1.0484222604704532,
+          "max": 1.3230091743119266,
+          "n_seeds": 3
+        },
+        "jitter/px_at_cer_5pct": {
+          "reference": 0.3263079777365492,
+          "median": 0.3263079777365492,
+          "min": 0.26167527251864603,
+          "max": 0.33075229357798164,
+          "n_seeds": 3
+        },
+        "jitter_augmented/0.0/line_cer": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "jitter_augmented/16.0/line_cer": {
+          "reference": 0.41940230925967853,
+          "median": 0.42725880551301687,
+          "min": 0.41940230925967853,
+          "max": 0.45345611893930987,
+          "n_seeds": 3
+        },
+        "jitter_augmented/2.0/line_cer": {
+          "reference": 0.00011319900384876613,
+          "median": 0.00011319900384876613,
+          "min": 0.0,
+          "max": 0.00022190169754798624,
+          "n_seeds": 3
+        },
+        "jitter_augmented/4.0/line_cer": {
+          "reference": 0.0003395970115462984,
+          "median": 0.0003395970115462984,
+          "min": 0.0002187705097352877,
+          "max": 0.0007766559414179519,
+          "n_seeds": 3
+        },
+        "jitter_augmented/8.0/line_cer": {
+          "reference": 0.038148064297034184,
+          "median": 0.052833078101071976,
+          "min": 0.038148064297034184,
+          "max": 0.06379673804504604,
+          "n_seeds": 3
+        },
+        "jitter_augmented/px_at_cer_20pct": {
+          "reference": 11.396199524940616,
+          "median": 11.14437627811861,
+          "min": 10.796355353075171,
+          "max": 11.396199524940616,
+          "n_seeds": 3
+        },
+        "jitter_augmented/px_at_cer_5pct": {
+          "reference": 8.248693586698337,
+          "median": 7.784615384615385,
+          "min": 7.124295774647888,
+          "max": 8.248693586698337,
+          "n_seeds": 3
+        },
+        "oracle/line_cer": {
+          "reference": 0.00022639800769753225,
+          "median": 0.00010938525486764385,
+          "min": 0.0,
+          "max": 0.00022639800769753225,
+          "n_seeds": 3
+        },
+        "oracle/line_wer": {
+          "reference": 0.001078167115902965,
+          "median": 0.0005232862375719519,
+          "min": 0.0,
+          "max": 0.001078167115902965,
+          "n_seeds": 3
+        },
+        "oracle/page_cer": {
+          "reference": 0.0002090738030524775,
+          "median": 0.00010087763542822556,
+          "min": 0.0,
+          "max": 0.0002090738030524775,
+          "n_seeds": 3
+        },
+        "oracle_augmented/line_cer": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "oracle_augmented/line_wer": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "oracle_augmented/page_cer": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "pipeline/matched_line_cer": {
+          "reference": 0.3560994118763043,
+          "median": 0.36402934241550955,
+          "min": 0.3560994118763043,
+          "max": 0.4365622374264794,
+          "n_seeds": 3
+        },
+        "pipeline/page_cer": {
+          "reference": 0.5292703324273469,
+          "median": 0.512080262080262,
+          "min": 0.4815898315343488,
+          "max": 0.5292703324273469,
+          "n_seeds": 3
+        },
+        "pipeline/page_wer": {
+          "reference": 0.9099730458221025,
+          "median": 0.9099730458221025,
+          "min": 0.8890633176347462,
+          "max": 1.1558372952984681,
+          "n_seeds": 3
+        },
+        "pipeline_augmented/matched_line_cer": {
+          "reference": 0.2060330108138873,
+          "median": 0.18679591302069687,
+          "min": 0.12723562597527308,
+          "max": 0.2060330108138873,
+          "n_seeds": 3
+        },
+        "pipeline_augmented/page_cer": {
+          "reference": 0.4420865565544637,
+          "median": 0.367014742014742,
+          "min": 0.23807121961061234,
+          "max": 0.4420865565544637,
+          "n_seeds": 3
+        },
+        "pipeline_augmented/page_wer": {
+          "reference": 0.7466307277628033,
+          "median": 0.7466307277628033,
+          "min": 0.4552590266875981,
+          "max": 0.843634442683571,
+          "n_seeds": 3
+        },
+        "recognizer/parameters": {
+          "reference": 415046.0,
+          "median": 415046.0,
+          "min": 415046.0,
+          "max": 415046.0,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 193.861
+    }
+  },
+  "figures": 11
+}
