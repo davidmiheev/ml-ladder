@@ -115,7 +115,8 @@ rather than about SimCLR.
 *The augmentation curve is not monotonic.* The story everyone tells — stronger
 augmentation means a harder pretext task means better features — predicts
 0.0 < 0.5 < 1.0. What happened is 0.316, **0.430**, 0.339: the middle wins by
-nine points over full strength, on every seed. The explanation is in the
+nine points over full strength, on every seed — `best/strength` is 0.5 on all
+three, so unlike D2's mask ratio this optimum is stable, not a coin flip. The explanation is in the
 definition of the objective rather than in any tuning detail. The positive pair
 *is* the invariance being learned, so augmenting harder does not simply make the
 task harder — it changes what the network is told to ignore. At full strength
@@ -134,7 +135,7 @@ the same temperature (0.339) and the arithmetic is uncomfortable: of that arm's
 at all**. Seventy-two percent of what looks like contrastive learning is what
 happens to a random network when you push 8000 images through it under any
 objective that keeps its features from collapsing. Only the strength-0.5 arm
-escapes this — +0.174 over untrained, of which +0.115 is genuinely augmentation.
+escapes this — +0.168 over untrained, of which +0.119 is genuinely augmentation.
 Without the control arm, both would have been reported as SimCLR's contribution
 without distinction.
 
@@ -143,7 +144,7 @@ only through the temperature loop, so it reported `best/probe_accuracy` = 0.359
 while the strength sweep held 0.430 — a summary that quietly excluded half of
 the experiment, and a PCA figure drawn from the wrong arm. `augmentation_gain`
 was worse: defined as strongest-minus-weakest, it reported +0.031 for an effect
-that is really +0.115 (best arm over the no-augmentation control), *because* the
+that is really +0.119 (best arm over the no-augmentation control), *because* the
 curve is not monotonic. A difference between two endpoints is only a measure of
 an effect if the effect is monotone, and the interesting result here is exactly
 that it is not. Both are fixed; the numbers above are from the corrected run.
@@ -408,7 +409,7 @@ table imitates.
 4. **Two of the three summary metrics I wrote for this part were wrong, and both
    were wrong in the same way: they assumed a shape the data did not have.**
    `augmentation_gain` compared the endpoints of a curve that turned out to have
-   its optimum in the middle, reporting +0.031 for a +0.115 effect. The
+   its optimum in the middle, reporting +0.031 for a +0.119 effect. The
    supervised column of D3 assumed a comparison that its own code does not
    perform. Part B's `usable_lrs` failed the same way. The pattern is now clear
    enough to name: **a derived metric encodes a hypothesis about the result, and
@@ -422,8 +423,18 @@ table imitates.
    a control arm change the headline number; none of them cost more than a few
    lines.
 
+6. **This part reproduced exactly, which part C did not.** The sweep was run
+   twice, on two separately allocated T4 sessions, the second time only to pick
+   up D1's corrected summary metrics. Every arm-level number came back
+   identical — D2's ten metrics and D3's thirty-seven bit-for-bit, and D1's
+   seven arms too; the only keys that moved were the three derived ones the fix
+   redefined. So C2's instability was not a general fact about GPU
+   non-determinism, as it was tempting to conclude: it was specific to an
+   all-or-nothing metric sitting on its threshold. Nothing here is near a
+   threshold, and nothing here moved.
+
 **Cost of the part:** ~1,600 lines including tests, 15 test cases, and a
-three-seed sweep in about 26 minutes on a T4 (D1 346s, D2 68s, D3 105s per
+three-seed sweep in about 28 minutes on a T4 (D1 354s, D2 67s, D3 107s per
 seed). D1 dominates because it trains six encoders from scratch.
 
 ---
