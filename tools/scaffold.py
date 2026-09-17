@@ -12,6 +12,7 @@ tree still mirrors the spec 1:1.
 from __future__ import annotations
 
 import argparse
+import subprocess
 import sys
 from pathlib import Path
 
@@ -181,6 +182,22 @@ def expected_files() -> dict[Path, str]:
     return files
 
 
+def _format(paths: list[Path]) -> None:
+    """Run the project formatter over generated Python files.
+
+    A rung title long enough to push `todo("...")` past the line limit would
+    otherwise produce code that fails `ruff format --check` the moment it is
+    created, which is a silly way to fail CI on a brand-new part.
+    """
+    python_files = [str(path) for path in paths if path.suffix == ".py"]
+    if not python_files:
+        return
+    try:
+        subprocess.run(["uv", "run", "ruff", "format", "--quiet", *python_files], check=True, capture_output=True)
+    except (OSError, subprocess.CalledProcessError) as error:  # formatter absent or unhappy
+        print(f"note: could not format generated files ({error}); run `make fmt`", file=sys.stderr)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true", help="fail if anything is missing instead of creating it")
@@ -197,6 +214,9 @@ def main(argv: list[str] | None = None) -> int:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content)
         created.append(path)
+
+    if created:
+        _format(created)
 
     if args.check and missing:
         print("parts/ does not mirror the ladder spec; missing:", file=sys.stderr)

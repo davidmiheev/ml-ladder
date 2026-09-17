@@ -15,6 +15,7 @@ left open.
 | E — Generative models | [e-generative.md](e-generative.md) | — | stub |
 | F — Geometric & equivariant nets | [f-geometric.md](f-geometric.md) | — | stub |
 | G — Scaling & systems | [g-scaling-systems.md](g-scaling-systems.md) | — | stub |
+| H — Computer vision & OCR | [h-computer-vision.md](h-computer-vision.md) | — | stub |
 
 Stubs are created by `tools/scaffold.py` from the ladder spec, so a new part
 arrives with its writeup outline already in place.

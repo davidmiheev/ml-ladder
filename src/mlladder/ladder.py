@@ -207,6 +207,46 @@ LADDER: tuple[Part, ...] = (
             ),
         ),
     ),
+    Part(
+        id="H",
+        title="Computer vision & OCR",
+        package="h_computer_vision",
+        note="follows C; independent of D-G, so it can be taken straight after the ViT rung",
+        lab=Lab(
+            "open-mmlab/mmocr — detection and recognition reference implementations",
+            "https://github.com/open-mmlab/mmocr",
+        ),
+        items=(
+            Item(
+                "H1",
+                "Object detection from scratch — IoU, non-max suppression and mAP implemented by hand",
+                "h1_detection_from_scratch",
+                note="a single-stage detector on a small dataset; the metrics matter more than the backbone",
+            ),
+            Item(
+                "H2",
+                "Semantic segmentation with a U-Net — skip connections, Dice vs cross-entropy loss",
+                "h2_unet_segmentation",
+            ),
+            Item(
+                "H3",
+                "Text recognition with CRNN + CTC — synthetic text lines, greedy vs beam decoding, CER/WER",
+                "h3_crnn_ctc",
+                note="CTC's alignment-free loss is the point: no per-character boxes needed",
+            ),
+            Item(
+                "H4",
+                "Attention-decoder OCR against CTC on the same data, with a pretrained model as the baseline",
+                "h4_attention_ocr",
+                note="TrOCR or EasyOCR as the reference; the comparison is decoder design, not dataset",
+            ),
+            Item(
+                "H5",
+                "Two-stage document pipeline — detect text regions, then recognize, with end-to-end error attributed to each stage",
+                "h5_document_pipeline",
+            ),
+        ),
+    ),
 )
 
 PARTS_DIR_NAME = "parts"

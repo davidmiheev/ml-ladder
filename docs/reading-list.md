@@ -81,7 +81,39 @@ Rendered source: [`source/ml-reading-list.html`](source/ml-reading-list.html).
 - [Megatron-LM: Training Multi-Billion Parameter Language Models Using Model Parallelism](https://arxiv.org/abs/1909.08053) *(paper)*
 - [Mixed Precision Training](https://arxiv.org/abs/1710.03740) *(paper)*
 
-## 9. Companion courses
+## 9. Computer vision & OCR → ladder part H
+
+*Detection and segmentation first, because OCR is both of them stacked: find
+the text, then read it.*
+
+**Detection**
+
+- [Faster R-CNN](https://arxiv.org/abs/1506.01497) — Ren et al. The two-stage baseline everything else is measured against. *(paper)*
+- [You Only Look Once](https://arxiv.org/abs/1506.02640) — Redmon et al. Detection as a single regression problem. *(paper)*
+- [Focal Loss for Dense Object Detection](https://arxiv.org/abs/1708.02002) — RetinaNet; why one-stage detectors drown in background class imbalance. *(paper)*
+- [End-to-End Object Detection with Transformers](https://arxiv.org/abs/2005.12872) — DETR: set prediction with bipartite matching, no anchors and no NMS. *(paper)*
+
+**Segmentation**
+
+- [U-Net](https://arxiv.org/abs/1505.04597) — Ronneberger et al. Skip connections between encoder and decoder, still the default for small datasets. *(paper)*
+- [Mask R-CNN](https://arxiv.org/abs/1703.06870) — He et al. Instance segmentation as detection plus a mask head. *(paper)*
+- [Segment Anything](https://arxiv.org/abs/2304.02643) — Kirillov et al. Promptable segmentation, and what a 1B-mask dataset buys. *(paper)*
+
+**OCR — text detection**
+
+- [EAST: An Efficient and Accurate Scene Text Detector](https://arxiv.org/abs/1704.03155) — rotated boxes for text, which axis-aligned detectors handle badly. *(paper)*
+- [Character Region Awareness for Text Detection](https://arxiv.org/abs/1904.01941) — CRAFT; per-character affinity instead of whole-word boxes. *(paper)*
+
+**OCR — recognition**
+
+- [Connectionist Temporal Classification](https://www.cs.toronto.edu/~graves/icml_2006.pdf) — Graves et al., 2006. The alignment-free loss that makes per-character annotation unnecessary. *(paper)*
+- [An End-to-End Trainable Neural Network for Image-based Sequence Recognition](https://arxiv.org/abs/1507.05717) — CRNN, the CNN+RNN+CTC recipe H3 builds. *(paper)*
+- [What Is Wrong With Scene Text Recognition Model Comparisons?](https://arxiv.org/abs/1904.01906) — Baek et al. A four-stage framework and an honest ablation; read before trusting any OCR leaderboard. *(paper)*
+- [TrOCR](https://arxiv.org/abs/2109.10282) — Li et al. Pretrained vision encoder plus text decoder, the attention alternative to CTC in H4. *(paper)*
+- [PP-OCR](https://arxiv.org/abs/2009.09941) — the engineering-first view: what a practical, fast pipeline actually contains. *(paper)*
+- [OCR-free Document Understanding Transformer](https://arxiv.org/abs/2111.15664) — Donut; skipping recognition entirely and reading documents end to end. *(paper)*
+
+## 10. Companion courses
 
 - [Stanford CS231n — CNNs for Visual Recognition](http://cs231n.stanford.edu/) *(course)*
 - [Stanford CS224n — NLP with Deep Learning](https://web.stanford.edu/class/cs224n/) *(course)*

@@ -101,3 +101,20 @@ Folder: `parts/g_scaling_systems/`
 - **G3.** Rust/Candle port of one transformer-block forward pass, as a comprehension exercise for [[ignite-catalog]] — `parts/g_scaling_systems/g3_candle_transformer_port.py`
   - Python driver lives here; the Rust crate lives in rust/crates/ignite-port.
 
+## H. Computer vision & OCR
+
+*follows C; independent of D-G, so it can be taken straight after the ViT rung*
+
+**Lab:** [open-mmlab/mmocr — detection and recognition reference implementations](https://github.com/open-mmlab/mmocr)
+
+Folder: `parts/h_computer_vision/`
+
+- **H1.** Object detection from scratch — IoU, non-max suppression and mAP implemented by hand — `parts/h_computer_vision/h1_detection_from_scratch.py`
+  - a single-stage detector on a small dataset; the metrics matter more than the backbone
+- **H2.** Semantic segmentation with a U-Net — skip connections, Dice vs cross-entropy loss — `parts/h_computer_vision/h2_unet_segmentation.py`
+- **H3.** Text recognition with CRNN + CTC — synthetic text lines, greedy vs beam decoding, CER/WER — `parts/h_computer_vision/h3_crnn_ctc.py`
+  - CTC's alignment-free loss is the point: no per-character boxes needed
+- **H4.** Attention-decoder OCR against CTC on the same data, with a pretrained model as the baseline — `parts/h_computer_vision/h4_attention_ocr.py`
+  - TrOCR or EasyOCR as the reference; the comparison is decoder design, not dataset
+- **H5.** Two-stage document pipeline — detect text regions, then recognize, with end-to-end error attributed to each stage — `parts/h_computer_vision/h5_document_pipeline.py`
+
