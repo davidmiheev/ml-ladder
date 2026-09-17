@@ -1,0 +1,430 @@
+{
+  "part": "D",
+  "title": "Self-supervised & representation learning",
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "reference_seed": 0,
+  "rungs": {
+    "D1": {
+      "title": "SimCLR-style contrastive pretraining on CIFAR-10",
+      "metrics": {
+        "augmentation_gain": {
+          "reference": 0.009000000000000008,
+          "median": 0.030999999999999972,
+          "min": 0.009000000000000008,
+          "max": 0.03600000000000003,
+          "n_seeds": 3
+        },
+        "best/probe_accuracy": {
+          "reference": 0.359,
+          "median": 0.359,
+          "min": 0.339,
+          "max": 0.36,
+          "n_seeds": 3
+        },
+        "best_minus_random": {
+          "reference": 0.11399999999999999,
+          "median": 0.10399999999999998,
+          "min": 0.07650000000000001,
+          "max": 0.11399999999999999,
+          "n_seeds": 3
+        },
+        "random_encoder/probe_accuracy": {
+          "reference": 0.245,
+          "median": 0.256,
+          "min": 0.245,
+          "max": 0.2625,
+          "n_seeds": 3
+        },
+        "strength/0.0/probe_accuracy": {
+          "reference": 0.319,
+          "median": 0.3155,
+          "min": 0.303,
+          "max": 0.319,
+          "n_seeds": 3
+        },
+        "strength/0.5/probe_accuracy": {
+          "reference": 0.438,
+          "median": 0.43,
+          "min": 0.4055,
+          "max": 0.438,
+          "n_seeds": 3
+        },
+        "strength/1.0/probe_accuracy": {
+          "reference": 0.328,
+          "median": 0.339,
+          "min": 0.328,
+          "max": 0.3465,
+          "n_seeds": 3
+        },
+        "temperature/0.1/probe_accuracy": {
+          "reference": 0.359,
+          "median": 0.359,
+          "min": 0.332,
+          "max": 0.36,
+          "n_seeds": 3
+        },
+        "temperature/0.5/probe_accuracy": {
+          "reference": 0.328,
+          "median": 0.339,
+          "min": 0.328,
+          "max": 0.3465,
+          "n_seeds": 3
+        },
+        "temperature/1.0/probe_accuracy": {
+          "reference": 0.3175,
+          "median": 0.3175,
+          "min": 0.314,
+          "max": 0.3185,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 345.587
+    },
+    "D2": {
+      "title": "Masked autoencoder (MAE) on a small image dataset",
+      "metrics": {
+        "best/mask_ratio": {
+          "reference": 0.75,
+          "median": 0.75,
+          "min": 0.5,
+          "max": 0.75,
+          "n_seeds": 3
+        },
+        "best/probe_accuracy": {
+          "reference": 0.3555,
+          "median": 0.356,
+          "min": 0.3555,
+          "max": 0.3615,
+          "n_seeds": 3
+        },
+        "mask/0.25/final_mse": {
+          "reference": 0.26127203434705737,
+          "median": 0.2681479322910309,
+          "min": 0.26127203434705737,
+          "max": 0.27179772555828097,
+          "n_seeds": 3
+        },
+        "mask/0.25/probe_accuracy": {
+          "reference": 0.3195,
+          "median": 0.349,
+          "min": 0.3195,
+          "max": 0.35,
+          "n_seeds": 3
+        },
+        "mask/0.5/final_mse": {
+          "reference": 0.3381991100311279,
+          "median": 0.3432100063562393,
+          "min": 0.3381991100311279,
+          "max": 0.3448528742790222,
+          "n_seeds": 3
+        },
+        "mask/0.5/probe_accuracy": {
+          "reference": 0.3275,
+          "median": 0.3505,
+          "min": 0.3275,
+          "max": 0.356,
+          "n_seeds": 3
+        },
+        "mask/0.75/final_mse": {
+          "reference": 0.48012328684329986,
+          "median": 0.48012328684329986,
+          "min": 0.4785838115215302,
+          "max": 0.4821893173456192,
+          "n_seeds": 3
+        },
+        "mask/0.75/probe_accuracy": {
+          "reference": 0.3555,
+          "median": 0.3555,
+          "min": 0.3445,
+          "max": 0.3615,
+          "n_seeds": 3
+        },
+        "mask/0.9/final_mse": {
+          "reference": 0.6720245277881622,
+          "median": 0.6761809909343719,
+          "min": 0.6720245277881622,
+          "max": 0.6931059539318085,
+          "n_seeds": 3
+        },
+        "mask/0.9/probe_accuracy": {
+          "reference": 0.345,
+          "median": 0.345,
+          "min": 0.3245,
+          "max": 0.3495,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 67.833
+    },
+    "D3": {
+      "title": "Linear probing of the learned representations against a supervised baseline",
+      "metrics": {
+        "best@min_labels": {
+          "reference": 0.577,
+          "median": 0.577,
+          "min": 0.56,
+          "max": 0.5975,
+          "n_seeds": 3
+        },
+        "mae/knn@100": {
+          "reference": 0.267,
+          "median": 0.267,
+          "min": 0.2565,
+          "max": 0.2885,
+          "n_seeds": 3
+        },
+        "mae/knn@25": {
+          "reference": 0.238,
+          "median": 0.2255,
+          "min": 0.22,
+          "max": 0.238,
+          "n_seeds": 3
+        },
+        "mae/knn@400": {
+          "reference": 0.2925,
+          "median": 0.2925,
+          "min": 0.285,
+          "max": 0.308,
+          "n_seeds": 3
+        },
+        "mae/knn@5": {
+          "reference": 0.164,
+          "median": 0.169,
+          "min": 0.164,
+          "max": 0.1955,
+          "n_seeds": 3
+        },
+        "mae/probe@100": {
+          "reference": 0.321,
+          "median": 0.3165,
+          "min": 0.2985,
+          "max": 0.321,
+          "n_seeds": 3
+        },
+        "mae/probe@25": {
+          "reference": 0.293,
+          "median": 0.2645,
+          "min": 0.2555,
+          "max": 0.293,
+          "n_seeds": 3
+        },
+        "mae/probe@400": {
+          "reference": 0.3415,
+          "median": 0.3675,
+          "min": 0.3415,
+          "max": 0.3735,
+          "n_seeds": 3
+        },
+        "mae/probe@5": {
+          "reference": 0.2315,
+          "median": 0.2315,
+          "min": 0.2225,
+          "max": 0.2505,
+          "n_seeds": 3
+        },
+        "mae_minus_random@min_labels": {
+          "reference": 0.065,
+          "median": 0.07,
+          "min": 0.065,
+          "max": 0.093,
+          "n_seeds": 3
+        },
+        "random/knn@100": {
+          "reference": 0.269,
+          "median": 0.2565,
+          "min": 0.253,
+          "max": 0.269,
+          "n_seeds": 3
+        },
+        "random/knn@25": {
+          "reference": 0.2265,
+          "median": 0.223,
+          "min": 0.2155,
+          "max": 0.2265,
+          "n_seeds": 3
+        },
+        "random/knn@400": {
+          "reference": 0.312,
+          "median": 0.305,
+          "min": 0.297,
+          "max": 0.312,
+          "n_seeds": 3
+        },
+        "random/knn@5": {
+          "reference": 0.1415,
+          "median": 0.165,
+          "min": 0.1415,
+          "max": 0.173,
+          "n_seeds": 3
+        },
+        "random/probe@100": {
+          "reference": 0.2315,
+          "median": 0.2345,
+          "min": 0.2315,
+          "max": 0.247,
+          "n_seeds": 3
+        },
+        "random/probe@25": {
+          "reference": 0.165,
+          "median": 0.186,
+          "min": 0.165,
+          "max": 0.2045,
+          "n_seeds": 3
+        },
+        "random/probe@400": {
+          "reference": 0.2595,
+          "median": 0.271,
+          "min": 0.2595,
+          "max": 0.279,
+          "n_seeds": 3
+        },
+        "random/probe@5": {
+          "reference": 0.1665,
+          "median": 0.1575,
+          "min": 0.1525,
+          "max": 0.1665,
+          "n_seeds": 3
+        },
+        "simclr/knn@100": {
+          "reference": 0.305,
+          "median": 0.305,
+          "min": 0.3035,
+          "max": 0.321,
+          "n_seeds": 3
+        },
+        "simclr/knn@25": {
+          "reference": 0.2895,
+          "median": 0.2695,
+          "min": 0.257,
+          "max": 0.2895,
+          "n_seeds": 3
+        },
+        "simclr/knn@400": {
+          "reference": 0.3395,
+          "median": 0.3395,
+          "min": 0.3355,
+          "max": 0.35,
+          "n_seeds": 3
+        },
+        "simclr/knn@5": {
+          "reference": 0.192,
+          "median": 0.196,
+          "min": 0.192,
+          "max": 0.21,
+          "n_seeds": 3
+        },
+        "simclr/probe@100": {
+          "reference": 0.3195,
+          "median": 0.322,
+          "min": 0.3195,
+          "max": 0.3335,
+          "n_seeds": 3
+        },
+        "simclr/probe@25": {
+          "reference": 0.273,
+          "median": 0.273,
+          "min": 0.2605,
+          "max": 0.275,
+          "n_seeds": 3
+        },
+        "simclr/probe@400": {
+          "reference": 0.35,
+          "median": 0.35,
+          "min": 0.3455,
+          "max": 0.36,
+          "n_seeds": 3
+        },
+        "simclr/probe@5": {
+          "reference": 0.241,
+          "median": 0.25,
+          "min": 0.241,
+          "max": 0.27,
+          "n_seeds": 3
+        },
+        "simclr_minus_random@min_labels": {
+          "reference": 0.07449999999999998,
+          "median": 0.0925,
+          "min": 0.07449999999999998,
+          "max": 0.11750000000000002,
+          "n_seeds": 3
+        },
+        "simclr_minus_supervised@max_labels": {
+          "reference": -0.25750000000000006,
+          "median": -0.25750000000000006,
+          "min": -0.269,
+          "max": -0.2545,
+          "n_seeds": 3
+        },
+        "simclr_minus_supervised@min_labels": {
+          "reference": -0.33599999999999997,
+          "median": -0.3275,
+          "min": -0.33599999999999997,
+          "max": -0.31000000000000005,
+          "n_seeds": 3
+        },
+        "supervised/knn@100": {
+          "reference": 0.611,
+          "median": 0.611,
+          "min": 0.5905,
+          "max": 0.615,
+          "n_seeds": 3
+        },
+        "supervised/knn@25": {
+          "reference": 0.6055,
+          "median": 0.6,
+          "min": 0.571,
+          "max": 0.6055,
+          "n_seeds": 3
+        },
+        "supervised/knn@400": {
+          "reference": 0.6085,
+          "median": 0.6085,
+          "min": 0.608,
+          "max": 0.629,
+          "n_seeds": 3
+        },
+        "supervised/knn@5": {
+          "reference": 0.4565,
+          "median": 0.423,
+          "min": 0.398,
+          "max": 0.4565,
+          "n_seeds": 3
+        },
+        "supervised/probe@100": {
+          "reference": 0.606,
+          "median": 0.606,
+          "min": 0.596,
+          "max": 0.6185,
+          "n_seeds": 3
+        },
+        "supervised/probe@25": {
+          "reference": 0.607,
+          "median": 0.607,
+          "min": 0.585,
+          "max": 0.618,
+          "n_seeds": 3
+        },
+        "supervised/probe@400": {
+          "reference": 0.6075,
+          "median": 0.6075,
+          "min": 0.6,
+          "max": 0.629,
+          "n_seeds": 3
+        },
+        "supervised/probe@5": {
+          "reference": 0.577,
+          "median": 0.577,
+          "min": 0.56,
+          "max": 0.5975,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 104.636
+    }
+  },
+  "figures": 10
+}

@@ -286,11 +286,17 @@ def run(exp: Experiment) -> dict[str, float]:
     strength_scores = []
     for strength in exp["strengths"]:
         name = f"strength={strength}"
-        accuracy, losses, _ = arm(name, temperature=exp["temperature"], strength=strength)
+        accuracy, losses, encoder = arm(name, temperature=exp["temperature"], strength=strength)
         strength_scores.append(accuracy)
         curves[name] = losses
         summary[f"strength/{strength}/probe_accuracy"] = accuracy
         print(f"[d1] strength={strength:<5}    probe accuracy={accuracy:.4f}")
+        # "Best" has to mean best over every arm the rung ran. The first
+        # version of this rung only tracked the temperature loop, so it
+        # reported 0.359 as the best while the strength sweep held 0.430 —
+        # a summary metric that silently excluded half the experiment.
+        if accuracy > best_accuracy:
+            best_encoder, best_accuracy, best_name = encoder, accuracy, name
 
     # -- what the representation looks like ----------------------------------
     if best_encoder is not None:
@@ -346,14 +352,14 @@ def run(exp: Experiment) -> dict[str, float]:
 
     summary["best/probe_accuracy"] = best_accuracy
     summary["best_minus_random"] = best_accuracy - random_accuracy
-    # Only defined when the sweep actually ran both ends; --strengths takes any
-    # subset, and a missing key here would crash the rung after all the work.
-    weakest, strongest = (
-        f"strength/{min(exp['strengths'])}/probe_accuracy",
-        f"strength/{max(exp['strengths'])}/probe_accuracy",
-    )
-    if weakest in summary and strongest in summary and weakest != strongest:
-        summary["augmentation_gain"] = summary[strongest] - summary[weakest]
+    # What augmentation is worth is *best arm minus the no-augmentation
+    # control*, not strongest minus weakest: the curve is not monotonic, so
+    # comparing its two ends reports 0.031 for an effect that is really 0.115.
+    # The control is only present when 0.0 was actually swept.
+    control = "strength/0.0/probe_accuracy"
+    if control in summary and len(strength_scores) > 1:
+        summary["augmentation_gain"] = max(strength_scores) - summary[control]
+        summary["best/strength"] = float(exp["strengths"][strength_scores.index(max(strength_scores))])
     return summary
 
 

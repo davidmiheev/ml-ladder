@@ -171,7 +171,18 @@ def test_knn_on_separable_features_is_perfect():
 # -- the rungs end to end ---------------------------------------------------
 
 
-def test_d1_runs():
+def test_d1_runs_and_summarizes_every_arm():
+    """The smoke test, plus the two summary metrics that were wrong at first.
+
+    ``best/probe_accuracy`` originally tracked only the temperature loop, so it
+    reported the best of half the experiment; ``augmentation_gain`` was defined
+    as strongest-minus-weakest, which measures nothing when the strength curve
+    has its optimum in the middle — which, on the real budget, it does.
+    """
+    import json
+    import os
+    from pathlib import Path
+
     from parts.d_self_supervised.d1_simclr_pretraining import main
 
     assert (
@@ -195,6 +206,7 @@ def test_d1_runs():
                 "0.5",
                 "--strengths",
                 "0.0",
+                "0.5",
                 "1.0",
                 "--probe-epochs",
                 "2",
@@ -202,6 +214,24 @@ def test_d1_runs():
         )
         == 0
     )
+
+    runs = sorted((Path(os.environ["MLLADDER_ARTIFACTS_DIR"]) / "d1_simclr_pretraining").iterdir())
+    metrics = json.loads((runs[-1] / "summary.json").read_text())["metrics"]
+
+    arms = {key: value for key, value in metrics.items() if key.endswith("/probe_accuracy") and "/" in key}
+    strengths = {key: value for key, value in arms.items() if key.startswith("strength/")}
+    assert len(strengths) == 3, "every swept strength should be reported"
+
+    # Best means best over *every* arm, not just the temperature loop.
+    assert metrics["best/probe_accuracy"] == max(
+        value for key, value in arms.items() if key != "random_encoder/probe_accuracy"
+    )
+    # And the worth of augmentation is measured against the no-augmentation
+    # control, not against the other end of a curve that need not be monotone.
+    assert metrics["augmentation_gain"] == pytest.approx(
+        max(strengths.values()) - metrics["strength/0.0/probe_accuracy"]
+    )
+    assert metrics["best/strength"] in (0.0, 0.5, 1.0)
 
 
 def test_d2_runs():
