@@ -327,3 +327,32 @@ def plot_boxes(
         fig.suptitle(title)
     fig.tight_layout()
     return fig
+
+
+def plot_histogram(
+    values: ArrayLike,
+    *,
+    bins: int | Sequence[float] = 25,
+    markers: Mapping[str, float] | None = None,
+    title: str = "",
+    xlabel: str = "",
+    ylabel: str = "count",
+) -> Figure:
+    """A distribution with optional vertical reference lines.
+
+    Summary statistics hide shape: a mean IoU of 0.79 is equally consistent
+    with every box being mediocre and with most boxes being excellent beside a
+    tail of misses, and those two call for different fixes. ``markers`` draws
+    the thresholds a metric is evaluated at, so how much of the mass sits on
+    either side is visible rather than computed.
+    """
+    use_house_style()
+    fig, ax = plt.subplots()
+    ax.hist(np.asarray(values).ravel(), bins=bins, color=PALETTE[0])
+    for index, (label, position) in enumerate((markers or {}).items()):
+        ax.axvline(position, color=PALETTE[(index + 1) % len(PALETTE)], linestyle="--", label=label)
+    if markers:
+        ax.legend()
+    ax.set(title=title, xlabel=xlabel, ylabel=ylabel)
+    fig.tight_layout()
+    return fig
