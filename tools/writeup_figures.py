@@ -53,8 +53,37 @@ def run_rung(item: Item, seed: int, artifacts: Path) -> tuple[Path, dict[str, An
     return runs[-1], summary["metrics"]
 
 
-def collect(part: Part, seeds: tuple[int, ...], reference: int, figures_dir: Path | None) -> dict[str, Any]:
-    """Run every rung of a part across seeds, copying the reference seed's figures.
+def sweepable(part: Part, only: list[str] | None) -> list[Item]:
+    """The rungs a sweep should run: implemented ones, or an explicit subset.
+
+    An unimplemented rung's stub raises ``NotImplementedError`` by design, so
+    sweeping a part mid-build would die on the first stub and produce nothing
+    for the rungs that *are* finished. Skipping stubs is therefore the useful
+    default — but it is announced rather than silent, because "the sweep
+    covered less than you think" is exactly the kind of thing that turns into
+    a wrong writeup.
+    """
+    from mlladder.cli import item_status
+
+    code_items = [item for item in part.items if item.is_code]
+    if only:
+        wanted = {rung.upper() for rung in only}
+        chosen = [item for item in code_items if item.id.upper() in wanted]
+        unknown = wanted - {item.id.upper() for item in chosen}
+        if unknown:
+            raise SystemExit(f"part {part.id} has no rung(s) {sorted(unknown)}")
+        return chosen
+    ready = [item for item in code_items if item_status(item) == "done"]
+    skipped = [item.id for item in code_items if item not in ready]
+    if skipped:
+        print(f"note: skipping unimplemented {part.id} rungs {skipped}; metrics will cover the rest")
+    return ready
+
+
+def collect(
+    part: Part, seeds: tuple[int, ...], reference: int, figures_dir: Path | None, items: list[Item]
+) -> dict[str, Any]:
+    """Run the given rungs across seeds, copying the reference seed's figures.
 
     Figures are copied while the scratch directory still exists; ``figures_dir``
     of ``None`` (a --check run) skips them.
@@ -64,13 +93,16 @@ def collect(part: Part, seeds: tuple[int, ...], reference: int, figures_dir: Pat
         "title": part.title,
         "seeds": list(seeds),
         "reference_seed": reference,
+        # Recorded so a partial sweep documents itself: a metrics file that
+        # covers four of six rungs should say so on its face.
+        "swept_rungs": [item.id for item in items],
         "rungs": {},
     }
     copied = 0
 
     with tempfile.TemporaryDirectory(prefix="mlladder-writeup-") as scratch:
         artifacts = Path(scratch)
-        for item in part.items:
+        for item in items:
             if not item.is_code:
                 continue
             per_seed: dict[str, list[float]] = {}
@@ -140,6 +172,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--check", action="store_true", help="regenerate into a scratch dir and diff against what is committed"
     )
+    parser.add_argument(
+        "--rungs",
+        nargs="+",
+        metavar="ID",
+        help="sweep only these rungs (e.g. --rungs D1); default is every implemented rung of the part",
+    )
     args = parser.parse_args(argv)
 
     if args.reference not in args.seeds:
@@ -148,7 +186,11 @@ def main(argv: list[str] | None = None) -> int:
     for part_id in args.parts:
         part = spec.get_part(part_id)
         figures_dir = None if args.check else ROOT / spec.figures_dir(part)
-        record = collect(part, tuple(args.seeds), args.reference, figures_dir)
+        items = sweepable(part, args.rungs)
+        if not items:
+            print(f"part {part.id} has no implemented rungs to sweep", file=sys.stderr)
+            return 1
+        record = collect(part, tuple(args.seeds), args.reference, figures_dir, items)
 
         metrics_file = ROOT / spec.metrics_path(part)
         if args.check:
@@ -171,6 +213,16 @@ def main(argv: list[str] | None = None) -> int:
             continue
 
         metrics_file.parent.mkdir(parents=True, exist_ok=True)
+        if args.rungs and metrics_file.exists():
+            # Merge into what is there, or `--rungs D1` would delete D2 and D3
+            # from the file and quietly shrink the writeup's evidence base.
+            existing_record = json.loads(metrics_file.read_text())
+            existing_record["rungs"].update(record["rungs"])
+            existing_record["swept_rungs"] = sorted(
+                set(existing_record.get("swept_rungs", [])) | set(record["swept_rungs"])
+            )
+            existing_record["figures"] = record["figures"]
+            record = existing_record
         metrics_file.write_text(json.dumps(record, indent=2) + "\n")
 
         print(f"\nwrote {record['figures']} figures to {spec.figures_dir(part)}/ and {spec.metrics_path(part)}")
