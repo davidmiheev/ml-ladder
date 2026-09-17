@@ -356,3 +356,45 @@ def plot_histogram(
     ax.set(title=title, xlabel=xlabel, ylabel=ylabel)
     fig.tight_layout()
     return fig
+
+
+def plot_panel_rows(
+    rows: Sequence[ArrayLike],
+    labels: Sequence[str],
+    *,
+    grayscale_first: bool = True,
+    vmax: float | None = None,
+    title: str = "",
+) -> Figure:
+    """A grid with one labelled row per panel, aligned column-wise.
+
+    Segmentation and OCR comparisons are read down a column: the same image,
+    its ground truth, and what each arm predicted for it. A per-class IoU table
+    says how much a model is wrong, never *where* — and "where" is the whole
+    claim behind skip connections, which are supposed to recover boundaries
+    rather than interiors.
+
+    The first row is drawn as an image and the rest as label maps, unless
+    ``grayscale_first`` says otherwise.
+    """
+    use_house_style()
+    panels = [np.asarray(row) for row in rows]
+    height, width = len(panels), min(len(panel) for panel in panels)
+    fig, axes = plt.subplots(height, width, figsize=(width * 1.5, height * 1.65), squeeze=False)
+    for row_index, (panel, label) in enumerate(zip(panels, labels, strict=True)):
+        for column_index in range(width):
+            ax = axes[row_index][column_index]
+            item = panel[column_index]
+            if row_index == 0 and grayscale_first:
+                ax.imshow(item, cmap="gray", vmin=0, vmax=255)
+            else:
+                ax.imshow(item, cmap="viridis", vmin=0, vmax=vmax)
+            ax.set(xticks=[], yticks=[])
+            ax.grid(False)
+            for spine in ax.spines.values():
+                spine.set_visible(False)
+        axes[row_index][0].set_ylabel(label, fontsize=8, rotation=0, ha="right", va="center")
+    if title:
+        fig.suptitle(title)
+    fig.tight_layout()
+    return fig

@@ -191,7 +191,9 @@ def test_encode_decode_round_trips_a_box():
     raw[..., 3:5] = boxes[..., 2:4]
     raw[..., 5:] = torch.nn.functional.one_hot(labels, 3).float() * 20.0
 
-    for (decoded, _scores, classes), scene in zip(decode(raw, grid=8, size=64, score_threshold=0.5), scenes):
+    for (decoded, _scores, classes), scene in zip(
+        decode(raw, grid=8, size=64, score_threshold=0.5), scenes, strict=True
+    ):
         assert len(decoded) == len(scene.boxes), "a box was lost or invented"
         overlaps = iou_matrix(decoded.astype(np.float32), scene.boxes)
         assert overlaps.max(axis=1).min() > 0.99, "grid arithmetic does not round-trip"
@@ -251,6 +253,151 @@ def test_h1_runs():
                 "0.5",
                 "--iou-thresholds",
                 "0.5",
+            ]
+        )
+        == 0
+    )
+
+
+# -- H2: segmentation metrics ------------------------------------------------
+
+
+def test_confusion_matrix_counts_pixels():
+    from parts.h_computer_vision.h2_unet_segmentation import confusion
+
+    truth = np.array([[0, 0], [1, 1]])
+    predicted = np.array([[0, 1], [1, 1]])
+    matrix = confusion(predicted, truth, num_classes=2)
+    # Row = truth, column = prediction: one 0->0, one 0->1, two 1->1.
+    assert matrix.tolist() == [[1, 1], [0, 2]]
+
+
+def test_confusion_matrix_honours_a_pixel_subset():
+    from parts.h_computer_vision.h2_unet_segmentation import confusion
+
+    truth = np.array([[[0, 0], [1, 1]]])
+    predicted = np.array([[[0, 1], [1, 1]]])
+    where = np.array([[[True, False], [False, False]]])
+    assert confusion(predicted, truth, num_classes=2, where=where).sum() == 1
+
+
+def test_iou_per_class_on_a_hand_computed_matrix():
+    from parts.h_computer_vision.h2_unet_segmentation import iou_per_class
+
+    # Class 0: 8 correct, 2 leaked to class 1. Class 1: 5 correct, 0 leaked.
+    matrix = np.array([[8, 2], [0, 5]])
+    ious = iou_per_class(matrix)
+    assert ious[0] == pytest.approx(8 / (10 + 8 - 8))  # row 10, column 8
+    assert ious[1] == pytest.approx(5 / (5 + 7 - 5))  # row 5, column 7
+
+
+def test_absent_class_iou_is_nan_not_zero():
+    from parts.h_computer_vision.h2_unet_segmentation import iou_per_class
+
+    matrix = np.array([[5, 0, 0], [0, 3, 0], [0, 0, 0]])  # class 2 never appears
+    ious = iou_per_class(matrix)
+    assert np.isnan(ious[2])
+    assert np.nanmean(ious) == pytest.approx(1.0), "a missing class must not drag the mean down"
+
+
+def test_dice_and_iou_agree_through_their_identity():
+    r"""$D = 2I/(1+I)$ — if the two disagree, one of them is wrong."""
+    from parts.h_computer_vision.h2_unet_segmentation import dice_per_class, iou_per_class
+
+    matrix = np.array([[40, 5, 1], [3, 20, 2], [0, 4, 15]])
+    iou, dice = iou_per_class(matrix), dice_per_class(matrix)
+    assert np.allclose(dice, 2 * iou / (1 + iou))
+
+
+def test_perfect_prediction_has_no_dice_loss():
+    from parts.h_computer_vision.h2_unet_segmentation import dice_loss
+
+    targets = torch.tensor([[[0, 1], [2, 2]]])
+    logits = torch.nn.functional.one_hot(targets, 3).permute(0, 3, 1, 2).float() * 30.0
+    assert dice_loss(logits, targets, num_classes=3).item() == pytest.approx(0.0, abs=1e-3)
+
+
+def test_dice_loss_prefers_the_better_prediction_and_has_a_gradient():
+    from parts.h_computer_vision.h2_unet_segmentation import dice_loss
+
+    targets = torch.tensor([[[0, 0], [1, 1]]])
+    good = (torch.nn.functional.one_hot(targets, 2).permute(0, 3, 1, 2).float() * 4.0).requires_grad_(True)
+    bad = torch.zeros_like(good).requires_grad_(True)
+    better, worse = dice_loss(good, targets, num_classes=2), dice_loss(bad, targets, num_classes=2)
+    assert better.item() < worse.item()
+    better.backward()
+    assert good.grad is not None and good.grad.abs().sum() > 0, "soft Dice must be differentiable"
+
+
+def test_unknown_loss_is_rejected():
+    from parts.h_computer_vision.h2_unet_segmentation import segmentation_loss
+
+    targets = torch.zeros(1, 2, 2, dtype=torch.long)
+    with pytest.raises(ValueError, match="unknown loss"):
+        segmentation_loss(torch.zeros(1, 2, 2, 2), targets, kind="focal", num_classes=2)
+
+
+# -- H2: the boundary band ---------------------------------------------------
+
+
+def test_boundary_band_finds_the_perimeter_not_the_interior():
+    from parts.h_computer_vision.h2_unet_segmentation import boundary_band
+
+    mask = np.zeros((1, 11, 11), dtype=np.int64)
+    mask[0, 3:8, 3:8] = 1  # a 5x5 square
+    band = boundary_band(mask, band=1)
+    assert band[0, 3, 3], "a corner of the square is on the boundary"
+    assert band[0, 2, 3], "the pixel just outside is on the boundary"
+    assert not band[0, 5, 5], "the centre of the square is not a boundary"
+    assert not band[0, 0, 0], "far background is not a boundary"
+
+
+def test_wider_band_covers_more_pixels():
+    from parts.h_computer_vision.h2_unet_segmentation import boundary_band
+
+    mask = np.zeros((1, 21, 21), dtype=np.int64)
+    mask[0, 6:15, 6:15] = 1
+    counts = [boundary_band(mask, band=width).sum() for width in (1, 2, 3)]
+    assert counts[0] < counts[1] < counts[2]
+
+
+def test_uniform_mask_has_no_boundary():
+    from parts.h_computer_vision.h2_unet_segmentation import boundary_band
+
+    assert not boundary_band(np.ones((2, 8, 8), dtype=np.int64), band=2).any()
+
+
+def test_unet_skips_change_capacity_but_not_output_shape():
+    from parts.h_computer_vision.h2_unet_segmentation import make_unet
+
+    from mlladder import torchkit
+
+    images = torch.randn(2, 1, 32, 32)
+    with_skips = make_unet(num_classes=4, width=8, skips=True)()
+    without = make_unet(num_classes=4, width=8, skips=False)()
+    assert with_skips(images).shape == without(images).shape == (2, 4, 32, 32)
+    # The no-skip arm keeps its decoder; only the concatenated channels go.
+    assert torchkit.count_parameters(without) < torchkit.count_parameters(with_skips)
+    assert torchkit.count_parameters(without) > 0.8 * torchkit.count_parameters(with_skips)
+
+
+def test_h2_runs():
+    from parts.h_computer_vision.h2_unet_segmentation import main
+
+    assert (
+        main(
+            [
+                "--train-images",
+                "60",
+                "--test-images",
+                "40",
+                "--epochs",
+                "1",
+                "--width",
+                "4",
+                "--losses",
+                "cross_entropy",
+                "dice",
             ]
         )
         == 0
