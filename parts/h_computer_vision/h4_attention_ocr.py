@@ -29,6 +29,7 @@ Needs ``uv sync --extra torch --extra ocr``. Run with ``ladder run H4``.
 from __future__ import annotations
 
 import time
+from functools import lru_cache
 
 import numpy as np
 
@@ -164,26 +165,46 @@ def error_breakdown(predictions: list[str], truths: list[str]) -> dict[str, floa
     }
 
 
-def trocr_transcribe(lines: list[synth.TextLine], *, model_name: str, batch_size: int):
+@lru_cache(maxsize=2)
+def load_trocr(model_name: str, device_key: str):
+    """Load TrOCR once per (model, device) and keep it.
+
+    Cached because this rung reads three splits per seed and a sweep runs three
+    seeds: without it the 62M-parameter checkpoint is re-read from disk nine
+    times for no benefit. ``device_key`` is a string rather than a
+    ``torch.device`` so the cache key stays hashable and stable.
+    """
+    from transformers import TrOCRProcessor, VisionEncoderDecoderModel
+
+    processor = TrOCRProcessor.from_pretrained(model_name)
+    model = VisionEncoderDecoderModel.from_pretrained(model_name).to(device_key)
+    model.eval()
+    return processor, model
+
+
+def trocr_transcribe(lines: list[synth.TextLine], *, model_name: str, batch_size: int, device):
     """Zero-shot TrOCR. Returns the transcriptions, upper-cased for comparison.
 
     Case folding is not cheating: the synthetic corpus is upper case only, so a
     model that reads "Token" has read the glyphs correctly and merely disagrees
     about a convention this dataset does not test. Scoring it case-sensitively
     would measure the dataset's quirk rather than the model's OCR.
+
+    The pixel values have to be moved to the model's device explicitly. Leaving
+    them on the CPU does not fail — ``transformers`` raises nothing and the
+    model simply runs where its inputs are — so the first version of this
+    silently did all 62M parameters' worth of inference on CPU while sitting on
+    an idle T4.
     """
     from PIL import Image
-    from transformers import TrOCRProcessor, VisionEncoderDecoderModel
 
-    processor = TrOCRProcessor.from_pretrained(model_name)
-    model = VisionEncoderDecoderModel.from_pretrained(model_name)
-    model.eval()
+    processor, model = load_trocr(model_name, str(device))
 
     outputs: list[str] = []
     for start in range(0, len(lines), batch_size):
         batch = lines[start : start + batch_size]
         images = [Image.fromarray(line.image).convert("RGB") for line in batch]
-        pixel_values = processor(images=images, return_tensors="pt").pixel_values
+        pixel_values = processor(images=images, return_tensors="pt").pixel_values.to(device)
         generated = model.generate(pixel_values, max_new_tokens=32)
         outputs.extend(text.strip().upper() for text in processor.batch_decode(generated, skip_special_tokens=True))
     return outputs, sum(parameter.numel() for parameter in model.parameters())
@@ -379,7 +400,7 @@ def run(exp: Experiment) -> dict[str, float]:
             truths = [line.text for line in lines]
             started = time.perf_counter()
             predictions, parameters = trocr_transcribe(
-                lines, model_name=exp["trocr_model"], batch_size=exp["trocr_batch"]
+                lines, model_name=exp["trocr_model"], batch_size=exp["trocr_batch"], device=device
             )
             summary[f"{split_name}/trocr/cer"] = character_error_rate(predictions, truths)
             summary[f"{split_name}/trocr/wer"] = word_error_rate(predictions, truths)
