@@ -154,6 +154,17 @@ def mean_average_precision(
 # -- the detector ------------------------------------------------------------
 
 
+def as_pair(value: int | tuple[int, int]) -> tuple[int, int]:
+    """Accept a square size/grid as a scalar, or (height, width) explicitly.
+
+    H1's scenes are square, but H5 detects text lines on 160x256 pages with the
+    same code. Keeping one grid implementation means H5 inherits this rung's
+    encode/decode round-trip test rather than growing its own copy to get
+    subtly wrong.
+    """
+    return (value, value) if isinstance(value, int) else (int(value[0]), int(value[1]))
+
+
 def make_detector(*, grid: int, width: int, num_classes: int):
     """A one-box-per-cell detector: conv stack down to ``grid``, then a head.
 
@@ -198,7 +209,7 @@ def make_detector(*, grid: int, width: int, num_classes: int):
     return Detector
 
 
-def encode_targets(scenes: list[synth.ShapeScene], *, grid: int, size: int, num_classes: int):
+def encode_targets(scenes, *, grid: int | tuple[int, int], size: int | tuple[int, int], num_classes: int):
     """Assign each ground-truth box to the cell holding its centre.
 
     This is YOLOv1's assignment rule and it has a consequence worth measuring:
@@ -207,47 +218,54 @@ def encode_targets(scenes: list[synth.ShapeScene], *, grid: int, size: int, num_
     the ceiling it imposes is visible rather than mysterious.
     """
     torch = vision.require_torch()
-    cell = size / grid
-    objectness = torch.zeros(len(scenes), grid, grid)
-    boxes = torch.zeros(len(scenes), grid, grid, 4)
-    labels = torch.zeros(len(scenes), grid, grid, dtype=torch.long)
+    grid_rows, grid_columns = as_pair(grid)
+    height, width = as_pair(size)
+    cell_y, cell_x = height / grid_rows, width / grid_columns
+    objectness = torch.zeros(len(scenes), grid_rows, grid_columns)
+    boxes = torch.zeros(len(scenes), grid_rows, grid_columns, 4)
+    labels = torch.zeros(len(scenes), grid_rows, grid_columns, dtype=torch.long)
     collisions = 0
     for index, scene in enumerate(scenes):
-        for (x1, y1, x2, y2), label in zip(scene.boxes, scene.labels, strict=True):
+        scene_labels = getattr(scene, "labels", None)
+        if scene_labels is None:  # single-class detection, as in H5
+            scene_labels = np.zeros(len(scene.boxes), dtype=np.int64)
+        for (x1, y1, x2, y2), label in zip(scene.boxes, scene_labels, strict=True):
             centre_x, centre_y = (x1 + x2) / 2, (y1 + y2) / 2
-            column, row = int(centre_x // cell), int(centre_y // cell)
-            column, row = min(column, grid - 1), min(row, grid - 1)
+            column, row = int(centre_x // cell_x), int(centre_y // cell_y)
+            column, row = min(column, grid_columns - 1), min(row, grid_rows - 1)
             if objectness[index, row, column] == 1:
                 collisions += 1
             objectness[index, row, column] = 1.0
             boxes[index, row, column] = torch.tensor(
                 [
-                    centre_x / cell - column,  # offset inside the cell, in [0, 1)
-                    centre_y / cell - row,
-                    np.log(max(x2 - x1, 1.0) / size),  # log-size, so scale is additive
-                    np.log(max(y2 - y1, 1.0) / size),
+                    centre_x / cell_x - column,  # offset inside the cell, in [0, 1)
+                    centre_y / cell_y - row,
+                    np.log(max(x2 - x1, 1.0) / width),  # log-size, so scale is additive
+                    np.log(max(y2 - y1, 1.0) / height),
                 ]
             )
             labels[index, row, column] = int(label)
     return objectness, boxes, labels, collisions
 
 
-def decode(raw, *, grid: int, size: int, score_threshold: float):
+def decode(raw, *, grid: int | tuple[int, int], size: int | tuple[int, int], score_threshold: float):
     """Turn the grid tensor back into per-image boxes, scores and classes."""
     torch = vision.require_torch()
-    cell = size / grid
+    grid_rows, grid_columns = as_pair(grid)
+    height, width = as_pair(size)
+    cell_y, cell_x = height / grid_rows, width / grid_columns
     objectness = torch.sigmoid(raw[..., 0])
     offsets = torch.sigmoid(raw[..., 1:3])
     log_size = raw[..., 3:5]
     class_scores = torch.softmax(raw[..., 5:], dim=-1)
     best_class = class_scores.argmax(dim=-1)
 
-    rows = torch.arange(grid, device=raw.device).view(1, grid, 1)
-    columns = torch.arange(grid, device=raw.device).view(1, 1, grid)
-    centre_x = (columns + offsets[..., 0]) * cell
-    centre_y = (rows + offsets[..., 1]) * cell
-    box_width = torch.exp(log_size[..., 0]) * size
-    box_height = torch.exp(log_size[..., 1]) * size
+    rows = torch.arange(grid_rows, device=raw.device).view(1, grid_rows, 1)
+    columns = torch.arange(grid_columns, device=raw.device).view(1, 1, grid_columns)
+    centre_x = (columns + offsets[..., 0]) * cell_x
+    centre_y = (rows + offsets[..., 1]) * cell_y
+    box_width = torch.exp(log_size[..., 0]) * width
+    box_height = torch.exp(log_size[..., 1]) * height
     boxes = torch.stack(
         [centre_x - box_width / 2, centre_y - box_height / 2, centre_x + box_width / 2, centre_y + box_height / 2],
         dim=-1,

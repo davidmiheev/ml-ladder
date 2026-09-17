@@ -139,3 +139,45 @@ def test_document_boxes_contain_ink():
         for x1, y1, x2, y2 in page.boxes.astype(int):
             crop = page.image[y1:y2, x1:x2]
             assert (crop < 160).mean() > 0.01, "box holds no text"
+
+
+# -- reproducibility across environments -------------------------------------
+
+# Rendered-pixel digests, verified identical on two machines with different
+# library versions: locally (matplotlib 3.11.2, Pillow 12.3.0) and on a Colab
+# T4 (matplotlib 3.10.0, Pillow 11.3.0). Every number in part H is computed
+# from these bytes, so if a dependency bump changes them the committed metrics
+# stop being reproducible and the part needs re-sweeping — which is exactly
+# what a failure here means. Re-bless deliberately, never reflexively.
+RENDER_DIGESTS = {
+    "DejaVuSans.ttf": "686abf10572506da",
+    "cmr10.ttf": "471df2226a487735",
+}
+SCENE_DIGEST = "99f78e4f52286ea7"
+PAGE_DIGEST = "4d6dcb9a3e01d4bd"
+
+
+def digest(array: np.ndarray) -> str:
+    import hashlib
+
+    return hashlib.sha256(array.tobytes()).hexdigest()[:16]
+
+
+def test_rendered_text_is_byte_identical_across_environments():
+    for font, expected in RENDER_DIGESTS.items():
+        strip = synth.render_text("MODEL BATCH", font=font, height=32, width=128, noise=0.0)
+        assert digest(strip) == expected, (
+            f"{font} renders differently here; part H's committed numbers were produced from the "
+            f"old bytes and would need a re-sweep"
+        )
+
+
+def test_generated_scenes_and_pages_are_byte_identical_across_environments():
+    assert digest(synth.shapes(3, rng=0)[0].image) == SCENE_DIGEST
+    assert digest(synth.documents(2, rng=0)[0].image) == PAGE_DIGEST
+
+
+def test_every_declared_font_is_actually_present():
+    """A missing face would silently change which letterforms a split contains."""
+    for font in synth.TRAIN_FONTS + synth.HELD_OUT_FONTS:
+        assert (synth.font_dir() / font).exists(), f"{font} is missing from {synth.font_dir()}"
