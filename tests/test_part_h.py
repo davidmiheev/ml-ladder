@@ -638,3 +638,170 @@ def test_h4_runs_without_the_pretrained_arm():
         )
         == 0
     )
+
+
+# -- H5: the two-stage pipeline ---------------------------------------------
+
+
+def test_crop_line_clamps_a_box_to_the_page():
+    """A detector early in training emits boxes off the page and inverted ones."""
+    from parts.h_computer_vision.h5_document_pipeline import crop_line
+
+    page = np.full((40, 60), 200, dtype=np.uint8)
+    for bad_box in ([-10, -10, 5, 5], [55, 35, 200, 200], [30, 20, 30, 20], [50, 30, 10, 5]):
+        crop = crop_line(page, bad_box, height=32, width=128)
+        assert crop.shape == (32, 128), f"{bad_box} produced {crop.shape}"
+        assert crop.dtype == np.uint8
+
+
+def test_crop_line_recovers_the_region_it_is_given():
+    from parts.h_computer_vision.h5_document_pipeline import crop_line
+
+    page = np.full((40, 60), 255, dtype=np.uint8)
+    page[10:20, 15:35] = 0  # a dark block
+    inside = crop_line(page, [15, 10, 35, 20], height=32, width=128)
+    outside = crop_line(page, [40, 25, 58, 38], height=32, width=128)
+    assert inside.mean() < 10, "the dark block should fill the crop"
+    assert outside.mean() > 245, "blank page should crop to blank"
+
+
+def test_jitter_moves_every_edge_and_respects_its_bound():
+    from parts.h_computer_vision.h5_document_pipeline import jitter_box
+
+    rng = np.random.default_rng(0)
+    box = np.array([10.0, 20.0, 50.0, 52.0], dtype=np.float32)
+    for _ in range(50):
+        jittered = jitter_box(box, pixels=3.0, rng=rng)
+        assert np.abs(jittered - box).max() <= 3.0 + 1e-6
+    # Zero jitter must be the identity, or the sweep's baseline is not a baseline.
+    assert np.array_equal(jitter_box(box, pixels=0.0, rng=rng), box)
+
+
+def test_jitter_perturbs_edges_independently():
+    """A uniform shift keeps the text framed; independent edges reframe it."""
+    from parts.h_computer_vision.h5_document_pipeline import jitter_box
+
+    rng = np.random.default_rng(1)
+    box = np.array([10.0, 20.0, 50.0, 52.0], dtype=np.float32)
+    widths = [
+        float(jitter_box(box, pixels=4.0, rng=rng)[2] - jitter_box(box, pixels=0.0, rng=rng)[0]) for _ in range(20)
+    ]
+    assert len(set(widths)) > 1, "a shift-only jitter would leave the width unchanged"
+
+
+def test_reading_order_is_top_to_bottom_then_left_to_right():
+    from parts.h_computer_vision.h5_document_pipeline import reading_order
+
+    boxes = np.array(
+        [
+            [100, 60, 200, 92],  # third: lowest
+            [10, 10, 80, 42],  # first: top-left
+            [90, 12, 160, 44],  # second: same band, further right
+        ],
+        dtype=np.float32,
+    )
+    assert reading_order(boxes).tolist() == [1, 2, 0]
+
+
+def test_reading_order_handles_no_boxes():
+    from parts.h_computer_vision.h5_document_pipeline import reading_order
+
+    assert reading_order(np.zeros((0, 4), dtype=np.float32)).tolist() == []
+
+
+def test_page_transcript_joins_in_reading_order():
+    from parts.h_computer_vision.h5_document_pipeline import page_transcript
+
+    boxes = np.array([[0, 40, 50, 72], [0, 0, 50, 32]], dtype=np.float32)
+    assert page_transcript(["SECOND", "FIRST"], boxes) == "FIRST SECOND"
+
+
+def test_page_transcript_penalises_a_missed_line_as_deletions():
+    """The reason the end-to-end metric is page-level and not per-line."""
+    from parts.h_computer_vision.h3_crnn_ctc import character_error_rate
+    from parts.h_computer_vision.h5_document_pipeline import page_transcript
+
+    boxes = np.array([[0, 0, 50, 32], [0, 40, 50, 72]], dtype=np.float32)
+    truth = page_transcript(["ALPHA", "BETA"], boxes)
+    missed = page_transcript(["ALPHA"], boxes[:1])
+    # A per-line score over found lines only would call this perfect.
+    assert character_error_rate([missed], [truth]) > 0.4
+
+
+def test_jitter_at_threshold_interpolates_between_swept_points():
+    from parts.h_computer_vision.h5_document_pipeline import jitter_at_threshold
+
+    pixels = [0.0, 2.0, 4.0]
+    # Crosses 0.05 a quarter of the way from 0 to 2 px: 0.0 -> 0.2 over 2 px.
+    assert jitter_at_threshold(pixels, [0.0, 0.2, 0.4], threshold=0.05) == pytest.approx(0.5)
+
+
+def test_jitter_at_threshold_reports_the_edges_honestly():
+    from parts.h_computer_vision.h5_document_pipeline import jitter_at_threshold
+
+    pixels = [0.0, 2.0, 4.0]
+    # Never crosses: robust throughout the sweep.
+    assert jitter_at_threshold(pixels, [0.01, 0.02, 0.03], threshold=0.05) == 4.0
+    # Already broken with no jitter at all.
+    assert jitter_at_threshold(pixels, [0.9, 0.9, 0.9], threshold=0.05) == 0.0
+
+
+def test_rectangular_pages_round_trip_through_the_grid():
+    """H5 reuses H1's grid on 160x256 pages, so the non-square path needs the test too."""
+    from parts.h_computer_vision.h1_detection_from_scratch import decode, encode_targets, iou_matrix
+
+    from mlladder import synth
+
+    pages = synth.documents(5, rng=21)
+    grid, size = (20, 32), (160, 256)
+    objectness, boxes, _labels, _collisions = encode_targets(pages, grid=grid, size=size, num_classes=1)
+
+    raw = torch.zeros(len(pages), grid[0], grid[1], 6)
+    raw[..., 0] = torch.where(objectness > 0.5, 20.0, -20.0)
+    raw[..., 1:3] = torch.logit(boxes[..., 0:2].clamp(1e-4, 1 - 1e-4))
+    raw[..., 3:5] = boxes[..., 2:4]
+
+    for (decoded, _scores, _classes), page in zip(
+        decode(raw, grid=grid, size=size, score_threshold=0.5), pages, strict=True
+    ):
+        assert len(decoded) == len(page.boxes)
+        overlaps = iou_matrix(decoded.astype(np.float32), page.boxes)
+        assert overlaps.max(axis=1).min() > 0.99, "rectangular grid arithmetic does not round-trip"
+
+
+def test_as_pair_accepts_a_scalar_or_a_shape():
+    from parts.h_computer_vision.h1_detection_from_scratch import as_pair
+
+    assert as_pair(8) == (8, 8)
+    assert as_pair((20, 32)) == (20, 32)
+
+
+def test_h5_runs():
+    from parts.h_computer_vision.h5_document_pipeline import main
+
+    assert (
+        main(
+            [
+                "--train-pages",
+                "40",
+                "--test-pages",
+                "20",
+                "--detector-epochs",
+                "1",
+                "--recognizer-epochs",
+                "1",
+                "--detector-width",
+                "4",
+                "--recognizer-channels",
+                "4",
+                "--recognizer-hidden",
+                "16",
+                "--jitter-pixels",
+                "0",
+                "4",
+                "--augment-copies",
+                "1",
+            ]
+        )
+        == 0
+    )

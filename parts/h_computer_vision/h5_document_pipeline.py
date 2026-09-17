@@ -121,6 +121,27 @@ def page_transcript(texts: list[str], boxes: NDArray[np.float32]) -> str:
     return " ".join(texts[index] for index in order)
 
 
+def jitter_at_threshold(pixels: list[float], errors: list[float], *, threshold: float) -> float:
+    """The jitter magnitude at which CER first crosses ``threshold``.
+
+    Linearly interpolated between the two swept points that straddle it, so
+    the answer is not quantised to the sweep grid. Returns the largest swept
+    value when the curve never crosses (the recognizer is robust throughout)
+    and 0.0 when it is already above threshold with no jitter at all.
+    """
+    for index, (pixel, error) in enumerate(zip(pixels, errors, strict=True)):
+        if error < threshold:
+            continue
+        if index == 0:
+            return 0.0
+        previous_pixel, previous_error = pixels[index - 1], errors[index - 1]
+        span = error - previous_error
+        if span <= 0:
+            return float(previous_pixel)
+        return float(previous_pixel + (threshold - previous_error) / span * (pixel - previous_pixel))
+    return float(max(pixels))
+
+
 @experiment(
     "h5_document_pipeline",
     defaults={
@@ -144,6 +165,10 @@ def page_transcript(texts: list[str], boxes: NDArray[np.float32]) -> str:
         "nms_threshold": 0.3,
         "match_iou": 0.5,
         "jitter_pixels": [0.0, 2.0, 4.0, 8.0, 16.0],
+        # The fix the diagnosis implies: show the recognizer misframed crops
+        # during training. Set --augment-copies 0 to run the clean arm alone.
+        "augment_jitter": 4.0,
+        "augment_copies": 2,
     },
     description="Detect text lines then recognize them, attributing page-level error to each stage.",
 )
@@ -213,92 +238,104 @@ def run(exp: Experiment) -> dict[str, float]:
     curves["detector"] = detector_losses
     summary["detector/parameters"] = float(torchkit.count_parameters(detector))
 
-    # -- stage 2: the recognizer, trained on ground-truth crops --------------
-    # Training on ground-truth crops and testing on detected ones is the whole
-    # point: the distribution shift between them *is* the detector's error.
-    train_crops, train_texts = [], []
-    for page in train_pages:
-        for box, text in zip(page.boxes, page.texts, strict=True):
-            train_crops.append(crop_line(page.image, box, height=exp["line_height"], width=exp["crop_width"]))
-            train_texts.append(text)
-    print(f"[h5] recognizer trains on {len(train_crops)} ground-truth crops")
-
+    # -- stage 2: the recognizer --------------------------------------------
+    # The clean arm trains on ground-truth crops only, so the shift between
+    # its training data and the detector's output *is* the detector's error.
+    # The augmented arm adds jittered copies of the same lines, which is the
+    # standard fix; training both is how the diagnosis gets tested rather
+    # than just stated.
     num_symbols = len(synth.ALPHABET) + 2
-    crop_stack = np.stack(train_crops).astype(np.float32) / 255.0
-    x_crops = torch.from_numpy(1.0 - crop_stack).unsqueeze(1).to(device)
-    targets = [encode_text(text) for text in train_texts]
-    target_lengths = torch.tensor([len(target) for target in targets], dtype=torch.long, device=device)
-    flat_targets = torch.tensor([symbol for target in targets for symbol in target], dtype=torch.long, device=device)
-    offsets = torch.cumsum(torch.cat([torch.zeros(1, dtype=torch.long, device=device), target_lengths]), dim=0)
 
-    torchkit.seed_torch(exp.seed)
-    recognizer = make_crnn(
-        num_symbols=num_symbols, channels=exp["recognizer_channels"], hidden=exp["recognizer_hidden"]
-    )().to(device)
-    optimizer = torch.optim.AdamW(recognizer.parameters(), lr=exp["recognizer_lr"], weight_decay=1e-4)
-    criterion = torch.nn.CTCLoss(blank=BLANK, zero_infinity=True)
-    recognizer_losses: list[float] = []
-    for epoch in range(1, exp["recognizer_epochs"] + 1):
-        recognizer.train()
-        permutation = torch.randperm(len(x_crops), device=device)
-        epoch_losses = []
-        for start in range(0, len(x_crops), 64):
-            index = permutation[start : start + 64]
-            logits = recognizer(x_crops[index])
-            log_probabilities = torch.log_softmax(logits, dim=-1).permute(1, 0, 2)
-            batch_targets = torch.cat([flat_targets[offsets[i] : offsets[i + 1]] for i in index])
-            input_lengths = torch.full((len(index),), logits.shape[1], dtype=torch.long, device=device)
-            loss = criterion(log_probabilities, batch_targets, input_lengths, target_lengths[index])
-            optimizer.zero_grad(set_to_none=True)
-            loss.backward()
-            torch.nn.utils.clip_grad_norm_(recognizer.parameters(), 5.0)
-            optimizer.step()
-            epoch_losses.append(loss.item())
-        recognizer_losses.append(float(np.mean(epoch_losses)))
-        if epoch % max(exp["recognizer_epochs"] // 3, 1) == 0:
-            print(f"[h5] recognizer epoch {epoch:>3}  ctc loss={recognizer_losses[-1]:.4f}")
-    curves["recognizer"] = recognizer_losses
+    def collect_crops(*, jitter: float, copies: int):
+        crops, texts = [], []
+        jitter_rng = np.random.default_rng(exp.seed + 1)
+        for page in train_pages:
+            for box, text in zip(page.boxes, page.texts, strict=True):
+                crops.append(crop_line(page.image, box, height=exp["line_height"], width=exp["crop_width"]))
+                texts.append(text)
+                for _ in range(copies):
+                    crops.append(
+                        crop_line(
+                            page.image,
+                            jitter_box(box, pixels=jitter, rng=jitter_rng),
+                            height=exp["line_height"],
+                            width=exp["crop_width"],
+                        )
+                    )
+                    texts.append(text)
+        return crops, texts
+
+    def train_recognizer(name: str, crops, texts):
+        crop_stack = np.stack(crops).astype(np.float32) / 255.0
+        x_crops = torch.from_numpy(1.0 - crop_stack).unsqueeze(1).to(device)
+        targets = [encode_text(text) for text in texts]
+        target_lengths = torch.tensor([len(target) for target in targets], dtype=torch.long, device=device)
+        flat_targets = torch.tensor(
+            [symbol for target in targets for symbol in target], dtype=torch.long, device=device
+        )
+        offsets = torch.cumsum(torch.cat([torch.zeros(1, dtype=torch.long, device=device), target_lengths]), dim=0)
+
+        torchkit.seed_torch(exp.seed)
+        model = make_crnn(
+            num_symbols=num_symbols, channels=exp["recognizer_channels"], hidden=exp["recognizer_hidden"]
+        )().to(device)
+        optimizer = torch.optim.AdamW(model.parameters(), lr=exp["recognizer_lr"], weight_decay=1e-4)
+        criterion = torch.nn.CTCLoss(blank=BLANK, zero_infinity=True)
+        losses: list[float] = []
+        for epoch in range(1, exp["recognizer_epochs"] + 1):
+            model.train()
+            permutation = torch.randperm(len(x_crops), device=device)
+            epoch_losses = []
+            for start in range(0, len(x_crops), 64):
+                index = permutation[start : start + 64]
+                logits = model(x_crops[index])
+                log_probabilities = torch.log_softmax(logits, dim=-1).permute(1, 0, 2)
+                batch_targets = torch.cat([flat_targets[offsets[i] : offsets[i + 1]] for i in index])
+                input_lengths = torch.full((len(index),), logits.shape[1], dtype=torch.long, device=device)
+                loss = criterion(log_probabilities, batch_targets, input_lengths, target_lengths[index])
+                optimizer.zero_grad(set_to_none=True)
+                loss.backward()
+                torch.nn.utils.clip_grad_norm_(model.parameters(), 5.0)
+                optimizer.step()
+                epoch_losses.append(loss.item())
+            losses.append(float(np.mean(epoch_losses)))
+            if epoch % max(exp["recognizer_epochs"] // 3, 1) == 0:
+                print(f"[h5] {name} epoch {epoch:>3}  ctc loss={losses[-1]:.4f}")
+        curves[name] = losses
+        return model
+
+    clean_crops, clean_texts = collect_crops(jitter=0.0, copies=0)
+    print(f"[h5] clean recognizer trains on {len(clean_crops)} ground-truth crops")
+    recognizer = train_recognizer("recognizer", clean_crops, clean_texts)
+    recognizers = {"clean": recognizer}
+
+    if exp["augment_copies"] > 0:
+        augmented_crops, augmented_texts = collect_crops(jitter=exp["augment_jitter"], copies=exp["augment_copies"])
+        print(
+            f"[h5] augmented recognizer trains on {len(augmented_crops)} crops "
+            f"({exp['augment_copies']} jittered copies at +-{exp['augment_jitter']}px per line)"
+        )
+        recognizers["augmented"] = train_recognizer("recognizer_augmented", augmented_crops, augmented_texts)
     summary["recognizer/parameters"] = float(torchkit.count_parameters(recognizer))
 
-    # -- arm 1: ground-truth crops (detection assumed perfect) ---------------
+    # -- detection runs once; it does not depend on which recognizer reads it -
     truth_pages = [page_transcript(list(page.texts), page.boxes) for page in test_pages]
+    gt_lines = [text for page in test_pages for text in page.texts]
     gt_crops, gt_index = [], []
     for page_id, page in enumerate(test_pages):
         for box in page.boxes:
             gt_crops.append(crop_line(page.image, box, height=exp["line_height"], width=exp["crop_width"]))
             gt_index.append(page_id)
-    gt_predictions = read_crops(recognizer, gt_crops, device=device)
-    gt_lines = [text for page in test_pages for text in page.texts]
-    summary["oracle/line_cer"] = character_error_rate(gt_predictions, gt_lines)
-    summary["oracle/line_wer"] = word_error_rate(gt_predictions, gt_lines)
 
-    per_page: dict[int, list[str]] = {}
-    for page_id, prediction in zip(gt_index, gt_predictions, strict=True):
-        per_page.setdefault(page_id, []).append(prediction)
-    oracle_pages = [
-        page_transcript(per_page.get(page_id, []), test_pages[page_id].boxes) for page_id in range(len(test_pages))
-    ]
-    summary["oracle/page_cer"] = character_error_rate(oracle_pages, truth_pages)
-    summary["oracle/page_wer"] = word_error_rate(oracle_pages, truth_pages)
-    print(
-        f"[h5] arm 1 (ground-truth crops):  line CER={summary['oracle/line_cer']:.4f}  "
-        f"page CER={summary['oracle/page_cer']:.4f}"
-    )
-
-    # -- arm 2: the real pipeline --------------------------------------------
     detector.eval()
     with torch.no_grad():
         raw = torch.cat([detector(chunk) for chunk in x_test_pages.split(64)])
     detections = decode(raw, grid=grid, size=page_shape, score_threshold=exp["score_threshold"])
 
-    pipeline_pages: list[str] = []
-    matched_ious: list[float] = []
-    matched_predictions: list[str] = []
-    matched_truths: list[str] = []
     kept_per_page: list[tuple[NDArray[np.float32], NDArray[np.float32]]] = []
+    matched_ious: list[float] = []
+    matches: list[tuple[int, int, int]] = []  # (page, detection row, truth column)
     found = missed = spurious = 0
-    example_pages: list[tuple[int, NDArray[np.float32], list[str]]] = []
-
     for page_id, (page, (candidate_boxes, scores, _classes)) in enumerate(zip(test_pages, detections, strict=True)):
         if len(candidate_boxes):
             keep = nms(candidate_boxes, scores, exp["nms_threshold"])
@@ -308,16 +345,7 @@ def run(exp: Experiment) -> dict[str, float]:
             kept_scores = np.zeros(0, dtype=np.float32)
         kept_per_page.append((kept_boxes, kept_scores))
 
-        crops = [crop_line(page.image, box, height=exp["line_height"], width=exp["crop_width"]) for box in kept_boxes]
-        texts = read_crops(recognizer, crops, device=device)
-        pipeline_pages.append(page_transcript(texts, kept_boxes))
-        if len(example_pages) < 4:
-            example_pages.append((page_id, kept_boxes, texts))
-
         # Per-line accounting, which separates "never found" from "found badly".
-        # A ground-truth line is found when some surviving box clears
-        # ``match_iou``; the detection that claims it also supplies the text
-        # that line's own CER is computed from.
         overlaps = iou_matrix(kept_boxes, page.boxes)
         claimed: set[int] = set()
         for column in range(len(page.boxes)):
@@ -327,21 +355,15 @@ def run(exp: Experiment) -> dict[str, float]:
                 found += 1
                 row = int(np.argmax(overlaps[:, column]))
                 claimed.add(row)
-                matched_predictions.append(texts[row])
-                matched_truths.append(page.texts[column])
+                matches.append((page_id, row, column))
             else:
                 missed += 1
         spurious += len(kept_boxes) - len(claimed)
 
-    summary["pipeline/page_cer"] = character_error_rate(pipeline_pages, truth_pages)
-    summary["pipeline/page_wer"] = word_error_rate(pipeline_pages, truth_pages)
     summary["detector/recall@match"] = found / max(found + missed, 1)
     summary["detector/spurious_per_page"] = spurious / len(test_pages)
     summary["detector/matched_iou_mean"] = float(np.mean(matched_ious)) if matched_ious else 0.0
-    if matched_truths:
-        # Recognition quality on the lines detection actually found — the
-        # pipeline's error minus everything caused by missing a line outright.
-        summary["pipeline/matched_line_cer"] = character_error_rate(matched_predictions, matched_truths)
+    summary["detector/boxes_per_page"] = float(np.mean([len(kept) for kept, _ in kept_per_page]))
     map_predictions = [
         (page_id, 0, float(score), box)
         for page_id, (kept, kept_scores) in enumerate(kept_per_page)
@@ -352,84 +374,153 @@ def run(exp: Experiment) -> dict[str, float]:
         map_predictions, map_truths, num_classes=1, iou_threshold=0.5
     )
     print(
-        f"[h5] arm 2 (detected crops):      page CER={summary['pipeline/page_cer']:.4f}  "
-        f"recall={summary['detector/recall@match']:.4f}  mAP@0.5={summary['detector/mAP@0.5']:.4f}  "
-        f"matched IoU={summary['detector/matched_iou_mean']:.3f}  spurious/page={summary['detector/spurious_per_page']:.2f}"
+        f"[h5] detector: recall={summary['detector/recall@match']:.4f}  "
+        f"mAP@0.5={summary['detector/mAP@0.5']:.4f}  matched IoU={summary['detector/matched_iou_mean']:.3f}  "
+        f"boxes/page={summary['detector/boxes_per_page']:.2f} (truth {len(gt_lines) / len(test_pages):.2f})  "
+        f"spurious/page={summary['detector/spurious_per_page']:.2f}"
     )
 
-    # -- the attribution -----------------------------------------------------
-    summary["detection_cost/page_cer"] = summary["pipeline/page_cer"] - summary["oracle/page_cer"]
-    if summary["pipeline/page_cer"] > 0:
-        summary["detection_share_of_error"] = summary["detection_cost/page_cer"] / summary["pipeline/page_cer"]
-    print(
-        f"[h5] attribution: recognizer alone {summary['oracle/page_cer']:.4f} CER, "
-        f"pipeline {summary['pipeline/page_cer']:.4f}, so detection costs "
-        f"{summary['detection_cost/page_cer']:+.4f}"
-        + (
-            f" ({summary['detection_share_of_error']:.0%} of the total)"
-            if "detection_share_of_error" in summary
-            else ""
-        )
-    )
+    # -- the three arms, for each recognizer ---------------------------------
+    example_pages: list[tuple[int, NDArray[np.float32], list[str]]] = []
+    jitter_curves: dict[str, list[float]] = {}
+    pipeline_by_arm: dict[str, list[str]] = {}
 
-    # -- arm 3: jittered ground-truth crops, the detector removed ------------
-    jitter_curve: list[float] = []
-    for pixels in exp["jitter_pixels"]:
-        jitter_rng = np.random.default_rng(exp.seed)
-        crops = [
-            crop_line(
-                test_pages[page_id].image,
-                jitter_box(box, pixels=pixels, rng=jitter_rng),
-                height=exp["line_height"],
-                width=exp["crop_width"],
-            )
-            for page_id, page in enumerate(test_pages)
-            for box in page.boxes
+    for arm, model in recognizers.items():
+        # The clean arm owns the unsuffixed metric names, so the headline keys
+        # stay stable whether or not the augmented arm is run at all.
+        tag = "" if arm == "clean" else f"_{arm}"
+        prefix, pipeline_prefix, jitter_prefix = f"oracle{tag}", f"pipeline{tag}", f"jitter{tag}"
+
+        # arm 1: ground-truth crops, detection assumed perfect.
+        gt_predictions = read_crops(model, gt_crops, device=device)
+        summary[f"{prefix}/line_cer"] = character_error_rate(gt_predictions, gt_lines)
+        summary[f"{prefix}/line_wer"] = word_error_rate(gt_predictions, gt_lines)
+        per_page: dict[int, list[str]] = {}
+        for page_id, prediction in zip(gt_index, gt_predictions, strict=True):
+            per_page.setdefault(page_id, []).append(prediction)
+        oracle_pages = [
+            page_transcript(per_page.get(page_id, []), test_pages[page_id].boxes) for page_id in range(len(test_pages))
         ]
-        predictions = read_crops(recognizer, crops, device=device)
-        error = character_error_rate(predictions, gt_lines)
-        summary[f"jitter/{pixels}/line_cer"] = error
-        jitter_curve.append(error)
-        print(f"[h5] arm 3 jitter +-{pixels:>4.1f}px  line CER={error:.4f}")
+        summary[f"{prefix}/page_cer"] = character_error_rate(oracle_pages, truth_pages)
 
-    # How much crop sloppiness the recognizer tolerates before it breaks:
-    # the smallest jitter that doubles the oracle error.
-    baseline = summary["jitter/0.0/line_cer"] if "jitter/0.0/line_cer" in summary else summary["oracle/line_cer"]
-    tolerated = [
-        pixels for pixels, error in zip(exp["jitter_pixels"], jitter_curve, strict=True) if error <= 2 * baseline + 0.01
-    ]
-    summary["jitter/tolerated_px"] = float(max(tolerated)) if tolerated else 0.0
-    print(f"[h5] recognizer tolerates up to +-{summary['jitter/tolerated_px']:.1f}px of crop error")
+        # arm 2: the real pipeline, on the detections computed above.
+        pipeline_pages: list[str] = []
+        texts_by_page: list[list[str]] = []
+        for page_id, page in enumerate(test_pages):
+            kept_boxes, _ = kept_per_page[page_id]
+            crops = [
+                crop_line(page.image, box, height=exp["line_height"], width=exp["crop_width"]) for box in kept_boxes
+            ]
+            texts = read_crops(model, crops, device=device)
+            texts_by_page.append(texts)
+            pipeline_pages.append(page_transcript(texts, kept_boxes))
+            if arm == "clean" and len(example_pages) < 4:
+                example_pages.append((page_id, kept_boxes, texts))
+        pipeline_by_arm[arm] = pipeline_pages
+        summary[f"{pipeline_prefix}/page_cer"] = character_error_rate(pipeline_pages, truth_pages)
+        summary[f"{pipeline_prefix}/page_wer"] = word_error_rate(pipeline_pages, truth_pages)
+        if matches:
+            # Recognition on the lines detection actually found: the pipeline's
+            # error with everything caused by missing a line removed.
+            summary[f"{pipeline_prefix}/matched_line_cer"] = character_error_rate(
+                [texts_by_page[page_id][row] for page_id, row, _ in matches],
+                [test_pages[page_id].texts[column] for page_id, _, column in matches],
+            )
+
+        summary[f"detection_cost{tag}/page_cer"] = (
+            summary[f"{pipeline_prefix}/page_cer"] - summary[f"{prefix}/page_cer"]
+        )
+        if summary[f"{pipeline_prefix}/page_cer"] > 0:
+            summary[f"detection_share_of_error{tag}"] = (
+                summary[f"detection_cost{tag}/page_cer"] / summary[f"{pipeline_prefix}/page_cer"]
+            )
+        print(
+            f"[h5] {arm:<10} arm1 GT crops page CER={summary[f'{prefix}/page_cer']:.4f}  "
+            f"arm2 pipeline={summary[f'{pipeline_prefix}/page_cer']:.4f}  "
+            f"matched-line={summary.get(f'{pipeline_prefix}/matched_line_cer', float('nan')):.4f}  "
+            f"detection costs {summary[f'detection_cost{tag}/page_cer']:+.4f}"
+        )
+
+        # arm 3: jittered ground-truth crops, the detector out of the loop.
+        curve: list[float] = []
+        for pixels in exp["jitter_pixels"]:
+            jitter_rng = np.random.default_rng(exp.seed)
+            crops = [
+                crop_line(
+                    test_pages[page_id].image,
+                    jitter_box(box, pixels=pixels, rng=jitter_rng),
+                    height=exp["line_height"],
+                    width=exp["crop_width"],
+                )
+                for page_id, page in enumerate(test_pages)
+                for box in page.boxes
+            ]
+            error = character_error_rate(read_crops(model, crops, device=device), gt_lines)
+            summary[f"{jitter_prefix}/{pixels}/line_cer"] = error
+            curve.append(error)
+        jitter_curves[arm] = curve
+        summary[f"{jitter_prefix}/px_at_cer_5pct"] = jitter_at_threshold(exp["jitter_pixels"], curve, threshold=0.05)
+        summary[f"{jitter_prefix}/px_at_cer_20pct"] = jitter_at_threshold(exp["jitter_pixels"], curve, threshold=0.20)
+        print(
+            f"[h5] {arm:<10} arm3 jitter "
+            + "  ".join(f"{p:g}px={e:.4f}" for p, e in zip(exp["jitter_pixels"], curve, strict=True))
+        )
+        print(
+            f"[h5] {arm:<10} passes 5% CER up to +-{summary[f'{jitter_prefix}/px_at_cer_5pct']:.2f}px, "
+            f"20% up to +-{summary[f'{jitter_prefix}/px_at_cer_20pct']:.2f}px"
+        )
+
+    # Did the fix the diagnosis implies actually work?
+    if "augmented" in recognizers:
+        summary["augmentation_gain/pipeline_page_cer"] = (
+            summary["pipeline/page_cer"] - summary["pipeline_augmented/page_cer"]
+        )
+        summary["augmentation_cost/oracle_page_cer"] = summary["oracle_augmented/page_cer"] - summary["oracle/page_cer"]
+        summary["augmentation_gain/tolerated_px"] = (
+            summary["jitter_augmented/px_at_cer_5pct"] - summary["jitter/px_at_cer_5pct"]
+        )
+        print(
+            f"[h5] crop augmentation: pipeline CER {summary['pipeline/page_cer']:.4f} -> "
+            f"{summary['pipeline_augmented/page_cer']:.4f} "
+            f"({summary['augmentation_gain/pipeline_page_cer']:+.4f}), "
+            f"tolerance {summary['jitter/px_at_cer_5pct']:.2f} -> "
+            f"{summary['jitter_augmented/px_at_cer_5pct']:.2f}px, "
+            f"clean-crop cost {summary['augmentation_cost/oracle_page_cer']:+.4f}"
+        )
 
     # -- figures -------------------------------------------------------------
-    exp.log_figure(
-        "training",
-        plotting.plot_curves(
-            curves,
-            x=list(range(1, max(len(values) for values in curves.values()) + 1)),
-            title="Stage losses (different objectives; only the trend is comparable)",
-            xlabel="epoch",
-            ylabel="loss",
-            logy=True,
-        ),
-    )
+    # One figure per stage: they run for different numbers of epochs, and
+    # plot_curves shares a single x axis across its series.
+    for stage, values in curves.items():
+        exp.log_figure(
+            f"training_{stage}",
+            plotting.plot_curves(
+                {stage: values},
+                x=list(range(1, len(values) + 1)),
+                title=f"{stage} loss",
+                xlabel="epoch",
+                ylabel="loss",
+                logy=True,
+            ),
+        )
+    attribution = {"clean\nGT crops": summary["oracle/page_cer"], "clean\npipeline": summary["pipeline/page_cer"]}
+    if "augmented" in recognizers:
+        attribution["augmented\nGT crops"] = summary["oracle_augmented/page_cer"]
+        attribution["augmented\npipeline"] = summary["pipeline_augmented/page_cer"]
     exp.log_figure(
         "attribution",
         plotting.plot_comparison(
-            {
-                "recognizer alone\n(GT crops)": summary["oracle/page_cer"],
-                "full pipeline\n(detected crops)": summary["pipeline/page_cer"],
-            },
-            title="Page-level CER: what detection costs",
+            attribution,
+            title="Page-level CER: what detection costs, and whether augmentation pays it back",
             ylabel="page CER",
         ),
     )
     exp.log_figure(
         "jitter",
         plotting.plot_curves(
-            {"line CER": jitter_curve},
+            {f"{arm} recognizer": curve for arm, curve in jitter_curves.items()},
             x=exp["jitter_pixels"],
-            title="Recognition against simulated detection error (detector not involved)",
+            title="Recognition against simulated crop error (detector not involved)",
             xlabel="per-edge box jitter (px)",
             ylabel="line CER",
             marker="o",
@@ -459,8 +550,8 @@ def run(exp: Experiment) -> dict[str, float]:
 
     print("[h5] example pages (pipeline | truth):")
     for page_id, _, _ in example_pages[:3]:
-        print(f"  {pipeline_pages[page_id]!r}")
-        print(f"  {truth_pages[page_id]!r}")
+        print(f"  got   {pipeline_by_arm['clean'][page_id]!r}")
+        print(f"  truth {truth_pages[page_id]!r}")
     return summary
 
 
