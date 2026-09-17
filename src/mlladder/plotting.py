@@ -257,3 +257,73 @@ def plot_image_grid(images: ArrayLike, *, nrow: int = 8, title: str = "", cmap: 
         fig.suptitle(title)
     fig.tight_layout()
     return fig
+
+
+def plot_boxes(
+    images: ArrayLike,
+    predictions: Sequence[ArrayLike],
+    *,
+    truths: Sequence[ArrayLike] | None = None,
+    labels: Sequence[ArrayLike] | None = None,
+    class_names: Sequence[str] | None = None,
+    scores: Sequence[ArrayLike] | None = None,
+    nrow: int = 4,
+    title: str = "",
+) -> Figure:
+    """Detections over images, with ground truth underneath for comparison.
+
+    Part H's detection rungs are the first ones whose output is not a number
+    per image, and a table of mAP says nothing about *how* a detector is wrong
+    — duplicate boxes, boxes off by a stride, the right box with the wrong
+    class all read the same. Truth is drawn dashed and grey, predictions solid
+    and coloured by class, so the failure mode is visible rather than inferred.
+
+    ``predictions[i]`` is an ``(n, 4)`` array of ``(x1, y1, x2, y2)`` for image
+    ``i``; every other per-image sequence is optional and indexed the same way.
+    """
+    from matplotlib.patches import Rectangle
+
+    use_house_style()
+    batch = np.asarray(images)
+    if batch.ndim == 4 and batch.shape[1] in (1, 3):
+        batch = np.transpose(batch, (0, 2, 3, 1))
+    if batch.ndim == 4 and batch.shape[-1] == 1:
+        batch = batch[..., 0]
+
+    count = len(batch)
+    ncol = min(nrow, count)
+    nrows = int(np.ceil(count / ncol))
+    fig, axes = plt.subplots(nrows, ncol, figsize=(ncol * 2.0, nrows * 2.1), squeeze=False)
+    flat = axes.ravel()
+    for index, ax in enumerate(flat):
+        ax.axis("off")
+        ax.grid(False)
+        if index >= count:
+            continue
+        image = batch[index]
+        ax.imshow(
+            image, cmap="gray" if image.ndim == 2 else None, vmin=0, vmax=255 if image.dtype == np.uint8 else None
+        )
+
+        if truths is not None:
+            for x1, y1, x2, y2 in np.asarray(truths[index]).reshape(-1, 4):
+                ax.add_patch(
+                    Rectangle(
+                        (x1, y1), x2 - x1, y2 - y1, fill=False, edgecolor="#888888", linewidth=1.6, linestyle="--"
+                    )
+                )
+        boxes = np.asarray(predictions[index]).reshape(-1, 4)
+        for order, (x1, y1, x2, y2) in enumerate(boxes):
+            class_id = int(np.asarray(labels[index]).reshape(-1)[order]) if labels is not None else 0
+            colour = PALETTE[class_id % len(PALETTE)]
+            ax.add_patch(Rectangle((x1, y1), x2 - x1, y2 - y1, fill=False, edgecolor=colour, linewidth=1.4))
+            caption = class_names[class_id][:4] if class_names is not None else ""
+            if scores is not None:
+                score = float(np.asarray(scores[index]).reshape(-1)[order])
+                caption = f"{caption} {score:.2f}".strip()
+            if caption:
+                ax.text(x1, y1 - 1.5, caption, color=colour, fontsize=6.5, va="bottom")
+    if title:
+        fig.suptitle(title)
+    fig.tight_layout()
+    return fig
