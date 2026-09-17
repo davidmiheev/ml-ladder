@@ -19,8 +19,12 @@ boost = ["xgboost>=2.0"]          # A4 benchmark baseline
 graph = ["torch-geometric>=2.5"]  # F2
 equivariant = ["escnn>=1.0"]      # F1
 datasets = ["datasets>=2.19", "tokenizers>=0.19"]  # C, D
+# H4's pretrained reference (TrOCR). Pinned below transformers 5: the 5.x
+# tokenizer conversion path cannot build TrOCR's RoBERTa tokenizer, and
+# sentencepiece/protobuf are what the 4.x slow-to-fast conversion needs.
+ocr = ["transformers>=4.40,<5", "sentencepiece>=0.2", "protobuf>=4"]
 all = [
-    "ml-ladder[torch,tracking,boost,graph,datasets]",
+    "ml-ladder[torch,tracking,boost,graph,datasets,ocr]",
 ]
 
 [project.scripts]

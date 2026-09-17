@@ -338,6 +338,7 @@ def text_lines(
     fonts: tuple[str, ...] = TRAIN_FONTS,
     height: int = 32,
     width: int = 128,
+    min_words: int = 1,
     max_words: int = 2,
     noise: float = 0.04,
     rng=None,
@@ -351,7 +352,10 @@ def text_lines(
     generator = as_rng(rng)
     lines: list[TextLine] = []
     for _ in range(n_lines):
-        count = int(generator.integers(1, max_words + 1))
+        # ``min_words == max_words`` pins the length exactly, which is what H4's
+        # length-generalization sweep needs. The default keeps the original
+        # draw, so H3's data is unchanged.
+        count = int(generator.integers(min_words, max_words + 1))
         text = " ".join(str(generator.choice(WORDS)) for _ in range(count))
         font = str(generator.choice(fonts))
         image = render_text(text, font=font, height=height, width=width, noise=noise, rng=generator)

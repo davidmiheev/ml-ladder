@@ -402,3 +402,239 @@ def test_h2_runs():
         )
         == 0
     )
+
+
+# -- H3: OCR metrics ---------------------------------------------------------
+
+
+def test_edit_distance_on_known_pairs():
+    from parts.h_computer_vision.h3_crnn_ctc import edit_distance
+
+    assert edit_distance("", "") == 0
+    assert edit_distance("ABC", "ABC") == 0
+    assert edit_distance("ABC", "ABD") == 1  # substitution
+    assert edit_distance("ABC", "AC") == 1  # deletion
+    assert edit_distance("AC", "ABC") == 1  # insertion
+    assert edit_distance("", "ABC") == 3
+    assert edit_distance("KITTEN", "SITTING") == 3  # the textbook case
+
+
+def test_edit_distance_is_symmetric():
+    from parts.h_computer_vision.h3_crnn_ctc import edit_distance
+
+    for a, b in (("ABC", "AXCY"), ("", "Z"), ("LONGER", "LNGER")):
+        assert edit_distance(a, b) == edit_distance(b, a)
+
+
+def test_one_deletion_costs_one_not_everything_after_it():
+    """The reason CER is an edit distance and not a per-position mismatch."""
+    from parts.h_computer_vision.h3_crnn_ctc import character_error_rate, edit_distance
+
+    truth, dropped = "ABCDEFGH", "ABDEFGH"
+    assert edit_distance(dropped, truth) == 1
+    assert character_error_rate([dropped], [truth]) == pytest.approx(1 / 8)
+
+
+def test_cer_pools_over_the_corpus():
+    """Pooled, not averaged per line: the denominator is total characters."""
+    from parts.h_computer_vision.h3_crnn_ctc import character_error_rate
+
+    # One error in a 2-char line and none in an 8-char line: 1/10, not 1/4.
+    assert character_error_rate(["AX", "ABCDEFGH"], ["AB", "ABCDEFGH"]) == pytest.approx(0.1)
+
+
+def test_cer_can_exceed_one_when_the_model_hallucinates():
+    from parts.h_computer_vision.h3_crnn_ctc import character_error_rate
+
+    assert character_error_rate(["ABCDEFGHIJ"], ["A"]) > 1.0
+
+
+def test_wer_counts_words_not_characters():
+    from parts.h_computer_vision.h3_crnn_ctc import character_error_rate, word_error_rate
+
+    truth, prediction = "ALPHA BETA GAMMA", "ALPHA BXTA GAMMA"
+    assert word_error_rate([prediction], [truth]) == pytest.approx(1 / 3)
+    # One wrong character ruins one word, so WER is much the worse metric.
+    assert word_error_rate([prediction], [truth]) > character_error_rate([prediction], [truth])
+
+
+def test_wer_is_zero_for_a_perfect_transcription():
+    from parts.h_computer_vision.h3_crnn_ctc import word_error_rate
+
+    assert word_error_rate(["ALPHA BETA"], ["ALPHA BETA"]) == 0.0
+
+
+def test_wer_handles_a_dropped_word():
+    from parts.h_computer_vision.h3_crnn_ctc import word_error_rate
+
+    assert word_error_rate(["ALPHA GAMMA"], ["ALPHA BETA GAMMA"]) == pytest.approx(1 / 3)
+
+
+# -- H3: CTC decoding --------------------------------------------------------
+
+
+def one_hot_columns(symbols: list[int], *, num_symbols: int) -> np.ndarray:
+    """Saturated log-probabilities that put all mass on the given symbol path."""
+    columns = np.full((len(symbols), num_symbols), -30.0, dtype=np.float32)
+    for row, symbol in enumerate(symbols):
+        columns[row, symbol] = 0.0
+    return columns
+
+
+def test_greedy_decode_collapses_repeats_and_drops_blanks():
+    from parts.h_computer_vision.h3_crnn_ctc import BLANK, encode_text, greedy_decode
+
+    a, b = encode_text("A")[0], encode_text("B")[0]
+    # A A blank A B -> "AAB": the blank separates the repeated A.
+    path = [a, a, BLANK, a, b]
+    assert greedy_decode(one_hot_columns(path, num_symbols=40)) == "AAB"
+
+
+def test_greedy_decode_merges_repeats_without_a_blank():
+    """The defining CTC behaviour: 'AA' with no blank between collapses to 'A'."""
+    from parts.h_computer_vision.h3_crnn_ctc import encode_text, greedy_decode
+
+    a = encode_text("A")[0]
+    assert greedy_decode(one_hot_columns([a, a, a], num_symbols=40)) == "A"
+
+
+def test_all_blank_decodes_to_empty():
+    from parts.h_computer_vision.h3_crnn_ctc import BLANK, greedy_decode
+
+    assert greedy_decode(one_hot_columns([BLANK] * 6, num_symbols=40)) == ""
+
+
+def test_beam_and_greedy_agree_when_the_path_is_certain():
+    """With saturated posteriors there is one alignment, so they cannot differ."""
+    from parts.h_computer_vision.h3_crnn_ctc import BLANK, beam_decode, encode_text, greedy_decode
+
+    ids = encode_text("CODE")
+    path = [ids[0], BLANK, ids[1], BLANK, ids[2], BLANK, ids[3]]
+    columns = one_hot_columns(path, num_symbols=40)
+    assert greedy_decode(columns) == "CODE"
+    assert beam_decode(columns, beam_width=5) == "CODE"
+
+
+def test_beam_search_can_beat_greedy_on_split_mass():
+    r"""The case beam search exists for.
+
+    Greedy takes the best *alignment*; the beam sums over alignments of the
+    same string. Here two columns each split mass between blank and 'A', so
+    the most likely single alignment is blank-blank (empty), while the string
+    "A" collects more total probability. Greedy returns "", the beam "A".
+    """
+    from parts.h_computer_vision.h3_crnn_ctc import BLANK, beam_decode, encode_text, greedy_decode
+
+    a = encode_text("A")[0]
+    columns = np.full((2, 40), -30.0, dtype=np.float32)
+    for row in range(2):
+        columns[row, BLANK] = np.log(0.55)
+        columns[row, a] = np.log(0.45)
+    assert greedy_decode(columns) == ""
+    assert beam_decode(columns, beam_width=8) == "A"
+
+
+def test_encode_text_round_trips_through_decode_ids():
+    from parts.h_computer_vision.h3_crnn_ctc import decode_ids, encode_text
+
+    for text in ("CODE", "ALPHA BETA", "Z0", "W1DTH 42"):
+        assert decode_ids(encode_text(text)) == text
+
+
+def test_encode_text_never_emits_the_blank():
+    """A target containing the blank id would make the CTC loss meaningless."""
+    from parts.h_computer_vision.h3_crnn_ctc import BLANK, encode_text
+
+    from mlladder import synth
+
+    assert BLANK not in encode_text(synth.ALPHABET + " ")
+
+
+# -- H4: the attention decoder ----------------------------------------------
+
+
+def test_attention_decoder_reuses_h3s_encoder_shape():
+    from parts.h_computer_vision.h4_attention_ocr import EOS, make_attention_recognizer
+
+    model = make_attention_recognizer(num_symbols=EOS + 1, channels=8, hidden=16)()
+    memory = model.encode(torch.randn(3, 1, 32, 128))
+    # 128 px of width, pooled twice, is 32 columns of 2*hidden features.
+    assert memory.shape == (3, 32, 32)
+
+
+def test_teacher_forced_pass_emits_one_logit_per_target_position():
+    from parts.h_computer_vision.h4_attention_ocr import EOS, make_attention_recognizer
+
+    model = make_attention_recognizer(num_symbols=EOS + 1, channels=8, hidden=16)()
+    logits = model(torch.randn(2, 1, 32, 128), torch.zeros(2, 7, dtype=torch.long))
+    assert logits.shape == (2, 7, EOS + 1)
+
+
+def test_transcribe_stops_and_stays_stopped_after_eos():
+    """A finished row must not resume emitting while the batch decodes on."""
+    from parts.h_computer_vision.h4_attention_ocr import EOS, make_attention_recognizer
+
+    torch.manual_seed(0)
+    model = make_attention_recognizer(num_symbols=EOS + 1, channels=8, hidden=16)()
+    # Force EOS to win at every step by loading the head's bias.
+    with torch.no_grad():
+        model.head.bias.fill_(-20.0)
+        model.head.bias[EOS] = 20.0
+    emitted, maps = model.transcribe(torch.randn(2, 1, 32, 128), max_length=6)
+    assert (emitted[:, 0] == EOS).all()
+    assert emitted.shape[1] == 1, "decoding should stop as soon as every row is finished"
+    assert maps.shape[0] == 2
+
+
+def test_attention_weights_are_a_distribution_over_columns():
+    from parts.h_computer_vision.h4_attention_ocr import EOS, make_attention_recognizer
+
+    model = make_attention_recognizer(num_symbols=EOS + 1, channels=8, hidden=16)()
+    _emitted, maps = model.transcribe(torch.randn(2, 1, 32, 128), max_length=4)
+    assert torch.allclose(maps.sum(dim=-1), torch.ones_like(maps.sum(dim=-1)), atol=1e-5)
+    assert (maps >= 0).all()
+
+
+def test_decode_symbols_drops_the_control_tokens():
+    from parts.h_computer_vision.h3_crnn_ctc import encode_text
+    from parts.h_computer_vision.h4_attention_ocr import EOS, SOS, decode_symbols
+
+    ids = [SOS, *encode_text("CODE"), EOS]
+    assert decode_symbols(ids) == "CODE"
+
+
+def test_error_breakdown_separates_too_long_from_too_short():
+    from parts.h_computer_vision.h4_attention_ocr import error_breakdown
+
+    truths = ["ABCD", "ABCD"]
+    looping = error_breakdown(["ABCDABCDABCD", "ABCDABCD"], truths)
+    truncating = error_breakdown(["A", ""], truths)
+    assert looping["length_bias"] > 0 and looping["overlong_rate"] == 1.0
+    assert truncating["length_bias"] < 0 and truncating["empty_rate"] == 0.5
+
+
+def test_h4_runs_without_the_pretrained_arm():
+    """The trained arms must work when the optional `ocr` extra is absent."""
+    from parts.h_computer_vision.h4_attention_ocr import main
+
+    assert (
+        main(
+            [
+                "--train-lines",
+                "80",
+                "--test-lines",
+                "30",
+                "--length-test-lines",
+                "20",
+                "--epochs",
+                "1",
+                "--channels",
+                "4",
+                "--hidden",
+                "16",
+                "--with-trocr",
+                "0",
+            ]
+        )
+        == 0
+    )
