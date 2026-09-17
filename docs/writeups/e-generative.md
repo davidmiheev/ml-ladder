@@ -105,6 +105,30 @@ section says what happened.
 
 ---
 
+## E5 — FLUX and Stable Diffusion
+
+**Question.** TODO(writeup): what is this rung actually asking?
+
+### The math
+
+TODO(writeup): the objective, its gradient or optimality condition, and the one
+property that explains the behaviour you measured. Derive rather than cite;
+`$inline$` and `$$display$$` render on GitHub. Say what the math predicts before the results
+section says what happened.
+
+**What I built.** TODO(writeup): design decisions and the non-obvious details.
+
+**Results.** TODO(writeup): a table with per-seed ranges, and the figures from
+`figures/e/e5_*.png`.
+
+**What surprised me.** TODO(writeup)
+
+**Open threads.** TODO(writeup)
+
+**Reading:** TODO(writeup): the entries from [the reading list](../reading-list.md) that belong here.
+
+---
+
 ## What part E settled
 
 TODO(writeup): numbered takeaways, including the methodological ones.

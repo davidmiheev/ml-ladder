@@ -12,6 +12,7 @@
 | H3 | Text recognition with CRNN + CTC — synthetic text lines, greedy vs beam decoding, CER/WER | `h3_crnn_ctc.py` |
 | H4 | Attention-decoder OCR against CTC on the same data, with a pretrained model as the baseline | `h4_attention_ocr.py` |
 | H5 | Two-stage document pipeline — detect text regions, then recognize, with end-to-end error attributed to each stage | `h5_document_pipeline.py` |
+| H6 | OCR as a vision-language model — PaddleOCR-VL and Unlimited-OCR read from source, against the H5 pipeline | `h6_ocr_vlm_architectures.py` |
 
 Run any rung with `ladder run H1`; `--help` lists its flags. Outputs land
 in `artifacts/<rung>/<timestamp>/`.

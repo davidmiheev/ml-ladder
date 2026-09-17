@@ -124,6 +124,13 @@ LADDER: tuple[Part, ...] = (
                 "c3_transformer_from_scratch",
             ),
             Item("C4", "Fine-tune a small ViT on a custom image-classification task", "c4_vit_finetune"),
+            Item(
+                "C5",
+                "Modern decoder architectures read from source — Qwen3.5, Gemma 4 and DeepSeek-V2 against C3",
+                "c5_modern_decoders",
+                note="candle's implementations as the reference: GQA, sliding-window KV, MLA and MoE routing "
+                "are all deltas against the transformer C3 builds by hand",
+            ),
         ),
     ),
     Part(
@@ -158,6 +165,13 @@ LADDER: tuple[Part, ...] = (
                 "E4",
                 "Compare sample quality and training stability across VAE, GAN, and diffusion",
                 "e4_generative_comparison",
+            ),
+            Item(
+                "E5",
+                "Production text-to-image architectures read from source — Stable Diffusion's U-Net against FLUX's MMDiT",
+                "e5_flux_and_sd",
+                note="what changed between them: latent autoencoding, cross-attention conditioning vs joint "
+                "attention streams, and flow matching replacing the DDPM schedule E3 implements",
             ),
         ),
     ),
@@ -244,6 +258,13 @@ LADDER: tuple[Part, ...] = (
                 "H5",
                 "Two-stage document pipeline — detect text regions, then recognize, with end-to-end error attributed to each stage",
                 "h5_document_pipeline",
+            ),
+            Item(
+                "H6",
+                "OCR as a vision-language model — PaddleOCR-VL and Unlimited-OCR read from source, against the H5 pipeline",
+                "h6_ocr_vlm_architectures",
+                note="the architectural answer to H5: a NaViT encoder plus an ERNIE decoder, and a "
+                "DeepSeek-OCR-lineage dual tower, replace detect-then-recognize with one autoregressive decode",
             ),
         ),
     ),

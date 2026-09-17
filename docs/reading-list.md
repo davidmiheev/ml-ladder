@@ -54,6 +54,18 @@ Rendered source: [`source/ml-reading-list.html`](source/ml-reading-list.html).
 - [An Image is Worth 16x16 Words](https://arxiv.org/abs/2010.11929) — ViT. *(paper)*
 - [The Annotated Transformer](https://nlp.seas.harvard.edu/annotated-transformer/) — Harvard NLP; line-by-line implementation walkthrough. *(course)*
 
+*For C5 — what production decoders changed about C3's block. Read the source
+alongside the papers; the [candle](https://github.com/davidmiheev/candle)
+implementations are the reference the rung actually works from.*
+
+- [RoFormer](https://arxiv.org/abs/2104.09864) — RoPE: relative position as a rotation, which replaced C3's additive encodings everywhere. *(paper)*
+- [GQA: Training Generalized Multi-Query Transformer Models](https://arxiv.org/abs/2305.13245) — grouped-query attention, the cheapest large win on KV-cache memory. *(paper)*
+- [Mistral 7B](https://arxiv.org/abs/2310.06825) — sliding-window attention: bounded context per layer, unbounded receptive field through depth. *(paper)*
+- [DeepSeek-V2](https://arxiv.org/abs/2405.04434) — multi-head latent attention, which compresses the KV cache into a low-rank latent instead of shrinking the head count. *(paper)*
+- [Switch Transformer](https://arxiv.org/abs/2101.03961) — the sparse-MoE routing that DeepSeek's shared+routed expert split refines. *(paper)*
+- [Gemma 4](https://blog.google/technology/developers/gemma-4/) — the model whose sliding-window KV layout C5 reads; `candle-transformers/src/models/gemma4/`. *(blog + source)*
+- Qwen3.5's hybrid Gated-DeltaNet stack — a linear-attention delta rule with **O(1) decode state**, i.e. C1's recurrence made competitive; `candle-transformers/src/models/qwen3_5.rs`. *(source)*
+
 ## 6. Generative models → ladder part E
 
 - [Auto-Encoding Variational Bayes](https://arxiv.org/abs/1312.6114) — VAE. *(paper)*
@@ -61,6 +73,15 @@ Rendered source: [`source/ml-reading-list.html`](source/ml-reading-list.html).
 - [Density Estimation Using Real NVP](https://arxiv.org/abs/1605.08803) — normalizing flows. *(paper)*
 - [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239) — DDPM. *(paper)*
 - [Score-Based Generative Modeling through Stochastic Differential Equations](https://arxiv.org/abs/2011.13456) *(paper)*
+
+*For E5 — how the DDPM of E3 became a production text-to-image model.*
+
+- [High-Resolution Image Synthesis with Latent Diffusion Models](https://arxiv.org/abs/2112.10752) — Stable Diffusion: diffuse in a VAE latent, not in pixels. E1 and E3 bolted together. *(paper)*
+- [Classifier-Free Diffusion Guidance](https://arxiv.org/abs/2207.12598) — the trick that made text conditioning actually steer the sample. *(paper)*
+- [Flow Straight and Fast: Rectified Flow](https://arxiv.org/abs/2209.03003) — learning a straight path between noise and data instead of reversing a noise schedule. *(paper)*
+- [Flow Matching for Generative Modeling](https://arxiv.org/abs/2210.02747) — Lipman et al.; the simulation-free objective underneath it. *(paper)*
+- [Scaling Rectified Flow Transformers](https://arxiv.org/abs/2403.03206) — SD3, and the MMDiT block: image and text as two streams with joint attention rather than cross-attention. *(paper)*
+- [FLUX](https://github.com/black-forest-labs/flux) — no paper; the architecture is the source, and `candle-transformers/src/models/flux/` is the readable port. *(source)*
 
 ## 7. Geometric & equivariant deep learning → ladder part F
 
@@ -112,6 +133,16 @@ the text, then read it.*
 - [TrOCR](https://arxiv.org/abs/2109.10282) — Li et al. Pretrained vision encoder plus text decoder, the attention alternative to CTC in H4. *(paper)*
 - [PP-OCR](https://arxiv.org/abs/2009.09941) — the engineering-first view: what a practical, fast pipeline actually contains. *(paper)*
 - [OCR-free Document Understanding Transformer](https://arxiv.org/abs/2111.15664) — Donut; skipping recognition entirely and reading documents end to end. *(paper)*
+
+**OCR — as a vision-language model (H6)**
+
+*Where the H1-H5 pipeline goes when the whole thing is replaced by one decoder.*
+
+- [PaddleOCR-VL](https://arxiv.org/abs/2510.14528) — a NaViT-style dynamic-resolution encoder, a 2x2 spatial-merge projector and an ERNIE-4.5-0.3B decoder; text, tables, formulas and charts from one autoregressive decode. `candle-transformers/src/models/paddleocr_vl/`. *(paper + source)*
+- [PP-OCRv4 / PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) — the classical pipeline the VL model replaced, and still the throughput baseline. *(source)*
+- Unlimited-OCR (Baidu, DeepSeek-OCR lineage) — a dual vision tower (SAM-ViT-B chained into a CLIP-L-shaped tower) feeding a llama-style decoder with DeepSeek-V2-Lite-style MoE: 64 routed experts, greedy top-6, two shared. `candle-transformers/src/models/unlimited_ocr/`. *(source)*
+- [NaViT: Patch n' Pack](https://arxiv.org/abs/2307.06304) — variable resolution without resizing, which is why a document model can stop squashing pages to a square. *(paper)*
+- [Segment Anything](https://arxiv.org/abs/2304.02643) — already above for segmentation, and read again here: its ViT-B image encoder *is* Unlimited-OCR's first tower. *(paper)*
 
 ## 10. Companion courses
 

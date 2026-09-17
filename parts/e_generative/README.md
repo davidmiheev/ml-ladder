@@ -9,6 +9,7 @@
 | E2 | DCGAN on a small image dataset | `e2_dcgan.py` |
 | E3 | DDPM diffusion model from scratch | `e3_ddpm.py` |
 | E4 | Compare sample quality and training stability across VAE, GAN, and diffusion | `e4_generative_comparison.py` |
+| E5 | Production text-to-image architectures read from source — Stable Diffusion's U-Net against FLUX's MMDiT | `e5_flux_and_sd.py` |
 
 Run any rung with `ladder run E1`; `--help` lists its flags. Outputs land
 in `artifacts/<rung>/<timestamp>/`.

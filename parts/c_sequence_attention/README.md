@@ -8,6 +8,7 @@
 | C2 | Seq2seq with attention on a toy translation task | `c2_seq2seq_attention.py` |
 | C3 | Transformer from scratch (attention, positional encoding, causal masking) | `c3_transformer_from_scratch.py` |
 | C4 | Fine-tune a small ViT on a custom image-classification task | `c4_vit_finetune.py` |
+| C5 | Modern decoder architectures read from source — Qwen3.5, Gemma 4 and DeepSeek-V2 against C3 | `c5_modern_decoders.py` |
 
 Run any rung with `ladder run C1`; `--help` lists its flags. All four need
 `uv sync --extra torch`. Text comes from `mlladder.text` (tiny Shakespeare, a

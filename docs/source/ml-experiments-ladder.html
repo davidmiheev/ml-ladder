@@ -165,6 +165,7 @@ const data = [
       { t: "Seq2seq with attention on a toy translation task" },
       { t: "Transformer from scratch (attention, positional encoding, causal masking)" },
       { t: "Fine-tune a small ViT on a custom image-classification task" },
+      { t: "Modern decoder architectures read from source \u2014 Qwen3.5, Gemma 4 and DeepSeek-V2 against C3", d: "candle's implementations as the reference: GQA, sliding-window KV, MLA and MoE routing are all deltas against the transformer C3 builds by hand" },
     ]
   },
   {
@@ -186,6 +187,7 @@ const data = [
       { t: "DCGAN on a small image dataset" },
       { t: "DDPM diffusion model from scratch" },
       { t: "Compare sample quality and training stability across VAE, GAN, and diffusion" },
+      { t: "Production text-to-image architectures read from source \u2014 Stable Diffusion's U-Net against FLUX's MMDiT", d: "what changed between them: latent autoencoding, cross-attention conditioning vs joint attention streams, and flow matching replacing the DDPM schedule E3 implements" },
     ]
   },
   {
@@ -220,6 +222,7 @@ const data = [
       { t: "Text recognition with CRNN + CTC \u2014 synthetic text lines, greedy vs beam decoding, CER/WER", d: "CTC's alignment-free loss is the point: no per-character boxes needed" },
       { t: "Attention-decoder OCR against CTC on the same data, with a pretrained model as the baseline", d: "TrOCR or EasyOCR as the reference; the comparison is decoder design, not dataset" },
       { t: "Two-stage document pipeline \u2014 detect text regions, then recognize, with end-to-end error attributed to each stage" },
+      { t: "OCR as a vision-language model \u2014 PaddleOCR-VL and Unlimited-OCR read from source, against the H5 pipeline", d: "the architectural answer to H5: a NaViT encoder plus an ERNIE decoder, and a DeepSeek-OCR-lineage dual tower, replace detect-then-recognize with one autoregressive decode" },
     ]
   },
 ];

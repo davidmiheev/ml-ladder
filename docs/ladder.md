@@ -55,6 +55,8 @@ Folder: `parts/c_sequence_attention/`
 - **C2.** Seq2seq with attention on a toy translation task — `parts/c_sequence_attention/c2_seq2seq_attention.py`
 - **C3.** Transformer from scratch (attention, positional encoding, causal masking) — `parts/c_sequence_attention/c3_transformer_from_scratch.py`
 - **C4.** Fine-tune a small ViT on a custom image-classification task — `parts/c_sequence_attention/c4_vit_finetune.py`
+- **C5.** Modern decoder architectures read from source — Qwen3.5, Gemma 4 and DeepSeek-V2 against C3 — `parts/c_sequence_attention/c5_modern_decoders.py`
+  - candle's implementations as the reference: GQA, sliding-window KV, MLA and MoE routing are all deltas against the transformer C3 builds by hand
 
 ## D. Self-supervised & representation learning
 
@@ -76,6 +78,8 @@ Folder: `parts/e_generative/`
 - **E2.** DCGAN on a small image dataset — `parts/e_generative/e2_dcgan.py`
 - **E3.** DDPM diffusion model from scratch — `parts/e_generative/e3_ddpm.py`
 - **E4.** Compare sample quality and training stability across VAE, GAN, and diffusion — `parts/e_generative/e4_generative_comparison.py`
+- **E5.** Production text-to-image architectures read from source — Stable Diffusion's U-Net against FLUX's MMDiT — `parts/e_generative/e5_flux_and_sd.py`
+  - what changed between them: latent autoencoding, cross-attention conditioning vs joint attention streams, and flow matching replacing the DDPM schedule E3 implements
 
 ## F. Geometric & equivariant nets
 
@@ -117,4 +121,6 @@ Folder: `parts/h_computer_vision/`
 - **H4.** Attention-decoder OCR against CTC on the same data, with a pretrained model as the baseline — `parts/h_computer_vision/h4_attention_ocr.py`
   - TrOCR or EasyOCR as the reference; the comparison is decoder design, not dataset
 - **H5.** Two-stage document pipeline — detect text regions, then recognize, with end-to-end error attributed to each stage — `parts/h_computer_vision/h5_document_pipeline.py`
+- **H6.** OCR as a vision-language model — PaddleOCR-VL and Unlimited-OCR read from source, against the H5 pipeline — `parts/h_computer_vision/h6_ocr_vlm_architectures.py`
+  - the architectural answer to H5: a NaViT encoder plus an ERNIE decoder, and a DeepSeek-OCR-lineage dual tower, replace detect-then-recognize with one autoregressive decode
 

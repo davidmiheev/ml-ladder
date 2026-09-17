@@ -1,6 +1,6 @@
 # Part C — Sequence models & attention
 
-> **Status:** complete (C1–C4) · **Constraint:** subsets and short budgets; C1/C3 share every setting so they can be compared
+> **Status:** C1–C4 complete; C5 (modern decoder architectures) specified, not yet built · **Constraint:** subsets and short budgets; C1/C3 share every setting so they can be compared
 > **Numbers:** seeds 0–2, reference seed 0 · raw values in [`data/c-metrics.json`](data/c-metrics.json)
 > **Reproduce:** `ladder run C1` … `C4` (needs `uv sync --extra torch`), or `uv run python tools/writeup_figures.py C`
 > **Hardware:** this part's sweep ran on a Colab T4 — C4 is ~25 min/seed on four CPU cores against ~35 s on the GPU
@@ -354,6 +354,30 @@ ImageNet ones — that comparison is part D's business.
 
 **Reading:** [An Image is Worth 16x16 Words](https://arxiv.org/abs/2010.11929) (ViT);
 Steiner et al., *How to train your ViT*; [timm](https://github.com/huggingface/pytorch-image-models).
+
+---
+
+## C5 — Modern decoder architectures
+
+**Question.** TODO(writeup): what is this rung actually asking?
+
+### The math
+
+TODO(writeup): the objective, its gradient or optimality condition, and the one
+property that explains the behaviour you measured. Derive rather than cite;
+`$inline$` and `$$display$$` render on GitHub. Say what the math predicts before the results
+section says what happened.
+
+**What I built.** TODO(writeup): design decisions and the non-obvious details.
+
+**Results.** TODO(writeup): a table with per-seed ranges, and the figures from
+`figures/c/c5_*.png`.
+
+**What surprised me.** TODO(writeup)
+
+**Open threads.** TODO(writeup)
+
+**Reading:** TODO(writeup): the entries from [the reading list](../reading-list.md) that belong here.
 
 ---
 
