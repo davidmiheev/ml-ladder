@@ -100,6 +100,33 @@
       "wer": 0.03225806451612903,
       "seconds_per_page": 0.721,
       "note": "identical to the transformers run to every digit, and the single error is the same one: page 5 has two identical SIGMA lines and both implementations emit one"
+    },
+    {
+      "model": "baidu/Unlimited-OCR",
+      "runtime": "candle (davidmiheev/candle @ ignite-perf + fixes, new examples/unlimited-ocr)",
+      "dtype": "float16",
+      "device": "Colab T4",
+      "scale": "4x",
+      "preprocessing": "global 1024 view only (--no-crops), 273 image tokens",
+      "cer": 0.2292,
+      "wer": 0.2414,
+      "seconds_per_page": 0.75,
+      "exact_pages": "8 of 10",
+      "failures": "page 2 returns an empty transcript; page 9 emits a spurious 'Text pro' line",
+      "note": "the transformers run scored 0.0000 on these pages using the model's own infer(), which tiles at crop_mode=True -- so this gap is preprocessing, not runtime"
+    },
+    {
+      "model": "baidu/Unlimited-OCR",
+      "runtime": "candle (davidmiheev/candle @ ignite-perf + fixes, new examples/unlimited-ocr)",
+      "dtype": "float16",
+      "device": "Colab T4",
+      "scale": "4x",
+      "preprocessing": "tiled, 5x3 grid, 1803 image tokens",
+      "cer": 1.1132,
+      "wer": 1.0952,
+      "seconds_per_page": 0.89,
+      "empty_pages": "4 of 10",
+      "note": "worse than the global view at 6.6x the image tokens. The tiled path only runs at all after two batch fixes (see candle-patches); the grid choice is evidently not what the reference does for a 1024x640 page."
     }
   ],
   "not_run": {
@@ -116,14 +143,18 @@
     "fork": "davidmiheev/candle @ ignite-perf (9aa02f1)",
     "command": "CUDA_COMPUTE_CAP=75 cargo build --release --features cuda --example paddleocr-vl",
     "why_compute_cap": "pinning the T4's sm_75 builds one architecture's PTX instead of every architecture candle knows about",
-    "first_build_seconds": 1124,
-    "first_build_reported_by_cargo": "18m 44s",
+    "first_build_seconds": 1362,
+    "first_build_reported_by_cargo": "22m 42s for three examples",
     "additional_examples_seconds": 37,
     "note": "37s to add the gemma4 and deepseekv2 examples once the tree is warm, so the cost is the first build, not the model",
     "fixes_needed": [
       "candle-kernels/src/compatibility.cuh defines __hmax_nan/__hmin_nan under `#if __CUDA_ARCH__ < 800`, but CUDA 12.8 already defines them for arch >= 530, so nvcc fails on src/affine.cu. Adding `&& CUDART_VERSION < 12000` to the guard fixes it.",
-      "--bf16 on an sm_75 card fails with DriverError(CUDA_ERROR_NOT_FOUND, 'named symbol not found'): candle's bf16 kernels need sm_80. Running without it works."
+      "--bf16 on an sm_75 card fails with DriverError(CUDA_ERROR_NOT_FOUND, 'named symbol not found'): candle's bf16 kernels need sm_80. Running without it works.",
+      "segment_anything/image_encoder.rs adds the learned pos_embed with `+`, which needs equal shapes; a batch of crops is [n, h, w, c] against the grid's [1, h, w, c]. broadcast_add.",
+      "unlimited_ocr/vision.rs forward_crops cats a transposed tensor and hands the result to a batched matmul, which rejects the strides. .contiguous().",
+      "a tar that preserves mtimes older than the previous build makes cargo skip the rebuild silently -- extract with -m. This cost one run that reported a stale binary's CLI."
     ],
-    "cpu_build": "still impossible on this branch: qwen3_5, gemma4 and unlimited_ocr call candle_nn::fused::static_decode, which is behind #[cfg(feature = \"cuda\")], from call sites that are not, so a build without --features cuda fails with 51 errors in candle-transformers"
+    "cpu_build": "still impossible on this branch: qwen3_5, gemma4 and unlimited_ocr call candle_nn::fused::static_decode, which is behind #[cfg(feature = \"cuda\")], from call sites that are not, so a build without --features cuda fails with 51 errors in candle-transformers",
+    "library_change_rebuild": "3m 03s"
   }
 }

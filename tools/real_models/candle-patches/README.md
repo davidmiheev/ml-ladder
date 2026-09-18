@@ -1,36 +1,80 @@
-# Fixes needed to build and run the candle fork
+# Fixes and additions for the candle fork
 
 `ignite-perf-fixes.patch` applies to `davidmiheev/candle` at `ignite-perf`
-(9aa02f1). It is three independent changes, all found by trying to run the
-models part C and part H price:
+(9aa02f1); `unlimited-ocr-example.rs` is a new example that belongs at
+`candle-examples/examples/unlimited-ocr/main.rs`. All of it was found by
+trying to run the models part C and part H price.
+
+## Build fixes
 
 1. **`candle-kernels/src/compatibility.cuh`** — the `__hmax_nan`/`__hmin_nan`
    shim is guarded on `__CUDA_ARCH__ < 800`, but CUDA 12.0+ defines both itself
-   for arch >= 530. On CUDA 12.8 `nvcc` fails on `src/affine.cu` with
-   "function has already been defined", so the CUDA build does not complete at
-   all. Guarded on `CUDART_VERSION < 12000` as well.
+   for arch >= 530. On CUDA 12.8 `nvcc` fails on `src/affine.cu` with "function
+   has already been defined", so **the CUDA build does not complete at all**.
+   Guarded on `CUDART_VERSION < 12000` as well.
 
-2. **`candle-transformers/src/models/gemma4/text.rs`** — `TextModel` loads its
-   decoder from `model.*`. A multimodal checkpoint (gemma-4-E2B-it) keeps the
-   identical decoder at `model.language_model.*` beside its vision and audio
-   towers, so text-only loading fails at `model.embed_tokens.weight`.
-   `new_with_quant_at` takes the decoder's own prefix and `new_nested` supplies
-   it; `new_with_quant` is unchanged in behaviour.
+Measured build times on a Colab T4 with `CUDA_COMPUTE_CAP=75` (one
+architecture's PTX instead of all of them):
 
-3. **`candle-examples/examples/gemma4/main.rs`** — picks the nested constructor
-   when the config has a `text_config`, and adds `--dtype` because the example
-   hardcodes bf16 on GPU and bf16 kernels need sm_80. On a T4 the old default
-   fails with `DriverError(CUDA_ERROR_NOT_FOUND, "named symbol not found")`.
+| what | time |
+| --- | --- |
+| first build, three examples | 22m 42s |
+| adding two more examples, warm | 37s |
+| after a `candle-transformers` change | 3m 03s |
 
-**These are not sufficient to make Gemma-4 work.** With all three applied,
-gemma-4-E2B-it loads and generates at 25.7 tok/s on a T4 and its f16 output is
-degenerate. Transformers at f16 on the same card with the same prompt answers
-correctly, so it is not precision — see
-[`../../../docs/writeups/data/c-real-models.json`](../../../docs/writeups/data/c-real-models.json)
-for the control.
+## Batch bugs in the vision path
 
-**Not fixed here:** `qwen3_5`, `gemma4` and `unlimited_ocr` call
-`candle_nn::fused::static_decode` (which is `#[cfg(feature = "cuda")]`) from
-call sites that are not gated, so a build without `--features cuda` fails with
-51 errors. Gating the call sites the same way would fix it; that is a larger
-change than belongs in a patch found by an outsider running the code.
+Both only bite when the encoder gets more than one crop, which is why the
+catalog executor's global-only V1 scope never hit them.
+
+2. **`segment_anything/image_encoder.rs`** — `(xs + pos_embed)` where `xs` is
+   `[n, h, w, c]` and the learned grid is `[1, h, w, c]`. candle's `+` needs
+   equal shapes, so Unlimited-OCR's tiled path dies with
+   `shape mismatch in add, lhs: [8, 40, 40, 768], rhs: [1, 40, 40, 768]`.
+   `broadcast_add` is identical when `n == 1`.
+
+3. **`unlimited_ocr/vision.rs`** — in `forward_crops`, `sam_seq` is a transpose
+   and the `cat` of it keeps non-standard strides, which the batched matmul in
+   the projector rejects: `matmul is only supported for contiguous tensors`.
+   One `.contiguous()`.
+
+With both applied the tiled path runs. It is **not** yet reference-equivalent:
+for a 1024x640 page `pick_crop_ratio` chooses a 5x3 grid (1803 image tokens
+against the global view's 273) and reads *worse* than the global view — see the
+numbers in [`../../../docs/writeups/data/h-real-models.json`](../../../docs/writeups/data/h-real-models.json).
+Whatever bounds the reference puts on the grid, this port does not have them.
+
+## DeepSeek-V2 quantization
+
+4. **`deepseek2.rs` + `examples/deepseekv2/main.rs`** — DeepSeek-V2-Lite is
+   31.4 GB in f16 against a 15.4 GB card, and the example had no way to ask for
+   less. Added the same load-time quantization `gemma4` and `qwen3_5` already
+   use: a `Proj` that quantizes on the CPU (so a full f32 copy never reaches the
+   GPU) and keeps a `QMatMul`, threaded through attention, the MLP, the MoE
+   experts and `lm_head`, plus `DeepSeekV2::new_with_quant` and a `--quant`
+   flag taking q8_0/q6k/q5k/q4k/q4_0/q3k/q2k. `--dtype` is there too, because
+   the example hardcoded bf16 and bf16 needs sm_80.
+
+   `quant_dtype_for` handles the case k-quants cannot: the dense MLP's
+   `down_proj` reduces over 10944 and each expert's over 1408, neither a
+   multiple of 256. Both are multiples of 32, so those fall back to Q8_0.
+
+   **Status: compiles, and the flags are live on the binary — but not yet run
+   end to end.** The GPU session was reclaimed during the 31.4 GB download,
+   twice. The wiring is unverified against generated tokens.
+
+5. **`examples/gemma4/main.rs`** — a nested-prefix constructor
+   (`TextModel::new_nested`), because a multimodal checkpoint keeps its decoder
+   at `model.language_model.*` and text-only loading died at
+   `model.embed_tokens.weight`; a `--dtype` flag; and the BOS prepend your
+   `candle-llm-safetensors` executor documents. See the note below — the BOS
+   change did not visibly fix the output in the one configuration I tried.
+
+## The new example
+
+`unlimited-ocr-example.rs` is the catalog executor's Unlimited-OCR path with
+the ignite SDK taken out: hub loading instead of `AssetLoader`, the same
+1024-square mean-gray pad, the same InternVL-style grid search, the same
+sliding-window n-gram suppression, the ordinary KV-cache decode rather than
+static R-SWA, and `--no-crops` for the global-only path. It reads part H's test
+pages at **CER 0.229** (8 of 10 exactly) through the global view.

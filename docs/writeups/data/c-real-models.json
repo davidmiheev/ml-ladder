@@ -13,7 +13,8 @@
       "load_seconds": 189.79783913100027,
       "tokens_per_second": 4.439352610585038,
       "note": "sum(p.numel()) reports 8.06B for a 15.7B model because bitsandbytes packs two 4-bit weights per byte; a parameter count read off a quantized model is a packed-element count",
-      "completion": "Grouped-query attention is a technique used in the field of natural language processing (NLP) to reduce the size of the key-value (KV) cache in a neural network. The KV cache is a data structure used to store"
+      "completion": "Grouped-query attention is a technique used in the field of natural language processing (NLP) to reduce the size of the key-value (KV) cache in a neural network. The KV cache is a data structure used to store",
+      "candle_status": "quantization is now wired into candle's deepseekv2 example (--quant q8_0..q2k, --dtype), compiles and exposes the flags, but has not generated a token: the GPU session was reclaimed during the 31.4 GB download twice. Unverified."
     },
     {
       "model": "google/gemma-4-E2B-it",
@@ -58,7 +59,8 @@
         "the example hardcodes bf16 on GPU, which needs sm_80; added a --dtype flag so an sm_75 card can ask for f16."
       ],
       "patch_is_behaviour_preserving": "the prefix change only alters where the decoder loads from: the constructor's other uses of the unprefixed builder are dtype() and device(), which are prefix-independent, and the one root-level weight (lm_head) is not reached because this config sets tie_word_embeddings=true",
-      "conclusion": "the fork's gemma4 generates through this path but its f16 output is wrong, and its default bf16 cannot run on sm_75 at all -- so gemma-4 could not be validated through the fork on a T4"
+      "conclusion": "WITHDRAWN: I concluded the fork's gemma4 f16 path was wrong on sm_75. The catalog's candle-llm-safetensors executor already documents the cause -- gemma-4-e2b-it ships a tokenizer.json with no BOS post-processor, and gemma-family models degenerate into token copy-loops without one, which is exactly the symptom. The same BOS prepend was added to the example; in the one configuration then tried (BOS, no chat template) the output was still not readable, and the session was reclaimed before BOS could be tried together with the chat template. The fix is unverified and the f16 accusation is withdrawn.",
+      "cause_documented_in": "ignite-catalog perf/exp-executors: models/executors/exp/candle-llm-safetensors/src/lib.rs"
     }
   ],
   "qwen_generation_comparison": {
@@ -75,8 +77,8 @@
   "not_run": {
     "Qwen/Qwen3.8-Flash-Next": "360 GB of weights; out of reach on any accelerator available here",
     "bf16 or AWQ Qwen 27B": "55.6 GB bf16, and 20.4/21.0 GB as 4-bit AWQ, against a 15.4 GB T4 -- the GGUF route at 3 bpw is what made these runnable at all",
-    "deepseek-ai/DeepSeek-V2-Lite via candle": "the fork's deepseekv2 example exposes no quantization flag, so it loads 31.4 GB of f16 weights -- twice what a T4 holds. The library has quantized loading (TextModel::new_with_quant takes a GgmlDType), but the example does not wire it up.",
-    "Qwen3.6 / Qwen3.8 via candle": "candle-transformers has qwen3_5.rs, but the fork ships no example binary for it, so there is nothing to run without writing one"
+    "deepseek-ai/DeepSeek-V2-Lite via candle": "quantization wired (see tools/real_models/candle-patches), compiles, flags live, never run end to end",
+    "Qwen3.6 / Qwen3.8 via candle": "qwen3_5.rs has no example binary; the catalog's candle-llm-safetensors executor drives it but needs the ignite SDK submodule, which is private and not fetchable from this session"
   },
   "candle_build": {
     "fork": "davidmiheev/candle @ ignite-perf (9aa02f1)",

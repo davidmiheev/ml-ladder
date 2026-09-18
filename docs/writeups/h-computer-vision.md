@@ -734,7 +734,46 @@ architectural:
 `#[cfg(feature = "cuda")]`, from call sites that are not — so a build *without*
 `--features cuda` fails with 51 errors in `candle-transformers`. A CPU-only
 build of those models is impossible on this branch; gating the call sites the
-same way would fix it. The decoder attempts through the fork are with
+same way would fix it.
+
+### Unlimited-OCR, and two bugs that only exist above a batch of one
+
+The fork implements Unlimited-OCR but ships no example for it. The catalog's
+`candle-ocr` executor does drive it, so this repo now carries that path with the
+ignite SDK taken out — hub loading instead of the asset loader, the same
+1024-square mean-gray pad, the same grid search, the same sliding-window n-gram
+suppression, plain KV-cache decode instead of static R-SWA.
+
+Getting it to run found two bugs, and they share a shape:
+
+- `segment_anything/image_encoder.rs` adds its learned positional grid with
+  `+`, which in candle requires equal shapes. The grid is `[1, h, w, c]` and a
+  batch of crops is `[n, h, w, c]`, so the tiled path dies with
+  `shape mismatch in add, lhs: [8, 40, 40, 768], rhs: [1, 40, 40, 768]`.
+- With that fixed, `forward_crops` cats a transposed tensor and hands the
+  result to a batched matmul, which rejects the strides.
+
+**Neither exists at a batch of one**, which is exactly the path the executor
+runs — its comment says so: *"V1 scope: single 1024x1024 global view."* Code that
+is only ever called one way is only ever tested one way, and the untested way
+was two lines from working.
+
+**Results** (10 pages, f16, T4):
+
+| preprocessing | image tokens | CER | WER | empty | s/page |
+| --- | --- | --- | --- | --- | --- |
+| global view only | 273 | **0.229** | 0.241 | 1/10 | 0.75 |
+| tiled, 5x3 grid | 1,803 | 1.113 | 1.095 | 4/10 | 0.89 |
+| transformers `infer()`, crop_mode | — | **0.000** | 0.000 | 0/10 | 7.18 |
+
+Eight of ten pages are read exactly through the global view. The tiled path,
+once unblocked, is **worse at 6.6x the image tokens** — so whatever bounds the
+reference puts on its grid, this port does not have them, and a 1024x640 page
+should not be asking for a 5x3 grid. That is a preprocessing gap, not a runtime
+one, and PaddleOCR-VL is the control that proves the distinction: the same two
+runtimes agree to sixteen digits when the preprocessing matches.
+
+The decoder attempts through the fork are with
 [part C](c-sequence-attention.md#the-decoders-actually-run).
 
 **Reproduce:** `tools/real_models/` — the scripts, and a README explaining the

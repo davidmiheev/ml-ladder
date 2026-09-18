@@ -81,3 +81,21 @@ What each model needed is recorded in
 (OCR) and [`../../docs/writeups/data/c-real-models.json`](../../docs/writeups/data/c-real-models.json)
 (decoders), including the two patches Gemma-4 needed and why its output is still
 wrong on an sm_75 card.
+
+## Unlimited-OCR
+
+`candle-patches/unlimited-ocr-example.rs` goes at
+`candle-examples/examples/unlimited-ocr/main.rs` in the fork. It is the
+`ignite-catalog` executor's Unlimited-OCR path with the ignite SDK removed, so
+it runs from the hub with no platform dependencies:
+
+```bash
+CUDA_COMPUTE_CAP=75 cargo build --release --features cuda --example unlimited-ocr
+./target/release/examples/unlimited-ocr --dtype f16 --no-crops \
+    --image vlm_pages/page000_4x.png
+```
+
+`--no-crops` is the global-1024-view path, which is the reference default under
+640px and the only path the catalog executor ships. The tiled path needs the two
+batch fixes in `ignite-perf-fixes.patch` even to run, and then reads worse than
+the global view — the grid search is not reference-equivalent yet.

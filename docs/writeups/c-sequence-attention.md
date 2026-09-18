@@ -578,23 +578,50 @@ repeated to the token limit.
 
 That is worth one control before blaming anyone. Transformers at **f16**, same
 model, same card, same prompt and chat template, answers correctly at 9.63
-tok/s. So it is not f16 precision. And the prefix patch is behaviour-preserving:
+tok/s — so it is not f16 precision. And the prefix patch is behaviour-preserving:
 the constructor's other uses of the unprefixed builder are `dtype()` and
 `device()`, and the one root-level weight (`lm_head`) is never reached because
-this config sets `tie_word_embeddings: true`. The conclusion I can defend is
-narrow and still useful: **the fork's `gemma4` f16 path produces wrong output on
-sm_75, and its default bf16 cannot run there at all**, so Gemma-4 could not be
-validated through the fork on this card.
+this config sets `tie_word_embeddings: true`.
 
-**DeepSeek-V2-Lite** did not run through the fork for a plainer reason: the
-`deepseekv2` example exposes no quantization flag, so it loads 31.4 GB of f16
-weights against a 15.4 GB card. The machinery exists in the library —
-`TextModel::new_with_quant` takes a `GgmlDType` — the example just does not wire
-it up. **Qwen3.6/3.8** have `qwen3_5.rs` in `candle-transformers` but no example
-binary, so there is nothing to invoke without writing one.
+I concluded from that that the fork's `gemma4` f16 path was wrong on sm_75.
+**That conclusion was premature, and the answer was already written down in the
+repository I had not read yet.** The catalog's `candle-llm-safetensors`
+executor carries this comment:
 
-So of the five models, the fork ran one end to end, and that one it ran
-*exactly* right.
+> Some checkpoints ship a tokenizer.json without a BOS post-processor
+> (e.g. gemma-4-e2b-it) — gemma-family models degenerate into token
+> copy-loops without it.
+
+A copy-loop is exactly what I saw, on exactly that checkpoint. I had reached for
+"the kernels are wrong on this card" when the available explanation was a
+missing token — and the thing that distinguishes them is that one of them was
+already diagnosed by someone who had run the model more than twice.
+
+The honest status is narrower than either claim. I added the same BOS prepend to
+the example; in the one configuration I then tried (BOS, no chat template) the
+output was still not readable, and the GPU session was reclaimed before I could
+try BOS together with the chat template. So: **the degeneration has a documented
+cause that fits the symptom exactly, my fix for it is unverified, and the f16
+accusation is withdrawn.**
+
+**DeepSeek-V2-Lite** needed the quantization the example did not have. It is
+now wired: the same load-time `Proj` that `gemma4` and `qwen3_5` use — quantize
+on the CPU so a full f32 copy never reaches the GPU, keep a `QMatMul` — threaded
+through attention, the MLP, the 64 MoE experts and `lm_head`, behind
+`DeepSeekV2::new_with_quant` and a `--quant` flag. One detail the model forces:
+k-quants need the reduction dimension to be a multiple of 256, and DeepSeek's
+dense `down_proj` reduces over 10944 while each expert's reduces over 1408.
+Neither qualifies, both are multiples of 32, so those layers fall back to Q8_0
+rather than silently producing a broken tensor.
+
+**It compiles and the flags are live on the binary, and that is all I can say
+for it** — the GPU session was reclaimed during the 31.4 GB download, twice, so
+no token has been generated through it. Wiring that has never run is a claim,
+not a result, and it is recorded here as one.
+
+**Qwen3.6/3.8** have `qwen3_5.rs` in `candle-transformers` but no example
+binary; the catalog's `candle-llm-safetensors` executor is what drives them, and
+it needs the ignite SDK submodule this session cannot fetch.
 
 ---
 
