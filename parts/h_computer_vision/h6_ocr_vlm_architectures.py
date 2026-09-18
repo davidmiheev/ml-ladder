@@ -333,6 +333,42 @@ def run(exp: Experiment) -> dict[str, float]:
 
     # -- figures -------------------------------------------------------------
     exp.log_figure(
+        "architectures",
+        plotting.plot_architecture(
+            {
+                "H1-H5 pipeline": [
+                    ("page image", ""),
+                    ("text-line detector", "boxes + NMS"),
+                    ("crop + resize", "the interface"),
+                    ("CRNN + CTC", "per-line transcript"),
+                ],
+                "PaddleOCR-VL": [
+                    ("page image", "dynamic resolution"),
+                    (
+                        f"NaViT encoder x{config['vision_num_hidden_layers']}",
+                        f"{config['vision_hidden_size']} wide, patch {patch}",
+                    ),
+                    ("2x2 merge + MLP projector", f"{merge * merge} patches -> 1 token"),
+                    (
+                        f"ERNIE decoder x{config['num_hidden_layers']}",
+                        f"GQA {config['num_attention_heads']}:{config['num_key_value_heads']}",
+                    ),
+                ],
+                "Unlimited-OCR": [
+                    ("page image", "1024x1024 global view"),
+                    ("SAM-ViT-B tower", "768 wide, ViTDet blocks"),
+                    ("CLIP-L tower + projector", "chained on SAM features"),
+                    (
+                        f"MoE decoder x{unlimited['num_hidden_layers']}",
+                        f"{unlimited['n_routed_experts']}+{unlimited['n_shared_experts']} experts, top-{unlimited['num_experts_per_tok']}",
+                    ),
+                ],
+            },
+            highlight={"H1-H5 pipeline": [1, 2], "PaddleOCR-VL": [2], "Unlimited-OCR": [1, 2]},
+            title="The interface H5 measured as 99.98% of its error, and the two designs without one",
+        ),
+    )
+    exp.log_figure(
         "parameter_budget",
         plotting.plot_comparison(
             {

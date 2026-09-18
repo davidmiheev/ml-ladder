@@ -398,3 +398,107 @@ def plot_panel_rows(
         fig.suptitle(title)
     fig.tight_layout()
     return fig
+
+
+def plot_architecture(
+    columns: Mapping[str, Sequence[str | tuple[str, str]]],
+    *,
+    links: Sequence[tuple[int, int, str]] = (),
+    title: str = "",
+    highlight: Mapping[str, Sequence[int]] | None = None,
+) -> Figure:
+    """Block diagrams of one or more architectures, side by side.
+
+    The rungs that read architectures rather than train them — C5, E5, H6 —
+    have no loss curve to plot, and a bar chart of parameter counts says what a
+    model costs without saying what it *is*. A diagram is the figure those
+    sections actually need, and drawing it with matplotlib rather than checking
+    in an image keeps it in the same regenerate-and-diff pipeline as every other
+    figure: it cannot silently drift from the numbers beside it.
+
+    ``columns`` maps a column heading to its stack of blocks, drawn bottom-up
+    in the order given (so the input is first). A block is a label, or a
+    ``(label, annotation)`` pair whose annotation is set in smaller grey type
+    beneath it. ``links`` draws horizontal arrows between columns as
+    ``(from_column_index, to_column_index, label)``, for showing what one
+    design replaced in another. ``highlight`` names, per column, the block
+    indices to draw in the accent colour — the thing that changed.
+    """
+    from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
+
+    use_house_style()
+    names = list(columns)
+    tallest = max(len(blocks) for blocks in columns.values())
+    fig, ax = plt.subplots(figsize=(3.1 * len(names) + 1.2, 0.95 * tallest + 1.6))
+    ax.set_axis_off()
+    ax.grid(False)
+
+    box_width, box_height, gap = 2.3, 0.62, 0.30
+    centres: dict[int, list[tuple[float, float]]] = {}
+    for column_index, name in enumerate(names):
+        x = column_index * 3.1
+        blocks = list(columns[name])
+        accents = set((highlight or {}).get(name, ()))
+        centres[column_index] = []
+        for row, block in enumerate(blocks):
+            label, annotation = block if isinstance(block, tuple) else (block, "")
+            y = row * (box_height + gap)
+            accent = row in accents
+            ax.add_patch(
+                FancyBboxPatch(
+                    (x - box_width / 2, y - box_height / 2),
+                    box_width,
+                    box_height,
+                    boxstyle="round,pad=0.04",
+                    linewidth=1.4 if accent else 1.0,
+                    edgecolor=PALETTE[1] if accent else "#6b6b6b",
+                    facecolor=(PALETTE[1] + "22") if accent else "#f2f2f2",
+                )
+            )
+            ax.text(x, y + (0.07 if annotation else 0), label, ha="center", va="center", fontsize=8.5)
+            if annotation:
+                ax.text(x, y - 0.17, annotation, ha="center", va="center", fontsize=6.8, color="#5a5a5a")
+            centres[column_index].append((x, y))
+            if row:  # arrow up from the block below
+                previous_y = (row - 1) * (box_height + gap)
+                ax.annotate(
+                    "",
+                    xy=(x, y - box_height / 2),
+                    xytext=(x, previous_y + box_height / 2),
+                    arrowprops={"arrowstyle": "-|>", "color": "#8a8a8a", "linewidth": 0.9},
+                )
+        ax.text(
+            x,
+            tallest * (box_height + gap) + 0.1,
+            name,
+            ha="center",
+            va="bottom",
+            fontsize=9.5,
+            fontweight="bold",
+        )
+
+    for source, target, label in links:
+        # Join the two columns at the height of their shortest stack, which is
+        # where a "this replaces that" arrow reads most naturally.
+        height = min(len(columns[names[source]]), len(columns[names[target]])) - 1
+        x0, y0 = centres[source][height]
+        x1, _ = centres[target][height]
+        ax.add_patch(
+            FancyArrowPatch(
+                (x0 + box_width / 2, y0),
+                (x1 - box_width / 2, y0),
+                arrowstyle="-|>",
+                mutation_scale=11,
+                color=PALETTE[2],
+                linewidth=1.1,
+                linestyle="--",
+            )
+        )
+        ax.text((x0 + x1) / 2, y0 + 0.22, label, ha="center", fontsize=7.2, color=PALETTE[2])
+
+    ax.set_xlim(-box_width / 2 - 0.4, (len(names) - 1) * 3.1 + box_width / 2 + 0.4)
+    ax.set_ylim(-box_height, tallest * (box_height + gap) + 0.7)
+    if title:
+        fig.suptitle(title)
+    fig.tight_layout()
+    return fig

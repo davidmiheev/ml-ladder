@@ -387,6 +387,56 @@ def run(exp: Experiment) -> dict[str, float]:
         )
 
     # -- figures -------------------------------------------------------------
+    # The architectures themselves. A state-vs-context curve says what each
+    # design costs; this says what each design *is*, which is the thing C5 is
+    # actually reading out of the source.
+    qwen_conf = CONFIGS["Qwen3-8B"]
+    exp.log_figure(
+        "architectures",
+        plotting.plot_architecture(
+            {
+                "C3 (this repo)": [
+                    ("token + positional", "learned PE"),
+                    ("multi-head attention", f"{exp['c3_heads']} heads, {exp['c3_heads']} KV"),
+                    ("MLP", f"{exp['c3_width']} wide"),
+                    ("LM head", ""),
+                ],
+                "Qwen3-8B": [
+                    ("token + RoPE", "rotary, no PE table"),
+                    (
+                        "grouped-query attention",
+                        f"{qwen_conf['num_attention_heads']} heads, {qwen_conf['num_key_value_heads']} KV",
+                    ),
+                    ("SwiGLU MLP", f"{qwen_conf['intermediate_size']} wide"),
+                    ("LM head", ""),
+                ],
+                "DeepSeek-V2-Lite": [
+                    ("token + RoPE", "decoupled rope key"),
+                    ("latent attention (MLA)", f"rank {deepseek['kv_lora_rank']} cache"),
+                    (
+                        "MoE FFN",
+                        f"{deepseek['n_routed_experts']}+{deepseek['n_shared_experts']} experts, top-{deepseek['num_experts_per_tok']}",
+                    ),
+                    ("LM head", ""),
+                ],
+                "Qwen3-Next": [
+                    ("token + RoPE", ""),
+                    ("gated DeltaNet x3", "O(1) recurrent state"),
+                    (
+                        "GQA attention x1",
+                        f"{qwen_next['num_attention_heads']} heads, {qwen_next['num_key_value_heads']} KV",
+                    ),
+                    ("MoE FFN", f"top-{qwen_next['num_experts_per_tok']}"),
+                ],
+            },
+            highlight={
+                "Qwen3-8B": [1],
+                "DeepSeek-V2-Lite": [1, 2],
+                "Qwen3-Next": [1, 3],
+            },
+            title="What each design changed about C3's block (accent = the change)",
+        ),
+    )
     exp.log_figure(
         "decode_state",
         plotting.plot_curves(

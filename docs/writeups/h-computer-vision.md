@@ -567,6 +567,7 @@ budgets below are a checked calculation rather than an assertion.
 
 KV cache 18.0 KiB/token, 8× less than multi-head would need.
 
+![Architectures](figures/h/h6_architectures.png)
 ![Parameter budget](figures/h/h6_parameter_budget.png)
 ![Token cost](figures/h/h6_token_cost.png)
 ![Attention cost](figures/h/h6_attention_cost.png)

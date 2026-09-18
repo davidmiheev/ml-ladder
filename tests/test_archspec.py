@@ -116,3 +116,30 @@ def test_crossover_is_one_when_it_wins_immediately():
     big_cache = Decoder(name="cache", layers=uniform_attention(layers=8, heads=32, kv_heads=32, head_dim=128))
     tiny = Decoder(name="tiny", layers=(AttentionLayer(kind="linear", state_elements=8),))
     assert crossover_tokens(tiny, big_cache) == 1
+
+
+# -- architecture diagrams ---------------------------------------------------
+
+
+def test_architecture_diagram_renders_every_block():
+    """The diagram is generated, not checked in, so it must not silently drop rows."""
+    from mlladder.plotting import plot_architecture
+
+    figure = plot_architecture(
+        {"A": ["input", ("middle", "annotated"), "output"], "B": ["input", "output"]},
+        highlight={"A": [1]},
+        links=[(0, 1, "replaces")],
+        title="test",
+    )
+    texts = {text.get_text() for axis in figure.axes for text in axis.texts}
+    for label in ("input", "middle", "annotated", "output", "replaces"):
+        assert label in texts, f"{label} missing from the diagram"
+    figure.clf()
+
+
+def test_architecture_diagram_accepts_uneven_columns():
+    from mlladder.plotting import plot_architecture
+
+    figure = plot_architecture({"tall": ["a", "b", "c", "d"], "short": ["a"]})
+    assert figure.axes, "a figure with no axes would render blank"
+    figure.clf()

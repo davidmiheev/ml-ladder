@@ -246,6 +246,33 @@ def run(exp: Experiment) -> dict[str, float]:
 
     # -- figures -------------------------------------------------------------
     exp.log_figure(
+        "architectures",
+        plotting.plot_architecture(
+            {
+                "E3 (this repo)": [
+                    ("noise in pixel space", f"{headline}x{headline}x3"),
+                    ("U-Net denoiser", "predicts epsilon"),
+                    ("DDPM ancestral sampling", "fixed beta schedule"),
+                    ("image", ""),
+                ],
+                "Stable Diffusion": [
+                    ("noise in VAE latent", f"{sd['downsample']}x down, {sd['latent_channels']} ch"),
+                    ("U-Net + cross-attention", f"text keys/values, {sd['cross_attention_dim']} wide"),
+                    ("DDIM / ancestral sampling", "predicts epsilon"),
+                    ("VAE decoder -> image", ""),
+                ],
+                "FLUX.1": [
+                    ("noise in VAE latent + 2x2 patch", f"{flux['latent_channels']} ch, 1 token / 16px"),
+                    ("MMDiT double-stream x19", "joint attention, both streams"),
+                    ("single-stream x38", "concatenated sequence"),
+                    ("flow-matching sampler", "predicts velocity"),
+                ],
+            },
+            highlight={"Stable Diffusion": [0, 1], "FLUX.1": [0, 1, 3]},
+            title="Three generations of the same idea (accent = what changed)",
+        ),
+    )
+    exp.log_figure(
         "positions",
         plotting.plot_curves(
             {

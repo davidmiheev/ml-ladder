@@ -430,6 +430,7 @@ Each mechanism against its own config without it, at 64k tokens:
 | MLA (rank 512 + 64 rope) | **10.7×** |
 | delta rule (vs its own all-attention twin) | **3.9×** |
 
+![Architectures](figures/c/c5_architectures.png)
 ![Decode state](figures/c/c5_decode_state.png)
 ![Mechanism savings](figures/c/c5_mechanism_savings.png)
 ![State per token](figures/c/c5_state_per_token.png)
