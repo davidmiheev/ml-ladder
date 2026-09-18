@@ -12,7 +12,8 @@
     "H2",
     "H3",
     "H4",
-    "H5"
+    "H5",
+    "H6"
   ],
   "rungs": {
     "H1": {
@@ -1976,7 +1977,426 @@
         }
       },
       "elapsed_sec_median": 193.861
+    },
+    "H6": {
+      "title": "OCR as a vision-language model \u2014 PaddleOCR-VL and Unlimited-OCR read from source, against the H5 pipeline",
+      "metrics": {
+        "candle/drifted_keys": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "candle/parsed_defaults": {
+          "reference": 17.0,
+          "median": 17.0,
+          "min": 17.0,
+          "max": 17.0,
+          "n_seeds": 3
+        },
+        "flops/1024/attention_after_merge": {
+          "reference": 220741853184.0,
+          "median": 220741853184.0,
+          "min": 220741853184.0,
+          "max": 220741853184.0,
+          "n_seeds": 3
+        },
+        "flops/1024/saved_by_merge": {
+          "reference": 3312453699072.0,
+          "median": 3312453699072.0,
+          "min": 3312453699072.0,
+          "max": 3312453699072.0,
+          "n_seeds": 3
+        },
+        "flops/1536/attention_after_merge": {
+          "reference": 1097461094400.0,
+          "median": 1097461094400.0,
+          "min": 1097461094400.0,
+          "max": 1097461094400.0,
+          "n_seeds": 3
+        },
+        "flops/1536/saved_by_merge": {
+          "reference": 16464872664576.0,
+          "median": 16464872664576.0,
+          "min": 16464872664576.0,
+          "max": 16464872664576.0,
+          "n_seeds": 3
+        },
+        "flops/384/attention_after_merge": {
+          "reference": 4121155584.0,
+          "median": 4121155584.0,
+          "min": 4121155584.0,
+          "max": 4121155584.0,
+          "n_seeds": 3
+        },
+        "flops/384/saved_by_merge": {
+          "reference": 61998607872.0,
+          "median": 61998607872.0,
+          "min": 61998607872.0,
+          "max": 61998607872.0,
+          "n_seeds": 3
+        },
+        "flops/640/attention_after_merge": {
+          "reference": 31854974976.0,
+          "median": 31854974976.0,
+          "min": 31854974976.0,
+          "max": 31854974976.0,
+          "n_seeds": 3
+        },
+        "flops/640/saved_by_merge": {
+          "reference": 478328385024.0,
+          "median": 478328385024.0,
+          "min": 478328385024.0,
+          "max": 478328385024.0,
+          "n_seeds": 3
+        },
+        "gqa/kv_cache_ratio": {
+          "reference": 8.0,
+          "median": 8.0,
+          "min": 8.0,
+          "max": 8.0,
+          "n_seeds": 3
+        },
+        "kv_bytes_per_token/paddle_text": {
+          "reference": 18432.0,
+          "median": 18432.0,
+          "min": 18432.0,
+          "max": 18432.0,
+          "n_seeds": 3
+        },
+        "kv_bytes_per_token/paddle_text_without_gqa": {
+          "reference": 147456.0,
+          "median": 147456.0,
+          "min": 147456.0,
+          "max": 147456.0,
+          "n_seeds": 3
+        },
+        "kv_bytes_per_token/unlimited_text": {
+          "reference": 61440.0,
+          "median": 61440.0,
+          "min": 61440.0,
+          "max": 61440.0,
+          "n_seeds": 3
+        },
+        "params/h5_pipeline": {
+          "reference": 487806.0,
+          "median": 487806.0,
+          "min": 487806.0,
+          "max": 487806.0,
+          "n_seeds": 3
+        },
+        "params/paddle_projector": {
+          "reference": 25952256.0,
+          "median": 25952256.0,
+          "min": 25952256.0,
+          "max": 25952256.0,
+          "n_seeds": 3
+        },
+        "params/paddle_text/blocks": {
+          "reference": 254840832.0,
+          "median": 254840832.0,
+          "min": 254840832.0,
+          "max": 254840832.0,
+          "n_seeds": 3
+        },
+        "params/paddle_text/embedding": {
+          "reference": 105906176.0,
+          "median": 105906176.0,
+          "min": 105906176.0,
+          "max": 105906176.0,
+          "n_seeds": 3
+        },
+        "params/paddle_text/extra": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "params/paddle_text/output_head": {
+          "reference": 105906176.0,
+          "median": 105906176.0,
+          "min": 105906176.0,
+          "max": 105906176.0,
+          "n_seeds": 3
+        },
+        "params/paddle_text/total": {
+          "reference": 466653184.0,
+          "median": 466653184.0,
+          "min": 466653184.0,
+          "max": 466653184.0,
+          "n_seeds": 3
+        },
+        "params/paddle_vision/blocks": {
+          "reference": 411404400.0,
+          "median": 411404400.0,
+          "min": 411404400.0,
+          "max": 411404400.0,
+          "n_seeds": 3
+        },
+        "params/paddle_vision/embedding": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "params/paddle_vision/extra": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "params/paddle_vision/output_head": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "params/paddle_vision/total": {
+          "reference": 411404400.0,
+          "median": 411404400.0,
+          "min": 411404400.0,
+          "max": 411404400.0,
+          "n_seeds": 3
+        },
+        "params/paddleocr_vl/total": {
+          "reference": 904009840.0,
+          "median": 904009840.0,
+          "min": 904009840.0,
+          "max": 904009840.0,
+          "n_seeds": 3
+        },
+        "params/paddleocr_vl/vision_share": {
+          "reference": 0.45508840921466076,
+          "median": 0.45508840921466076,
+          "min": 0.45508840921466076,
+          "max": 0.45508840921466076,
+          "n_seeds": 3
+        },
+        "params/unlimited_clip/blocks": {
+          "reference": 302260224.0,
+          "median": 302260224.0,
+          "min": 302260224.0,
+          "max": 302260224.0,
+          "n_seeds": 3
+        },
+        "params/unlimited_clip/embedding": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "params/unlimited_clip/extra": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "params/unlimited_clip/output_head": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "params/unlimited_clip/total": {
+          "reference": 302260224.0,
+          "median": 302260224.0,
+          "min": 302260224.0,
+          "max": 302260224.0,
+          "n_seeds": 3
+        },
+        "params/unlimited_sam/blocks": {
+          "reference": 85036032.0,
+          "median": 85036032.0,
+          "min": 85036032.0,
+          "max": 85036032.0,
+          "n_seeds": 3
+        },
+        "params/unlimited_sam/embedding": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "params/unlimited_sam/extra": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "params/unlimited_sam/output_head": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "params/unlimited_sam/total": {
+          "reference": 85036032.0,
+          "median": 85036032.0,
+          "min": 85036032.0,
+          "max": 85036032.0,
+          "n_seeds": 3
+        },
+        "params/unlimited_text/active_per_token": {
+          "reference": 739604480.0,
+          "median": 739604480.0,
+          "min": 739604480.0,
+          "max": 739604480.0,
+          "n_seeds": 3
+        },
+        "params/unlimited_text/blocks": {
+          "reference": 2603776000.0,
+          "median": 2603776000.0,
+          "min": 2603776000.0,
+          "max": 2603776000.0,
+          "n_seeds": 3
+        },
+        "params/unlimited_text/embedding": {
+          "reference": 165478400.0,
+          "median": 165478400.0,
+          "min": 165478400.0,
+          "max": 165478400.0,
+          "n_seeds": 3
+        },
+        "params/unlimited_text/extra": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "params/unlimited_text/output_head": {
+          "reference": 165478400.0,
+          "median": 165478400.0,
+          "min": 165478400.0,
+          "max": 165478400.0,
+          "n_seeds": 3
+        },
+        "params/unlimited_text/sparsity": {
+          "reference": 3.967975964666953,
+          "median": 3.967975964666953,
+          "min": 3.967975964666953,
+          "max": 3.967975964666953,
+          "n_seeds": 3
+        },
+        "params/unlimited_text/total": {
+          "reference": 2934732800.0,
+          "median": 2934732800.0,
+          "min": 2934732800.0,
+          "max": 2934732800.0,
+          "n_seeds": 3
+        },
+        "params/vlm_over_pipeline": {
+          "reference": 1853.215909603408,
+          "median": 1853.215909603408,
+          "min": 1853.215909603408,
+          "max": 1853.215909603408,
+          "n_seeds": 3
+        },
+        "tokens/1024/after_merge": {
+          "reference": 1332.0,
+          "median": 1332.0,
+          "min": 1332.0,
+          "max": 1332.0,
+          "n_seeds": 3
+        },
+        "tokens/1024/patches": {
+          "reference": 5329.0,
+          "median": 5329.0,
+          "min": 5329.0,
+          "max": 5329.0,
+          "n_seeds": 3
+        },
+        "tokens/1536/after_merge": {
+          "reference": 2970.0,
+          "median": 2970.0,
+          "min": 2970.0,
+          "max": 2970.0,
+          "n_seeds": 3
+        },
+        "tokens/1536/patches": {
+          "reference": 11881.0,
+          "median": 11881.0,
+          "min": 11881.0,
+          "max": 11881.0,
+          "n_seeds": 3
+        },
+        "tokens/384/after_merge": {
+          "reference": 182.0,
+          "median": 182.0,
+          "min": 182.0,
+          "max": 182.0,
+          "n_seeds": 3
+        },
+        "tokens/384/patches": {
+          "reference": 729.0,
+          "median": 729.0,
+          "min": 729.0,
+          "max": 729.0,
+          "n_seeds": 3
+        },
+        "tokens/640/after_merge": {
+          "reference": 506.0,
+          "median": 506.0,
+          "min": 506.0,
+          "max": 506.0,
+          "n_seeds": 3
+        },
+        "tokens/640/patches": {
+          "reference": 2025.0,
+          "median": 2025.0,
+          "min": 2025.0,
+          "max": 2025.0,
+          "n_seeds": 3
+        },
+        "tokens/a4_300dpi/after_merge": {
+          "reference": 11062.0,
+          "median": 11062.0,
+          "min": 11062.0,
+          "max": 11062.0,
+          "n_seeds": 3
+        },
+        "tokens/a4_300dpi/patches": {
+          "reference": 44250.0,
+          "median": 44250.0,
+          "min": 44250.0,
+          "max": 44250.0,
+          "n_seeds": 3
+        },
+        "validation/relative_error": {
+          "reference": 0.01331604408757668,
+          "median": 0.01331604408757668,
+          "min": 0.01331604408757668,
+          "max": 0.01331604408757668,
+          "n_seeds": 3
+        },
+        "validation/trocr_measured": {
+          "reference": 61596672.0,
+          "median": 61596672.0,
+          "min": 61596672.0,
+          "max": 61596672.0,
+          "n_seeds": 3
+        },
+        "validation/trocr_predicted": {
+          "reference": 60776448.0,
+          "median": 60776448.0,
+          "min": 60776448.0,
+          "max": 60776448.0,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 1.206
     }
   },
-  "figures": 11
+  "figures": 3
 }

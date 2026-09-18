@@ -805,3 +805,132 @@ def test_h5_runs():
         )
         == 0
     )
+
+
+# -- H6: architecture accounting ---------------------------------------------
+
+
+def test_parameter_formula_on_a_hand_computed_block():
+    """One block, no biases, plain MLP — every term checkable by hand."""
+    from parts.h_computer_vision.h6_ocr_vlm_architectures import Transformer
+
+    stack = Transformer(name="toy", layers=1, hidden=8, intermediate=16, heads=2, gated=False)
+    # attention: q/k/v/o each 8*8 = 64 -> 256; mlp: 2 * 8 * 16 = 256; norms: 2*8 = 16
+    assert stack.attention_parameters() == 256
+    assert stack.mlp_parameters() == 256
+    assert stack.block_parameters() == 256 + 256 + 16
+
+
+def test_gated_mlp_is_three_matrices_not_two():
+    from parts.h_computer_vision.h6_ocr_vlm_architectures import Transformer
+
+    shared = {"name": "toy", "layers": 1, "hidden": 8, "intermediate": 16, "heads": 2}
+    plain = Transformer(**shared, gated=False).mlp_parameters()
+    gated = Transformer(**shared, gated=True).mlp_parameters()
+    assert gated == 1.5 * plain
+
+
+def test_grouped_query_attention_shrinks_the_kv_cache_not_the_queries():
+    from parts.h_computer_vision.h6_ocr_vlm_architectures import Transformer
+
+    shared = {"name": "t", "layers": 4, "hidden": 64, "intermediate": 128, "heads": 16, "head_dim": 8}
+    multi = Transformer(**shared, kv_heads=16)
+    grouped = Transformer(**shared, kv_heads=2)
+    assert multi.kv_cache_bytes_per_token() == 8 * grouped.kv_cache_bytes_per_token()
+    # Query capacity is untouched, so the saving is not free capacity.
+    assert multi.heads == grouped.heads
+
+
+def test_moe_total_exceeds_active_by_the_expert_ratio():
+    """The distinction a dense count erases, and the one MoE exists to create."""
+    from parts.h_computer_vision.h6_ocr_vlm_architectures import Transformer
+
+    stack = Transformer(
+        name="moe",
+        layers=3,
+        hidden=64,
+        intermediate=256,
+        heads=8,
+        gated=True,
+        routed_experts=16,
+        shared_experts=2,
+        experts_per_token=4,
+        moe_intermediate=32,
+        dense_layers=1,
+    )
+    total = stack.parameters()["total"]
+    active = stack.parameters(active=True)["total"]
+    assert total > active
+    # Per MoE layer: (16+2) experts held against (4+2) run.
+    per_expert = 3 * 64 * 32
+    assert total - active == (stack.layers - stack.dense_layers) * (16 - 4) * per_expert
+
+
+def test_dense_stack_has_no_active_distinction():
+    from parts.h_computer_vision.h6_ocr_vlm_architectures import Transformer
+
+    stack = Transformer(name="dense", layers=2, hidden=32, intermediate=64, heads=4)
+    assert stack.parameters()["total"] == stack.parameters(active=True)["total"]
+
+
+def test_tied_embeddings_drop_the_output_head():
+    from parts.h_computer_vision.h6_ocr_vlm_architectures import Transformer
+
+    shared = {"name": "t", "layers": 1, "hidden": 16, "intermediate": 32, "heads": 2, "vocab": 100}
+    untied = Transformer(**shared, tied_embeddings=False).parameters()
+    tied = Transformer(**shared, tied_embeddings=True).parameters()
+    assert untied["total"] - tied["total"] == 100 * 16
+
+
+def test_attention_cost_is_quadratic_in_tokens():
+    from parts.h_computer_vision.h6_ocr_vlm_architectures import Transformer
+
+    stack = Transformer(name="t", layers=2, hidden=64, intermediate=128, heads=8)
+    assert stack.attention_flops(200) == pytest.approx(4 * stack.attention_flops(100))
+
+
+def test_spatial_merge_divides_tokens_by_four():
+    from parts.h_computer_vision.h6_ocr_vlm_architectures import page_tokens
+
+    raw = page_tokens(height=384, width=384, patch=14)
+    merged = page_tokens(height=384, width=384, patch=14, merge=2)
+    assert raw == (384 // 14) ** 2
+    assert merged == raw // 4
+
+
+def test_candle_defaults_parse_from_rust_source(tmp_path):
+    from parts.h_computer_vision.h6_ocr_vlm_architectures import parse_candle_defaults
+
+    source = tmp_path / "config.rs"
+    source.write_text(
+        "fn default_vision_hidden_size() -> usize {\n    1152\n}\n"
+        "fn default_num_key_value_heads() -> usize { 2 }\n"
+        "fn default_rope_theta() -> f64 { 500000.0 }\n"  # not usize: skipped
+        "fn default_big() -> usize { 103_424 }\n"
+    )
+    parsed = parse_candle_defaults(source)
+    assert parsed == {"vision_hidden_size": 1152, "num_key_value_heads": 2, "big": 103424}
+
+
+def test_recorded_defaults_match_the_candle_checkout():
+    """The recorded table must agree with the fork, or the rung is documenting fiction.
+
+    Skipped when the checkout is absent; when it is present, drift is a real
+    failure — the numbers in the writeup came from these values.
+    """
+    from pathlib import Path
+
+    from parts.h_computer_vision.h6_ocr_vlm_architectures import PADDLEOCR_VL_DEFAULTS, parse_candle_defaults
+
+    config = Path("/home/user/davidmiheev/candle/candle-transformers/src/models/paddleocr_vl/config.rs")
+    if not config.exists():
+        pytest.skip("candle checkout not present")
+    parsed = parse_candle_defaults(config)
+    mismatched = {k: (v, parsed[k]) for k, v in PADDLEOCR_VL_DEFAULTS.items() if k in parsed and parsed[k] != v}
+    assert not mismatched, f"recorded defaults drifted from candle: {mismatched}"
+
+
+def test_h6_runs():
+    from parts.h_computer_vision.h6_ocr_vlm_architectures import main
+
+    assert main(["--page-sizes", "384", "640", "--validate-against", ""]) == 0
