@@ -1,0 +1,1212 @@
+{
+  "part": "E",
+  "title": "Generative models",
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "reference_seed": 0,
+  "swept_rungs": [
+    "E1",
+    "E2",
+    "E3",
+    "E4",
+    "E5"
+  ],
+  "rungs": {
+    "E1": {
+      "title": "VAE on MNIST/FashionMNIST",
+      "metrics": {
+        "best/agree": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "best/elbo_beta": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "best/sample_beta": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "beta/0.25/active_units": {
+          "reference": 16.0,
+          "median": 16.0,
+          "min": 16.0,
+          "max": 16.0,
+          "n_seeds": 3
+        },
+        "beta/0.25/elbo": {
+          "reference": -115.66484069824219,
+          "median": -113.640869140625,
+          "min": -115.66484069824219,
+          "max": -112.75413513183594,
+          "n_seeds": 3
+        },
+        "beta/0.25/fd_reconstructions": {
+          "reference": 1.9502650490308575,
+          "median": 1.9676494986447608,
+          "min": 1.9502650490308575,
+          "max": 2.2148598521890897,
+          "n_seeds": 3
+        },
+        "beta/0.25/fd_samples": {
+          "reference": 4.743456963251909,
+          "median": 5.087930301566491,
+          "min": 4.743456963251909,
+          "max": 5.937824610447464,
+          "n_seeds": 3
+        },
+        "beta/0.25/kl": {
+          "reference": 38.97227096557617,
+          "median": 36.983150482177734,
+          "min": 34.93684005737305,
+          "max": 38.97227096557617,
+          "n_seeds": 3
+        },
+        "beta/0.25/reconstruction": {
+          "reference": 76.69257354736328,
+          "median": 76.69257354736328,
+          "min": 76.65771484375,
+          "max": 77.81729125976562,
+          "n_seeds": 3
+        },
+        "beta/0.25/train_loss": {
+          "reference": 86.2060306630236,
+          "median": 86.2060306630236,
+          "min": 85.84166676947412,
+          "max": 86.59420930578354,
+          "n_seeds": 3
+        },
+        "beta/1.0/active_units": {
+          "reference": 16.0,
+          "median": 16.0,
+          "min": 16.0,
+          "max": 16.0,
+          "n_seeds": 3
+        },
+        "beta/1.0/elbo": {
+          "reference": -108.74661254882812,
+          "median": -108.74661254882812,
+          "min": -108.8815689086914,
+          "max": -108.09075927734375,
+          "n_seeds": 3
+        },
+        "beta/1.0/fd_reconstructions": {
+          "reference": 2.590406937820916,
+          "median": 2.590406937820916,
+          "min": 2.462289285057171,
+          "max": 2.9395467355801514,
+          "n_seeds": 3
+        },
+        "beta/1.0/fd_samples": {
+          "reference": 4.442979716640085,
+          "median": 4.442979716640085,
+          "min": 4.172954983325257,
+          "max": 4.5852044361520825,
+          "n_seeds": 3
+        },
+        "beta/1.0/kl": {
+          "reference": 23.27739143371582,
+          "median": 23.382892608642578,
+          "min": 23.27739143371582,
+          "max": 24.15838050842285,
+          "n_seeds": 3
+        },
+        "beta/1.0/reconstruction": {
+          "reference": 85.46922302246094,
+          "median": 84.72319030761719,
+          "min": 84.7078628540039,
+          "max": 85.46922302246094,
+          "n_seeds": 3
+        },
+        "beta/1.0/train_loss": {
+          "reference": 108.60026079543094,
+          "median": 108.60026079543094,
+          "min": 108.22730522967399,
+          "max": 109.20899614374689,
+          "n_seeds": 3
+        },
+        "beta/16.0/active_units": {
+          "reference": 4.0,
+          "median": 6.0,
+          "min": 4.0,
+          "max": 7.0,
+          "n_seeds": 3
+        },
+        "beta/16.0/elbo": {
+          "reference": -185.46826171875,
+          "median": -185.72520446777344,
+          "min": -186.0017547607422,
+          "max": -185.46826171875,
+          "n_seeds": 3
+        },
+        "beta/16.0/fd_reconstructions": {
+          "reference": 20.543827090004363,
+          "median": 18.89664319202408,
+          "min": 13.723553794854691,
+          "max": 20.543827090004363,
+          "n_seeds": 3
+        },
+        "beta/16.0/fd_samples": {
+          "reference": 20.78528065249079,
+          "median": 19.31214969265653,
+          "min": 14.126815411572142,
+          "max": 20.78528065249079,
+          "n_seeds": 3
+        },
+        "beta/16.0/kl": {
+          "reference": 1.0745389461517334,
+          "median": 1.0745389461517334,
+          "min": 1.068412184715271,
+          "max": 1.1195497512817383,
+          "n_seeds": 3
+        },
+        "beta/16.0/reconstruction": {
+          "reference": 184.3937225341797,
+          "median": 184.65679931640625,
+          "min": 184.3937225341797,
+          "max": 184.8822021484375,
+          "n_seeds": 3
+        },
+        "beta/16.0/train_loss": {
+          "reference": 201.80264525717877,
+          "median": 202.32020974666514,
+          "min": 201.80264525717877,
+          "max": 202.61507707961061,
+          "n_seeds": 3
+        },
+        "beta/4.0/active_units": {
+          "reference": 16.0,
+          "median": 16.0,
+          "min": 15.0,
+          "max": 16.0,
+          "n_seeds": 3
+        },
+        "beta/4.0/elbo": {
+          "reference": -124.31649780273438,
+          "median": -124.53093719482422,
+          "min": -125.55979919433594,
+          "max": -124.31649780273438,
+          "n_seeds": 3
+        },
+        "beta/4.0/fd_reconstructions": {
+          "reference": 5.205858753144911,
+          "median": 5.7235341779223905,
+          "min": 5.205858753144911,
+          "max": 6.638237866134309,
+          "n_seeds": 3
+        },
+        "beta/4.0/fd_samples": {
+          "reference": 6.815611574091676,
+          "median": 6.940601083470472,
+          "min": 6.815611574091676,
+          "max": 8.262358018770517,
+          "n_seeds": 3
+        },
+        "beta/4.0/kl": {
+          "reference": 9.968915939331055,
+          "median": 9.826871871948242,
+          "min": 9.498279571533203,
+          "max": 9.968915939331055,
+          "n_seeds": 3
+        },
+        "beta/4.0/reconstruction": {
+          "reference": 114.34757995605469,
+          "median": 114.70406341552734,
+          "min": 114.34757995605469,
+          "max": 116.0615234375,
+          "n_seeds": 3
+        },
+        "beta/4.0/train_loss": {
+          "reference": 154.45821575408286,
+          "median": 154.55376596653716,
+          "min": 154.45821575408286,
+          "max": 154.5795417947972,
+          "n_seeds": 3
+        },
+        "collapse/units_lost": {
+          "reference": -12.0,
+          "median": -10.0,
+          "min": -12.0,
+          "max": -9.0,
+          "n_seeds": 3
+        },
+        "distortion_range": {
+          "reference": 107.7011489868164,
+          "median": 107.7011489868164,
+          "min": 107.06491088867188,
+          "max": 107.99908447265625,
+          "n_seeds": 3
+        },
+        "rate_range": {
+          "reference": 37.89773201942444,
+          "median": 35.91473829746246,
+          "min": 33.81729030609131,
+          "max": 37.89773201942444,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 23.23
+    },
+    "E2": {
+      "title": "DCGAN on a small image dataset",
+      "metrics": {
+        "minimax/coverage": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "minimax/d_loss_std_late": {
+          "reference": 0.05271910615162421,
+          "median": 0.05271910615162421,
+          "min": 0.04280832419583851,
+          "max": 0.07828904873075712,
+          "n_seeds": 3
+        },
+        "minimax/discriminator_loss": {
+          "reference": 0.5939818430454173,
+          "median": 0.570471649474286,
+          "min": 0.5539667625376519,
+          "max": 0.5939818430454173,
+          "n_seeds": 3
+        },
+        "minimax/fd": {
+          "reference": 1.8141616754129863,
+          "median": 2.0181883807935,
+          "min": 1.8141616754129863,
+          "max": 2.0948921380772543,
+          "n_seeds": 3
+        },
+        "minimax/fd_best": {
+          "reference": 1.8676575453672992,
+          "median": 2.016179333917737,
+          "min": 1.8676575453672992,
+          "max": 2.0396881461780794,
+          "n_seeds": 3
+        },
+        "minimax/fd_final_over_best": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0080101734106597,
+          "n_seeds": 3
+        },
+        "minimax/fd_std_late": {
+          "reference": 1.420655378524424,
+          "median": 0.5124449348058748,
+          "min": 0.39511904062774883,
+          "max": 1.420655378524424,
+          "n_seeds": 3
+        },
+        "minimax/generator_loss": {
+          "reference": -0.15498509012321207,
+          "median": -0.14083587738903278,
+          "min": -0.15498509012321207,
+          "max": -0.13058842136029233,
+          "n_seeds": 3
+        },
+        "minimax/max_class_share": {
+          "reference": 0.289,
+          "median": 0.293,
+          "min": 0.289,
+          "max": 0.578,
+          "n_seeds": 3
+        },
+        "minimax/mode_entropy": {
+          "reference": 0.8700499534345874,
+          "median": 0.8700499534345874,
+          "min": 0.645250392545808,
+          "max": 0.8901708288000284,
+          "n_seeds": 3
+        },
+        "minimax/nn_distance": {
+          "reference": 6.414454936981201,
+          "median": 6.394955635070801,
+          "min": 6.318770408630371,
+          "max": 6.414454936981201,
+          "n_seeds": 3
+        },
+        "non_saturating/coverage": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "non_saturating/d_loss_std_late": {
+          "reference": 0.016253750122813687,
+          "median": 0.016253750122813687,
+          "min": 0.015400884466279154,
+          "max": 0.018559404558347856,
+          "n_seeds": 3
+        },
+        "non_saturating/discriminator_loss": {
+          "reference": 0.5567054003477097,
+          "median": 0.5653815447015965,
+          "min": 0.5567054003477097,
+          "max": 0.5721661068023519,
+          "n_seeds": 3
+        },
+        "non_saturating/fd": {
+          "reference": 1.7305745757843383,
+          "median": 1.8437981688892648,
+          "min": 1.7305745757843383,
+          "max": 1.996949820611194,
+          "n_seeds": 3
+        },
+        "non_saturating/fd_best": {
+          "reference": 1.8595425827340222,
+          "median": 1.8595425827340222,
+          "min": 1.7619475255745805,
+          "max": 1.964054571146347,
+          "n_seeds": 3
+        },
+        "non_saturating/fd_final_over_best": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "non_saturating/fd_std_late": {
+          "reference": 0.22734146028961988,
+          "median": 0.3248022165924526,
+          "min": 0.22734146028961988,
+          "max": 0.3622819711460773,
+          "n_seeds": 3
+        },
+        "non_saturating/generator_loss": {
+          "reference": 2.459982117439838,
+          "median": 2.4328266914854657,
+          "min": 2.3845803471321756,
+          "max": 2.459982117439838,
+          "n_seeds": 3
+        },
+        "non_saturating/max_class_share": {
+          "reference": 0.236,
+          "median": 0.292,
+          "min": 0.236,
+          "max": 0.556,
+          "n_seeds": 3
+        },
+        "non_saturating/mode_entropy": {
+          "reference": 0.9099271456899419,
+          "median": 0.8776951872838178,
+          "min": 0.686068643769341,
+          "max": 0.9099271456899419,
+          "n_seeds": 3
+        },
+        "non_saturating/nn_distance": {
+          "reference": 6.261631011962891,
+          "median": 6.261631011962891,
+          "min": 6.214081764221191,
+          "max": 6.385745048522949,
+          "n_seeds": 3
+        },
+        "non_saturating_gain/entropy": {
+          "reference": 0.03987719225535458,
+          "median": 0.03987719225535458,
+          "min": -0.012475641516210612,
+          "max": 0.040818251223533,
+          "n_seeds": 3
+        },
+        "non_saturating_gain/fd": {
+          "reference": 0.08358709962864808,
+          "median": 0.0979423174660603,
+          "min": 0.08358709962864808,
+          "max": 0.17439021190423531,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 36.396
+    },
+    "E5": {
+      "title": "Production text-to-image architectures read from source \u2014 Stable Diffusion's U-Net against FLUX's MMDiT",
+      "metrics": {
+        "attention/joint_over_cross": {
+          "reference": 10.125,
+          "median": 10.125,
+          "min": 10.125,
+          "max": 10.125,
+          "n_seeds": 3
+        },
+        "candle/modules_found": {
+          "reference": 2.0,
+          "median": 2.0,
+          "min": 2.0,
+          "max": 2.0,
+          "n_seeds": 3
+        },
+        "flux/image_tokens": {
+          "reference": 4096.0,
+          "median": 4096.0,
+          "min": 4096.0,
+          "max": 4096.0,
+          "n_seeds": 3
+        },
+        "flux/joint_sequence": {
+          "reference": 4608.0,
+          "median": 4608.0,
+          "min": 4608.0,
+          "max": 4608.0,
+          "n_seeds": 3
+        },
+        "flux/single_stream_share": {
+          "reference": 0.4995056437421628,
+          "median": 0.4995056437421628,
+          "min": 0.4995056437421628,
+          "max": 0.4995056437421628,
+          "n_seeds": 3
+        },
+        "flux/text_share_of_sequence": {
+          "reference": 0.1111111111111111,
+          "median": 0.1111111111111111,
+          "min": 0.1111111111111111,
+          "max": 0.1111111111111111,
+          "n_seeds": 3
+        },
+        "params/flux/double_stream": {
+          "reference": 6456317952.0,
+          "median": 6456317952.0,
+          "min": 6456317952.0,
+          "max": 6456317952.0,
+          "n_seeds": 3
+        },
+        "params/flux/projections": {
+          "reference": 12779520.0,
+          "median": 12779520.0,
+          "min": 12779520.0,
+          "max": 12779520.0,
+          "n_seeds": 3
+        },
+        "params/flux/single_stream": {
+          "reference": 6456317952.0,
+          "median": 6456317952.0,
+          "min": 6456317952.0,
+          "max": 6456317952.0,
+          "n_seeds": 3
+        },
+        "params/flux/total": {
+          "reference": 12925415424.0,
+          "median": 12925415424.0,
+          "min": 12925415424.0,
+          "max": 12925415424.0,
+          "n_seeds": 3
+        },
+        "params/flux_over_sd": {
+          "reference": 41.90729083665339,
+          "median": 41.90729083665339,
+          "min": 41.90729083665339,
+          "max": 41.90729083665339,
+          "n_seeds": 3
+        },
+        "params/sd_unet_estimate": {
+          "reference": 308428800.0,
+          "median": 308428800.0,
+          "min": 308428800.0,
+          "max": 308428800.0,
+          "n_seeds": 3
+        },
+        "pixel_diffusion/attention_ratio": {
+          "reference": 65536.0,
+          "median": 65536.0,
+          "min": 65536.0,
+          "max": 65536.0,
+          "n_seeds": 3
+        },
+        "pixel_diffusion/positions_at_headline": {
+          "reference": 1048576.0,
+          "median": 1048576.0,
+          "min": 1048576.0,
+          "max": 1048576.0,
+          "n_seeds": 3
+        },
+        "positions/1024/flux_tokens": {
+          "reference": 4096.0,
+          "median": 4096.0,
+          "min": 4096.0,
+          "max": 4096.0,
+          "n_seeds": 3
+        },
+        "positions/1024/latent_saving": {
+          "reference": 64.0,
+          "median": 64.0,
+          "min": 64.0,
+          "max": 64.0,
+          "n_seeds": 3
+        },
+        "positions/1024/pixel": {
+          "reference": 1048576.0,
+          "median": 1048576.0,
+          "min": 1048576.0,
+          "max": 1048576.0,
+          "n_seeds": 3
+        },
+        "positions/1024/sd_latent": {
+          "reference": 16384.0,
+          "median": 16384.0,
+          "min": 16384.0,
+          "max": 16384.0,
+          "n_seeds": 3
+        },
+        "positions/2048/flux_tokens": {
+          "reference": 16384.0,
+          "median": 16384.0,
+          "min": 16384.0,
+          "max": 16384.0,
+          "n_seeds": 3
+        },
+        "positions/2048/latent_saving": {
+          "reference": 64.0,
+          "median": 64.0,
+          "min": 64.0,
+          "max": 64.0,
+          "n_seeds": 3
+        },
+        "positions/2048/pixel": {
+          "reference": 4194304.0,
+          "median": 4194304.0,
+          "min": 4194304.0,
+          "max": 4194304.0,
+          "n_seeds": 3
+        },
+        "positions/2048/sd_latent": {
+          "reference": 65536.0,
+          "median": 65536.0,
+          "min": 65536.0,
+          "max": 65536.0,
+          "n_seeds": 3
+        },
+        "positions/256/flux_tokens": {
+          "reference": 256.0,
+          "median": 256.0,
+          "min": 256.0,
+          "max": 256.0,
+          "n_seeds": 3
+        },
+        "positions/256/latent_saving": {
+          "reference": 64.0,
+          "median": 64.0,
+          "min": 64.0,
+          "max": 64.0,
+          "n_seeds": 3
+        },
+        "positions/256/pixel": {
+          "reference": 65536.0,
+          "median": 65536.0,
+          "min": 65536.0,
+          "max": 65536.0,
+          "n_seeds": 3
+        },
+        "positions/256/sd_latent": {
+          "reference": 1024.0,
+          "median": 1024.0,
+          "min": 1024.0,
+          "max": 1024.0,
+          "n_seeds": 3
+        },
+        "positions/512/flux_tokens": {
+          "reference": 1024.0,
+          "median": 1024.0,
+          "min": 1024.0,
+          "max": 1024.0,
+          "n_seeds": 3
+        },
+        "positions/512/latent_saving": {
+          "reference": 64.0,
+          "median": 64.0,
+          "min": 64.0,
+          "max": 64.0,
+          "n_seeds": 3
+        },
+        "positions/512/pixel": {
+          "reference": 262144.0,
+          "median": 262144.0,
+          "min": 262144.0,
+          "max": 262144.0,
+          "n_seeds": 3
+        },
+        "positions/512/sd_latent": {
+          "reference": 4096.0,
+          "median": 4096.0,
+          "min": 4096.0,
+          "max": 4096.0,
+          "n_seeds": 3
+        },
+        "validation/flux_error": {
+          "reference": 0.077117952,
+          "median": 0.077117952,
+          "min": 0.077117952,
+          "max": 0.077117952,
+          "n_seeds": 3
+        },
+        "validation/sd_unet_error": {
+          "reference": 0.6413618604651162,
+          "median": 0.6413618604651162,
+          "min": 0.6413618604651162,
+          "max": 0.6413618604651162,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 1.804
+    },
+    "E3": {
+      "title": "DDPM diffusion model from scratch",
+      "metrics": {
+        "cosine/coverage": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "cosine/fd": {
+          "reference": 1.248174394522728,
+          "median": 2.2655584040022454,
+          "min": 1.248174394522728,
+          "max": 2.4982080024632083,
+          "n_seeds": 3
+        },
+        "cosine/mode_entropy": {
+          "reference": 0.8557532434292634,
+          "median": 0.8242165367937703,
+          "min": 0.7620073022147444,
+          "max": 0.8557532434292634,
+          "n_seeds": 3
+        },
+        "cosine/nn_distance": {
+          "reference": 6.341644763946533,
+          "median": 6.416202545166016,
+          "min": 6.341644763946533,
+          "max": 6.845937252044678,
+          "n_seeds": 3
+        },
+        "cosine/parameters": {
+          "reference": 244897.0,
+          "median": 244897.0,
+          "min": 244897.0,
+          "max": 244897.0,
+          "n_seeds": 3
+        },
+        "cosine/steps/10/fd": {
+          "reference": 24.320640606050898,
+          "median": 24.320640606050898,
+          "min": 8.965969518506926,
+          "max": 153.01736731690744,
+          "n_seeds": 3
+        },
+        "cosine/steps/10/seconds": {
+          "reference": 0.44165766499986603,
+          "median": 0.44165766499986603,
+          "min": 0.4394178049999482,
+          "max": 0.44552866899994115,
+          "n_seeds": 3
+        },
+        "cosine/steps/100/fd": {
+          "reference": 3.9855225197458566,
+          "median": 3.556083598371025,
+          "min": 2.671605737873392,
+          "max": 3.9855225197458566,
+          "n_seeds": 3
+        },
+        "cosine/steps/100/seconds": {
+          "reference": 4.384466682000038,
+          "median": 4.40946385999996,
+          "min": 4.384466682000038,
+          "max": 4.427859593999983,
+          "n_seeds": 3
+        },
+        "cosine/steps/25/fd": {
+          "reference": 10.835950973491032,
+          "median": 10.835950973491032,
+          "min": 4.63937574980174,
+          "max": 20.356072977427413,
+          "n_seeds": 3
+        },
+        "cosine/steps/25/seconds": {
+          "reference": 1.1149508389999028,
+          "median": 1.1149508389999028,
+          "min": 1.1128853049999634,
+          "max": 1.1171401040001,
+          "n_seeds": 3
+        },
+        "cosine/steps/400/fd": {
+          "reference": 1.248174394522728,
+          "median": 2.2655584040022454,
+          "min": 1.248174394522728,
+          "max": 2.4982080024632083,
+          "n_seeds": 3
+        },
+        "cosine/steps/400/seconds": {
+          "reference": 16.99202302799995,
+          "median": 17.077646607000133,
+          "min": 16.99202302799995,
+          "max": 17.082180396000012,
+          "n_seeds": 3
+        },
+        "cosine/steps/50/fd": {
+          "reference": 7.513195125894024,
+          "median": 7.513195125894024,
+          "min": 4.028737501315643,
+          "max": 10.189864962487611,
+          "n_seeds": 3
+        },
+        "cosine/steps/50/seconds": {
+          "reference": 2.2210590160000265,
+          "median": 2.227234165000027,
+          "min": 2.2210590160000265,
+          "max": 2.2276596240001254,
+          "n_seeds": 3
+        },
+        "cosine/train_mse": {
+          "reference": 0.0465228362207083,
+          "median": 0.0465228362207083,
+          "min": 0.045442153006157976,
+          "max": 0.04775045039330391,
+          "n_seeds": 3
+        },
+        "cosine_gain/fd": {
+          "reference": 0.30755587812681107,
+          "median": -0.03607121109894962,
+          "min": -1.07521995033456,
+          "max": 0.30755587812681107,
+          "n_seeds": 3
+        },
+        "linear/coverage": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "linear/fd": {
+          "reference": 1.555730272649539,
+          "median": 1.555730272649539,
+          "min": 1.4229880521286482,
+          "max": 2.229487192903296,
+          "n_seeds": 3
+        },
+        "linear/mode_entropy": {
+          "reference": 0.7985020899690821,
+          "median": 0.7985020899690821,
+          "min": 0.7342845652199913,
+          "max": 0.8728994090305322,
+          "n_seeds": 3
+        },
+        "linear/nn_distance": {
+          "reference": 6.903956413269043,
+          "median": 6.711483955383301,
+          "min": 5.78660249710083,
+          "max": 6.903956413269043,
+          "n_seeds": 3
+        },
+        "linear/parameters": {
+          "reference": 244897.0,
+          "median": 244897.0,
+          "min": 244897.0,
+          "max": 244897.0,
+          "n_seeds": 3
+        },
+        "linear/steps/10/fd": {
+          "reference": 4.598043404961693,
+          "median": 2.947359072695516,
+          "min": 2.777880998945104,
+          "max": 4.598043404961693,
+          "n_seeds": 3
+        },
+        "linear/steps/10/seconds": {
+          "reference": 0.4321172890000753,
+          "median": 0.44737886400002935,
+          "min": 0.4321172890000753,
+          "max": 0.449385938000205,
+          "n_seeds": 3
+        },
+        "linear/steps/100/fd": {
+          "reference": 1.6194161522762585,
+          "median": 1.6194161522762585,
+          "min": 1.4228143125412522,
+          "max": 2.0404569500266376,
+          "n_seeds": 3
+        },
+        "linear/steps/100/seconds": {
+          "reference": 4.303539328000056,
+          "median": 4.411962810999967,
+          "min": 4.303539328000056,
+          "max": 4.417928160000201,
+          "n_seeds": 3
+        },
+        "linear/steps/25/fd": {
+          "reference": 1.7884553780782575,
+          "median": 1.7884553780782575,
+          "min": 1.6363143397784192,
+          "max": 2.81808503333097,
+          "n_seeds": 3
+        },
+        "linear/steps/25/seconds": {
+          "reference": 1.0938073209999857,
+          "median": 1.128804430000173,
+          "min": 1.0938073209999857,
+          "max": 1.129096772999901,
+          "n_seeds": 3
+        },
+        "linear/steps/400/fd": {
+          "reference": 1.555730272649539,
+          "median": 1.555730272649539,
+          "min": 1.4229880521286482,
+          "max": 2.229487192903296,
+          "n_seeds": 3
+        },
+        "linear/steps/400/seconds": {
+          "reference": 16.74042915600012,
+          "median": 16.915816425000003,
+          "min": 16.74042915600012,
+          "max": 16.95915456900002,
+          "n_seeds": 3
+        },
+        "linear/steps/50/fd": {
+          "reference": 1.3971262889140377,
+          "median": 1.3971262889140377,
+          "min": 1.3559491441993572,
+          "max": 2.0242669914337093,
+          "n_seeds": 3
+        },
+        "linear/steps/50/seconds": {
+          "reference": 2.1767834930000163,
+          "median": 2.2344192109999312,
+          "min": 2.1767834930000163,
+          "max": 2.238940715999888,
+          "n_seeds": 3
+        },
+        "linear/train_mse": {
+          "reference": 0.028414150184773383,
+          "median": 0.028414150184773383,
+          "min": 0.027271403435696947,
+          "max": 0.02843911704072293,
+          "n_seeds": 3
+        },
+        "steps/knee": {
+          "reference": 400.0,
+          "median": 400.0,
+          "min": 400.0,
+          "max": 400.0,
+          "n_seeds": 3
+        },
+        "steps/quality_cost": {
+          "reference": 23.07246621152817,
+          "median": 23.07246621152817,
+          "min": 6.70041111450468,
+          "max": 150.51915931444424,
+          "n_seeds": 3
+        },
+        "steps/speedup": {
+          "reference": 38.47328909825465,
+          "median": 38.47328909825465,
+          "min": 38.33119571257577,
+          "max": 38.87457495265133,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 162.954
+    },
+    "E4": {
+      "title": "Compare sample quality and training stability across VAE, GAN, and diffusion",
+      "metrics": {
+        "budget_sensitivity/extra_fraction": {
+          "reference": 0.14285714285714285,
+          "median": 0.14285714285714285,
+          "min": 0.14285714285714285,
+          "max": 0.14285714285714285,
+          "n_seeds": 3
+        },
+        "budget_sensitivity/fd_ratio": {
+          "reference": 8.224850740840242,
+          "median": 6.395515278370003,
+          "min": 3.789937045585754,
+          "max": 8.224850740840242,
+          "n_seeds": 3
+        },
+        "budget_sensitivity/mse_ratio": {
+          "reference": 1.0155650367655042,
+          "median": 1.0155650367655042,
+          "min": 1.0089789330898933,
+          "max": 1.0356847894408763,
+          "n_seeds": 3
+        },
+        "diffusion/coverage": {
+          "reference": 0.4,
+          "median": 0.7,
+          "min": 0.4,
+          "max": 0.9,
+          "n_seeds": 3
+        },
+        "diffusion/extended/epochs": {
+          "reference": 16.0,
+          "median": 16.0,
+          "min": 16.0,
+          "max": 16.0,
+          "n_seeds": 3
+        },
+        "diffusion/extended/fd": {
+          "reference": 3.3598339206126493,
+          "median": 3.3598339206126493,
+          "min": 2.713184721232448,
+          "max": 3.958899092949469,
+          "n_seeds": 3
+        },
+        "diffusion/extended/mode_entropy": {
+          "reference": 0.6972660503090906,
+          "median": 0.6972660503090906,
+          "min": 0.6416763454570421,
+          "max": 0.8072623536431889,
+          "n_seeds": 3
+        },
+        "diffusion/extended/train_mse": {
+          "reference": 0.0465228362207083,
+          "median": 0.0465228362207083,
+          "min": 0.045442153006157976,
+          "max": 0.04775045039330391,
+          "n_seeds": 3
+        },
+        "diffusion/fd": {
+          "reference": 27.634132511051128,
+          "median": 25.31919963448348,
+          "min": 10.282799286516111,
+          "max": 27.634132511051128,
+          "n_seeds": 3
+        },
+        "diffusion/max_class_share": {
+          "reference": 0.641,
+          "median": 0.641,
+          "min": 0.583,
+          "max": 0.965,
+          "n_seeds": 3
+        },
+        "diffusion/mode_entropy": {
+          "reference": 0.3235942524926902,
+          "median": 0.3235942524926902,
+          "min": 0.09150022260446208,
+          "max": 0.5062506367489985,
+          "n_seeds": 3
+        },
+        "diffusion/nn_distance": {
+          "reference": 8.271139144897461,
+          "median": 7.232843399047852,
+          "min": 4.09378719329834,
+          "max": 8.271139144897461,
+          "n_seeds": 3
+        },
+        "diffusion/parameters": {
+          "reference": 244897.0,
+          "median": 244897.0,
+          "min": 244897.0,
+          "max": 244897.0,
+          "n_seeds": 3
+        },
+        "diffusion/sample_seconds": {
+          "reference": 8.58133064499998,
+          "median": 8.850788399000066,
+          "min": 8.58133064499998,
+          "max": 8.877669992999927,
+          "n_seeds": 3
+        },
+        "diffusion/train_mse": {
+          "reference": 0.04724696587691916,
+          "median": 0.04724696587691916,
+          "min": 0.04706374666792281,
+          "max": 0.04817919849239765,
+          "n_seeds": 3
+        },
+        "diffusion/train_seconds": {
+          "reference": 38.65550974100006,
+          "median": 39.73890209699994,
+          "min": 38.65550974100006,
+          "max": 39.74995653999986,
+          "n_seeds": 3
+        },
+        "gan/coverage": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "gan/fd": {
+          "reference": 1.7388439976535857,
+          "median": 1.764795438368882,
+          "min": 1.7388439976535857,
+          "max": 1.8848328000241672,
+          "n_seeds": 3
+        },
+        "gan/max_class_share": {
+          "reference": 0.249,
+          "median": 0.259,
+          "min": 0.249,
+          "max": 0.53,
+          "n_seeds": 3
+        },
+        "gan/mode_entropy": {
+          "reference": 0.8983855057386652,
+          "median": 0.8983855057386652,
+          "min": 0.7043331358115341,
+          "max": 0.9057237780262053,
+          "n_seeds": 3
+        },
+        "gan/nn_distance": {
+          "reference": 6.229560852050781,
+          "median": 6.2808918952941895,
+          "min": 6.229560852050781,
+          "max": 6.34427547454834,
+          "n_seeds": 3
+        },
+        "gan/parameters": {
+          "reference": 237345.0,
+          "median": 237345.0,
+          "min": 237345.0,
+          "max": 237345.0,
+          "n_seeds": 3
+        },
+        "gan/sample_seconds": {
+          "reference": 0.007201885000085895,
+          "median": 0.007201885000085895,
+          "min": 0.004019383000013477,
+          "max": 0.021359597999889957,
+          "n_seeds": 3
+        },
+        "gan/train_seconds": {
+          "reference": 7.750112999000066,
+          "median": 7.750112999000066,
+          "min": 7.687293969000166,
+          "max": 7.839877731999877,
+          "n_seeds": 3
+        },
+        "real/fd": {
+          "reference": 0.05811736756306729,
+          "median": 0.0937520258699287,
+          "min": 0.05811736756306729,
+          "max": 0.09560313535676457,
+          "n_seeds": 3
+        },
+        "real/nn_distance": {
+          "reference": 4.806639194488525,
+          "median": 4.596504211425781,
+          "min": 4.582213878631592,
+          "max": 4.806639194488525,
+          "n_seeds": 3
+        },
+        "sampling_cost/diffusion_over_gan": {
+          "reference": 1191.5395267902268,
+          "median": 1191.5395267902268,
+          "min": 414.3705513112028,
+          "max": 2208.7146193757003,
+          "n_seeds": 3
+        },
+        "vae/coverage": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "vae/fd": {
+          "reference": 3.7871429182169614,
+          "median": 3.7871429182169614,
+          "min": 3.570703079238271,
+          "max": 4.298954796091987,
+          "n_seeds": 3
+        },
+        "vae/max_class_share": {
+          "reference": 0.317,
+          "median": 0.403,
+          "min": 0.317,
+          "max": 0.551,
+          "n_seeds": 3
+        },
+        "vae/mode_entropy": {
+          "reference": 0.8235007603787516,
+          "median": 0.7904025075387298,
+          "min": 0.6268688165190235,
+          "max": 0.8235007603787516,
+          "n_seeds": 3
+        },
+        "vae/nn_distance": {
+          "reference": 5.243068218231201,
+          "median": 5.243068218231201,
+          "min": 5.215441703796387,
+          "max": 5.346571922302246,
+          "n_seeds": 3
+        },
+        "vae/parameters": {
+          "reference": 657761.0,
+          "median": 657761.0,
+          "min": 657761.0,
+          "max": 657761.0,
+          "n_seeds": 3
+        },
+        "vae/sample_seconds": {
+          "reference": 0.005330072000106156,
+          "median": 0.0039371829998344765,
+          "min": 0.0037202720000095724,
+          "max": 0.005330072000106156,
+          "n_seeds": 3
+        },
+        "vae/train_seconds": {
+          "reference": 4.854005137000058,
+          "median": 4.854005137000058,
+          "min": 4.706448536999687,
+          "max": 5.066042545000073,
+          "n_seeds": 3
+        },
+        "winner/coverage/gan": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "winner/distinct_axes": {
+          "reference": 2.0,
+          "median": 2.0,
+          "min": 2.0,
+          "max": 2.0,
+          "n_seeds": 3
+        },
+        "winner/quality/gan": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "winner/sample_speed/vae": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "winner/train_speed/vae": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 151.717
+    }
+  },
+  "figures": 4
+}

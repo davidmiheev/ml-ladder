@@ -90,17 +90,25 @@ def train_gan(x, *, exp, device, image_size, image_channels):
     return generator
 
 
-def train_diffusion(x, *, exp, device, image_size, image_channels):
-    """E3's DDPM at the shared budget, on the cosine schedule."""
+def train_diffusion(x, *, exp, device, image_size, image_channels, epochs=None):
+    """E3's DDPM at the shared budget, on the cosine schedule.
+
+    ``epochs`` overrides the shared budget. It exists for the convergence
+    control below, which needs the *same* run continued rather than a second
+    independent one — hence the re-seed and full replay rather than a warm
+    start, so the longer run is exactly the shorter run plus more epochs.
+    """
     torch = vision.require_torch()
     torchkit.seed_torch(exp.seed)
     diffusion = Diffusion(make_schedule(exp["schedule"], exp["train_steps"]), device=device)
     model = make_denoiser(channels=exp["channels"], image_channels=image_channels)().to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=exp["diffusion_lr"], weight_decay=1e-5)
     data = torch.from_numpy(x * 2 - 1).to(device)
-    for _ in range(exp["epochs"]):
+    losses: list[float] = []
+    for _ in range(exp["epochs"] if epochs is None else epochs):
         model.train()
         permutation = torch.randperm(len(data), device=device)
+        epoch_losses = []
         for start in range(0, len(data), exp["batch_size"]):
             batch = data[permutation[start : start + exp["batch_size"]]]
             t = torch.randint(0, exp["train_steps"], (len(batch),), device=device)
@@ -109,7 +117,9 @@ def train_diffusion(x, *, exp, device, image_size, image_channels):
             optimizer.zero_grad(set_to_none=True)
             loss.backward()
             optimizer.step()
-    return model, diffusion
+            epoch_losses.append(loss.item())
+        losses.append(float(np.mean(epoch_losses)))
+    return model, diffusion, losses[-1]
 
 
 @experiment(
@@ -133,6 +143,10 @@ def train_diffusion(x, *, exp, device, image_size, image_channels):
         "sample_steps": 100,
         "sample_count": 1000,
         "scorer_epochs": 2,
+        # The convergence control: the same diffusion run continued this many
+        # epochs further, to test whether the shared budget is measuring the
+        # family or measuring how far from converged one member of it is.
+        "extra_epochs": 2,
     },
     description="VAE, GAN and diffusion on identical data and budget, scored on quality, coverage, stability and cost.",
 )
@@ -187,7 +201,7 @@ def run(exp: Experiment) -> dict[str, float]:
 
     # -- diffusion -----------------------------------------------------------
     started = time.perf_counter()
-    denoiser, diffusion = train_diffusion(x_train, **shared)
+    denoiser, diffusion, diffusion_mse = train_diffusion(x_train, **shared)
     summary["diffusion/train_seconds"] = time.perf_counter() - started
     started = time.perf_counter()
     generator = torch.Generator(device=device).manual_seed(exp.seed)
@@ -222,6 +236,41 @@ def run(exp: Experiment) -> dict[str, float]:
     if "real/fd" in summary:
         print(
             f"[e4] {'real data':<10} fd={summary['real/fd']:7.2f}  nn={summary['real/nn_distance']:5.2f}  (the floor)"
+        )
+
+    # -- is the shared budget measuring the family, or its convergence? ------
+    # An equal-budget comparison is only fair if every arm is near the flat part
+    # of its own curve. Diffusion is the arm most likely not to be, so the same
+    # run is continued a little further and re-scored. If a few more epochs move
+    # the score a lot, the headline is a statement about the budget.
+    if exp["extra_epochs"] > 0:
+        longer, longer_diffusion, longer_mse = train_diffusion(
+            x_train, **shared, epochs=exp["epochs"] + exp["extra_epochs"]
+        )
+        generator = torch.Generator(device=device).manual_seed(exp.seed)
+        drawn = longer_diffusion.sample(
+            longer, shape=shape, device=device, steps=exp["sample_steps"], generator=generator
+        )
+        extended = ((drawn + 1) / 2).clamp(0, 1).cpu().numpy()
+        extended_coverage = generative.class_coverage(scorer, extended, device=device, num_classes=num_classes)
+        summary["diffusion/train_mse"] = diffusion_mse
+        summary["diffusion/extended/train_mse"] = longer_mse
+        summary["diffusion/extended/fd"] = generative.distribution_distance(
+            scorer, real_reference, extended, device=device
+        )
+        summary["diffusion/extended/mode_entropy"] = extended_coverage["entropy"]
+        summary["diffusion/extended/epochs"] = float(exp["epochs"] + exp["extra_epochs"])
+        # Two ratios over the same pair of runs: how much the quality moved, and
+        # how much the training loss moved. A large first and a small second is
+        # the finding -- the loss cannot see what changed.
+        summary["budget_sensitivity/fd_ratio"] = summary["diffusion/fd"] / max(summary["diffusion/extended/fd"], 1e-9)
+        summary["budget_sensitivity/mse_ratio"] = diffusion_mse / max(longer_mse, 1e-9)
+        summary["budget_sensitivity/extra_fraction"] = exp["extra_epochs"] / exp["epochs"]
+        print(
+            f"[e4] +{exp['extra_epochs']} epochs ({summary['budget_sensitivity/extra_fraction']:.0%} more budget): "
+            f"diffusion fd {summary['diffusion/fd']:.2f} -> {summary['diffusion/extended/fd']:.2f} "
+            f"({summary['budget_sensitivity/fd_ratio']:.1f}x better) while the training MSE moves "
+            f"{diffusion_mse:.4f} -> {longer_mse:.4f} ({summary['budget_sensitivity/mse_ratio']:.3f}x)"
         )
 
     # -- who wins what -------------------------------------------------------

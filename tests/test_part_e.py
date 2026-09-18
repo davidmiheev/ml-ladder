@@ -396,6 +396,51 @@ def test_e4_runs():
     )
 
 
+def test_e4_convergence_control_trains_the_same_run_for_longer():
+    """The control is only meaningful if the longer run *extends* the shorter one.
+
+    Both calls re-seed and replay from scratch, so the same ``epochs`` must give
+    the same loss and a larger ``epochs`` must give a different one. If the
+    re-seed were dropped, the comparison would confound more training with a
+    different initialization.
+    """
+    from typing import ClassVar
+
+    import numpy as np
+    from parts.e_generative.e4_generative_comparison import train_diffusion
+
+    from mlladder import vision
+
+    vision.require_torch()
+
+    class Config:
+        """The slice of ``Experiment`` ``train_diffusion`` actually touches."""
+
+        seed = 0
+        _values: ClassVar[dict] = {
+            "channels": 8,
+            "train_steps": 8,
+            "batch_size": 32,
+            "diffusion_lr": 2e-3,
+            "schedule": "cosine",
+            "epochs": 1,
+        }
+
+        def __getitem__(self, key):
+            return self._values[key]
+
+    exp = Config()
+    rng = np.random.default_rng(0)
+    x = rng.random((64, 1, 16, 16)).astype(np.float32)
+    shared = {"exp": exp, "device": "cpu", "image_size": 16, "image_channels": 1}
+
+    _, _, once = train_diffusion(x, **shared, epochs=1)
+    _, _, again = train_diffusion(x, **shared, epochs=1)
+    _, _, twice = train_diffusion(x, **shared, epochs=2)
+    assert once == again
+    assert once != twice
+
+
 def test_latent_positions_compose_the_two_compressions():
     from parts.e_generative.e5_flux_and_sd import latent_positions
 
