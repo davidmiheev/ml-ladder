@@ -95,14 +95,44 @@ def parse_candle_defaults(config_path: Path) -> dict[str, int]:
     return found
 
 
-def page_tokens(*, height: int, width: int, patch: int, merge: int = 1) -> int:
+def page_tokens(*, height: int, width: int, patch: int, merge: int = 1, minimum: int = 0) -> int:
     """Visual tokens a page becomes: patches, then the spatial merge.
 
     The merge is a 2x2 concatenation before the projector, so it divides the
     token count by four while keeping the information — the cheapest available
     lever on an attention cost that grows as the square.
+
+    **Rounding up, not down, and why that was wrong for a while.** A NaViT-style
+    encoder pads a page to whole patches rather than cropping the remainder, so
+    a 640x1024 page at patch 14 and merge 2 becomes ceil(640/28) x ceil(1024/28)
+    = 23 x 37 = 851 tokens, not the 821 that flooring gives. That is not a
+    derivation — it is what PaddleOCR-VL's own processor emitted when this rung's
+    arithmetic was finally checked against the loaded model (see
+    ``MEASURED_PAGE_TOKENS``). Flooring quietly under-counted every page whose
+    side was not a multiple of patch x merge.
+
+    ``minimum`` is the other half of that correction: the processor refuses to
+    shrink a page below a floor, so a small page costs more tokens than its size
+    implies. 851 is a property of the geometry; the floor is a property of the
+    preprocessing, and they are separate arguments.
     """
-    return (height // patch) * (width // patch) // (merge * merge)
+    stride = patch * merge
+    tokens = -(-height // stride) * -(-width // stride)
+    return max(tokens, minimum)
+
+
+# Token counts PaddleOCR-VL's own processor emitted on the H5 test pages, T4 and
+# CPU alike, recorded so the arithmetic above is audited rather than trusted.
+# Keys are (height, width) of the page as handed to the processor.
+MEASURED_PAGE_TOKENS = {
+    (640, 1024): 851,  # the H5 pages upscaled 4x
+    (160, 256): 198,  # the H5 pages at native size
+}
+# The native page is 6 x 10 = 60 tokens by geometry and 198 in fact: the
+# processor upscales anything below its minimum, so a page smaller than the
+# floor is charged for the floor. Recorded as a measured constant because it is
+# a preprocessing policy, not something derivable from the model config.
+MEASURED_TOKEN_FLOOR = 198
 
 
 @experiment(
@@ -286,6 +316,32 @@ def run(exp: Experiment) -> dict[str, float]:
             f"attention {paddle_vision.attention_flops(after) / 1e9:8.1f} GFLOP "
             f"({paddle_vision.attention_flops(raw) / max(paddle_vision.attention_flops(after), 1):.0f}x cheaper)"
         )
+
+    # -- does the token arithmetic survive the loaded model? ------------------
+    # H6 is arithmetic over a config, and arithmetic over a config can be wrong
+    # in ways no amount of internal consistency reveals. These are the counts
+    # PaddleOCR-VL's processor actually emitted on H5's pages; the first row is
+    # geometry and now matches exactly, the second is the preprocessing floor
+    # and does not, which is the more interesting half.
+    for (page_height, page_width), measured in MEASURED_PAGE_TOKENS.items():
+        predicted = page_tokens(height=page_height, width=page_width, patch=patch, merge=merge)
+        key = f"{page_height}x{page_width}"
+        summary[f"validation/tokens/{key}/predicted"] = float(predicted)
+        summary[f"validation/tokens/{key}/measured"] = float(measured)
+        summary[f"validation/tokens/{key}/error"] = abs(predicted - measured) / measured
+        print(
+            f"[h6] token check at {page_width}x{page_height}: predicted {predicted}, "
+            f"processor emitted {measured} ({abs(predicted - measured) / measured:.0%} off)"
+        )
+    floored = page_tokens(height=160, width=256, patch=patch, merge=merge, minimum=MEASURED_TOKEN_FLOOR)
+    summary["validation/tokens/floor_applied"] = float(floored)
+    summary["validation/tokens/floor_over_geometry"] = floored / page_tokens(
+        height=160, width=256, patch=patch, merge=merge
+    )
+    print(
+        f"[h6] the small page costs {summary['validation/tokens/floor_over_geometry']:.1f}x what its geometry "
+        f"implies, because the processor will not shrink a page below its floor"
+    )
 
     a4_raw = page_tokens(height=exp["a4_height"], width=exp["a4_width"], patch=patch)
     a4_merged = page_tokens(height=exp["a4_height"], width=exp["a4_width"], patch=patch, merge=merge)

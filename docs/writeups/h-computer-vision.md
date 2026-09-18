@@ -1,6 +1,6 @@
 # Part H — Computer vision & OCR
 
-> **Status:** complete (H1–H6) · **Constraint:** synthetic data with exact ground truth, rendered offline; small budgets
+> **Status:** complete (H1–H6, plus the real-model runs) · **Constraint:** synthetic data with exact ground truth, rendered offline; small budgets
 > **Numbers:** seeds 0–2, reference seed 0 · raw values in [`data/h-metrics.json`](data/h-metrics.json)
 > **Reproduce:** `ladder run H1` … `H6` (needs `uv sync --extra torch --extra ocr`), or `uv run python tools/writeup_figures.py H`
 > **Hardware:** H1–H5 swept on a Colab T4; H6 is arithmetic and runs anywhere
@@ -561,9 +561,9 @@ budgets below are a checked calculation rather than an assertion.
 
 | page | patches | tokens after 2×2 merge | attention |
 | --- | --- | --- | --- |
-| 384px | 729 | 182 | 4.1 GFLOP |
-| 1024px | 5,329 | 1,332 | 220.7 GFLOP |
-| A4 at 300dpi | 44,250 | 11,062 | — |
+| 384px | 784 | 196 | 4.8 GFLOP |
+| 1024px | 5,476 | 1,369 | 233.2 GFLOP |
+| A4 at 300dpi | 44,678 | 11,214 | — |
 
 KV cache 18.0 KiB/token, 8× less than multi-head would need.
 
@@ -592,7 +592,7 @@ recorded beside them.
 
 **Open threads.** Actually running PaddleOCR-VL on H5's pages, which would turn
 this accounting into the head-to-head the rung deliberately does not attempt.
-Measuring the vision tower's activation memory, which at 11,062 tokens for an A4
+Measuring the vision tower's activation memory, which at 11,214 tokens for an A4
 scan is likely the real deployment constraint rather than parameters. And
 DeepSeek-OCR's compression claims, which is the lineage Unlimited-OCR comes from.
 
@@ -600,6 +600,110 @@ DeepSeek-OCR's compression claims, which is the lineage Unlimited-OCR comes from
 [NaViT](https://arxiv.org/abs/2307.06304);
 [Donut](https://arxiv.org/abs/2111.15664);
 [GQA](https://arxiv.org/abs/2305.13245).
+
+---
+
+## The models, actually run
+
+Everything above H6 is a model I trained; H6 itself is arithmetic over two
+published configs. Both of those are ways of being wrong that the rung cannot
+detect on its own — so the models H6 prices were downloaded and run on H5's own
+test pages, against H5's own ground truth, scored with H3's own CER.
+
+The pages are written by `tools/real_models/write_pages.py`, which replays the
+same rng stream `h5_document_pipeline` uses: 2500 train pages drawn first, so
+page *k* here is page *k* of H5's test split. Each page is saved twice — at its
+native 256x160 and upscaled 4x with Lanczos. **Upscaling adds no information**,
+so the ground truth is untouched; it exists only to remove the excuse that the
+page is smaller than the model's patch grid, and it turns out to be the variable
+that matters.
+
+**Results** (10 pages, 26 lines; raw values in [`data/h-real-models.json`](data/h-real-models.json)):
+
+| model | params | page | CER | WER | s/page |
+| --- | --- | --- | --- | --- | --- |
+| H5's pipeline (clean arm) | 0.49M | native | 0.512 | — | — |
+| H5's pipeline (augmented arm) | 0.49M | native | 0.367 | — | — |
+| H5's recognizer on gold crops | 0.42M | crops | 0.0001 | — | — |
+| PaddleOCR-VL (T4, fp16) | 0.96B | 4x | **0.000** | **0.000** | 3.33 |
+| PaddleOCR-VL (T4, fp16) | 0.96B | native | 0.039 | 0.032 | 0.83 |
+| PaddleOCR-VL (CPU, fp32) | 0.96B | 4x | **0.000** | **0.000** | 96.2 |
+| Unlimited-OCR (T4, bf16) | 3.34B | 4x | **0.000** | **0.000** | 7.18 |
+| Unlimited-OCR (T4, bf16) | 3.34B | native | 0.317 | 0.320 | 3.10 |
+
+Both models transcribe every line of every page **exactly** at 4x. H5's pipeline,
+trained on this exact distribution, reads the same pages at 0.512 CER — and the
+gap is not a recognition gap, because H5's own recognizer reads gold crops at
+0.0001. It is the interface, which is what H5 concluded when it attributed
+99.98% of the pipeline's error to detection, and what H6 argued was worth
+deleting. Here is that argument as a measurement rather than an argument:
+deleting the interface costs **2,000x the parameters** — 0.96B against 0.49M —
+and takes the page CER from 0.512 to 0.000.
+
+**What surprised me.**
+
+*Resolution is the whole story for the smaller model, and a cliff for the larger
+one.* PaddleOCR-VL degrades gracefully — 0.000 to 0.039 CER as the page shrinks
+4x. Unlimited-OCR, three and a half times the size, goes from 0.000 to 0.317,
+and the failure mode is not misreading: on several native-resolution pages it
+returns **an empty transcript** rather than a wrong one. Its refusal is better
+calibrated than its reading, which is a design choice I would not have predicted
+from either config, and a reminder that "bigger model" and "more robust" are
+different claims.
+
+*Unlimited-OCR does detection and recognition in one token stream.* It emits
+`<|det|>text [687, 48, 984, 163]<|/det|>SCORE` — a grounded box immediately
+before the line's text. H5's interface is not *gone* in this model; it has been
+moved inside the sequence, where the two stages share gradients instead of
+passing crops. That is a sharper statement of H6's point than H6 makes.
+
+*Cheap hardware is the difference between the two OCR models, not quality.*
+PaddleOCR-VL reads these pages perfectly on four CPU cores — 96 s/page, but
+perfectly, and it is 29x faster on a T4 (3.33 s/page). Unlimited-OCR needs the
+GPU. On this evidence the 0.96B model is strictly the better deployment for this
+document class.
+
+**A correction to H6, which is why this was worth doing.** H6's `page_tokens`
+floored the patch grid. A NaViT-style encoder *pads* a page to whole patches
+rather than cropping the remainder, so the count is a ceiling:
+
+$$\text{tokens} = \left\lceil \frac{H}{p \cdot m} \right\rceil \cdot \left\lceil \frac{W}{p \cdot m} \right\rceil.$$
+
+For the 1024x640 page that is 23 x 37 = **851**, which is exactly what
+PaddleOCR-VL's processor emitted. The shipped formula said 821. The old answer is
+now pinned in a test so it cannot come back.
+
+The second half of the check failed and stayed failed, which is the more useful
+half. At native size the geometry says 60 tokens; the processor emitted **198**,
+3.3x more, because it will not shrink a page below a floor. That is a
+preprocessing policy, not something derivable from the model config, so it is
+recorded as a measured constant (`MEASURED_TOKEN_FLOOR`) rather than folded into
+the formula as though it had been derived. **A small page does not cost little.**
+
+**The decoders.** C5's arithmetic got the same treatment, less completely.
+DeepSeek-V2-Lite loads on a 15.4GB T4 only under 4-bit NF4 with double-quantised
+scales — 9.62GB resident — and generates coherent text at 4.4 tokens/s. One
+detail worth recording: `sum(p.numel())` reports **8.06B** for a 15.7B-parameter
+model, because bitsandbytes packs two 4-bit weights per byte. A parameter count
+read off a quantized model is a packed-element count, and would have understated
+DeepSeek by exactly 2x if I had trusted it.
+
+**What did not run, and why.** Gemma-4-E2B-it was mid-run when the GPU session
+was reclaimed; nothing was measured, so nothing is reported. The Qwen 3.6-vs-3.8
+comparison needs `Qwen3.6-27B` against `Qwen3.8-27B` — the size-matched pair —
+and at 20.4GB and 21.0GB even as 4-bit AWQ they do not fit a 15.4GB T4 without
+CPU offload. `Qwen3.8-Flash-Next` is 360GB of weights and is out of reach here at
+any quantization. Those remain arithmetic in C5 until there is a 24GB card.
+
+**A bug in the candle fork, found trying.** `ignite-perf`'s `qwen3_5`, `gemma4`
+and `unlimited_ocr` call `candle_nn::fused::static_decode`, which is behind
+`#[cfg(feature = "cuda")]`, from call sites that are not — so
+`cargo build --release` without `--features cuda` fails with 51 errors on
+`candle-transformers`. A CPU-only build of those models is currently impossible;
+gating the call sites the same way would fix it.
+
+**Reproduce:** `tools/real_models/` — the scripts, and a README explaining the
+transformers version pin each checkpoint needs and why.
 
 ---
 
@@ -642,12 +746,23 @@ DeepSeek-OCR's compression claims, which is the lineage Unlimited-OCR comes from
    occasions in this repo where a number that looked like a result was an
    artifact of how it was computed or how few times it was run. The arm-level
    measurements were right every time; only the summaries lied.
-7. **The field's answer to H5 was to delete the interface, not fix it.** H6
-   prices that at 904M parameters and 182 tokens per 384px page. Whether that is
-   worth it is a deployment question, but the direction is not mysterious once
-   you have measured that the interface was where all the error was.
+7. **The field's answer to H5 was to delete the interface, not fix it, and
+   running the real models settles whether that works.** H6 prices the deletion
+   at 904M parameters and 196 tokens per 384px page. PaddleOCR-VL (0.96B) and
+   Unlimited-OCR (3.34B) then read H5's own test pages at **CER 0.000** where
+   H5's pipeline reads them at 0.512 — 2,000x the parameters to remove the
+   interface, and the error goes with it. Whether that trade is worth making is
+   a deployment question; that it works is now measured rather than argued.
+8. **Arithmetic over a config is a hypothesis, and this one was wrong.** H6's
+   token count floored the patch grid where a NaViT encoder pads it; the
+   corrected ceiling gives 851 tokens for a 1024x640 page, exactly what the
+   processor emits. The second prediction stayed wrong and is more useful for
+   it: a 256x160 page is 60 tokens of geometry and 198 in fact, because the
+   processor will not shrink a page below a floor. Being able to run the model
+   is what separated the bug from the policy, and neither was visible from the
+   config alone.
 
-**Cost of the part:** ~3,400 lines including tests, 76 test cases, and a
+**Cost of the part:** ~3,600 lines including tests, 78 test cases, and a
 three-seed sweep in about 24 minutes on a T4 (H1 14s, H2 42s, H3 116s, H4 114s,
 H5 194s, H6 1s per seed). H5 dominates because it trains a detector and two
 recognizers; H6 is arithmetic.

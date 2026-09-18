@@ -1996,59 +1996,59 @@
           "n_seeds": 3
         },
         "flops/1024/attention_after_merge": {
-          "reference": 220741853184.0,
-          "median": 220741853184.0,
-          "min": 220741853184.0,
-          "max": 220741853184.0,
+          "reference": 233175614976.0,
+          "median": 233175614976.0,
+          "min": 233175614976.0,
+          "max": 233175614976.0,
           "n_seeds": 3
         },
         "flops/1024/saved_by_merge": {
-          "reference": 3312453699072.0,
-          "median": 3312453699072.0,
-          "min": 3312453699072.0,
-          "max": 3312453699072.0,
+          "reference": 3497634224640.0,
+          "median": 3497634224640.0,
+          "min": 3497634224640.0,
+          "max": 3497634224640.0,
           "n_seeds": 3
         },
         "flops/1536/attention_after_merge": {
-          "reference": 1097461094400.0,
-          "median": 1097461094400.0,
-          "min": 1097461094400.0,
-          "max": 1097461094400.0,
+          "reference": 1138484160000.0,
+          "median": 1138484160000.0,
+          "min": 1138484160000.0,
+          "max": 1138484160000.0,
           "n_seeds": 3
         },
         "flops/1536/saved_by_merge": {
-          "reference": 16464872664576.0,
-          "median": 16464872664576.0,
-          "min": 16464872664576.0,
-          "max": 16464872664576.0,
+          "reference": 17077262400000.0,
+          "median": 17077262400000.0,
+          "min": 17077262400000.0,
+          "max": 17077262400000.0,
           "n_seeds": 3
         },
         "flops/384/attention_after_merge": {
-          "reference": 4121155584.0,
-          "median": 4121155584.0,
-          "min": 4121155584.0,
-          "max": 4121155584.0,
+          "reference": 4779565056.0,
+          "median": 4779565056.0,
+          "min": 4779565056.0,
+          "max": 4779565056.0,
           "n_seeds": 3
         },
         "flops/384/saved_by_merge": {
-          "reference": 61998607872.0,
-          "median": 61998607872.0,
-          "min": 61998607872.0,
-          "max": 61998607872.0,
+          "reference": 71693475840.0,
+          "median": 71693475840.0,
+          "min": 71693475840.0,
+          "max": 71693475840.0,
           "n_seeds": 3
         },
         "flops/640/attention_after_merge": {
-          "reference": 31854974976.0,
-          "median": 31854974976.0,
-          "min": 31854974976.0,
-          "max": 31854974976.0,
+          "reference": 34816697856.0,
+          "median": 34816697856.0,
+          "min": 34816697856.0,
+          "max": 34816697856.0,
           "n_seeds": 3
         },
         "flops/640/saved_by_merge": {
-          "reference": 478328385024.0,
-          "median": 478328385024.0,
-          "min": 478328385024.0,
-          "max": 478328385024.0,
+          "reference": 522250467840.0,
+          "median": 522250467840.0,
+          "min": 522250467840.0,
+          "max": 522250467840.0,
           "n_seeds": 3
         },
         "gqa/kv_cache_ratio": {
@@ -2304,73 +2304,73 @@
           "n_seeds": 3
         },
         "tokens/1024/after_merge": {
-          "reference": 1332.0,
-          "median": 1332.0,
-          "min": 1332.0,
-          "max": 1332.0,
+          "reference": 1369.0,
+          "median": 1369.0,
+          "min": 1369.0,
+          "max": 1369.0,
           "n_seeds": 3
         },
         "tokens/1024/patches": {
-          "reference": 5329.0,
-          "median": 5329.0,
-          "min": 5329.0,
-          "max": 5329.0,
+          "reference": 5476.0,
+          "median": 5476.0,
+          "min": 5476.0,
+          "max": 5476.0,
           "n_seeds": 3
         },
         "tokens/1536/after_merge": {
-          "reference": 2970.0,
-          "median": 2970.0,
-          "min": 2970.0,
-          "max": 2970.0,
+          "reference": 3025.0,
+          "median": 3025.0,
+          "min": 3025.0,
+          "max": 3025.0,
           "n_seeds": 3
         },
         "tokens/1536/patches": {
-          "reference": 11881.0,
-          "median": 11881.0,
-          "min": 11881.0,
-          "max": 11881.0,
+          "reference": 12100.0,
+          "median": 12100.0,
+          "min": 12100.0,
+          "max": 12100.0,
           "n_seeds": 3
         },
         "tokens/384/after_merge": {
-          "reference": 182.0,
-          "median": 182.0,
-          "min": 182.0,
-          "max": 182.0,
+          "reference": 196.0,
+          "median": 196.0,
+          "min": 196.0,
+          "max": 196.0,
           "n_seeds": 3
         },
         "tokens/384/patches": {
-          "reference": 729.0,
-          "median": 729.0,
-          "min": 729.0,
-          "max": 729.0,
+          "reference": 784.0,
+          "median": 784.0,
+          "min": 784.0,
+          "max": 784.0,
           "n_seeds": 3
         },
         "tokens/640/after_merge": {
-          "reference": 506.0,
-          "median": 506.0,
-          "min": 506.0,
-          "max": 506.0,
+          "reference": 529.0,
+          "median": 529.0,
+          "min": 529.0,
+          "max": 529.0,
           "n_seeds": 3
         },
         "tokens/640/patches": {
-          "reference": 2025.0,
-          "median": 2025.0,
-          "min": 2025.0,
-          "max": 2025.0,
+          "reference": 2116.0,
+          "median": 2116.0,
+          "min": 2116.0,
+          "max": 2116.0,
           "n_seeds": 3
         },
         "tokens/a4_300dpi/after_merge": {
-          "reference": 11062.0,
-          "median": 11062.0,
-          "min": 11062.0,
-          "max": 11062.0,
+          "reference": 11214.0,
+          "median": 11214.0,
+          "min": 11214.0,
+          "max": 11214.0,
           "n_seeds": 3
         },
         "tokens/a4_300dpi/patches": {
-          "reference": 44250.0,
-          "median": 44250.0,
-          "min": 44250.0,
-          "max": 44250.0,
+          "reference": 44678.0,
+          "median": 44678.0,
+          "min": 44678.0,
+          "max": 44678.0,
           "n_seeds": 3
         },
         "validation/relative_error": {
@@ -2378,6 +2378,62 @@
           "median": 0.01331604408757668,
           "min": 0.01331604408757668,
           "max": 0.01331604408757668,
+          "n_seeds": 3
+        },
+        "validation/tokens/160x256/error": {
+          "reference": 0.696969696969697,
+          "median": 0.696969696969697,
+          "min": 0.696969696969697,
+          "max": 0.696969696969697,
+          "n_seeds": 3
+        },
+        "validation/tokens/160x256/measured": {
+          "reference": 198.0,
+          "median": 198.0,
+          "min": 198.0,
+          "max": 198.0,
+          "n_seeds": 3
+        },
+        "validation/tokens/160x256/predicted": {
+          "reference": 60.0,
+          "median": 60.0,
+          "min": 60.0,
+          "max": 60.0,
+          "n_seeds": 3
+        },
+        "validation/tokens/640x1024/error": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "validation/tokens/640x1024/measured": {
+          "reference": 851.0,
+          "median": 851.0,
+          "min": 851.0,
+          "max": 851.0,
+          "n_seeds": 3
+        },
+        "validation/tokens/640x1024/predicted": {
+          "reference": 851.0,
+          "median": 851.0,
+          "min": 851.0,
+          "max": 851.0,
+          "n_seeds": 3
+        },
+        "validation/tokens/floor_applied": {
+          "reference": 198.0,
+          "median": 198.0,
+          "min": 198.0,
+          "max": 198.0,
+          "n_seeds": 3
+        },
+        "validation/tokens/floor_over_geometry": {
+          "reference": 3.3,
+          "median": 3.3,
+          "min": 3.3,
+          "max": 3.3,
           "n_seeds": 3
         },
         "validation/trocr_measured": {
@@ -2395,7 +2451,7 @@
           "n_seeds": 3
         }
       },
-      "elapsed_sec_median": 1.637
+      "elapsed_sec_median": 2.218
     }
   },
   "figures": 4

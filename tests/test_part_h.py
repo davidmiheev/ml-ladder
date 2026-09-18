@@ -892,10 +892,44 @@ def test_attention_cost_is_quadratic_in_tokens():
 def test_spatial_merge_divides_tokens_by_four():
     from parts.h_computer_vision.h6_ocr_vlm_architectures import page_tokens
 
+    # 384 is not a multiple of 14, so "patches" is the ceiling: a NaViT encoder
+    # pads the remainder rather than cropping it.
     raw = page_tokens(height=384, width=384, patch=14)
     merged = page_tokens(height=384, width=384, patch=14, merge=2)
-    assert raw == (384 // 14) ** 2
-    assert merged == raw // 4
+    assert raw == (-(-384 // 14)) ** 2
+    assert merged == (-(-384 // 28)) ** 2
+
+
+def test_page_tokens_matches_what_the_processor_emitted():
+    """The arithmetic against the loaded model, not against itself.
+
+    851 is what PaddleOCR-VL's processor produced for a 1024x640 page. Flooring
+    the division gives 821, which is the version this rung shipped with until
+    the model was actually run.
+    """
+    from parts.h_computer_vision.h6_ocr_vlm_architectures import MEASURED_PAGE_TOKENS, page_tokens
+
+    assert page_tokens(height=640, width=1024, patch=14, merge=2) == MEASURED_PAGE_TOKENS[(640, 1024)]
+    # The shipped formula floored the patch grid and then divided by the merge,
+    # which is 821 -- pinned here so the old answer cannot come back unnoticed.
+    assert (640 // 14) * (1024 // 14) // 4 == 821
+
+
+def test_page_tokens_floor_is_separate_from_the_geometry():
+    """A page below the processor's floor is charged for the floor.
+
+    The 256x160 page is 60 tokens of geometry and 198 tokens in fact. Modelling
+    that as a minimum keeps the two claims separable: one is derived, one is a
+    preprocessing policy that had to be measured.
+    """
+    from parts.h_computer_vision.h6_ocr_vlm_architectures import MEASURED_TOKEN_FLOOR, page_tokens
+
+    geometry = page_tokens(height=160, width=256, patch=14, merge=2)
+    floored = page_tokens(height=160, width=256, patch=14, merge=2, minimum=MEASURED_TOKEN_FLOOR)
+    assert geometry == 60
+    assert floored == MEASURED_TOKEN_FLOOR == 198
+    # The floor must not touch a page that already exceeds it.
+    assert page_tokens(height=640, width=1024, patch=14, merge=2, minimum=MEASURED_TOKEN_FLOOR) == 851
 
 
 def test_candle_defaults_parse_from_rust_source(tmp_path):

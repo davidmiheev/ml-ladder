@@ -57,6 +57,12 @@ of the pipeline's error, because it cannot read a line that was never found.
 
 **H6 — the cost of deleting the interface.** PaddleOCR-VL is 904M parameters
 (45.5% vision) against this pipeline's 488k; Unlimited-OCR's text tower holds
-2.93B and runs 740M per token. A 384px page is 729 patches → 182 tokens after
+2.93B and runs 740M per token. A 384px page is 784 patches → 196 tokens after
 the 2×2 merge, 16× cheaper in attention. Parameter formulas validated against
-TrOCR to 1.3%.
+TrOCR to 1.3%; the token formula against PaddleOCR-VL's own processor, which
+found it was flooring a patch grid the encoder pads.
+
+**The models, actually run.** Both models H6 prices read H5's own test pages at
+**CER 0.000** where the pipeline reads them at 0.512 — see
+[the writeup](../../docs/writeups/h-computer-vision.md#the-models-actually-run)
+and `tools/real_models/`.
