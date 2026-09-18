@@ -243,3 +243,186 @@ def test_e2_runs():
         )
         == 0
     )
+
+
+# -- E3: the diffusion process ----------------------------------------------
+
+
+def test_schedules_are_valid_probabilities_and_monotone_in_destruction():
+    from parts.e_generative.e3_ddpm import make_schedule
+
+    for kind in ("linear", "cosine"):
+        betas = make_schedule(kind, 200)
+        assert betas.shape == (200,)
+        assert (betas > 0).all() and (betas < 1).all(), f"{kind} produced an invalid beta"
+        alpha_bar = np.cumprod(1 - betas)
+        assert (np.diff(alpha_bar) <= 0).all(), f"{kind}'s signal must never increase"
+
+
+def test_cosine_keeps_more_signal_than_linear():
+    """Nichol & Dhariwal's whole point: linear destroys the image too early."""
+    from parts.e_generative.e3_ddpm import make_schedule
+
+    midpoint = 100
+    linear = np.cumprod(1 - make_schedule("linear", 200))[midpoint]
+    cosine = np.cumprod(1 - make_schedule("cosine", 200))[midpoint]
+    assert cosine > linear
+
+
+def test_unknown_schedule_is_rejected():
+    from parts.e_generative.e3_ddpm import make_schedule
+
+    with pytest.raises(ValueError, match="unknown schedule"):
+        make_schedule("quadratic", 10)
+
+
+def test_add_noise_matches_the_closed_form():
+    r"""$x_t = \sqrt{\bar\alpha_t} x_0 + \sqrt{1-\bar\alpha_t}\epsilon$, exactly."""
+    from parts.e_generative.e3_ddpm import Diffusion, make_schedule
+
+    diffusion = Diffusion(make_schedule("linear", 50), device="cpu")
+    images = torch.ones(4, 1, 8, 8)
+    noise = torch.zeros(4, 1, 8, 8)
+    t = torch.full((4,), 10, dtype=torch.long)
+    expected = float(torch.sqrt(diffusion.alpha_bar[10]))
+    assert diffusion.add_noise(images, t, noise).mean().item() == pytest.approx(expected, rel=1e-5)
+
+
+def test_noise_overwhelms_the_signal_by_the_final_step():
+    from parts.e_generative.e3_ddpm import Diffusion, make_schedule
+
+    diffusion = Diffusion(make_schedule("cosine", 200), device="cpu")
+    assert diffusion.signal_to_noise[0] > diffusion.signal_to_noise[-1]
+    assert diffusion.signal_to_noise[-1] < 0.1, "the terminal distribution must be nearly pure noise"
+
+
+def test_sampling_honours_the_requested_step_count():
+    """Striding must actually reduce the number of network calls."""
+    from parts.e_generative.e3_ddpm import Diffusion, make_schedule
+
+    diffusion = Diffusion(make_schedule("cosine", 40), device="cpu")
+    calls = {"n": 0}
+
+    class Counter(torch.nn.Module):
+        def forward(self, x, t):
+            calls["n"] += 1
+            return torch.zeros_like(x)
+
+    diffusion.sample(Counter(), shape=(2, 1, 8, 8), device="cpu", steps=5)
+    assert calls["n"] == 5
+
+
+def test_denoiser_accepts_a_timestep_and_keeps_the_image_shape():
+    from parts.e_generative.e3_ddpm import make_denoiser
+
+    model = make_denoiser(channels=16, image_channels=1)()
+    output = model(torch.randn(3, 1, 28, 28), torch.randint(0, 100, (3,)))
+    assert output.shape == (3, 1, 28, 28)
+
+
+def test_denoiser_output_depends_on_the_timestep():
+    """If it did not, one set of weights could not serve every noise level."""
+    from parts.e_generative.e3_ddpm import make_denoiser
+
+    torch.manual_seed(0)
+    model = make_denoiser(channels=16, image_channels=1)().eval()
+    images = torch.randn(2, 1, 28, 28)
+    with torch.no_grad():
+        early = model(images, torch.zeros(2, dtype=torch.long))
+        late = model(images, torch.full((2,), 99, dtype=torch.long))
+    assert not torch.allclose(early, late)
+
+
+def test_e3_runs():
+    from parts.e_generative.e3_ddpm import main
+
+    assert (
+        main(
+            [
+                "--train-samples",
+                "200",
+                "--test-samples",
+                "100",
+                "--epochs",
+                "1",
+                "--channels",
+                "8",
+                "--schedules",
+                "cosine",
+                "--sample-steps",
+                "4",
+                "--sample-count",
+                "50",
+                "--scorer-epochs",
+                "1",
+                "--train-steps",
+                "20",
+            ]
+        )
+        == 0
+    )
+
+
+# -- E4 and E5 ---------------------------------------------------------------
+
+
+def test_e4_runs():
+    from parts.e_generative.e4_generative_comparison import main
+
+    assert (
+        main(
+            [
+                "--train-samples",
+                "200",
+                "--test-samples",
+                "120",
+                "--epochs",
+                "1",
+                "--channels",
+                "8",
+                "--latent",
+                "16",
+                "--sample-count",
+                "50",
+                "--scorer-epochs",
+                "1",
+                "--train-steps",
+                "20",
+                "--sample-steps",
+                "4",
+            ]
+        )
+        == 0
+    )
+
+
+def test_latent_positions_compose_the_two_compressions():
+    from parts.e_generative.e5_flux_and_sd import latent_positions
+
+    # 1024px at an 8x VAE downsample is 128x128 latent positions...
+    assert latent_positions(height=1024, width=1024, downsample=8) == 128 * 128
+    # ...and a further 2x2 patch quarters that again.
+    assert latent_positions(height=1024, width=1024, downsample=8, patch=2) == 64 * 64
+
+
+def test_flux_budget_lands_near_its_published_size():
+    """~12B is public, so the MMDiT arithmetic can be checked rather than trusted."""
+    from parts.e_generative.e5_flux_and_sd import ARCHITECTURES, mmdit_parameters
+
+    total = mmdit_parameters(ARCHITECTURES["FLUX.1 MMDiT"])["total"]
+    assert abs(total - 12.0e9) / 12.0e9 < 0.15, f"{total / 1e9:.2f}B against a published ~12B"
+
+
+def test_double_stream_blocks_cost_about_twice_a_single_stream_one():
+    """Two sets of weights per block is what makes them double-stream."""
+    from parts.e_generative.e5_flux_and_sd import ARCHITECTURES, mmdit_parameters
+
+    config = dict(ARCHITECTURES["FLUX.1 MMDiT"], depth=1, depth_single_blocks=1)
+    budget = mmdit_parameters(config)
+    assert budget["double_stream"] == pytest.approx(2 * budget["single_stream"], rel=1e-6)
+
+
+def test_e5_runs():
+    from parts.e_generative.e5_flux_and_sd import main
+
+    assert main(["--resolutions", "512", "1024"]) == 0
