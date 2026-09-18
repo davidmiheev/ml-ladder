@@ -1,0 +1,132 @@
+diff --git a/candle-examples/examples/gemma4/main.rs b/candle-examples/examples/gemma4/main.rs
+index bd82b9b..0ede5ce 100644
+--- a/candle-examples/examples/gemma4/main.rs
++++ b/candle-examples/examples/gemma4/main.rs
+@@ -148,6 +148,11 @@ struct Args {
+     #[arg(long)]
+     cpu: bool,
+ 
++    /// Weight dtype: f16, bf16 or f32. Defaults to bf16 on GPU, which needs
++    /// sm_80 or newer; pass f16 on older cards.
++    #[arg(long)]
++    dtype: Option<String>,
++
+     /// Enable tracing (generates a trace-timestamp.json file).
+     #[arg(long)]
+     tracing: bool,
+@@ -271,10 +276,16 @@ fn main() -> Result<()> {
+ 
+     let start = std::time::Instant::now();
+     let device = candle_examples::device(args.cpu)?;
+-    let dtype = if device.is_cuda() {
+-        DType::BF16
+-    } else {
+-        DType::F32
++    // bfloat16 needs sm_80; on an sm_75 card (T4) candle has no bf16 kernels
++    // built and the first matmul fails with "named symbol not found" rather
++    // than anything that names the real problem. --dtype f16 is the way out.
++    let dtype = match args.dtype.as_deref() {
++        Some("f16") => DType::F16,
++        Some("bf16") => DType::BF16,
++        Some("f32") => DType::F32,
++        Some(other) => anyhow::bail!("unknown dtype {other}, expected f16, bf16 or f32"),
++        None if device.is_cuda() => DType::BF16,
++        None => DType::F32,
+     };
+     let vb = unsafe { VarBuilder::from_mmaped_safetensors(&filenames, dtype, &device)? };
+ 
+@@ -289,13 +300,18 @@ fn main() -> Result<()> {
+         let model = Model::new(&config, vb)?;
+         ModelKind::Multimodal(model)
+     } else {
++        // A multimodal checkpoint nests the decoder under the vision and audio
++        // towers, so the same config shape is reached two different ways and
++        // the weights live at two different prefixes. Whichever the config
++        // says, load the text half from where that checkpoint actually keeps it.
++        let mut nested = false;
+         let mut config: Gemma4TextConfig = match args.config_file {
+             Some(config_file) => serde_json::from_slice(&std::fs::read(config_file)?)?,
+             None => {
+                 let config_file = repo.get("config.json")?;
+-                // For text-only, try to parse the text_config sub-object
+                 let raw: serde_json::Value = serde_json::from_slice(&std::fs::read(config_file)?)?;
+                 if let Some(text_cfg) = raw.get("text_config") {
++                    nested = true;
+                     serde_json::from_value(text_cfg.clone())?
+                 } else {
+                     serde_json::from_value(raw)?
+@@ -303,7 +319,11 @@ fn main() -> Result<()> {
+             }
+         };
+         config.use_flash_attn = args.use_flash_attn;
+-        let model = TextModel::new(&config, vb)?;
++        let model = if nested {
++            TextModel::new_nested(&config, vb, "language_model", None)?
++        } else {
++            TextModel::new(&config, vb)?
++        };
+         ModelKind::TextOnly(model)
+     };
+ 
+diff --git a/candle-kernels/src/compatibility.cuh b/candle-kernels/src/compatibility.cuh
+index 8cb8f14..11325c0 100644
+--- a/candle-kernels/src/compatibility.cuh
++++ b/candle-kernels/src/compatibility.cuh
+@@ -7,7 +7,9 @@
+ 
+ // FIXME: the minimum compute capabilities are just guesses since the table is not specific enough
+ 
+-#if __CUDA_ARCH__ < 800
++// CUDA 12.0+ defines these itself for __CUDA_ARCH__ >= 530, so redefining
++// them here makes nvcc fail with "function has already been defined".
++#if __CUDA_ARCH__ < 800 && CUDART_VERSION < 12000
+ __device__ __forceinline__ __half __hmax_nan(__half a, __half b) {
+     return __hisnan(a) ? a : (__hisnan(b) ? b : __hmax(a, b));
+ }
+diff --git a/candle-transformers/src/models/gemma4/text.rs b/candle-transformers/src/models/gemma4/text.rs
+index c69ef2c..f086a0c 100644
+--- a/candle-transformers/src/models/gemma4/text.rs
++++ b/candle-transformers/src/models/gemma4/text.rs
+@@ -2000,6 +2000,23 @@ impl TextModel {
+         Self::new_with_quant(cfg, vb, None)
+     }
+ 
++    /// Like [`Self::new`], but for a checkpoint whose text weights are nested
++    /// under the multimodal prefix.
++    ///
++    /// A text-only Gemma-4 stores its decoder at `model.*`; a multimodal one
++    /// (gemma-4-E2B-it, for instance) stores the same decoder at
++    /// `model.language_model.*` beside its vision and audio towers. The
++    /// architecture is identical, so loading the text half of a multimodal
++    /// checkpoint only needs the extra path component.
++    pub fn new_nested(
++        cfg: &Gemma4TextConfig,
++        vb: VarBuilder,
++        nested_under: &str,
++        quant: Option<GgmlDType>,
++    ) -> Result<Self> {
++        Self::new_with_quant_at(cfg, vb.pp("model").pp(nested_under), quant)
++    }
++
+     /// Like [`Self::new`], but with `quant` set every linear projection is
+     /// quantized to that GGML dtype at load time (activations stay in the
+     /// VarBuilder dtype) and the gather-only embedding tables are stored in
+@@ -2009,7 +2026,17 @@ impl TextModel {
+         vb: VarBuilder,
+         quant: Option<GgmlDType>,
+     ) -> Result<Self> {
+-        let vb_m = vb.pp("model");
++        Self::new_with_quant_at(cfg, vb.pp("model"), quant)
++    }
++
++    /// The body of [`Self::new_with_quant`], taking the decoder's own prefix
++    /// rather than deriving it, so a nested checkpoint can reuse it verbatim.
++    pub fn new_with_quant_at(
++        cfg: &Gemma4TextConfig,
++        vb_m: VarBuilder,
++        quant: Option<GgmlDType>,
++    ) -> Result<Self> {
++        let vb = vb_m.clone();
+         let embed_dtype = if quant.is_some() {
+             DType::F16
+         } else {

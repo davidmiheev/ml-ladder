@@ -562,6 +562,40 @@ GGUF route is what made them runnable at all — the quantization was not a
 convenience, it was the difference between a measurement and a paragraph
 explaining why there wasn't one.
 
+### Through the candle fork
+
+Part H's OCR model runs through the accompanying candle fork and
+[matches transformers to sixteen digits](h-computer-vision.md#the-same-model-through-candle-and-what-two-implementations-agreeing-buys).
+The decoders went less well, and the failures are specific enough to be useful.
+
+**Gemma-4-E2B-it** needed two patches before it would load at all. The fork's
+`TextModel` reads the decoder from `model.*`; a multimodal checkpoint keeps the
+same decoder at `model.language_model.*` beside its vision and audio towers, so
+text-only loading died at `model.embed_tokens.weight`. And the example hardcodes
+bf16 on GPU, which needs sm_80. With a nested-prefix constructor and a `--dtype`
+flag it loads and generates at **25.7 tok/s** — and emits the word "thought"
+repeated to the token limit.
+
+That is worth one control before blaming anyone. Transformers at **f16**, same
+model, same card, same prompt and chat template, answers correctly at 9.63
+tok/s. So it is not f16 precision. And the prefix patch is behaviour-preserving:
+the constructor's other uses of the unprefixed builder are `dtype()` and
+`device()`, and the one root-level weight (`lm_head`) is never reached because
+this config sets `tie_word_embeddings: true`. The conclusion I can defend is
+narrow and still useful: **the fork's `gemma4` f16 path produces wrong output on
+sm_75, and its default bf16 cannot run there at all**, so Gemma-4 could not be
+validated through the fork on this card.
+
+**DeepSeek-V2-Lite** did not run through the fork for a plainer reason: the
+`deepseekv2` example exposes no quantization flag, so it loads 31.4 GB of f16
+weights against a 15.4 GB card. The machinery exists in the library —
+`TextModel::new_with_quant` takes a `GgmlDType` — the example just does not wire
+it up. **Qwen3.6/3.8** have `qwen3_5.rs` in `candle-transformers` but no example
+binary, so there is nothing to invoke without writing one.
+
+So of the five models, the fork ran one end to end, and that one it ran
+*exactly* right.
+
 ---
 
 ## What part C settled

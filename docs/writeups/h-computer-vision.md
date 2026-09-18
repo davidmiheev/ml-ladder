@@ -689,12 +689,53 @@ here: DeepSeek-V2-Lite, Gemma-4 and both Qwen 27Bs are in
 out of reach here at any quantization. Everything else asked for did run, and is
 reported with part C.
 
-**A bug in the candle fork, found trying.** `ignite-perf`'s `qwen3_5`, `gemma4`
-and `unlimited_ocr` call `candle_nn::fused::static_decode`, which is behind
-`#[cfg(feature = "cuda")]`, from call sites that are not — so
-`cargo build --release` without `--features cuda` fails with 51 errors on
-`candle-transformers`. A CPU-only build of those models is currently impossible;
-gating the call sites the same way would fix it.
+### The same model through candle, and what two implementations agreeing buys
+
+Everything above ran under transformers. The accompanying candle fork
+implements PaddleOCR-VL directly, so the same weights were run through it on the
+same T4, on the same pages, scored by the same function:
+
+| runtime | 4x CER | native CER | native WER | s/page (4x) |
+| --- | --- | --- | --- | --- |
+| transformers, fp16 | 0.0000 | 0.0392156862745098 | 0.03225806451612903 | 3.33 |
+| candle fork, f16 | 0.0000 | 0.0392156862745098 | 0.03225806451612903 | 4.68 |
+
+**Identical to sixteen digits**, and they fail on the same page for the same
+reason: page 5's two lines are both `SIGMA`, and both runtimes emit one. So the
+native-resolution error is not a misreading at all — it is a **repeated-line
+collapse**, which I would not have diagnosed from one implementation, because
+one implementation's quirk and a model's behaviour look the same from inside it.
+
+candle also prints its own geometry: `1024x640 -> 1036x644 (46 x 74 patches)`.
+That is 3,404 patches and **851 tokens** after the 2x2 merge — the corrected
+ceiling above, confirmed by an implementation that has never seen my arithmetic.
+
+**Building it.** `CUDA_COMPUTE_CAP=75 cargo build --release --features cuda
+--example paddleocr-vl`: **18m 44s**, and **37 seconds** to add the `gemma4` and
+`deepseekv2` examples afterwards. The cost is the first build, not the model —
+I had guessed "30+ minutes" for the build and used that guess as a reason to
+reach for transformers instead, which was wrong twice over: wrong about the
+number, and wrong to let an unmeasured estimate decide the approach.
+
+Two things had to be fixed to get there, both environmental rather than
+architectural:
+
+- `candle-kernels/src/compatibility.cuh` defines `__hmax_nan`/`__hmin_nan` under
+  `#if __CUDA_ARCH__ < 800`, but **CUDA 12.8 already defines them for arch >=
+  530**, so `nvcc` fails on `src/affine.cu` with a redefinition. Adding
+  `&& CUDART_VERSION < 12000` to the guard fixes it.
+- `--bf16` on an sm_75 card dies with `DriverError(CUDA_ERROR_NOT_FOUND, "named
+  symbol not found")`, because candle's bf16 kernels need sm_80. Dropping the
+  flag works — and the error names a missing symbol rather than the missing
+  capability, which cost me a diagnosis.
+
+**And one that is architectural.** `ignite-perf`'s `qwen3_5`, `gemma4` and
+`unlimited_ocr` call `candle_nn::fused::static_decode`, which is behind
+`#[cfg(feature = "cuda")]`, from call sites that are not — so a build *without*
+`--features cuda` fails with 51 errors in `candle-transformers`. A CPU-only
+build of those models is impossible on this branch; gating the call sites the
+same way would fix it. The decoder attempts through the fork are with
+[part C](c-sequence-attention.md#the-decoders-actually-run).
 
 **Reproduce:** `tools/real_models/` — the scripts, and a README explaining the
 transformers version pin each checkpoint needs and why.

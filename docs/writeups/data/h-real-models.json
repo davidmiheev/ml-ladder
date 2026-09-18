@@ -77,9 +77,53 @@
       "seconds_per_page": 3.100392361100012,
       "load_seconds": 16.957525515000043,
       "note": "returns an empty transcript on several pages at this resolution rather than reading them wrongly"
+    },
+    {
+      "model": "PaddlePaddle/PaddleOCR-VL",
+      "runtime": "candle (davidmiheev/candle @ ignite-perf, examples/paddleocr-vl)",
+      "dtype": "float16",
+      "device": "Colab T4",
+      "scale": "4x",
+      "image_tokens_median": 851,
+      "cer": 0.0,
+      "wer": 0.0,
+      "seconds_per_page": 4.681,
+      "note": "candle reports the geometry itself: 1024x640 -> 1036x644, 46 x 74 patches, which is 3404 patches and 851 tokens after the 2x2 merge -- an independent confirmation of H6's corrected ceiling, from a different implementation"
+    },
+    {
+      "model": "PaddlePaddle/PaddleOCR-VL",
+      "runtime": "candle (davidmiheev/candle @ ignite-perf, examples/paddleocr-vl)",
+      "dtype": "float16",
+      "device": "Colab T4",
+      "scale": "native",
+      "cer": 0.0392156862745098,
+      "wer": 0.03225806451612903,
+      "seconds_per_page": 0.721,
+      "note": "identical to the transformers run to every digit, and the single error is the same one: page 5 has two identical SIGMA lines and both implementations emit one"
     }
   ],
   "not_run": {
     "note": "the decoder runs and what could not be run among them are recorded in c-real-models.json"
+  },
+  "cross_implementation_check": {
+    "claim": "candle and transformers agree exactly on this model and these pages",
+    "cer_4x": "0.0000 in both",
+    "cer_native": "0.0392156862745098 in both",
+    "shared_failure": "page 5, whose two lines are both 'SIGMA'; both runtimes emit one line, so the native-resolution error is a repeated-line collapse rather than a misreading",
+    "why_it_matters": "two independent implementations of the same weights reaching the same CER to 16 digits means the number is a property of the model, not of a runtime"
+  },
+  "candle_build": {
+    "fork": "davidmiheev/candle @ ignite-perf (9aa02f1)",
+    "command": "CUDA_COMPUTE_CAP=75 cargo build --release --features cuda --example paddleocr-vl",
+    "why_compute_cap": "pinning the T4's sm_75 builds one architecture's PTX instead of every architecture candle knows about",
+    "first_build_seconds": 1124,
+    "first_build_reported_by_cargo": "18m 44s",
+    "additional_examples_seconds": 37,
+    "note": "37s to add the gemma4 and deepseekv2 examples once the tree is warm, so the cost is the first build, not the model",
+    "fixes_needed": [
+      "candle-kernels/src/compatibility.cuh defines __hmax_nan/__hmin_nan under `#if __CUDA_ARCH__ < 800`, but CUDA 12.8 already defines them for arch >= 530, so nvcc fails on src/affine.cu. Adding `&& CUDART_VERSION < 12000` to the guard fixes it.",
+      "--bf16 on an sm_75 card fails with DriverError(CUDA_ERROR_NOT_FOUND, 'named symbol not found'): candle's bf16 kernels need sm_80. Running without it works."
+    ],
+    "cpu_build": "still impossible on this branch: qwen3_5, gemma4 and unlimited_ocr call candle_nn::fused::static_decode, which is behind #[cfg(feature = \"cuda\")], from call sites that are not, so a build without --features cuda fails with 51 errors in candle-transformers"
   }
 }

@@ -43,6 +43,22 @@
       "prompt_tokens_per_second": 0.8,
       "generation_tokens_per_second": 9.5,
       "note": "same 96-token budget, also all reasoning, but terse and telegraphic where 3.6 was structured. n=1 at temperature 0: an anecdote, not a measurement"
+    },
+    {
+      "model": "google/gemma-4-E2B-it",
+      "runtime": "candle (davidmiheev/candle @ ignite-perf, examples/gemma4)",
+      "dtype": "float16",
+      "device": "Colab T4",
+      "load_seconds": 32.68,
+      "tokens_per_second": 25.67,
+      "output": "degenerate -- the word 'thought' repeated to the token limit",
+      "control": "transformers at float16, same model, same card, same prompt and chat template: a correct answer at 9.63 tok/s. So the degeneration is not float16 precision.",
+      "patches_needed": [
+        "TextModel loads the decoder from `model.*`, but a multimodal checkpoint keeps it at `model.language_model.*`, so text-only loading of gemma-4-E2B-it fails at model.embed_tokens.weight. Added a constructor taking the decoder's own prefix.",
+        "the example hardcodes bf16 on GPU, which needs sm_80; added a --dtype flag so an sm_75 card can ask for f16."
+      ],
+      "patch_is_behaviour_preserving": "the prefix change only alters where the decoder loads from: the constructor's other uses of the unprefixed builder are dtype() and device(), which are prefix-independent, and the one root-level weight (lm_head) is not reached because this config sets tie_word_embeddings=true",
+      "conclusion": "the fork's gemma4 generates through this path but its f16 output is wrong, and its default bf16 cannot run on sm_75 at all -- so gemma-4 could not be validated through the fork on a T4"
     }
   ],
   "qwen_generation_comparison": {
@@ -58,6 +74,14 @@
   },
   "not_run": {
     "Qwen/Qwen3.8-Flash-Next": "360 GB of weights; out of reach on any accelerator available here",
-    "bf16 or AWQ Qwen 27B": "55.6 GB bf16, and 20.4/21.0 GB as 4-bit AWQ, against a 15.4 GB T4 -- the GGUF route at 3 bpw is what made these runnable at all"
+    "bf16 or AWQ Qwen 27B": "55.6 GB bf16, and 20.4/21.0 GB as 4-bit AWQ, against a 15.4 GB T4 -- the GGUF route at 3 bpw is what made these runnable at all",
+    "deepseek-ai/DeepSeek-V2-Lite via candle": "the fork's deepseekv2 example exposes no quantization flag, so it loads 31.4 GB of f16 weights -- twice what a T4 holds. The library has quantized loading (TextModel::new_with_quant takes a GgmlDType), but the example does not wire it up.",
+    "Qwen3.6 / Qwen3.8 via candle": "candle-transformers has qwen3_5.rs, but the fork ships no example binary for it, so there is nothing to run without writing one"
+  },
+  "candle_build": {
+    "fork": "davidmiheev/candle @ ignite-perf (9aa02f1)",
+    "first_build_reported_by_cargo": "18m 44s with CUDA_COMPUTE_CAP=75",
+    "additional_examples_seconds": 37,
+    "see": "h-real-models.json for the two build fixes this needed"
   }
 }
