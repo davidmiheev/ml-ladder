@@ -35,10 +35,10 @@ values recorded here when it is absent.
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
 from pathlib import Path
 
 from mlladder import Experiment, experiment, plotting
+from mlladder.archspec import Transformer
 
 # Architecture facts as read from candle on 2026-09-17. They are kept here so
 # the rung runs without the checkout, and *checked against* the sources when it
@@ -79,108 +79,6 @@ UNLIMITED_OCR_TEXT = {
     "num_experts_per_tok": 6,
     "first_k_dense_replace": 1,
 }
-
-
-@dataclass(frozen=True)
-class Transformer:
-    """Enough of a transformer stack to count its parameters.
-
-    ``gated`` selects a SwiGLU MLP (three matrices) over a plain one (two),
-    which is not a detail: at these widths the MLP is most of the block, so
-    getting it wrong misstates the whole budget by ~25%.
-    """
-
-    name: str
-    layers: int
-    hidden: int
-    intermediate: int
-    heads: int
-    kv_heads: int | None = None
-    head_dim: int | None = None
-    gated: bool = True
-    vocab: int = 0
-    tied_embeddings: bool = False
-    biases: bool = False
-    extra: dict[str, int] = field(default_factory=dict)
-    # Mixture-of-experts, which decouples the parameters a model *has* from the
-    # ones it *runs* per token. Counting an MoE stack as dense — as the first
-    # version of this rung did — understates Unlimited-OCR's text tower by
-    # roughly an order of magnitude.
-    routed_experts: int = 0
-    shared_experts: int = 0
-    experts_per_token: int = 0
-    moe_intermediate: int = 0
-    dense_layers: int = 0  # leading layers that keep a plain MLP
-
-    @property
-    def per_head(self) -> int:
-        return self.head_dim or self.hidden // self.heads
-
-    @property
-    def kv(self) -> int:
-        return self.kv_heads if self.kv_heads is not None else self.heads
-
-    def attention_parameters(self) -> int:
-        """Q, K, V and the output projection, with GQA shrinking K and V."""
-        q = self.hidden * self.heads * self.per_head
-        k = self.hidden * self.kv * self.per_head
-        v = k
-        o = self.heads * self.per_head * self.hidden
-        bias = (self.heads * self.per_head + 2 * self.kv * self.per_head + self.hidden) if self.biases else 0
-        return q + k + v + o + bias
-
-    def mlp_parameters(self) -> int:
-        matrices = 3 if self.gated else 2
-        bias = (self.intermediate * (matrices - 1) + self.hidden) if self.biases else 0
-        return matrices * self.hidden * self.intermediate + bias
-
-    def expert_parameters(self) -> int:
-        """One expert's FFN, at the (much narrower) MoE width."""
-        return 3 * self.hidden * self.moe_intermediate if self.routed_experts else 0
-
-    def block_parameters(self, *, active: bool = False) -> int:
-        """A block's parameters; ``active`` counts only the experts a token uses."""
-        if self.routed_experts:
-            used = self.experts_per_token if active else self.routed_experts
-            ffn = (used + self.shared_experts) * self.expert_parameters()
-            ffn += self.hidden * self.routed_experts  # the router
-        else:
-            ffn = self.mlp_parameters()
-        return self.attention_parameters() + ffn + 2 * self.hidden  # two norms
-
-    def parameters(self, *, active: bool = False) -> dict[str, int]:
-        """Total parameters, or those touched per token when ``active``."""
-        dense = min(self.dense_layers, self.layers)
-        blocks = dense * (self.attention_parameters() + self.mlp_parameters() + 2 * self.hidden)
-        blocks += (self.layers - dense) * self.block_parameters(active=active)
-        embedding = self.vocab * self.hidden
-        head = 0 if self.tied_embeddings else embedding
-        return {
-            "blocks": blocks,
-            "embedding": embedding,
-            "output_head": head,
-            "extra": sum(self.extra.values()),
-            "total": blocks + embedding + head + sum(self.extra.values()),
-        }
-
-    def kv_cache_bytes_per_token(self, *, dtype_bytes: int = 2) -> int:
-        r"""$2 \times L \times H_{kv} \times d_h \times \text{bytes}$ — keys and values, every layer.
-
-        This is the number that decides whether a long document fits in memory,
-        and it is where grouped-query attention pays: PaddleOCR-VL's text stack
-        has 16 query heads against 2 key/value heads, so the cache is an eighth
-        of what multi-head attention would need for the same query capacity.
-        """
-        return 2 * self.layers * self.kv * self.per_head * dtype_bytes
-
-    def attention_flops(self, tokens: int) -> int:
-        r"""Score-and-apply cost, $2 \times 2 \times L \times H \times T^2 \times d_h$.
-
-        Only the quadratic term: the projections are linear in $T$ and are
-        dwarfed by this once a page is a few hundred tokens long, which is
-        exactly the regime a document model lives in.
-        """
-        return 4 * self.layers * self.heads * tokens * tokens * self.per_head
 
 
 def parse_candle_defaults(config_path: Path) -> dict[str, int]:

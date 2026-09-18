@@ -314,3 +314,77 @@ def test_c4_runs():
     from parts.c_sequence_attention.c4_vit_finetune import main
 
     assert main(["--train-samples", "32", "--test-samples", "32", "--epochs", "1", "--arms", "probe"]) == 0
+
+
+# -- C5: modern decoder accounting -------------------------------------------
+
+
+def test_c5_configs_carry_their_provenance():
+    """Every recorded config names where it came from, or it is unverifiable."""
+    from parts.c_sequence_attention.c5_modern_decoders import CONFIGS
+
+    for name, config in CONFIGS.items():
+        assert "source" in config, f"{name} has no source repo recorded"
+        assert "/" in config["source"], f"{name}'s source is not a hub id"
+
+
+def test_build_decoder_picks_the_right_mechanism_per_config():
+    from parts.c_sequence_attention.c5_modern_decoders import CONFIGS, build_decoder
+
+    assert build_decoder("Qwen3-8B", CONFIGS["Qwen3-8B"]).composition() == {"full": 36}
+    assert build_decoder("Mistral-7B", CONFIGS["Mistral-7B"]).composition() == {"sliding": 32}
+    assert build_decoder("DeepSeek-V2-Lite", CONFIGS["DeepSeek-V2-Lite"]).composition() == {"mla": 27}
+    # Three linear layers for every full one, at interval 4 over 48 layers.
+    hybrid = build_decoder("Qwen3-Next-80B-A3B", CONFIGS["Qwen3-Next-80B-A3B"]).composition()
+    assert hybrid == {"linear": 36, "full": 12}
+
+
+def test_deltanet_state_is_dominated_by_the_recurrent_matrix():
+    """The conv window is a rounding error next to the outer-product memory."""
+    from parts.c_sequence_attention.c5_modern_decoders import CONFIGS, deltanet_state_elements
+
+    config = CONFIGS["Qwen3-Next-80B-A3B"]
+    matrix = config["linear_num_value_heads"] * config["linear_key_head_dim"] * config["linear_value_head_dim"]
+    total = deltanet_state_elements(config)
+    assert total > matrix
+    assert matrix / total > 0.9
+
+
+def test_sliding_window_stack_stops_growing_but_full_attention_does_not():
+    from parts.c_sequence_attention.c5_modern_decoders import CONFIGS, build_decoder
+
+    mistral = build_decoder("Mistral-7B", CONFIGS["Mistral-7B"])
+    qwen = build_decoder("Qwen3-8B", CONFIGS["Qwen3-8B"])
+    assert mistral.state_bytes_at(65536) == mistral.state_bytes_at(262144)
+    assert qwen.state_bytes_at(262144) == 4 * qwen.state_bytes_at(65536)
+
+
+def test_moe_accounting_reproduces_deepseeks_published_size():
+    """15.7B total is public, so the formulas can be checked rather than trusted."""
+    from parts.c_sequence_attention.c5_modern_decoders import CONFIGS
+
+    from mlladder.archspec import Transformer
+
+    config = CONFIGS["DeepSeek-V2-Lite"]
+    stack = Transformer(
+        name="DeepSeek-V2-Lite",
+        layers=config["num_hidden_layers"],
+        hidden=config["hidden_size"],
+        intermediate=config["intermediate_size"],
+        heads=config["num_attention_heads"],
+        kv_heads=config["num_key_value_heads"],
+        vocab=config["vocab_size"],
+        routed_experts=config["n_routed_experts"],
+        shared_experts=config["n_shared_experts"],
+        experts_per_token=config["num_experts_per_tok"],
+        moe_intermediate=config["moe_intermediate_size"],
+        dense_layers=config["first_k_dense_replace"],
+    )
+    held = stack.parameters()["total"]
+    assert abs(held - 15.7e9) / 15.7e9 < 0.05, f"{held / 1e9:.1f}B against a published 15.7B"
+
+
+def test_c5_runs():
+    from parts.c_sequence_attention.c5_modern_decoders import main
+
+    assert main(["--contexts", "1024", "65536"]) == 0

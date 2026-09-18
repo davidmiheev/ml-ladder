@@ -654,7 +654,377 @@
         }
       },
       "elapsed_sec_median": 37.143
+    },
+    "C5": {
+      "title": "Modern decoder architectures read from source \u2014 Qwen3.5, Gemma 4 and DeepSeek-V2 against C3",
+      "metrics": {
+        "deltanet/cache_ratio": {
+          "reference": 3.904205885857262,
+          "median": 3.904205885857262,
+          "min": 3.904205885857262,
+          "max": 3.904205885857262,
+          "n_seeds": 3
+        },
+        "deltanet/crossover_vs_gqa": {
+          "reference": 322.0,
+          "median": 322.0,
+          "min": 322.0,
+          "max": 322.0,
+          "n_seeds": 3
+        },
+        "deltanet/crossover_vs_own_attention": {
+          "reference": 537.0,
+          "median": 537.0,
+          "min": 537.0,
+          "max": 537.0,
+          "n_seeds": 3
+        },
+        "deltanet/state_bytes_per_layer": {
+          "reference": 1097728.0,
+          "median": 1097728.0,
+          "min": 1097728.0,
+          "max": 1097728.0,
+          "n_seeds": 3
+        },
+        "deltanet/state_mib_total": {
+          "reference": 37.6875,
+          "median": 37.6875,
+          "min": 37.6875,
+          "max": 37.6875,
+          "n_seeds": 3
+        },
+        "gqa/cache_ratio": {
+          "reference": 4.0,
+          "median": 4.0,
+          "min": 4.0,
+          "max": 4.0,
+          "n_seeds": 3
+        },
+        "gqa/heads_ratio": {
+          "reference": 4.0,
+          "median": 4.0,
+          "min": 4.0,
+          "max": 4.0,
+          "n_seeds": 3
+        },
+        "layers/C3 (this repo)/full": {
+          "reference": 4.0,
+          "median": 4.0,
+          "min": 4.0,
+          "max": 4.0,
+          "n_seeds": 3
+        },
+        "layers/DeepSeek-V2-Lite/mla": {
+          "reference": 27.0,
+          "median": 27.0,
+          "min": 27.0,
+          "max": 27.0,
+          "n_seeds": 3
+        },
+        "layers/Mistral-7B/sliding": {
+          "reference": 32.0,
+          "median": 32.0,
+          "min": 32.0,
+          "max": 32.0,
+          "n_seeds": 3
+        },
+        "layers/Qwen3-8B/full": {
+          "reference": 36.0,
+          "median": 36.0,
+          "min": 36.0,
+          "max": 36.0,
+          "n_seeds": 3
+        },
+        "layers/Qwen3-Next-80B-A3B/full": {
+          "reference": 12.0,
+          "median": 12.0,
+          "min": 12.0,
+          "max": 12.0,
+          "n_seeds": 3
+        },
+        "layers/Qwen3-Next-80B-A3B/linear": {
+          "reference": 36.0,
+          "median": 36.0,
+          "min": 36.0,
+          "max": 36.0,
+          "n_seeds": 3
+        },
+        "mla/cache_ratio": {
+          "reference": 10.666666666666666,
+          "median": 10.666666666666666,
+          "min": 10.666666666666666,
+          "max": 10.666666666666666,
+          "n_seeds": 3
+        },
+        "mla/latent_rank": {
+          "reference": 512.0,
+          "median": 512.0,
+          "min": 512.0,
+          "max": 512.0,
+          "n_seeds": 3
+        },
+        "params/DeepSeek-V2-Lite/active": {
+          "reference": 2742530048.0,
+          "median": 2742530048.0,
+          "min": 2742530048.0,
+          "max": 2742530048.0,
+          "n_seeds": 3
+        },
+        "params/DeepSeek-V2-Lite/held": {
+          "reference": 15787864064.0,
+          "median": 15787864064.0,
+          "min": 15787864064.0,
+          "max": 15787864064.0,
+          "n_seeds": 3
+        },
+        "params/DeepSeek-V2-Lite/sparsity": {
+          "reference": 5.7566786097798115,
+          "median": 5.7566786097798115,
+          "min": 5.7566786097798115,
+          "max": 5.7566786097798115,
+          "n_seeds": 3
+        },
+        "sliding/cache_ratio": {
+          "reference": 16.0,
+          "median": 16.0,
+          "min": 16.0,
+          "max": 16.0,
+          "n_seeds": 3
+        },
+        "sliding/receptive_field": {
+          "reference": 131072.0,
+          "median": 131072.0,
+          "min": 131072.0,
+          "max": 131072.0,
+          "n_seeds": 3
+        },
+        "state_mib/C3 (this repo)/1024": {
+          "reference": 3.0,
+          "median": 3.0,
+          "min": 3.0,
+          "max": 3.0,
+          "n_seeds": 3
+        },
+        "state_mib/C3 (this repo)/16384": {
+          "reference": 48.0,
+          "median": 48.0,
+          "min": 48.0,
+          "max": 48.0,
+          "n_seeds": 3
+        },
+        "state_mib/C3 (this repo)/262144": {
+          "reference": 768.0,
+          "median": 768.0,
+          "min": 768.0,
+          "max": 768.0,
+          "n_seeds": 3
+        },
+        "state_mib/C3 (this repo)/4096": {
+          "reference": 12.0,
+          "median": 12.0,
+          "min": 12.0,
+          "max": 12.0,
+          "n_seeds": 3
+        },
+        "state_mib/C3 (this repo)/65536": {
+          "reference": 192.0,
+          "median": 192.0,
+          "min": 192.0,
+          "max": 192.0,
+          "n_seeds": 3
+        },
+        "state_mib/DeepSeek-V2-Lite/1024": {
+          "reference": 30.375,
+          "median": 30.375,
+          "min": 30.375,
+          "max": 30.375,
+          "n_seeds": 3
+        },
+        "state_mib/DeepSeek-V2-Lite/16384": {
+          "reference": 486.0,
+          "median": 486.0,
+          "min": 486.0,
+          "max": 486.0,
+          "n_seeds": 3
+        },
+        "state_mib/DeepSeek-V2-Lite/262144": {
+          "reference": 7776.0,
+          "median": 7776.0,
+          "min": 7776.0,
+          "max": 7776.0,
+          "n_seeds": 3
+        },
+        "state_mib/DeepSeek-V2-Lite/4096": {
+          "reference": 121.5,
+          "median": 121.5,
+          "min": 121.5,
+          "max": 121.5,
+          "n_seeds": 3
+        },
+        "state_mib/DeepSeek-V2-Lite/65536": {
+          "reference": 1944.0,
+          "median": 1944.0,
+          "min": 1944.0,
+          "max": 1944.0,
+          "n_seeds": 3
+        },
+        "state_mib/Mistral-7B/1024": {
+          "reference": 128.0,
+          "median": 128.0,
+          "min": 128.0,
+          "max": 128.0,
+          "n_seeds": 3
+        },
+        "state_mib/Mistral-7B/16384": {
+          "reference": 512.0,
+          "median": 512.0,
+          "min": 512.0,
+          "max": 512.0,
+          "n_seeds": 3
+        },
+        "state_mib/Mistral-7B/262144": {
+          "reference": 512.0,
+          "median": 512.0,
+          "min": 512.0,
+          "max": 512.0,
+          "n_seeds": 3
+        },
+        "state_mib/Mistral-7B/4096": {
+          "reference": 512.0,
+          "median": 512.0,
+          "min": 512.0,
+          "max": 512.0,
+          "n_seeds": 3
+        },
+        "state_mib/Mistral-7B/65536": {
+          "reference": 512.0,
+          "median": 512.0,
+          "min": 512.0,
+          "max": 512.0,
+          "n_seeds": 3
+        },
+        "state_mib/Qwen3-8B/1024": {
+          "reference": 144.0,
+          "median": 144.0,
+          "min": 144.0,
+          "max": 144.0,
+          "n_seeds": 3
+        },
+        "state_mib/Qwen3-8B/16384": {
+          "reference": 2304.0,
+          "median": 2304.0,
+          "min": 2304.0,
+          "max": 2304.0,
+          "n_seeds": 3
+        },
+        "state_mib/Qwen3-8B/262144": {
+          "reference": 36864.0,
+          "median": 36864.0,
+          "min": 36864.0,
+          "max": 36864.0,
+          "n_seeds": 3
+        },
+        "state_mib/Qwen3-8B/4096": {
+          "reference": 576.0,
+          "median": 576.0,
+          "min": 576.0,
+          "max": 576.0,
+          "n_seeds": 3
+        },
+        "state_mib/Qwen3-8B/65536": {
+          "reference": 9216.0,
+          "median": 9216.0,
+          "min": 9216.0,
+          "max": 9216.0,
+          "n_seeds": 3
+        },
+        "state_mib/Qwen3-Next-80B-A3B/1024": {
+          "reference": 61.6875,
+          "median": 61.6875,
+          "min": 61.6875,
+          "max": 61.6875,
+          "n_seeds": 3
+        },
+        "state_mib/Qwen3-Next-80B-A3B/16384": {
+          "reference": 421.6875,
+          "median": 421.6875,
+          "min": 421.6875,
+          "max": 421.6875,
+          "n_seeds": 3
+        },
+        "state_mib/Qwen3-Next-80B-A3B/262144": {
+          "reference": 6181.6875,
+          "median": 6181.6875,
+          "min": 6181.6875,
+          "max": 6181.6875,
+          "n_seeds": 3
+        },
+        "state_mib/Qwen3-Next-80B-A3B/4096": {
+          "reference": 133.6875,
+          "median": 133.6875,
+          "min": 133.6875,
+          "max": 133.6875,
+          "n_seeds": 3
+        },
+        "state_mib/Qwen3-Next-80B-A3B/65536": {
+          "reference": 1573.6875,
+          "median": 1573.6875,
+          "min": 1573.6875,
+          "max": 1573.6875,
+          "n_seeds": 3
+        },
+        "state_vs_gqa/DeepSeek-V2-Lite": {
+          "reference": 0.2109375,
+          "median": 0.2109375,
+          "min": 0.2109375,
+          "max": 0.2109375,
+          "n_seeds": 3
+        },
+        "state_vs_gqa/Mistral-7B": {
+          "reference": 0.05555555555555555,
+          "median": 0.05555555555555555,
+          "min": 0.05555555555555555,
+          "max": 0.05555555555555555,
+          "n_seeds": 3
+        },
+        "state_vs_gqa/Qwen3-8B": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "state_vs_gqa/Qwen3-Next-80B-A3B": {
+          "reference": 0.17075602213541666,
+          "median": 0.17075602213541666,
+          "min": 0.17075602213541666,
+          "max": 0.17075602213541666,
+          "n_seeds": 3
+        },
+        "validation/deepseek_active_error": {
+          "reference": 0.032041813333333335,
+          "median": 0.032041813333333335,
+          "min": 0.032041813333333335,
+          "max": 0.032041813333333335,
+          "n_seeds": 3
+        },
+        "validation/deepseek_total_error": {
+          "reference": 0.005596437197452229,
+          "median": 0.005596437197452229,
+          "min": 0.005596437197452229,
+          "max": 0.005596437197452229,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 1.406
     }
   },
-  "figures": 15
+  "figures": 3,
+  "swept_rungs": [
+    "C1",
+    "C2",
+    "C3",
+    "C4",
+    "C5"
+  ]
 }

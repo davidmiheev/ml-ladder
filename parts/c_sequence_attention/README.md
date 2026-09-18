@@ -75,3 +75,24 @@ At matched budgets on this corpus, **recurrence beats the transformer**:
 transformers are not built for, and the transformer here gets no warmup (part
 B5's lesson about Adam's schedule applies directly). The writeup takes this
 apart rather than explaining it away.
+
+## C5 — what changed since C3
+
+Decode state in MiB (fp16), computed from published configs rather than trained:
+
+| decoder | 1k | 64k | 256k |
+| --- | --- | --- | --- |
+| C3 (this repo, 4 layers MHA) | 3 | 192 | 768 |
+| Qwen3-8B (GQA 32:8) | 144 | 9,216 | 36,864 |
+| Mistral-7B (sliding 4096) | 128 | **512** | **512** |
+| DeepSeek-V2-Lite (MLA r=512) | 30 | 1,944 | 7,776 |
+| Qwen3-Next (36 linear + 12 full) | 62 | 1,574 | 6,182 |
+
+Each mechanism ablated against its own config without it, at 64k: GQA **4.0×**,
+sliding window **16.0×**, MLA **10.7×**, delta rule **3.9×**.
+
+Qwen3-8B's cache at 64k tokens is 9.2 GiB — larger than the model's own weights
+in fp16. The delta-rule state is constant in context (38 MiB before reading
+anything) and pays for itself from 537 tokens onward, which is C1's bargain with
+a bigger budget. The accounting is validated against DeepSeek's published
+15.7B/2.4B figures to 0.6%/3.2%.

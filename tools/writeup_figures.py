@@ -199,6 +199,11 @@ def main(argv: list[str] | None = None) -> int:
                 return 1
             existing = deterministic_part(json.loads(metrics_file.read_text()))
             fresh = deterministic_part(record)
+            # A --rungs check regenerates a subset, so compare like with like;
+            # otherwise the differing rung *sets* make it trivially unequal and
+            # it reports staleness with an empty list of changed keys.
+            if args.rungs:
+                existing = {rung: values for rung, values in existing.items() if rung in fresh}
             if existing != fresh:
                 changed = sorted(
                     f"{rung}.{key}"
@@ -218,9 +223,10 @@ def main(argv: list[str] | None = None) -> int:
             # from the file and quietly shrink the writeup's evidence base.
             existing_record = json.loads(metrics_file.read_text())
             existing_record["rungs"].update(record["rungs"])
-            existing_record["swept_rungs"] = sorted(
-                set(existing_record.get("swept_rungs", [])) | set(record["swept_rungs"])
-            )
+            # Derived from the merged file rather than accumulated, because
+            # the file's coverage simply *is* its rung set — accumulating let a
+            # stale stored value shadow the truth after a partial re-run.
+            existing_record["swept_rungs"] = sorted(existing_record["rungs"])
             existing_record["figures"] = record["figures"]
             record = existing_record
         metrics_file.write_text(json.dumps(record, indent=2) + "\n")

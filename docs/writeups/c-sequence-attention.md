@@ -1,6 +1,6 @@
 # Part C — Sequence models & attention
 
-> **Status:** C1–C4 complete; C5 (modern decoder architectures) specified, not yet built · **Constraint:** subsets and short budgets; C1/C3 share every setting so they can be compared
+> **Status:** complete (C1–C5) · **Constraint:** subsets and short budgets; C1/C3 share every setting so they can be compared
 > **Numbers:** seeds 0–2, reference seed 0 · raw values in [`data/c-metrics.json`](data/c-metrics.json)
 > **Reproduce:** `ladder run C1` … `C4` (needs `uv sync --extra torch`), or `uv run python tools/writeup_figures.py C`
 > **Hardware:** this part's sweep ran on a Colab T4 — C4 is ~25 min/seed on four CPU cores against ~35 s on the GPU
@@ -357,27 +357,130 @@ Steiner et al., *How to train your ViT*; [timm](https://github.com/huggingface/p
 
 ---
 
-## C5 — Modern decoder architectures
+## C5 — What changed since C3, and what it cost
 
-**Question.** TODO(writeup): what is this rung actually asking?
+**Question.** C3's transformer is eight years old as a design. Every production
+decoder since has changed the attention layer. What are those changes actually
+buying, in a quantity that can be computed rather than argued about?
 
 ### The math
 
-TODO(writeup): the objective, its gradient or optimality condition, and the one
-property that explains the behaviour you measured. Derive rather than cite;
-`$inline$` and `$$display$$` render on GitHub. Say what the math predicts before the results
-section says what happened.
+**The bill attention pays is not the quadratic term.** At generation time a
+decoder emits one token at a time, and each new token attends over everything
+already produced — so every past key and value must be *retained* and re-read.
+The cache for a multi-head stack is
 
-**What I built.** TODO(writeup): design decisions and the non-obvious details.
+$$M_{\text{KV}} = 2 \, b \, L \, H \, d_h \, T,$$
 
-**Results.** TODO(writeup): a table with per-seed ranges, and the figures from
-`figures/c/c5_*.png`.
+bytes for $L$ layers, $H$ heads of width $d_h$, context $T$ and $b$ bytes per
+element. It grows linearly with context and is read in full per token, which
+makes decode memory-bound: the arithmetic is trivial next to the bandwidth.
+Four families of change attack one factor each.
 
-**What surprised me.** TODO(writeup)
+**Grouped-query attention** shrinks $H$ to $H_{kv}$ in that formula and nowhere
+else — queries keep their full head count, so the model's capacity to *ask*
+different questions is untouched while the memory of answers is shared.
 
-**Open threads.** TODO(writeup)
+**Sliding-window attention** replaces $T$ with $\min(T, W)$, making a layer's
+cache constant past the window. Reach is not lost, it is relocated: stacking $L$
+such layers gives a receptive field of $L \cdot W$ through composition, the same
+trick a CNN uses for its effective field.
 
-**Reading:** TODO(writeup): the entries from [the reading list](../reading-list.md) that belong here.
+**Multi-head latent attention** stops caching per-head keys and values at all.
+DeepSeek-V2 projects them into one shared low-rank latent $c_{KV}$ of rank $r$,
+plus a small decoupled rotary key that must stay outside the compression because
+RoPE does not commute with the down-projection:
+
+$$M_{\text{MLA}} = b \, L \, (r + d_{\text{rope}}) \, T.$$
+
+The head count has left the expression entirely.
+
+**A delta rule leaves the cache paradigm.** Gated DeltaNet keeps a fixed-size
+matrix $S \in \mathbb{R}^{H_v \times d_k \times d_v}$ updated by an
+outer-product rule, plus a short causal convolution window. Its size is chosen
+by the architect, not by how much text has been read — so the state is
+**constant in $T$**. That is C1's bargain exactly: compress the past into a
+fixed state. What changed is not the bargain but the budget, and the update
+rule that fills it.
+
+**What I built.** No training. Five configurations — C3's own, measured from
+this repo, and four published ones recorded with their hub ids — reduced to
+layer lists and evaluated for decode state against context. Each mechanism is
+also ablated **against its own config with that mechanism removed**, rather than
+against a different model, so the number attributed to it is not really a
+difference in ten other things. The accounting lives in
+`src/mlladder/archspec.py` and is shared with H6.
+
+**Results** (decode state in MiB, fp16):
+
+| decoder | layers | 1k | 16k | 64k | 256k |
+| --- | --- | --- | --- | --- | --- |
+| C3 (this repo) | 4 full | 3.0 | 48 | 192 | 768 |
+| Qwen3-8B | 36 full (GQA 32:8) | 144 | 2,304 | 9,216 | 36,864 |
+| Mistral-7B | 32 sliding (W=4096) | 128 | **512** | **512** | **512** |
+| DeepSeek-V2-Lite | 27 MLA (r=512) | 30 | 486 | 1,944 | 7,776 |
+| Qwen3-Next-80B-A3B | 36 linear + 12 full | 62 | 422 | 1,574 | 6,182 |
+
+Each mechanism against its own config without it, at 64k tokens:
+
+| mechanism | cache shrink |
+| --- | --- |
+| GQA (32 query heads over 8 KV) | **4.0×** |
+| sliding window 4096 | **16.0×** |
+| MLA (rank 512 + 64 rope) | **10.7×** |
+| delta rule (vs its own all-attention twin) | **3.9×** |
+
+![Decode state](figures/c/c5_decode_state.png)
+![Mechanism savings](figures/c/c5_mechanism_savings.png)
+![State per token](figures/c/c5_state_per_token.png)
+
+**What surprised me.** Three things.
+
+*The numbers are enormous and they are not about parameters.* Qwen3-8B carries
+**9.2 GiB of KV cache at 64k tokens** — larger than the 8B model's own weights
+in fp16. The thing that stops a decoder serving long contexts is usually not its
+size; it is the cache the context creates, and no amount of quantizing weights
+touches it.
+
+*Mistral's window is the bluntest instrument and the biggest win.* A cache that
+simply stops growing beats every clever compression asymptotically: 512 MiB at
+64k and still 512 MiB at 256k, while MLA's 10.7× compression is still growing
+linearly underneath it. And the reach is not obviously sacrificed — 32 layers at
+a 4096 window compose to a 131,072-token receptive field. The cost is that the
+reach is *indirect*, mediated through depth, which is exactly the compromise C1's
+recurrence made and lost on. Whether it loses here is not something state
+accounting can answer.
+
+*C1's answer came back, and the crossover is early.* The delta-rule state is
+1.05 MiB per linear layer, so Qwen3-Next carries **38 MiB before reading a single
+token** — strictly worse than any cache at short context. It pays that back
+against its own all-attention twin from **537 tokens** onward. I had expected a
+constant-state design to need a very long context to justify itself; at these
+dimensions it needs about two paragraphs. The tempting comparison — the hybrid
+against Qwen3-8B, which crosses at 322 tokens — is the one to avoid, because it
+credits the delta rule with savings that are really Qwen3-Next's much more
+aggressive GQA (2 KV heads against 8).
+
+**A check worth having.** DeepSeek publishes V2-Lite at 15.7B total and 2.4B
+activated. The accounting here computes 15.8B (**0.6% off**) and, excluding the
+embedding and output head that DeepSeek's transformer-only figure omits, 2.32B
+(**3.2% off**). H6's independent check against TrOCR agreed to 1.3%. Two
+validations on models with known answers is what makes the other numbers in
+these tables worth reading.
+
+**Open threads.** Gemma 4's ring-buffered sliding KV, which sizes the buffer at
+window + prefill chunk rather than the full context and is implemented in the
+accompanying fork — the natural next arm. Actually *measuring* decode throughput
+against these predictions, since memory-bound is a claim about bandwidth that a
+byte count only implies. And quality: none of this says whether a 512 MiB
+windowed cache answers questions as well as a 9 GiB full one, which is the
+question that decides anything.
+
+**Reading:** [GQA](https://arxiv.org/abs/2305.13245);
+[Mistral 7B](https://arxiv.org/abs/2310.06825) for sliding windows;
+[DeepSeek-V2](https://arxiv.org/abs/2405.04434) for MLA;
+[RoFormer](https://arxiv.org/abs/2104.09864);
+and candle's `qwen3_5.rs`, `deepseek2.rs` and `gemma4/` for the implementations.
 
 ---
 
@@ -419,9 +522,17 @@ section says what happened.
    is fiction. Figures and metrics here therefore come from one sweep on one
    device, and `--check` should be run on that device.
 
-**Cost of the part:** ~1,800 lines including tests, 21 test cases, and a full
+6. **The design C1 lost with came back, and the ladder is why I noticed.** C5's
+   delta-rule stack is C1's bargain — compress the past into a fixed state —
+   with a larger budget and a better update rule, and it pays for itself from
+   537 tokens of context. Reading Qwen3-Next's config as "a linear-attention
+   hybrid" says nothing; reading it as "C1, with the compression problem solved
+   differently" is only available because this part built C1 first.
+
+**Cost of the part:** ~2,300 lines including tests, 27 test cases, and a full
 three-seed sweep in about 8 minutes on a T4 (C1 67s, C2 25s, C3 33s, C4 35s per
-seed) — the first part where the CPU-only path stopped being comfortable.
+seed; C5 is arithmetic) — the first part where the CPU-only path stopped being
+comfortable.
 
 ---
 
