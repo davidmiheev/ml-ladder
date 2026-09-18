@@ -485,6 +485,85 @@ and candle's `qwen3_5.rs`, `deepseek2.rs` and `gemma4/` for the implementations.
 
 ---
 
+## The decoders, actually run
+
+C5's method is reading published configs and computing decode state from them.
+That method has two failure modes it cannot detect from the inside: the
+arithmetic can be wrong, and the *config* can fail to contain the thing you are
+asking about. Loading the weights finds both.
+
+Everything below ran on one Colab T4 (15.4 GB), which is the binding constraint
+and the reason quantization is not an optional extra here. Raw values in
+[`data/c-real-models.json`](data/c-real-models.json); the scripts are in
+`tools/real_models/`.
+
+| model | how it fit | resident | gen tok/s |
+| --- | --- | --- | --- |
+| DeepSeek-V2-Lite (15.7B) | bitsandbytes NF4, double-quantised scales | 9.62 GB | 4.44 |
+| Gemma-4-E2B-it | bitsandbytes NF4 | 6.70 GB | 6.35 |
+| Qwen3.6-27B | GGUF UD-IQ3_XXS, 3.06 bpw, fully offloaded | 12.0 GB | 10.2 |
+| Qwen3.8-27B | GGUF UD-IQ3_XXS, 3.06 bpw, fully offloaded | 10.9 GB | 9.5 |
+
+All four produce coherent text. Two things came out of it that the arithmetic
+could not have.
+
+**A parameter count read off a quantized model is not a parameter count.**
+`sum(p.numel())` reports **8.06B** for DeepSeek-V2-Lite, a published 15.7B-parameter
+model, because bitsandbytes packs two 4-bit weights into each byte. C5's
+own count of 15.8B is right and the loaded model's `numel` is wrong by exactly
+2x — which is the direction that would have been very easy to believe, since
+"the config over-counts" is a more plausible-sounding story than "the tensor
+told me half."
+
+**Gemma-4-E2B-it runs one KV head for eight query heads.** That is multi-query
+attention — the limit of the GQA lever, not a step along it. C5 prices GQA at
+Qwen3-8B's 32:8, a 4x cache reduction; MQA at 8:1 is 8x, and the reason the
+family stops there is that there is nothing left to share.
+
+### Two generations, one architecture
+
+The interesting result is a negative one. Asked to compare Qwen3.6 against
+Qwen3.8, the size-matched pair is `Qwen3.6-27B` and `Qwen3.8-27B`. Their configs
+were flattened and compared key by key:
+
+**61 keys compared. One differs. It is `transformers_version` — the library that
+wrote the file.**
+
+Same 64 layers, same 5120 hidden, same 24 query heads over 4 KV heads, same
+256-wide head, same 17408 intermediate, same 248320 vocabulary, same interleave
+of 48 linear-attention layers with 16 full-attention ones at interval 4, same
+single MTP layer. Both ship **55.56 GB** of bf16 weights — identical to the
+hundredth of a gigabyte, so the parameter counts match too.
+
+Whatever separates these two generations at 27B, it is weights, data or
+post-training. It is not shape, and **no amount of reading configs will find
+it** — which is exactly the boundary of what this rung can see, now measured
+rather than assumed. C5 carries them as a single entry for that reason, with a
+test that fails if a later edit splits them without an actual difference to
+point at.
+
+The runtime behaviour is consistent with that: 10.2 against 9.5 generated
+tokens/s at the same quantization. I am *not* reporting that 0.7 as a
+difference between the models, because the two GGUF files are 12.0 GB and
+10.9 GB at the same nominal 3.06 bpw — the quantizer allocated bits differently
+between them, so the arms are not matched. A throughput comparison across two
+different quantizations of two models is a comparison of the quantizations.
+
+One qualitative note, offered as an anecdote and not a result: at a 96-token
+budget **neither model produced an answer**. Both are reasoning models, both
+opened a thinking block, and both were still in it when the budget ran out —
+3.6 with a numbered plan, 3.8 telegraphically. n=1 at temperature 0 on one
+prompt is worth exactly what this paragraph claims for it, which is nothing
+except that the budget was wrong for the model class.
+
+**What did not run.** `Qwen3.8-Flash-Next` is 360 GB of weights. The 27B pair at
+4-bit AWQ is 20.4 and 21.0 GB against a 15.4 GB card, which is why the 3-bit
+GGUF route is what made them runnable at all — the quantization was not a
+convenience, it was the difference between a measurement and a paragraph
+explaining why there wasn't one.
+
+---
+
 ## What part C settled
 
 1. **Every architecture here is a different answer to "how does information

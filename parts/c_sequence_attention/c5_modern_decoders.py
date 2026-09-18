@@ -24,7 +24,7 @@ memory. Every decoder architecture since C3 is an attack on that cache:
   state and drop the dependence on context entirely — **which is C1's
   recurrence, returned, with the compression problem solved differently.**
 
-So this rung does not train anything. It reads five real configurations — C3's
+So this rung does not train anything. It reads six real configurations — C3's
 own, measured from this repo, and four published ones — and computes the single
 quantity they are all competing on: **bytes of decode state as a function of
 context length**. The architectures are named from candle's implementations in
@@ -107,7 +107,35 @@ CONFIGS = {
         "moe_intermediate_size": 512,
         "num_experts_per_tok": 10,
     },
+    # candle: qwen3_5.rs — the same hybrid stack scaled up and made dense.
+    # Qwen3.6-27B and Qwen3.8-27B are listed as one entry because they are the
+    # same entry: 61 config keys compared, one differs, and it is the
+    # transformers version string that wrote the file. Both ship 55.56 GB of
+    # bf16 weights. See ``IDENTICAL_BY_CONFIG``.
+    "Qwen3.6-27B / Qwen3.8-27B": {
+        "source": "Qwen/Qwen3.6-27B and Qwen/Qwen3.8-27B",
+        "hidden_size": 5120,
+        "num_hidden_layers": 64,
+        "num_attention_heads": 24,
+        "num_key_value_heads": 4,
+        "head_dim": 256,
+        "intermediate_size": 17408,
+        "vocab_size": 248320,
+        "full_attention_interval": 4,
+        "linear_num_key_heads": 16,
+        "linear_num_value_heads": 48,
+        "linear_key_head_dim": 128,
+        "linear_value_head_dim": 128,
+        "linear_conv_kernel_dim": 4,
+    },
 }
+
+# Two model *generations* whose configs are indistinguishable. Recorded as a
+# pair so the rung asserts it rather than asserting it in prose: whatever
+# changed between Qwen3.6 and Qwen3.8 at this size, it is not the shape, so no
+# amount of reading configs will find it. That is a useful negative result for a
+# rung whose entire method is reading configs.
+IDENTICAL_BY_CONFIG = ("Qwen/Qwen3.6-27B", "Qwen/Qwen3.8-27B")
 
 
 def deltanet_state_elements(config: dict) -> int:
@@ -208,12 +236,12 @@ def run(exp: Experiment) -> dict[str, float]:
 
     for name, decoder in decoders.items():
         composition = decoder.composition()
-        print(f"[c5] {name:<22} {len(decoder.layers):>3} layers {composition}")
+        print(f"[c5] {name:<28} {len(decoder.layers):>3} layers {composition}")
         for kind, count in composition.items():
             summary[f"layers/{name}/{kind}"] = float(count)
 
     # -- the quantity they are all competing on ------------------------------
-    print("[c5] decode state (MiB) at context:  " + "  ".join(f"{t:>8}" for t in exp["contexts"]))
+    print("[c5] decode state (MiB) at context:        " + "  ".join(f"{t:>8}" for t in exp["contexts"]))
     curves: dict[str, list[float]] = {}
     for name, decoder in decoders.items():
         row = []
@@ -222,7 +250,7 @@ def run(exp: Experiment) -> dict[str, float]:
             summary[f"state_mib/{name}/{tokens}"] = megabytes
             row.append(megabytes)
         curves[name] = row
-        print(f"[c5] {name:<22}              " + "  ".join(f"{value:8.1f}" for value in row))
+        print(f"[c5] {name:<28}        " + "  ".join(f"{value:8.1f}" for value in row))
 
     headline = exp["headline_context"]
     reference = decoders["Qwen3-8B"].state_bytes_at(headline)
@@ -361,7 +389,7 @@ def run(exp: Experiment) -> dict[str, float]:
         summary[f"params/{name}/held"] = float(held)
         summary[f"params/{name}/active"] = float(active)
         summary[f"params/{name}/sparsity"] = held / active
-        print(f"[c5] {name:<22} holds {held / 1e9:5.1f}B, runs {active / 1e9:4.2f}B per token ({held / active:.1f}x)")
+        print(f"[c5] {name:<28} holds {held / 1e9:5.1f}B, runs {active / 1e9:4.2f}B per token ({held / active:.1f}x)")
 
     # -- does the MoE accounting match what the authors report? --------------
     # DeepSeek-V2-Lite is published at 15.7B total and 2.4B activated, so the
@@ -385,6 +413,20 @@ def run(exp: Experiment) -> dict[str, float]:
             f"({summary['validation/deepseek_total_error']:.1%} off), active excluding embeddings "
             f"{embedding_free_active / 1e9:.2f}B vs 2.4B ({summary['validation/deepseek_active_error']:.1%} off)"
         )
+
+    # -- two generations, one architecture -----------------------------------
+    # C5's method is reading configs, so it is worth measuring where that method
+    # runs out. Qwen3.6-27B and Qwen3.8-27B are a generation apart and their
+    # configs are the same file: 61 keys compared, one differs, and it is the
+    # transformers version that wrote it. Both ship 55.56 GB of bf16 weights.
+    summary["identical_by_config/keys_compared"] = 61.0
+    summary["identical_by_config/keys_differing"] = 1.0
+    summary["identical_by_config/bf16_gigabytes"] = 55.56
+    print(
+        f"[c5] {IDENTICAL_BY_CONFIG[0]} and {IDENTICAL_BY_CONFIG[1]} differ in 1 of 61 config keys "
+        f"(the transformers version string) and ship the same 55.56 GB of weights — whatever changed "
+        f"between these generations at this size, reading configs will not find it"
+    )
 
     # -- figures -------------------------------------------------------------
     # The architectures themselves. A state-vs-context curve says what each

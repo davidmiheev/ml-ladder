@@ -1,0 +1,63 @@
+{
+  "what": "End-to-end runs of the decoders C5 prices, and a config-level comparison of two Qwen generations",
+  "why": "C5 reads published configs and computes decode state. Arithmetic over a config is a hypothesis about a model; loading the weights is the test. These runs check what actually fits, what it costs, and -- in the Qwen case -- whether reading configs can see a generation change at all.",
+  "date": "2026-09-18",
+  "hardware": "Colab T4, 15360 MiB",
+  "runs": [
+    {
+      "model": "deepseek-ai/DeepSeek-V2-Lite",
+      "published_parameters": 15700000000,
+      "quantization": "bitsandbytes NF4, double-quantised scales, float16 compute",
+      "footprint_gb": 9.620154752,
+      "packed_tensor_elements": 8064724480,
+      "load_seconds": 189.79783913100027,
+      "tokens_per_second": 4.439352610585038,
+      "note": "sum(p.numel()) reports 8.06B for a 15.7B model because bitsandbytes packs two 4-bit weights per byte; a parameter count read off a quantized model is a packed-element count",
+      "completion": "Grouped-query attention is a technique used in the field of natural language processing (NLP) to reduce the size of the key-value (KV) cache in a neural network. The KV cache is a data structure used to store"
+    },
+    {
+      "model": "google/gemma-4-E2B-it",
+      "quantization": "bitsandbytes NF4, double-quantised scales, float16 compute",
+      "footprint_gb": 6.703768674,
+      "packed_tensor_elements": 3936020000,
+      "load_seconds": 140.53131849,
+      "tokens_per_second": 6.347589455284188,
+      "layers": 35,
+      "hidden_size": 1536,
+      "num_key_value_heads": 1,
+      "note": "one KV head for eight query heads -- multi-query attention, the limit of the GQA lever C5 measures",
+      "completion": "Grouped-query attention reduces the KV cache size by grouping queries together, allowing the model to process multiple queries with a single set of attention keys and values. This shared computation and reduced redundancy in the stored key-value pairs directly lowers the"
+    },
+    {
+      "model": "Qwen/Qwen3.6-27B",
+      "quantization": "unsloth UD-IQ3_XXS GGUF, 3.0625 bpw, llama.cpp b11042, all layers offloaded to the T4",
+      "file_gigabytes": 12.0,
+      "prompt_tokens_per_second": 19.3,
+      "generation_tokens_per_second": 10.2,
+      "note": "spent its whole 96-token budget inside a structured, numbered reasoning block and never reached an answer"
+    },
+    {
+      "model": "Qwen/Qwen3.8-27B",
+      "quantization": "unsloth UD-IQ3_XXS GGUF, 3.0625 bpw, llama.cpp b11042, all layers offloaded to the T4",
+      "file_gigabytes": 10.9,
+      "prompt_tokens_per_second": 0.8,
+      "generation_tokens_per_second": 9.5,
+      "note": "same 96-token budget, also all reasoning, but terse and telegraphic where 3.6 was structured. n=1 at temperature 0: an anecdote, not a measurement"
+    }
+  ],
+  "qwen_generation_comparison": {
+    "claim": "Qwen3.6-27B and Qwen3.8-27B are the same architecture",
+    "method": "both config.json files flattened and compared key by key",
+    "keys_compared": 61,
+    "keys_differing": 1,
+    "the_difference": "transformers_version: 4.57.1 against 5.8.0.dev0 -- the library that wrote the file",
+    "shared": "64 layers, hidden 5120, 24 query heads over 4 KV heads, head_dim 256, intermediate 17408, vocab 248320, 48 linear-attention layers interleaved with 16 full-attention ones at interval 4, one MTP layer",
+    "bf16_gigabytes": 55.56,
+    "conclusion": "identical parameter counts and identical shapes. Whatever separates these generations at 27B is weights, data or post-training, and no amount of reading configs will find it -- which is the limit of C5's method, measured.",
+    "caveat": "the two GGUF files differ in size (12.0 GB against 10.9 GB) at the same nominal 3.0625 bpw, so the quantiser allocated bits differently between them. The throughput figures above are therefore not perfectly matched, and the 0.7 tok/s gap should not be read as a model difference."
+  },
+  "not_run": {
+    "Qwen/Qwen3.8-Flash-Next": "360 GB of weights; out of reach on any accelerator available here",
+    "bf16 or AWQ Qwen 27B": "55.6 GB bf16, and 20.4/21.0 GB as 4-bit AWQ, against a 15.4 GB T4 -- the GGUF route at 3 bpw is what made these runnable at all"
+  }
+}

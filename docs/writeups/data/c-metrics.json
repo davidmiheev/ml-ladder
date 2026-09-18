@@ -707,6 +707,27 @@
           "max": 4.0,
           "n_seeds": 3
         },
+        "identical_by_config/bf16_gigabytes": {
+          "reference": 55.56,
+          "median": 55.56,
+          "min": 55.56,
+          "max": 55.56,
+          "n_seeds": 3
+        },
+        "identical_by_config/keys_compared": {
+          "reference": 61.0,
+          "median": 61.0,
+          "min": 61.0,
+          "max": 61.0,
+          "n_seeds": 3
+        },
+        "identical_by_config/keys_differing": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
         "layers/C3 (this repo)/full": {
           "reference": 4.0,
           "median": 4.0,
@@ -747,6 +768,20 @@
           "median": 36.0,
           "min": 36.0,
           "max": 36.0,
+          "n_seeds": 3
+        },
+        "layers/Qwen3.6-27B / Qwen3.8-27B/full": {
+          "reference": 16.0,
+          "median": 16.0,
+          "min": 16.0,
+          "max": 16.0,
+          "n_seeds": 3
+        },
+        "layers/Qwen3.6-27B / Qwen3.8-27B/linear": {
+          "reference": 48.0,
+          "median": 48.0,
+          "min": 48.0,
+          "max": 48.0,
           "n_seeds": 3
         },
         "mla/cache_ratio": {
@@ -973,6 +1008,41 @@
           "max": 1573.6875,
           "n_seeds": 3
         },
+        "state_mib/Qwen3.6-27B / Qwen3.8-27B/1024": {
+          "reference": 138.8125,
+          "median": 138.8125,
+          "min": 138.8125,
+          "max": 138.8125,
+          "n_seeds": 3
+        },
+        "state_mib/Qwen3.6-27B / Qwen3.8-27B/16384": {
+          "reference": 1098.8125,
+          "median": 1098.8125,
+          "min": 1098.8125,
+          "max": 1098.8125,
+          "n_seeds": 3
+        },
+        "state_mib/Qwen3.6-27B / Qwen3.8-27B/262144": {
+          "reference": 16458.8125,
+          "median": 16458.8125,
+          "min": 16458.8125,
+          "max": 16458.8125,
+          "n_seeds": 3
+        },
+        "state_mib/Qwen3.6-27B / Qwen3.8-27B/4096": {
+          "reference": 330.8125,
+          "median": 330.8125,
+          "min": 330.8125,
+          "max": 330.8125,
+          "n_seeds": 3
+        },
+        "state_mib/Qwen3.6-27B / Qwen3.8-27B/65536": {
+          "reference": 4170.8125,
+          "median": 4170.8125,
+          "min": 4170.8125,
+          "max": 4170.8125,
+          "n_seeds": 3
+        },
         "state_vs_gqa/DeepSeek-V2-Lite": {
           "reference": 0.2109375,
           "median": 0.2109375,
@@ -1001,6 +1071,13 @@
           "max": 0.17075602213541666,
           "n_seeds": 3
         },
+        "state_vs_gqa/Qwen3.6-27B / Qwen3.8-27B": {
+          "reference": 0.4525621202256944,
+          "median": 0.4525621202256944,
+          "min": 0.4525621202256944,
+          "max": 0.4525621202256944,
+          "n_seeds": 3
+        },
         "validation/deepseek_active_error": {
           "reference": 0.032041813333333335,
           "median": 0.032041813333333335,
@@ -1016,7 +1093,7 @@
           "n_seeds": 3
         }
       },
-      "elapsed_sec_median": 1.874
+      "elapsed_sec_median": 2.54
     }
   },
   "figures": 4,

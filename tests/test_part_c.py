@@ -388,3 +388,30 @@ def test_c5_runs():
     from parts.c_sequence_attention.c5_modern_decoders import main
 
     assert main(["--contexts", "1024", "65536"]) == 0
+
+
+def test_the_two_qwen_generations_are_one_architecture():
+    """C5's method is reading configs; this is where reading configs runs out.
+
+    Qwen3.6-27B and Qwen3.8-27B are a generation apart and share a config, so
+    the rung carries them as one entry. If a future edit splits them into two,
+    this fails and forces the split to be justified by an actual difference.
+    """
+    from parts.c_sequence_attention.c5_modern_decoders import CONFIGS, IDENTICAL_BY_CONFIG
+
+    entry = CONFIGS["Qwen3.6-27B / Qwen3.8-27B"]
+    assert all(name in entry["source"] for name in IDENTICAL_BY_CONFIG)
+    assert entry["num_hidden_layers"] == 64
+    assert entry["full_attention_interval"] == 4
+    # 48 linear layers to 16 full ones, which is the hybrid ratio the rung prices.
+    assert entry["num_hidden_layers"] - entry["num_hidden_layers"] // 4 == 48
+
+
+def test_the_qwen_27b_pair_builds_a_hybrid_stack():
+    from parts.c_sequence_attention.c5_modern_decoders import CONFIGS, build_decoder
+
+    decoder = build_decoder("Qwen3.6-27B / Qwen3.8-27B", CONFIGS["Qwen3.6-27B / Qwen3.8-27B"])
+    kinds = [layer.kind for layer in decoder.layers]
+    assert len(decoder.layers) == 64
+    assert kinds.count("linear") == 48
+    assert kinds.count("attention") == 16

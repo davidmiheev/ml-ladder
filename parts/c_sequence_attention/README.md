@@ -87,6 +87,14 @@ Decode state in MiB (fp16), computed from published configs rather than trained:
 | Mistral-7B (sliding 4096) | 128 | **512** | **512** |
 | DeepSeek-V2-Lite (MLA r=512) | 30 | 1,944 | 7,776 |
 | Qwen3-Next (36 linear + 12 full) | 62 | 1,574 | 6,182 |
+| Qwen3.6-27B / Qwen3.8-27B (48 linear + 16 full) | 139 | 4,171 | 16,459 |
+
+**Two generations, one architecture.** Qwen3.6-27B and Qwen3.8-27B differ in
+**1 of 61 config keys** — the transformers version that wrote the file — and ship
+the same 55.56 GB of weights, so C5 carries them as one entry. Both were run at
+3-bit GGUF on a T4, along with DeepSeek-V2-Lite and Gemma-4 at 4-bit NF4; see
+[the writeup](../../docs/writeups/c-sequence-attention.md#the-decoders-actually-run)
+and `tools/real_models/`.
 
 Each mechanism ablated against its own config without it, at 64k: GQA **4.0×**,
 sliding window **16.0×**, MLA **10.7×**, delta rule **3.9×**.

@@ -5,8 +5,14 @@
     "source": "src/mlladder/synth.py documents(), the H5 test split: rng seed 0, 2500 train pages drawn first so page k here is page k of H5's test set",
     "count": 10,
     "lines": 26,
-    "native_size": [160, 256],
-    "upscaled_size": [640, 1024],
+    "native_size": [
+      160,
+      256
+    ],
+    "upscaled_size": [
+      640,
+      1024
+    ],
     "upscale": "LANCZOS 4x -- adds no information, so ground truth is unchanged; it only removes the excuse that the page is smaller than the model's patch grid"
   },
   "scoring": "parts/h_computer_vision/h3_crnn_ctc.py character_error_rate / word_error_rate, one transcript per page with lines joined in reading order -- the same functions and the same construction H5 scores its pipeline with",
@@ -71,22 +77,9 @@
       "seconds_per_page": 3.100392361100012,
       "load_seconds": 16.957525515000043,
       "note": "returns an empty transcript on several pages at this resolution rather than reading them wrongly"
-    },
-    {
-      "model": "deepseek-ai/DeepSeek-V2-Lite",
-      "quantization": "bitsandbytes NF4, double-quantised scales, float16 compute",
-      "device": "Colab T4",
-      "footprint_gb": 9.620154752,
-      "packed_tensor_elements": 8064724480,
-      "load_seconds": 189.79783913100027,
-      "tokens_per_second": 4.439352610585038,
-      "note": "the 15.7B published parameter count appears as 8.06B numel because bitsandbytes packs two 4-bit weights per byte; sum(p.numel()) under bnb is a packed-element count, not a parameter count",
-      "completion": "Grouped-query attention is a technique used in the field of natural language processing (NLP) to reduce the size of the key-value (KV) cache in a neural network. The KV cache is a data structure used to store"
     }
   ],
   "not_run": {
-    "google/gemma-4-E2B-it": "the GPU session was reclaimed mid-run; nothing measured",
-    "Qwen/Qwen3.6-27B and Qwen/Qwen3.8-27B": "55.6 GB each in bf16; the matched 4-bit AWQ pair (cyankiwi/Qwen3.6-27B-AWQ-INT4, cyankiwi/Qwen3.8-27B-AWQ-INT4) is 20.4 and 21.0 GB, which does not fit a 15.4 GB T4 without CPU offload",
-    "Qwen/Qwen3.8-Flash-Next": "360 GB of weights; out of reach on any single accelerator available here"
+    "note": "the decoder runs and what could not be run among them are recorded in c-real-models.json"
   }
 }

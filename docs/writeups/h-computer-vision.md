@@ -680,20 +680,14 @@ preprocessing policy, not something derivable from the model config, so it is
 recorded as a measured constant (`MEASURED_TOKEN_FLOOR`) rather than folded into
 the formula as though it had been derived. **A small page does not cost little.**
 
-**The decoders.** C5's arithmetic got the same treatment, less completely.
-DeepSeek-V2-Lite loads on a 15.4GB T4 only under 4-bit NF4 with double-quantised
-scales — 9.62GB resident — and generates coherent text at 4.4 tokens/s. One
-detail worth recording: `sum(p.numel())` reports **8.06B** for a 15.7B-parameter
-model, because bitsandbytes packs two 4-bit weights per byte. A parameter count
-read off a quantized model is a packed-element count, and would have understated
-DeepSeek by exactly 2x if I had trusted it.
+**The decoders** got the same treatment, and it belongs with C5 rather than
+here: DeepSeek-V2-Lite, Gemma-4 and both Qwen 27Bs are in
+[part C's writeup](c-sequence-attention.md#the-decoders-actually-run) with
+[`data/c-real-models.json`](data/c-real-models.json).
 
-**What did not run, and why.** Gemma-4-E2B-it was mid-run when the GPU session
-was reclaimed; nothing was measured, so nothing is reported. The Qwen 3.6-vs-3.8
-comparison needs `Qwen3.6-27B` against `Qwen3.8-27B` — the size-matched pair —
-and at 20.4GB and 21.0GB even as 4-bit AWQ they do not fit a 15.4GB T4 without
-CPU offload. `Qwen3.8-Flash-Next` is 360GB of weights and is out of reach here at
-any quantization. Those remain arithmetic in C5 until there is a 24GB card.
+**What did not run, and why.** `Qwen3.8-Flash-Next` is 360GB of weights and is
+out of reach here at any quantization. Everything else asked for did run, and is
+reported with part C.
 
 **A bug in the candle fork, found trying.** `ignite-perf`'s `qwen3_5`, `gemma4`
 and `unlimited_ocr` call `candle_nn::fused::static_decode`, which is behind
