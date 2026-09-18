@@ -156,3 +156,44 @@ def nearest_neighbour_distance(fake, real, *, sample: int = 256, rng=None) -> fl
         gaps = ((block[:, None, :] - real_flat[None, :, :]) ** 2).sum(axis=2)
         distances.append(np.sqrt(gaps.min(axis=1)))
     return float(np.concatenate(distances).mean())
+
+
+def class_coverage(model, images, *, device, num_classes: int | None = None) -> dict[str, float]:
+    r"""What fraction of the data's classes a sample set actually covers.
+
+    A Fréchet distance is a single number over a fitted Gaussian, and a
+    generator that has collapsed onto three of ten digits can still land a
+    respectable one — the mean and covariance of its features are simply wrong
+    in a way that averages out. Classifying the samples and looking at the
+    histogram catches that directly.
+
+    Reported as the normalized entropy
+
+    $$H_{\text{norm}} = \frac{-\sum_c p_c \log p_c}{\log C},$$
+
+    which is 1 when the sample set is spread evenly over all $C$ classes and
+    falls toward 0 as it concentrates, plus the count of classes that appear at
+    all. The classifier is the same one the Fréchet distance uses, so this costs
+    one extra forward pass and no extra assumptions.
+    """
+    torch = vision.require_torch()
+    tensor = torch.from_numpy(images) if isinstance(images, np.ndarray) else images
+    model.eval()
+    predictions = []
+    with torch.no_grad():
+        for start in range(0, len(tensor), 512):
+            logits = model(tensor[start : start + 512].to(device))
+            predictions.append(logits.argmax(dim=1).cpu().numpy())
+    predicted = np.concatenate(predictions)
+    classes = num_classes or int(predicted.max()) + 1
+    counts = np.bincount(predicted, minlength=classes).astype(np.float64)
+    probabilities = counts / counts.sum()
+    nonzero = probabilities[probabilities > 0]
+    # ``+ 0.0`` normalises the negative zero a fully collapsed sample set
+    # produces (p = 1 gives -0.0), which otherwise prints as "-0.000".
+    entropy = float(-(nonzero * np.log(nonzero)).sum() / np.log(classes)) + 0.0
+    return {
+        "coverage": float((counts > 0).sum() / classes),
+        "entropy": entropy,
+        "max_class_share": float(probabilities.max()),
+    }

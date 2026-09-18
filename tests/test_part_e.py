@@ -142,3 +142,104 @@ def test_e1_runs():
         )
         == 0
     )
+
+
+# -- E2: the GAN objectives --------------------------------------------------
+
+
+def test_minimax_generator_loss_saturates_where_the_generator_is_worst():
+    r"""The vanishing gradient the non-saturating form exists to avoid.
+
+    At $s \to -\infty$ the discriminator is confidently rejecting, which is
+    exactly when the generator most needs a signal. The minimax gradient
+    $-\sigma(s)$ goes to zero there; the non-saturating $1 - \sigma(s)$ goes to
+    one.
+    """
+    from parts.e_generative.e2_dcgan import generator_loss
+
+    for non_saturating, expected in ((False, 0.0), (True, 1.0)):
+        scores = torch.full((32,), -12.0, requires_grad=True)
+        generator_loss(scores, non_saturating=non_saturating).backward()
+        magnitude = scores.grad.abs().mean().item() * len(scores)
+        assert magnitude == pytest.approx(expected, abs=1e-4)
+
+
+def test_both_objectives_agree_about_which_direction_is_better():
+    """Same fixed point: both prefer the discriminator being fooled."""
+    from parts.e_generative.e2_dcgan import generator_loss
+
+    fooled, rejected = torch.full((16,), 4.0), torch.full((16,), -4.0)
+    for non_saturating in (True, False):
+        assert generator_loss(fooled, non_saturating=non_saturating) < generator_loss(
+            rejected, non_saturating=non_saturating
+        )
+
+
+def test_discriminator_loss_is_lowest_when_it_is_right():
+    from parts.e_generative.e2_dcgan import discriminator_loss
+
+    right = discriminator_loss(torch.full((16,), 6.0), torch.full((16,), -6.0))
+    wrong = discriminator_loss(torch.full((16,), -6.0), torch.full((16,), 6.0))
+    assert right.item() < wrong.item()
+
+
+def test_label_smoothing_only_touches_the_real_side():
+    """Smoothing the fake label too would reward merely-ambiguous samples."""
+    from parts.e_generative.e2_dcgan import discriminator_loss
+
+    real, fake = torch.full((8,), 3.0), torch.full((8,), -3.0)
+    plain = discriminator_loss(real, fake, label_smoothing=0.0)
+    smoothed = discriminator_loss(real, fake, label_smoothing=0.2)
+    assert smoothed.item() > plain.item()  # the real term is penalised, the fake term unchanged
+
+
+def test_class_coverage_detects_a_collapsed_sample_set():
+    """A generator stuck on one mode must score 0 entropy, not a middling value."""
+    from mlladder.generative import class_coverage, make_feature_extractor
+
+    model = make_feature_extractor(num_classes=10, image_channels=1)()
+    with torch.no_grad():  # force every input to class 3
+        model.head.bias.fill_(-20.0)
+        model.head.bias[3] = 20.0
+    stats = class_coverage(model, torch.randn(64, 1, 28, 28), device="cpu", num_classes=10)
+    assert stats["coverage"] == pytest.approx(0.1)
+    assert stats["entropy"] == pytest.approx(0.0)
+    assert stats["max_class_share"] == pytest.approx(1.0)
+
+
+def test_dcgan_shapes_round_trip():
+    from parts.e_generative.e2_dcgan import make_dcgan
+
+    Generator, Discriminator = make_dcgan(latent=16, channels=8, image_size=28, image_channels=1)
+    images = Generator()(torch.randn(4, 16))
+    assert images.shape == (4, 1, 28, 28)
+    assert images.min() >= -1 and images.max() <= 1, "the tanh output must stay in [-1, 1]"
+    assert Discriminator()(images).shape == (4,)
+
+
+def test_e2_runs():
+    from parts.e_generative.e2_dcgan import main
+
+    assert (
+        main(
+            [
+                "--train-samples",
+                "300",
+                "--test-samples",
+                "150",
+                "--epochs",
+                "1",
+                "--channels",
+                "8",
+                "--latent",
+                "16",
+                "--arms",
+                "non_saturating",
+                "--sample-count",
+                "100",
+                "--scorer-epochs",
+                "1",
+            ]
+        )
+        == 0
+    )
