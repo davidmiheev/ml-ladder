@@ -1,0 +1,18 @@
+{
+  "what": "Attempting to run FLUX.1-schnell through the candle fork, which E5 prices from its config",
+  "date": "2026-09-19",
+  "status": "not completed: two blockers fixed, the run itself was cut off when the GPU session was reclaimed",
+  "blockers_fixed": [
+    {
+      "blocker": "black-forest-labs/FLUX.1-schnell is a gated repo; the example hardcodes it and dies with a 401 before doing anything",
+      "fix": "--bf-repo points the transformer and the autoencoder at an ungated mirror. unsloth/FLUX.1-schnell carries the identical layout (flux1-schnell.safetensors 23.78 GB, ae.safetensors 0.34 GB).",
+      "note": "the --quantized path takes its transformer from lmz/candle-flux (flux1-schnell.gguf, 12.64 GB, ungated) but still needs ae.safetensors from the gated repo, so the override is required even there"
+    },
+    {
+      "blocker": "device.bf16_default_to_f32() picks bf16 on any CUDA device, but bf16 kernels need sm_80; a T4 dies with DriverError(CUDA_ERROR_NOT_FOUND, 'named symbol not found')",
+      "fix": "--dtype f16, the same escape gemma4 and deepseekv2 needed. Third example in this fork with the same sm_75 trap."
+    }
+  ],
+  "also_hit": "the T4's 113 GB disk filled at 82 GB with the T5-XXL encoder, the CLIP encoder, the FLUX GGUF and three LLM caches resident at once; the run needs the LLM caches cleared first",
+  "builds": "yes, 34s incrementally with both fixes"
+}

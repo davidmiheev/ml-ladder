@@ -627,15 +627,41 @@ rather than silently producing a broken tensor.
 
 **It compiles and the flags are live on the binary, and that is all I can say
 for it** — the GPU session was reclaimed during the 31.4 GB download, twice, so
-no token has been generated through it. Wiring that has never run is a claim,
-not a result, and it is recorded here as one.
+no token has been generated through candle's quantizer. Wiring that has never
+run is a claim, not a result, and it is recorded here as one.
+
+What *did* run is the same model pre-quantized on the hub
+(`slowfastai/DeepSeek-V2-Lite-bnb-4bit`), and the comparison is the useful part:
+
+| | load | resident | gen tok/s |
+| --- | --- | --- | --- |
+| quantize the f16 weights at load | 189.8s | 9.62 GB | 4.44 |
+| download it already quantized | **119.1s** | 9.62 GB | 4.49 |
+
+Same footprint, same throughput, 70 seconds sooner. **Pre-quantizing buys load
+time and nothing else** — which is worth knowing before treating an
+ahead-of-time quantized checkpoint as a performance decision rather than a
+convenience one.
 
 **Qwen3.6/3.8** had `qwen3_5.rs` in `candle-transformers` and no binary to
 invoke it, so that binary is now written: `--quant q8_0..q2k`, `--dtype`, and
-Qwen's chat template, building clean in 16.6s against the warm tree. Whether it
-*runs* is a separate claim from whether it builds, and at the time of writing
-the 55.6 GB checkpoint was still downloading — so the example is reported as
-built, not as verified.
+Qwen's chat template. **`Qwen/Qwen3.5-4B` at q4k answers correctly through it at
+26.79 tok/s**, which verifies the example and the quantization path together.
+
+Getting there needed one fact about the catalogue. Checking all 465 models under
+the Qwen org: **the Qwen3.6 generation ships no small checkpoint** — 27B and
+35B-A3B, and their FP8 twins, and nothing else. Qwen3.5 ships 0.8B, 2B, 4B, 9B,
+27B and up. So there is no official small Qwen3.6 to verify against, and the
+27B's 55.6 GB will not fit a 50-minute session alongside a from-scratch build.
+
+The nearest small thing is a community REAP-pruned derivative of 35B-A3B,
+`inference-optimization/Qwen3.6-8B-A1.6B`. It loads and generates — and emits
+multilingual token soup at 5.23 tok/s. Qwen3.5-4B through **the same binary, the
+same flags and the same quantization** answers correctly, so the failure belongs
+to the pruned derivative, not to the example. Which is the whole reason to run a
+control before concluding anything: without it, "my new example produces
+garbage" would have been the obvious reading, and it would have been wrong —
+the same mistake I made with Gemma's missing BOS, caught this time.
 
 ---
 

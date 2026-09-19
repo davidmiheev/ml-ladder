@@ -62,6 +62,37 @@
       "tokens_per_second_note": "5.89 tok/s with the chat template, 24.55 tok/s on a bare prompt",
       "resolved": "VERIFIED. The degeneration was a missing BOS token, exactly as the catalog's candle-llm-safetensors executor documents: gemma-4-e2b-it ships a tokenizer.json with no BOS post-processor and gemma-family models fall into token copy-loops without one. Same binary, same card, same f16, same chat template: 'thought' repeated to the limit before the BOS prepend, a correct answer after. My earlier claim that the fork's gemma4 f16 path was wrong on sm_75 is withdrawn -- it was never a precision or kernel problem.",
       "cause_documented_in": "ignite-catalog perf/exp-executors: models/executors/exp/candle-llm-safetensors/src/lib.rs"
+    },
+    {
+      "model": "Qwen/Qwen3.5-4B",
+      "runtime": "candle (davidmiheev/candle @ ignite-perf + fixes, new examples/qwen3_5)",
+      "quantization": "q4k at load time, f16 activations",
+      "device": "Colab T4",
+      "load_seconds": 189.1,
+      "tokens_per_second": 26.79,
+      "output": "correct: 'Grouped-Query Attention (GQA) reduces the KV cache size by sharing a single set of Key and Value vectors across multiple query heads, whereas standard Multi-Head Attention maintains separate KV caches for each head. This compression significantly lowers memory usage during inference while preserving the model's ability to attend effectively'",
+      "note": "emits an empty <think></think> block before the answer. This is the run that verifies the new qwen3_5 example and its quantization path end to end."
+    },
+    {
+      "model": "inference-optimization/Qwen3.6-8B-A1.6B",
+      "runtime": "candle (davidmiheev/candle @ ignite-perf + fixes, new examples/qwen3_5)",
+      "quantization": "q4k at load time, f16 activations",
+      "device": "Colab T4",
+      "load_seconds": 366.1,
+      "tokens_per_second": 5.23,
+      "output": "degenerate: multilingual token soup",
+      "note": "a community REAP-pruned derivative of Qwen3.6-35B-A3B, not an official Qwen checkpoint. Qwen3.5-4B through the same binary, the same flags and the same quantization answers correctly, so the failure is the derivative, not the example."
+    },
+    {
+      "model": "slowfastai/DeepSeek-V2-Lite-bnb-4bit",
+      "runtime": "transformers (pinned 4.46.3 for the checkpoint's vendored DeepSeek-V2 code)",
+      "quantization": "bitsandbytes NF4, quantized ahead of time on the hub",
+      "device": "Colab T4",
+      "footprint_gb": 9.62,
+      "load_seconds": 119.1,
+      "tokens_per_second": 4.49,
+      "output": "coherent, in the shape a base model answers: a lettered multiple-choice continuation rather than prose. DeepSeek-V2-Lite is a base checkpoint.",
+      "note": "against quantizing the f16 weights at load (189.8s, 9.62 GB, 4.44 tok/s): the same footprint and the same throughput, reached 70s sooner. Pre-quantizing buys load time, not inference."
     }
   ],
   "qwen_generation_comparison": {
@@ -78,7 +109,8 @@
   "not_run": {
     "Qwen/Qwen3.8-Flash-Next": "360 GB of weights; out of reach on any accelerator available here",
     "bf16 or AWQ Qwen 27B": "55.6 GB bf16, and 20.4/21.0 GB as 4-bit AWQ, against a 15.4 GB T4 -- the GGUF route at 3 bpw is what made these runnable at all",
-    "deepseek-ai/DeepSeek-V2-Lite via candle": "quantization wired (see tools/real_models/candle-patches), compiles, flags live, never run end to end"
+    "deepseek-ai/DeepSeek-V2-Lite via candle": "quantization wired (see tools/real_models/candle-patches), compiles, flags live, never run end to end",
+    "Qwen3.6 official (27B / 35B-A3B) via candle": "55.6 GB and ~70 GB of weights; a 50-minute Colab session cannot hold the download and a from-scratch candle build together"
   },
   "candle_build": {
     "fork": "davidmiheev/candle @ ignite-perf (9aa02f1)",
@@ -91,6 +123,16 @@
     "flags": "--quant q8_0..q2k (a 27B is 55.6 GB in bf16, so this is not optional), --dtype, and Qwen's chat template",
     "builds": "clean in 16.6s incrementally, CUDA_COMPUTE_CAP=75",
     "note": "qwen3_5.rs already detects the model.language_model prefix itself and already has load-time quantization with a GGUF disk cache -- the two things gemma4 needed patching for",
-    "status": "built; the run was still downloading the 55.6 GB checkpoint when last checked"
+    "status": "verified: Qwen/Qwen3.5-4B answers correctly at q4k, 26.79 tok/s on a T4"
+  },
+  "qwen_official_catalogue": {
+    "checked": "all 465 models under the Qwen org on the hub",
+    "qwen3.6": [
+      "Qwen/Qwen3.6-27B",
+      "Qwen/Qwen3.6-27B-FP8",
+      "Qwen/Qwen3.6-35B-A3B",
+      "Qwen/Qwen3.6-35B-A3B-FP8"
+    ],
+    "finding": "the Qwen3.6 generation ships no small checkpoint -- 27B and 35B-A3B only. Qwen3.5 does (0.8B, 2B, 4B, 9B, 27B, 35B-A3B, 122B-A10B, 397B-A17B), which is why the verification run is a 3.5."
   }
 }

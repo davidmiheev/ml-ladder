@@ -104,3 +104,33 @@ already documents. Same binary, same T4, same f16, same chat template:
 
 A one-token difference, which is exactly what it takes to distinguish a missing
 BOS from a broken kernel — and I had guessed the kernel.
+
+## FLUX: two blockers before it can run at all
+
+6. **`examples/flux/main.rs`** — the repo is hardcoded to
+   `black-forest-labs/FLUX.1-schnell`, which is **gated**: without an accepted
+   licence the example dies with a 401 before loading anything. `--bf-repo`
+   points the transformer and the autoencoder at an ungated mirror;
+   `unsloth/FLUX.1-schnell` carries the identical layout. This is needed even on
+   the `--quantized` path, which takes its transformer from `lmz/candle-flux`
+   but still fetches `ae.safetensors` from the gated repo.
+
+   Also `--dtype`, because `device.bf16_default_to_f32()` picks bf16 on any CUDA
+   device and bf16 kernels need sm_80. That is now the **third** example in this
+   fork with the same sm_75 trap (`gemma4`, `deepseekv2`, `flux`) — it may be
+   worth a shared helper that consults the compute capability rather than just
+   `is_cuda()`.
+
+## Verified runs
+
+| model | how | result |
+| --- | --- | --- |
+| PaddleOCR-VL | candle, f16 | CER 0.000, identical to transformers to 16 digits |
+| Unlimited-OCR | candle, f16, new example | CER 0.229, 8/10 pages exact |
+| gemma-4-E2B-it | candle, f16, BOS fix | correct answer, 5.89 tok/s |
+| Qwen3.5-4B | candle, q4k, new example | correct answer, 26.79 tok/s |
+| DeepSeek-V2-Lite | transformers, bnb NF4 | coherent, 4.49 tok/s, 9.62 GB |
+
+`Qwen3.6-8B-A1.6B` (a community REAP-pruned derivative) produces token soup
+through the same binary and flags that Qwen3.5-4B answers correctly with — the
+derivative, not the example.
