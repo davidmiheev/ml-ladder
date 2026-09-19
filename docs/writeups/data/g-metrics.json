@@ -766,7 +766,7 @@
           "n_seeds": 3
         }
       },
-      "elapsed_sec_median": 852.786
+      "elapsed_sec_median": 855.285
     },
     "G2": {
       "title": "Mixed-precision + gradient-accumulation training, profiled for throughput and memory",
@@ -877,7 +877,7 @@
           "n_seeds": 3
         }
       },
-      "elapsed_sec_median": 1.449
+      "elapsed_sec_median": 1.421
     },
     "G3": {
       "title": "Rust/Candle port of one transformer-block forward pass, as a comprehension exercise for [[ignite-catalog]]",
@@ -980,50 +980,85 @@
           "max": 3.966992153436877e-05,
           "n_seeds": 3
         },
+        "speed/busy/1_threads_ms": {
+          "reference": 0.9590005874633789,
+          "median": 0.9590005874633789,
+          "min": 0.9364223480224609,
+          "max": 1.0358095169067383,
+          "n_seeds": 3
+        },
+        "speed/busy/2_threads_ms": {
+          "reference": 2.4409008026123047,
+          "median": 0.9356069564819336,
+          "min": 0.8177995681762695,
+          "max": 2.4409008026123047,
+          "n_seeds": 3
+        },
+        "speed/busy/4_threads_ms": {
+          "reference": 90.6392765045166,
+          "median": 90.6392765045166,
+          "min": 88.47946166992188,
+          "max": 91.52010440826416,
+          "n_seeds": 3
+        },
+        "speed/busy_spread": {
+          "reference": 94.51430759209813,
+          "median": 94.56905066484549,
+          "min": 94.51430759209813,
+          "max": 111.91018920731175,
+          "n_seeds": 3
+        },
+        "speed/contention_cost_multithreaded": {
+          "reference": 221.99371686170088,
+          "median": 190.59928102563083,
+          "min": 160.40775607942805,
+          "max": 221.99371686170088,
+          "n_seeds": 3
+        },
+        "speed/contention_cost_singlethreaded": {
+          "reference": 2.0604138920192603,
+          "median": 2.0604138920192603,
+          "min": 2.0248280697413055,
+          "max": 2.217894263952135,
+          "n_seeds": 3
+        },
+        "speed/idle/1_threads_ms": {
+          "reference": 0.4654407501220703,
+          "median": 0.4654407501220703,
+          "min": 0.46247005462646484,
+          "max": 0.4670238494873047,
+          "n_seeds": 3
+        },
+        "speed/idle/2_threads_ms": {
+          "reference": 0.4285240173339844,
+          "median": 0.4285240173339844,
+          "min": 0.4226970672607422,
+          "max": 0.42953968048095703,
+          "n_seeds": 3
+        },
+        "speed/idle/4_threads_ms": {
+          "reference": 0.4082965850830078,
+          "median": 0.48017024993896484,
+          "min": 0.4082965850830078,
+          "max": 0.5515909194946289,
+          "n_seeds": 3
+        },
+        "speed/idle_spread": {
+          "reference": 1.1399574895475673,
+          "median": 1.1399574895475673,
+          "min": 1.1178716932538493,
+          "max": 1.304931976626131,
+          "n_seeds": 3
+        },
         "speed/rust_process_ms": {
-          "reference": 6.985602378845215,
-          "median": 6.833229064941406,
-          "min": 6.7969465255737305,
-          "max": 6.985602378845215,
-          "n_seeds": 3
-        },
-        "speed/thread_oversubscription": {
-          "reference": 1.1479641915303744,
-          "median": 1.1479641915303744,
-          "min": 1.1020683756836442,
-          "max": 1.1586235594650516,
-          "n_seeds": 3
-        },
-        "speed/torch_1_threads_ms": {
-          "reference": 0.46288013458251953,
-          "median": 0.4669761657714844,
-          "min": 0.46288013458251953,
-          "max": 0.4779624938964844,
-          "n_seeds": 3
-        },
-        "speed/torch_2_threads_ms": {
-          "reference": 0.4235649108886719,
-          "median": 0.4256582260131836,
-          "min": 0.4235649108886719,
-          "max": 0.4320859909057617,
-          "n_seeds": 3
-        },
-        "speed/torch_4_threads_ms": {
-          "reference": 0.40321826934814453,
-          "median": 0.41252613067626953,
-          "min": 0.40321826934814453,
-          "max": 0.42372703552246094,
-          "n_seeds": 3
-        },
-        "speed/torch_best_ms": {
-          "reference": 0.40321826934814453,
-          "median": 0.41252613067626953,
-          "min": 0.40321826934814453,
-          "max": 0.42372703552246094,
+          "reference": 6.662416458129883,
+          "median": 6.759209632873535,
+          "min": 6.662416458129883,
+          "max": 6.820249557495117,
           "n_seeds": 3
         }
       },
-      "elapsed_sec_median": 1.389
+      "elapsed_sec_median": 8.165
     }
   },
   "figures": 9

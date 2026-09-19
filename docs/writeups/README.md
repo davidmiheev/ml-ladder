@@ -14,7 +14,7 @@ left open.
 | D — Self-supervised & representation learning | [d-self-supervised.md](d-self-supervised.md) | [pdf/d-self-supervised.pdf](pdf/d-self-supervised.pdf) | complete |
 | E — Generative models | [e-generative.md](e-generative.md) | [pdf/e-generative.pdf](pdf/e-generative.pdf) | complete |
 | F — Geometric & equivariant nets | [f-geometric.md](f-geometric.md) | [pdf/f-geometric.pdf](pdf/f-geometric.pdf) | complete |
-| G — Scaling & systems | [g-scaling-systems.md](g-scaling-systems.md) | — | stub |
+| G — Scaling & systems | [g-scaling-systems.md](g-scaling-systems.md) | [pdf/g-scaling-systems.pdf](pdf/g-scaling-systems.pdf) | complete |
 | H — Computer vision & OCR | [h-computer-vision.md](h-computer-vision.md) | [pdf/h-computer-vision.pdf](pdf/h-computer-vision.pdf) | complete |
 | I — Speech — recognition & synthesis | [i-speech.md](i-speech.md) | — | stub |
 
