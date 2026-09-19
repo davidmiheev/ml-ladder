@@ -90,8 +90,11 @@ def test_group_conv_is_equivariant_to_quarter_turns():
 def test_the_orientation_roll_is_load_bearing():
     """Rotating the filter spatially but not cycling its group axis fails.
 
-    The wrong version still runs, still trains and still looks like a group
-    convolution. Pinning the failure keeps the roll from being "cleaned up".
+    Group convolution on $p4$ needs both halves of $g^{-1}h = (r^{-1}s,\\;
+    r^{-1}(y-x))$: the spatial ``rot90`` *and* the cyclic shift of the
+    orientation axis. The version without the roll still runs, still trains and
+    still looks like a group convolution, which is exactly why this is pinned
+    rather than argued.
     """
     from parts.f_geometric.f1_equivariant_cnn import ROTATIONS
 
@@ -100,29 +103,10 @@ def test_the_orientation_roll_is_load_bearing():
     rng = np.random.default_rng(2)
     x = torch.from_numpy(rng.random((2, 2, ROTATIONS, 15, 15)).astype(np.float32))
 
-    def apply(use_roll: bool):
-        filters = []
-        for r in range(ROTATIONS):
-            rotated = torch.rot90(weight, r, dims=(3, 4))
-            filters.append(torch.roll(rotated, shifts=r, dims=2) if use_roll else rotated)
-        stacked = torch.cat(filters, dim=0).reshape(3 * ROTATIONS, 2 * ROTATIONS, 3, 3)
-        out = torch.nn.functional.conv2d(x.reshape(2, 2 * ROTATIONS, 15, 15), stacked, padding=1)
-        return out.view(2, ROTATIONS, 3, 15, 15).permute(0, 2, 1, 3, 4)
+    def act(tensor):
+        """The $p4$ action on a group-valued feature map: turn it and shift its fibre."""
+        return torch.roll(torch.rot90(tensor, 1, dims=(3, 4)), shifts=1, dims=2)
 
-    acted = torch.roll(torch.rot90(x, 1, dims=(3, 4)), shifts=1, dims=2)
-
-    def error(use_roll: bool):
-        with torch.no_grad():
-            base = apply(use_roll)
-            moved = torch.roll(torch.rot90(base, 1, dims=(3, 4)), shifts=1, dims=2)
-            x_backup = x.clone()
-            try:
-                globals()["x"] = acted
-                return float((apply(use_roll) - moved).norm() / moved.norm())
-            finally:
-                globals()["x"] = x_backup
-
-    # Computed directly rather than through the closure trick above.
     def measure(use_roll: bool) -> float:
         with torch.no_grad():
             filters = []
@@ -135,9 +119,8 @@ def test_the_orientation_roll_is_load_bearing():
                 out = torch.nn.functional.conv2d(inp.reshape(2, 2 * ROTATIONS, 15, 15), stacked, padding=1)
                 return out.view(2, ROTATIONS, 3, 15, 15).permute(0, 2, 1, 3, 4)
 
-            base = forward(x)
-            expected = torch.roll(torch.rot90(base, 1, dims=(3, 4)), shifts=1, dims=2)
-            return float((forward(acted) - expected).norm() / expected.norm())
+            expected = act(forward(x))
+            return float((forward(act(x)) - expected).norm() / expected.norm())
 
     assert measure(True) < 1e-5
     assert measure(False) > 0.1
@@ -424,6 +407,8 @@ def test_f2_runs():
         main(
             [
                 "--epochs",
+                "3",
+                "--depth-epochs",
                 "3",
                 "--hidden",
                 "8",

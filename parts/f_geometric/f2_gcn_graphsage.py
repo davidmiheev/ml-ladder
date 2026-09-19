@@ -233,7 +233,7 @@ def smoothness(embeddings) -> float:
 
 def train_node_classifier(
     model, features, labels, adjacency, split, *, exp: Experiment, epochs: int, lr: float, weight_decay: float
-) -> tuple[list[float], list[float], float]:
+) -> tuple[list[float], list[float], float, int]:
     """Full-batch training with model selection on the validation split.
 
     Full batch because the graph does not decompose: a node's representation
@@ -247,8 +247,8 @@ def train_node_classifier(
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
     losses: list[float] = []
     validations: list[float] = []
-    best_validation, best_state = -1.0, None
-    for _ in range(epochs):
+    best_validation, best_state, best_epoch = -1.0, None, 0
+    for epoch in range(epochs):
         model.train()
         optimizer.zero_grad()
         logits = model(features, adjacency)
@@ -265,10 +265,17 @@ def train_node_classifier(
         validations.append(validation)
         if validation > best_validation:
             best_validation = validation
+            best_epoch = epoch
             best_state = {k: v.detach().clone() for k, v in model.state_dict().items()}
     if best_state is not None:
         model.load_state_dict(best_state)
-    return losses, validations, best_validation
+    # ``best_epoch`` is reported so the budget can be checked rather than
+    # assumed. A deep stack trains *slower* as well as worse, and a fixed epoch
+    # budget that binds it would manufacture the oversmoothing result out of
+    # undertraining: measured at 200 epochs, a two-layer GCN peaked at epoch 63
+    # and an eight-layer one at epoch 186 -- still climbing when the budget ran
+    # out. Hence ``depth_epochs``.
+    return losses, validations, best_validation, best_epoch
 
 
 def test_accuracy(model, features, labels, adjacency, test_index) -> float:
@@ -291,23 +298,36 @@ def prepare(graph: graphs.Graph, *, device):
 
 
 def fit_arm(
-    arm: str, graph: graphs.Graph, prepared, split, *, exp: Experiment, layers: int, hidden: int, device
-) -> tuple[float, float, list[float], float]:
-    """Seed, build, train and score one architecture. Returns test/val/curve/smoothness."""
+    arm: str,
+    graph: graphs.Graph,
+    prepared,
+    split,
+    *,
+    exp: Experiment,
+    layers: int,
+    hidden: int,
+    device,
+    epochs: int | None = None,
+) -> tuple[float, float, list[float], float, int]:
+    """Seed, build, train and score one architecture.
+
+    Returns test accuracy, best validation accuracy, the loss curve, the
+    representation smoothness, and the epoch the selected model came from.
+    """
     torchkit.seed_torch(exp.seed)
     features, labels, operators = prepared
     model = ARCHITECTURES[arm](
         graph.features.shape[1], hidden, graph.num_classes, layers=layers, dropout=exp["dropout"]
     )().to(device)
     adjacency = operators[AGGREGATORS[arm]]
-    losses, _, best_validation = train_node_classifier(
+    losses, _, best_validation, best_epoch = train_node_classifier(
         model,
         features,
         labels,
         adjacency,
         split,
         exp=exp,
-        epochs=exp["epochs"],
+        epochs=exp["epochs"] if epochs is None else epochs,
         lr=exp["lr"],
         weight_decay=exp["weight_decay"],
     )
@@ -316,7 +336,33 @@ def fit_arm(
     model.eval()
     with torch.no_grad():
         collapse = smoothness(model.embed(features, adjacency))
-    return accuracy, best_validation, losses, collapse
+    return accuracy, best_validation, losses, collapse, best_epoch
+
+
+def predicted_crossover(num_classes: int, average_degree: float) -> float:
+    r"""Where the neighbour aggregate should stop being worth more than the node.
+
+    Derived rather than fitted, so the sweep has something to disagree with.
+    Take balanced classes with centroids $\mu_c$ summing to zero and features
+    $x_i = \mu_{c_i} + \varepsilon_i$. The mean over $d$ neighbours of a node in
+    class $c$ has expectation
+
+    $$h\,\mu_c + (1-h)\,\frac{-\mu_c}{C-1} = \frac{hC-1}{C-1}\,\mu_c,$$
+
+    so the class signal is scaled by $s(h) = (hC-1)/(C-1)$ — exactly zero at
+    $h = 1/C$ and **negative** below it, where the neighbourhood carries the
+    signal *inverted*. Averaging $d$ independent noise terms meanwhile shrinks
+    the noise by $\sqrt{d}$, so the aggregate's signal-to-noise relative to the
+    node's own features is $\sqrt{d}\,|s(h)|$. Setting that to 1:
+
+    $$h^{*} = \frac{1}{C}\left(1 + \frac{C-1}{\sqrt{d}}\right).$$
+
+    This is the crossover for a model using *only* the aggregate. Both graph
+    arms also see the node itself — the GCN through its self-loop, GraphSAGE
+    through a separate weight — so both should cross lower than $h^{*}$, and
+    GraphSAGE lower still. The sweep measures whether they do.
+    """
+    return float((1.0 + (num_classes - 1) / np.sqrt(average_degree)) / num_classes)
 
 
 def crossover(homophilies: list[float], gaps: list[float]) -> float:
@@ -339,9 +385,13 @@ def crossover(homophilies: list[float], gaps: list[float]) -> float:
 @experiment(
     "f2_gcn_graphsage",
     defaults={
-        "hidden": 32,
+        # Kipf & Welling's width, kept so the Cora numbers sit beside the
+        # published ones rather than beside a wider variant of them.
+        "hidden": 16,
         "layers": 2,
         "epochs": 200,
+        # The depth sweep gets its own, larger budget: see train_node_classifier.
+        "depth_epochs": 300,
         "lr": 1e-2,
         "weight_decay": 5e-4,
         "dropout": 0.5,
@@ -390,7 +440,7 @@ def run(exp: Experiment) -> dict[str, float]:
     curves: dict[str, list[float]] = {}
     cora_scores: dict[str, float] = {}
     for arm in exp["arms"]:
-        accuracy, validation, losses, collapse = fit_arm(
+        accuracy, validation, losses, collapse, best_epoch = fit_arm(
             arm, cora, prepared, index, exp=exp, layers=exp["layers"], hidden=exp["hidden"], device=device
         )
         curves[arm] = losses
@@ -398,6 +448,7 @@ def run(exp: Experiment) -> dict[str, float]:
         summary[f"cora/{arm}/test_accuracy"] = accuracy
         summary[f"cora/{arm}/val_accuracy"] = validation
         summary[f"cora/{arm}/smoothness"] = collapse
+        summary[f"cora/{arm}/best_epoch"] = float(best_epoch)
         print(f"[f2] cora {arm:<5} test {accuracy:.3f}  val {validation:.3f}")
 
     # The control that needs no features and no training at all.
@@ -406,6 +457,12 @@ def run(exp: Experiment) -> dict[str, float]:
     cora_scores["label_prop"] = propagation
     summary["cora/label_propagation/test_accuracy"] = propagation
     summary["cora/graph_gain"] = cora_scores["gcn"] - cora_scores["mlp"]
+    # The same derivation applied to Cora. Its assumptions (balanced Gaussian
+    # classes, independent noise) are wrong for a sparse bag of words, so this
+    # is a sanity check rather than a prediction: it should put Cora's 0.81
+    # comfortably on the paying side, and if it did not, the model behind the
+    # SBM sweep's prediction would be the thing to distrust.
+    summary["cora/predicted_crossover"] = predicted_crossover(cora.num_classes, float(cora.degree().mean()))
     summary["cora/learning_gain_over_propagation"] = cora_scores["gcn"] - propagation
     print(
         f"[f2] cora label-propagation (no features, no parameters) {propagation:.3f}  "
@@ -415,15 +472,28 @@ def run(exp: Experiment) -> dict[str, float]:
     # -- depth: oversmoothing -------------------------------------------------
     depth_accuracy: dict[str, list[float]] = {"gcn": [], "sage": []}
     depth_smoothness: dict[str, list[float]] = {"gcn": [], "sage": []}
+    budget_bound = 0
     for arm in depth_accuracy:
         for depth in exp["depths"]:
-            accuracy, _, _, collapse = fit_arm(
-                arm, cora, prepared, index, exp=exp, layers=depth, hidden=exp["hidden"], device=device
+            accuracy, _, _, collapse, best_epoch = fit_arm(
+                arm,
+                cora,
+                prepared,
+                index,
+                exp=exp,
+                layers=depth,
+                hidden=exp["hidden"],
+                device=device,
+                epochs=exp["depth_epochs"],
             )
             depth_accuracy[arm].append(accuracy)
             depth_smoothness[arm].append(collapse)
             summary[f"depth/{arm}/{depth}/test_accuracy"] = accuracy
             summary[f"depth/{arm}/{depth}/smoothness"] = collapse
+            summary[f"depth/{arm}/{depth}/best_epoch"] = float(best_epoch)
+            # A model still improving when the budget ended is undertrained, and
+            # its accuracy is not evidence about depth.
+            budget_bound += int(best_epoch > 0.9 * exp["depth_epochs"])
         best = int(np.argmax(depth_accuracy[arm]))
         summary[f"depth/{arm}/best_depth"] = float(exp["depths"][best])
         summary[f"depth/{arm}/deepest_drop"] = depth_accuracy[arm][best] - depth_accuracy[arm][-1]
@@ -432,6 +502,13 @@ def run(exp: Experiment) -> dict[str, float]:
             f"[f2] depth {arm:<5} best {exp['depths'][best]} layers ({depth_accuracy[arm][best]:.3f}); "
             f"at {exp['depths'][-1]} layers {depth_accuracy[arm][-1]:.3f}, "
             f"cosine similarity {depth_smoothness[arm][0]:.3f} -> {depth_smoothness[arm][-1]:.3f}"
+        )
+
+    summary["depth/arms_bound_by_budget"] = float(budget_bound)
+    if budget_bound:
+        print(
+            f"[f2] WARNING: {budget_bound} depth arm(s) were still improving at the end of "
+            f"{exp['depth_epochs']} epochs -- their accuracies measure the budget, not the depth"
         )
 
     # -- homophily: where the graph stops paying ------------------------------
@@ -454,7 +531,7 @@ def run(exp: Experiment) -> dict[str, float]:
         sbm_prepared = prepare(graph, device=device)
         sbm_index = tuple(torch.from_numpy(part).to(device) for part in sbm_split)
         for arm in exp["arms"]:
-            accuracy, _, _, _ = fit_arm(
+            accuracy, _, _, _, _ = fit_arm(
                 arm, graph, sbm_prepared, sbm_index, exp=exp, layers=exp["layers"], hidden=exp["hidden"], device=device
             )
             sweep[arm].append(accuracy)
@@ -474,6 +551,13 @@ def run(exp: Experiment) -> dict[str, float]:
             f"{summary[f'homophily/{arm}/crossover']:.3f}; at h={exp['homophilies'][0]:.2f} it is {gap[0]:+.3f}"
         )
     summary["homophily/sage_over_gcn_at_lowest"] = sweep["sage"][0] - sweep["gcn"][0]
+    summary["homophily/predicted_crossover"] = predicted_crossover(exp["sbm_classes"], exp["sbm_degree"])
+    summary["homophily/random_floor"] = 1.0 / exp["sbm_classes"]
+    print(
+        f"[f2] the neighbour aggregate alone should stop paying at h="
+        f"{summary['homophily/predicted_crossover']:.3f} (random floor {summary['homophily/random_floor']:.2f}); "
+        f"both arms also see the node itself, so both should cross lower"
+    )
 
     # -- figures --------------------------------------------------------------
     exp.log_figure(
@@ -503,7 +587,7 @@ def run(exp: Experiment) -> dict[str, float]:
                 ],
             },
             highlight={"GCN": [2, 4], "GraphSAGE (mean)": [2, 4]},
-            title="One layer of each arm: the only difference is how the node's own features enter",
+            title="Two layers of each arm: the only difference is how a node's own features enter",
         ),
     )
     exp.log_figure(
