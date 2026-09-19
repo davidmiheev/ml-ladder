@@ -263,11 +263,13 @@ def equivariance_error(model, images, degrees: float) -> float:
     This, not the invariance of the pooled vector, is the quantity the
     architecture actually promises. **Measuring the pooled vector instead
     flatters every network**: a global average over spatial positions cannot
-    distinguish a permutation of those positions, so a plain CNN ending in one
-    scores 0.019 at a quarter turn -- not because its features are equivariant
-    but because the pooling threw away the evidence. On the feature maps the
-    same network scores an order of magnitude worse, which is the truth about
-    it.
+    distinguish a permutation of those positions, so an *untrained* plain CNN
+    scores 0.019 at a quarter turn on the structured probes the tests use --
+    not because its features are equivariant but because the pooling threw away
+    the evidence. On the feature maps the same network scores 0.372, twenty
+    times worse, which is the truth about it. The flattery is smaller but still
+    there once the network is trained and measured on real digits: the sweep's
+    ``pooling_flattery`` puts it at 1.6x for the plain CNN and 3.0x for $p4$.
 
     The floor here is the resampler, not the network: ``rotate_batch``
     interpolates, and four quarter turns do not return an image to itself

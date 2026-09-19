@@ -221,6 +221,16 @@ def smoothness(embeddings) -> float:
     consistent with several stories — vanishing gradients, overfitting, bad
     initialization — and this one distinguishes them, because only the diffusion
     story predicts that the *representations themselves* collapse together.
+
+    **It has a floor, and the floor is not zero.** These embeddings come out of
+    a ReLU, so they live in the non-negative orthant where every pairwise cosine
+    is $\ge 0$ and a random pair already scores well above it. The absolute
+    number is therefore uninterpretable on its own: measured on Cora, the
+    *graph-blind* MLP scored 0.71 against the GCN's 0.63, which read naively
+    would say the model with no edges oversmoothed harder. It did not; it has
+    the same nonlinearity. That is why the depth sweep runs an MLP arm at every
+    depth -- the quantity that means something is the **difference** between a
+    graph model and a graph-blind one of identical shape.
     """
     torch = vision.require_torch()
     with torch.no_grad():
@@ -391,7 +401,9 @@ def crossover(homophilies: list[float], gaps: list[float]) -> float:
         "layers": 2,
         "epochs": 200,
         # The depth sweep gets its own, larger budget: see train_node_classifier.
-        "depth_epochs": 300,
+        # 300 was not enough -- three to four of the twelve arms were still
+        # improving when it ran out, so the sweep was measuring the budget.
+        "depth_epochs": 600,
         "lr": 1e-2,
         "weight_decay": 5e-4,
         "dropout": 0.5,
@@ -470,9 +482,14 @@ def run(exp: Experiment) -> dict[str, float]:
     )
 
     # -- depth: oversmoothing -------------------------------------------------
-    depth_accuracy: dict[str, list[float]] = {"gcn": [], "sage": []}
-    depth_smoothness: dict[str, list[float]] = {"gcn": [], "sage": []}
+    # The MLP runs at every depth too. Its representations pass through the same
+    # ReLUs and the same widths and touch no edges, so it is the control that
+    # turns an uninterpretable cosine similarity into a statement about the
+    # graph: see ``smoothness``.
+    depth_accuracy: dict[str, list[float]] = {arm: [] for arm in ("mlp", "gcn", "sage")}
+    depth_smoothness: dict[str, list[float]] = {arm: [] for arm in ("mlp", "gcn", "sage")}
     budget_bound = 0
+    hidden_start = next((i for i, d in enumerate(exp["depths"]) if d >= 2), 0)
     for arm in depth_accuracy:
         for depth in exp["depths"]:
             accuracy, _, _, collapse, best_epoch = fit_arm(
@@ -497,12 +514,36 @@ def run(exp: Experiment) -> dict[str, float]:
         best = int(np.argmax(depth_accuracy[arm]))
         summary[f"depth/{arm}/best_depth"] = float(exp["depths"][best])
         summary[f"depth/{arm}/deepest_drop"] = depth_accuracy[arm][best] - depth_accuracy[arm][-1]
-        summary[f"depth/{arm}/smoothness_rise"] = depth_smoothness[arm][-1] - depth_smoothness[arm][0]
+        # A "one-layer" model is a single linear map, so ``embed`` hands back the
+        # raw features and its smoothness describes Cora's bag of words, not any
+        # representation. The rise is therefore measured from the shallowest
+        # depth that actually has a hidden layer.
+        summary[f"depth/{arm}/smoothness_rise"] = depth_smoothness[arm][-1] - depth_smoothness[arm][hidden_start]
         print(
             f"[f2] depth {arm:<5} best {exp['depths'][best]} layers ({depth_accuracy[arm][best]:.3f}); "
             f"at {exp['depths'][-1]} layers {depth_accuracy[arm][-1]:.3f}, "
-            f"cosine similarity {depth_smoothness[arm][0]:.3f} -> {depth_smoothness[arm][-1]:.3f}"
+            f"cosine similarity {depth_smoothness[arm][hidden_start]:.3f} -> {depth_smoothness[arm][-1]:.3f}"
         )
+
+    # What the graph adds to the collapse, at each depth, over a graph-blind
+    # model of identical shape. This -- not the raw cosine similarity -- is the
+    # oversmoothing signal.
+    graph_excess = {
+        arm: [depth_smoothness[arm][i] - depth_smoothness["mlp"][i] for i in range(len(exp["depths"]))]
+        for arm in ("gcn", "sage")
+    }
+    for arm, excess in graph_excess.items():
+        for depth, value in zip(exp["depths"], excess, strict=True):
+            summary[f"depth/{arm}/{depth}/smoothness_over_mlp"] = value
+        summary[f"depth/{arm}/excess_rise"] = excess[-1] - excess[hidden_start]
+        print(
+            f"[f2] depth {arm:<5} collapse beyond the graph-blind MLP: "
+            f"{excess[hidden_start]:+.3f} at {exp['depths'][hidden_start]} layers -> "
+            f"{excess[-1]:+.3f} at {exp['depths'][-1]}"
+        )
+    if exp["depths"][0] == 1:
+        # Recorded once under its true name, so nobody reads it as a model's.
+        summary["depth/input_features_smoothness"] = depth_smoothness["gcn"][0]
 
     summary["depth/arms_bound_by_budget"] = float(budget_bound)
     if budget_bound:
@@ -604,7 +645,7 @@ def run(exp: Experiment) -> dict[str, float]:
         plotting.plot_curves(
             depth_accuracy,
             x=exp["depths"],
-            title="Cora accuracy against depth -- deeper is worse, not better",
+            title="Cora accuracy against depth -- deeper is worse, and the MLP is not",
             xlabel="message-passing layers",
             ylabel="test accuracy",
             marker="o",
@@ -615,9 +656,20 @@ def run(exp: Experiment) -> dict[str, float]:
         plotting.plot_curves(
             depth_smoothness,
             x=exp["depths"],
-            title="Representation collapse: mean pairwise cosine similarity",
-            xlabel="message-passing layers",
+            title="Mean pairwise cosine similarity -- note the graph-blind MLP's floor",
+            xlabel="layers",
             ylabel="cosine similarity",
+            marker="o",
+        ),
+    )
+    exp.log_figure(
+        "depth_smoothness_excess",
+        plotting.plot_curves(
+            graph_excess,
+            x=exp["depths"],
+            title="Collapse the graph is responsible for (same shape, minus the MLP)",
+            xlabel="message-passing layers",
+            ylabel="cosine similarity over the MLP",
             marker="o",
         ),
     )

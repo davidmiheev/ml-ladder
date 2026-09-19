@@ -409,7 +409,7 @@ def test_f2_runs():
                 "--epochs",
                 "3",
                 "--depth-epochs",
-                "3",
+                "4",
                 "--hidden",
                 "8",
                 "--depths",
