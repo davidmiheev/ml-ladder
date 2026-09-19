@@ -300,11 +300,16 @@ def evaluate(model, ids, *, exp: Experiment, vocab_size: int, device, seed: int)
         "data_budgets": [125_000, 250_000, 500_000, 1_000_000],
         # "Only N matters": same parameter count, different arrangement.
         # 2 x 12 x 96^2 and 8 x 12 x 48^2 are the same number: identical dense
-        # parameter counts, four times the depth at half the width.
-        "shape_pairs": [[96, 2], [48, 8]],
+        # parameter counts, four times the depth at half the width. Two flat
+        # lists rather than a list of pairs, so the generated CLI can set them.
+        "shape_widths": [96, 48],
+        "shape_depths": [2, 8],
         # IsoFLOP contours, in FLOPs. Each is swept over the widths below.
         "isoflop_budgets": [3e11, 9e11, 2.7e12],
-        "isoflop_widths": [32, 48, 64, 96],
+        # Extended downward because the first sweep put the minimum of the two
+        # smaller contours at the smallest width -- an answer off the grid is
+        # not an answer.
+        "isoflop_widths": [16, 24, 32, 48, 64, 96],
         # Block sizes for the FLOP-accounting figure (no training).
         "flop_block_sizes": [32, 64, 128, 256, 512, 1024],
     },
@@ -388,7 +393,10 @@ def run(exp: Experiment) -> dict[str, float]:
     )
 
     # -- does the arrangement matter, or only the count? ----------------------
-    shapes = [fit(tokens=exp["budget_tokens"], width=w, depth=d) for w, d in exp["shape_pairs"]]
+    shapes = [
+        fit(tokens=exp["budget_tokens"], width=w, depth=d)
+        for w, d in zip(exp["shape_widths"], exp["shape_depths"], strict=True)
+    ]
     for record in shapes:
         summary[f"shape/{int(record['width'])}x{int(record['depth'])}/parameters"] = record["parameters"]
         summary[f"shape/{int(record['width'])}x{int(record['depth'])}/val_loss"] = record["val_loss"]
@@ -441,6 +449,11 @@ def run(exp: Experiment) -> dict[str, float]:
         summary[f"isoflop/{budget:.3g}/optimal_tokens"] = tokens_used[best]
         summary[f"isoflop/{budget:.3g}/optimal_width"] = float(exp["isoflop_widths"][best])
         summary[f"isoflop/{budget:.3g}/best_loss"] = losses[best]
+        summary[f"isoflop/{budget:.3g}/optimal_epochs"] = tokens_used[best] / len(train_ids)
+        # Chinchilla's headline is a *ratio*, ~20 tokens per parameter. Whether
+        # that constant transfers to character-level data is exactly what this
+        # sweep is in a position to say something about.
+        summary[f"isoflop/{budget:.3g}/tokens_per_parameter"] = tokens_used[best] / sizes[best]
         # An interior minimum is what makes the contour informative; one that
         # sits at an end means the answer is off the grid.
         summary[f"isoflop/{budget:.3g}/interior_minimum"] = float(0 < best < len(losses) - 1)
@@ -451,6 +464,13 @@ def run(exp: Experiment) -> dict[str, float]:
         )
 
     summary["isoflop/max_epochs_of_data"] = max_epochs
+    interior = sum(int(summary[f"isoflop/{budget:.3g}/interior_minimum"]) for budget in exp["isoflop_budgets"])
+    summary["isoflop/interior_minima"] = float(interior)
+    if interior < len(exp["isoflop_budgets"]):
+        print(
+            f"[g1] WARNING: only {interior} of {len(exp['isoflop_budgets'])} contours bracket their own minimum. "
+            f"An exponent fitted through points pinned to the edge of the grid is a measurement of the grid"
+        )
     if max_epochs > 1.5:
         print(
             f"[g1] note: the largest IsoFLOP point repeated the training split {max_epochs:.1f} times -- "
@@ -465,9 +485,16 @@ def run(exp: Experiment) -> dict[str, float]:
         summary["isoflop/tokens_exponent"] = slope_d
         summary["isoflop/exponents_sum"] = slope_n + slope_d
         summary["isoflop/tokens_per_parameter"] = optimal_tokens[-1] / optimal_params[-1]
+        summary["isoflop/exponent_is_trustworthy"] = float(interior == len(exp["isoflop_budgets"]))
+        # The two exponents would sum to exactly 1 if FLOPs per token were
+        # proportional to N -- then C = kND and log C = log N + log D + const.
+        # They are not: the attention and head terms break the proportionality,
+        # and N* is quantized to the width grid besides. The residual is a
+        # measure of both, not a free parameter.
         print(
-            f"[g1] compute-optimal: N* ~ C^{slope_n:.3f}, D* ~ C^{slope_d:.3f} "
-            f"(Chinchilla: 0.5 and 0.5; the two must sum to 1 by construction, measured {slope_n + slope_d:.3f})"
+            f"[g1] compute-optimal: N* ~ C^{slope_n:.3f}, D* ~ C^{slope_d:.3f} (Chinchilla measured 0.5 and 0.5). "
+            f"The two would sum to 1 if FLOPs per token were proportional to N; measured {slope_n + slope_d:.3f}, "
+            f"the gap being the attention/head terms plus the coarseness of the width grid"
         )
 
     # -- what the 6ND rule leaves out -----------------------------------------

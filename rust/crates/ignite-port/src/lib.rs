@@ -1,8 +1,11 @@
 //! Rust ports of ladder rungs, kept next to the Python so the two can be diffed.
 //!
-//! Rung G3 lands here: a transformer-block forward pass written against Candle,
-//! checked numerically against the Python implementation from rung C3. Until
-//! then this crate holds only the shape conventions both sides agree on.
+//! Rung G3 lands here: a transformer-block forward pass written against Candle
+//! ([`transformer`]), checked numerically against the Python implementation
+//! from rung C3. This module keeps the shape conventions the two sides agree
+//! on.
+
+pub mod transformer;
 
 /// Shape of one transformer block's activations, in the order the Python side
 /// uses: `(batch, seq, d_model)`.

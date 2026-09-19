@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import itertools
+import shutil
 
 import numpy as np
 import pytest
@@ -163,10 +164,68 @@ def test_g1_runs():
                 "48",
                 "--eval-batches",
                 "2",
-                "--shape-pairs",
-                "48,2",
-                "32,4",
+                "--shape-widths",
+                "48",
+                "32",
+                "--shape-depths",
+                "2",
+                "4",
             ]
         )
         == 0
     )
+
+
+# -- G3: the Rust/Candle port -------------------------------------------------
+
+
+def test_the_weight_names_are_a_contract_between_two_languages():
+    """The Rust side looks these up by string. Renaming in Python breaks it silently.
+
+    There is no type system spanning the two implementations, so the only thing
+    keeping them in sync is this list and this test.
+    """
+    from parts.c_sequence_attention.c3_transformer_from_scratch import make_transformer
+    from parts.g_scaling_systems.g3_candle_transformer_port import EXPECTED_WEIGHTS
+
+    CharTransformer, _ = make_transformer()
+    model = CharTransformer(65, width=32, heads=4, depth=1, block_size=8)
+    exported = set(model.blocks[0].state_dict())
+    assert set(EXPECTED_WEIGHTS) == exported, exported.symmetric_difference(EXPECTED_WEIGHTS)
+
+
+def test_the_two_gelus_disagree_far_above_float32_noise():
+    """Why picking the wrong GELU is a silent bug and not a rounding one.
+
+    PyTorch's ``nn.GELU()`` is exact; Candle's ``gelu()`` is the tanh
+    approximation. Their difference is ~1e-3 on ordinary activations — four
+    orders of magnitude above float32 round-off, and still small enough to look
+    like a precision issue rather than a wrong function.
+    """
+    x = torch.linspace(-4, 4, 2001)
+    exact = torch.nn.functional.gelu(x)
+    approximate = torch.nn.functional.gelu(x, approximate="tanh")
+    gap = float((exact - approximate).abs().max())
+    assert gap > 1e-4, gap
+    assert gap < 1e-2, gap
+    assert float((exact - approximate).abs().max()) > 100 * float(torch.finfo(torch.float32).eps)
+
+
+def test_disagreement_reports_absolute_and_relative():
+    from parts.g_scaling_systems.g3_candle_transformer_port import disagreement
+
+    reference = np.array([[1.0, 2.0], [3.0, 4.0]], dtype=np.float32)
+    measured = disagreement(reference, reference + 0.01)
+    assert measured["max_abs"] == pytest.approx(0.01, abs=1e-6)
+    # Scale-free: the same absolute error on a 1000x larger tensor is 1000x
+    # smaller relatively, which is the whole reason both are reported.
+    bigger = disagreement(reference * 1000, reference * 1000 + 0.01)
+    assert bigger["relative"] < measured["relative"] / 100
+
+
+@pytest.mark.skipif(shutil.which("cargo") is None, reason="no Rust toolchain")
+def test_g3_runs():
+    from parts.g_scaling_systems.g3_candle_transformer_port import main
+
+    vision.require_torch()
+    assert main(["--batches", "1", "2", "--length", "8", "--width", "32", "--timing-repeats", "3"]) == 0
