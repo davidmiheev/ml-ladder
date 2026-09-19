@@ -37,6 +37,7 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
+import sys
 import time
 from pathlib import Path
 
@@ -118,6 +119,23 @@ def run_port(weights: Path, inputs: Path, output: Path, *, heads: int, gelu: str
     return result.returncode == 0, (result.stderr or result.stdout).strip()[-2000:]
 
 
+def spin(count: int) -> list[subprocess.Popen]:
+    """Start ``count`` processes that do nothing but burn a core.
+
+    Crude on purpose. The point is not to simulate a realistic workload but to
+    take the cores away, which is the condition under which a spin-waiting
+    thread pool stops being free.
+    """
+    return [
+        subprocess.Popen(
+            [sys.executable, "-c", "x = 0.0\nwhile True:\n    x = (x * 1.0000001 + 1.0) % 1e9"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        for _ in range(count)
+    ]
+
+
 def disagreement(reference: np.ndarray, ported: np.ndarray) -> dict[str, float]:
     r"""How far apart two implementations of the same function are.
 
@@ -145,8 +163,10 @@ def disagreement(reference: np.ndarray, ported: np.ndarray) -> dict[str, float]:
         "batches": [1, 4],
         "length": 16,
         "timing_repeats": 50,
-        # Not a tuning knob: the spread across these is the measurement.
+        # Not a tuning knob: the spread across these, on both an idle and a
+        # loaded machine, is the measurement.
         "thread_counts": [1, 2, 4],
+        "contention_processes": 4,
         "build": True,
     },
     description="A transformer block ported to Rust/Candle and diffed against the PyTorch original.",
@@ -215,40 +235,70 @@ def run(exp: Experiment) -> dict[str, float]:
     # Batch 1 cannot see a batched-layout bug, so state that it was tested.
     summary["agreement/batches_checked"] = float(len(exp["batches"]))
 
-    # -- speed, and the trap in measuring it ----------------------------------
+    # -- speed, and two traps in measuring it ---------------------------------
     # The first version of this compared "PyTorch" against "the ported binary"
-    # and made Rust look 10x faster. It was measuring neither. PyTorch's default
-    # thread pool is what it was measuring, and on a block this small the pool
-    # costs two orders of magnitude more than the arithmetic it parallelizes.
+    # and made Rust look 10x faster; it was measuring process startup. The
+    # replacement measured PyTorch at 1/2/4 threads and found an 84 ms outlier
+    # at 4 -- 192x the single-threaded time -- which got written up as the cost
+    # of a thread pool. It was not: that run shared a 4-core box with a sweep
+    # that was using all of it. On an idle machine the same sweep spreads by
+    # 1.2x. What is real is the *interaction*, so the contention is now created
+    # on purpose and measured on both sides of it.
     batch = exp["batches"][-1]
     generator = torch.Generator().manual_seed(exp.seed)
     x = torch.randn(batch, exp["length"], exp["width"], generator=generator)
+
+    def time_threads(threads: int) -> float:
+        torch.set_num_threads(threads)
+        with torch.no_grad():
+            for _ in range(20):
+                block(x)
+            started = time.time()
+            for _ in range(exp["timing_repeats"]):
+                block(x)
+            return (time.time() - started) / exp["timing_repeats"] * 1e3
+
     restore = torch.get_num_threads()
-    thread_times: dict[str, float] = {}
+    idle: dict[int, float] = {}
+    busy: dict[int, float] = {}
     try:
         for threads in exp["thread_counts"]:
-            torch.set_num_threads(threads)
-            with torch.no_grad():
-                for _ in range(20):
-                    block(x)
-                started = time.time()
-                for _ in range(exp["timing_repeats"]):
-                    block(x)
-                seconds = (time.time() - started) / exp["timing_repeats"]
-            thread_times[f"{threads} thread(s)"] = seconds * 1e3
-            summary[f"speed/torch_{threads}_threads_ms"] = seconds * 1e3
+            idle[threads] = time_threads(threads)
+        load = spin(exp["contention_processes"])
+        try:
+            for threads in exp["thread_counts"]:
+                busy[threads] = time_threads(threads)
+        finally:
+            for process in load:
+                process.kill()
+            for process in load:
+                process.wait(timeout=10)
     finally:
         torch.set_num_threads(restore)
 
-    fastest = min(thread_times.values())
-    slowest = max(thread_times.values())
-    summary["speed/thread_oversubscription"] = slowest / max(fastest, 1e-12)
-    summary["speed/torch_best_ms"] = fastest
+    for threads in exp["thread_counts"]:
+        summary[f"speed/idle/{threads}_threads_ms"] = idle[threads]
+        summary[f"speed/busy/{threads}_threads_ms"] = busy[threads]
+    summary["speed/idle_spread"] = max(idle.values()) / max(min(idle.values()), 1e-12)
+    summary["speed/busy_spread"] = max(busy.values()) / max(min(busy.values()), 1e-12)
+    widest = max(exp["thread_counts"])
+    summary["speed/contention_cost_multithreaded"] = busy[widest] / max(idle[widest], 1e-12)
+    summary["speed/contention_cost_singlethreaded"] = busy[1] / max(idle[1], 1e-12)
     print(
-        "[g3] PyTorch forward: "
-        + ", ".join(f"{label} {value:.3f} ms" for label, value in thread_times.items())
-        + f" -- {summary['speed/thread_oversubscription']:.0f}x between best and worst, from a setting, "
-        f"on {int(summary['block/parameters']):,} parameters"
+        "[g3] idle:  "
+        + ", ".join(f"{n}t {idle[n]:.3f} ms" for n in exp["thread_counts"])
+        + f"  (spread {summary['speed/idle_spread']:.1f}x)"
+    )
+    print(
+        f"[g3] with {exp['contention_processes']} competing processes: "
+        + ", ".join(f"{n}t {busy[n]:.3f} ms" for n in exp["thread_counts"])
+        + f"  (spread {summary['speed/busy_spread']:.1f}x)"
+    )
+    print(
+        f"[g3] contention costs the {widest}-thread pool "
+        f"{summary['speed/contention_cost_multithreaded']:.1f}x and the single thread "
+        f"{summary['speed/contention_cost_singlethreaded']:.2f}x -- the pool spins for cores it "
+        f"cannot get, and one thread simply waits its turn"
     )
 
     # The ported binary, measured honestly: a whole process, npz parse included.
@@ -261,15 +311,23 @@ def run(exp: Experiment) -> dict[str, float]:
     summary["speed/rust_process_ms"] = rust_seconds * 1e3
     print(
         f"[g3] the ported binary takes {rust_seconds * 1e3:.1f} ms per call, but that is process startup "
-        f"and npz parsing around a {fastest:.3f} ms kernel -- it is not a comparison and is not reported as one"
+        f"and npz parsing around a {min(idle.values()):.3f} ms kernel -- it is not a comparison and is "
+        f"not reported as one"
     )
 
     exp.log_figure(
         "threads",
-        plotting.plot_comparison(
-            thread_times,
+        plotting.plot_curves(
+            {
+                "idle machine": [idle[n] for n in exp["thread_counts"]],
+                f"{exp['contention_processes']} competing processes": [busy[n] for n in exp["thread_counts"]],
+            },
+            x=exp["thread_counts"],
             title=f"PyTorch forward pass, {int(summary['block/parameters']):,} parameters",
+            xlabel="torch intra-op threads",
             ylabel="milliseconds",
+            logy=True,
+            marker="o",
         ),
     )
     exp.log_figure(
