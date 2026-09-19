@@ -1,7 +1,7 @@
 {
   "what": "Attempting to run FLUX.1-schnell through the candle fork, which E5 prices from its config",
   "date": "2026-09-19",
-  "status": "still not completed after two attempts; both blockers are fixed and the build succeeds, but the run has not produced an image",
+  "status": "COMPLETED 2026-09-19 on a Kaggle Tesla T4, via diffusers with NF4 quantization rather than the candle fork. Three earlier attempts through candle on Colab failed; the record of why is kept below, because the reasons were real and only one of them was about FLUX.",
   "blockers_fixed": [
     {
       "blocker": "black-forest-labs/FLUX.1-schnell is a gated repo; the example hardcodes it and dies with a 401 before doing anything",
@@ -23,5 +23,38 @@
     "finding": "google/t5-v1_1-xxl at refs/pr/2 ships model.safetensors in float32 -- an 11B encoder at 4 bytes a parameter is ~44 GB, the bulk of the 56 GB. The FLUX transformer itself is 12.64 GB quantized and the autoencoder 0.34 GB.",
     "implication": "a --t5-repo flag pointing at an f16 mirror would cut the download roughly in half and very likely bring the whole run inside one session. The example converts to the run dtype at load anyway, so the f32 bytes are downloaded only to be halved in memory.",
     "status": "not implemented"
+  },
+  "the_run_that_worked": {
+    "how": "diffusers FluxPipeline, unsloth/FLUX.1-schnell (ungated mirror), transformer and T5-XXL both quantized to NF4 on load with bitsandbytes, fp16 compute, enable_model_cpu_offload",
+    "hardware": "Kaggle Tesla T4, 14.56 GB, compute capability 7.5, torch 2.10.0+cu128",
+    "load_seconds": 381.4,
+    "generate_seconds": 19.8,
+    "steps": 4,
+    "guidance_scale": 0.0,
+    "resolution": "512x512",
+    "peak_vram_gb": 6.53,
+    "prompt": "a cross-section diagram of a transformer block, technical illustration, clean white background",
+    "image": "../figures/e/e5_flux_schnell_sample.png",
+    "note": "12B parameters at 6.53 GB of VRAM is the whole point of the 4-bit path: the fp16 weights are ~24 GB and never exist. The first Kaggle attempt used sequential CPU offload instead and was killed loading T5's shards, because offload still materializes every component in host RAM first.",
+    "what_it_drew": "an electrical transformer -- radiator fins, bushings, isometric line art. The prompt said 'transformer block' and the model resolved it to the dominant sense in its training distribution, which is a fair reading of an ambiguous phrase and not a failure."
+  },
+  "why_the_candle_route_failed": {
+    "summary": "Two of the three blockers were real FLUX problems and the third was mine.",
+    "gated_repo": "real; fixed with an ungated mirror.",
+    "bf16": "real but mis-stated. The fork's kernels are compiled with CUDA_COMPUTE_CAP=75 and contain no bf16 symbol, so the path dies with DriverError(CUDA_ERROR_NOT_FOUND). That is a build-time absence, not a hardware limit: bf16 runs on the same T4 under PyTorch. Measured there at 2.42 TFLOP/s against fp16's 25.67 and fp32's 4.34 on a 4096-square matmul -- emulated, 11x slower than fp16, and slower than fp32 itself. 'bf16 needs sm_80' is true of tensor cores and false of the dtype.",
+    "session_length": "the binding constraint, and the one that had nothing to do with FLUX. Colab sessions died at ~50 minutes against a 35m50s build plus ~56 GB of downloads. Kaggle's longer batch kernels removed it, and Colab refused a T4 for this entire session besides."
+  },
+  "dtype_benchmark_t4": {
+    "note": "4096-square matmul, TFLOP/s, measured twice on separate Kaggle T4 sessions",
+    "run_1": {
+      "fp32": 3.83,
+      "fp16": 23.07,
+      "bf16": 2.07
+    },
+    "run_2": {
+      "fp32": 4.34,
+      "fp16": 25.67,
+      "bf16": 2.42
+    }
   }
 }
