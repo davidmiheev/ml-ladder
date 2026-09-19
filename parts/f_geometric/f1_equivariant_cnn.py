@@ -454,6 +454,32 @@ def run(exp: Experiment) -> dict[str, float]:
         summary["parameters/p4_over_plain"] = summary["p4/parameters"] / summary["plain/parameters"]
 
     # -- figures --------------------------------------------------------------
+    width = exp["width"]
+    exp.log_figure(
+        "architectures",
+        plotting.plot_architecture(
+            {
+                "Plain CNN": [
+                    ("image", "1 x 28 x 28"),
+                    ("conv 3x3 -> BN -> ReLU", f"{2 * width} channels"),
+                    ("avg pool 2x2"),
+                    ("conv 3x3 x2 -> BN -> ReLU", f"{2 * width} channels"),
+                    ("global average pool", f"{2 * width}-vector"),
+                    ("linear -> logits", "10 classes"),
+                ],
+                "p4 CNN": [
+                    ("image", "1 x 28 x 28"),
+                    ("LIFTING conv Z^2 -> p4", f"one filter, 4 rot90 copies -> {width} x 4"),
+                    ("avg pool 2x2", "spatial only; the fibre is untouched"),
+                    ("GROUP conv p4 -> p4  x2", "rot90 the filter AND roll its fibre"),
+                    ("max over C_4", f"{2 * width} maps, now rotation-invariant"),
+                    ("global average pool -> linear", "same head, same width"),
+                ],
+            },
+            highlight={"p4 CNN": [1, 3, 4]},
+            title="Matched on feature width: the p4 arm replaces three layers, not the shape",
+        ),
+    )
     # The error curves are logarithmic, and 0 degrees is the identity: every arm
     # scores exactly zero there, which a log axis can only render as a hole. The
     # metric is still recorded for all angles; the figure drops the point that
