@@ -268,6 +268,47 @@ LADDER: tuple[Part, ...] = (
             ),
         ),
     ),
+    Part(
+        id="I",
+        title="Speech — recognition & synthesis",
+        package="i_speech",
+        note="the third modality; reuses C's sequence models and H's CTC on a signal that is "
+        "continuous in time, where the interesting problems are the front end and the alignment",
+        lab=Lab(
+            "torchaudio tutorials — pipelines, feature extraction and forced alignment",
+            "https://docs.pytorch.org/audio/stable/tutorials/",
+        ),
+        items=(
+            Item(
+                "I1",
+                "Audio front end from scratch — STFT, mel filterbank and MFCCs, against torchaudio's",
+                "i1_audio_frontend",
+                note="the features are the modelling decision: window length trades time against "
+                "frequency resolution, and the mel scale is a claim about perception, not physics",
+            ),
+            Item(
+                "I2",
+                "Speech recognition with CTC on a small corpus, and the same audio through Whisper",
+                "i2_asr_ctc_whisper",
+                note="H3's CTC decoder on a new signal; the pretrained encoder-decoder is the "
+                "baseline that says what the small model's error is actually made of",
+            ),
+            Item(
+                "I3",
+                "Text-to-speech: a mel-spectrogram predictor plus a vocoder, evaluated without listening",
+                "i3_tts_vocoder",
+                note="synthesis has E's measurement problem in a harder form — the honest metrics "
+                "are mel distance, an ASR round-trip WER, and a speaker/prosody check",
+            ),
+            Item(
+                "I4",
+                "Streaming and latency — chunked inference against full-utterance, with the accuracy it costs",
+                "i4_streaming_latency",
+                note="where speech stops being sequence modelling and becomes a systems problem; "
+                "ties to G2's throughput/memory accounting",
+            ),
+        ),
+    ),
 )
 
 PARTS_DIR_NAME = "parts"

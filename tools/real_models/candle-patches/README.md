@@ -116,10 +116,15 @@ BOS from a broken kernel — and I had guessed the kernel.
    but still fetches `ae.safetensors` from the gated repo.
 
    Also `--dtype`, because `device.bf16_default_to_f32()` picks bf16 on any CUDA
-   device and bf16 kernels need sm_80. That is now the **third** example in this
-   fork with the same sm_75 trap (`gemma4`, `deepseekv2`, `flux`) — it may be
-   worth a shared helper that consults the compute capability rather than just
-   `is_cuda()`.
+   device and *this fork's* bf16 kernels are absent below sm_80. That is now the
+   **third** example in the fork with the same sm_75 trap (`gemma4`,
+   `deepseekv2`, `flux`) — it may be worth a shared helper that consults the
+   compute capability rather than just `is_cuda()`.
+
+   The trap is a property of the build, not of the card: PyTorch runs bf16 on
+   the same T4 (rung G2 measures 0.77x fp32, emulated), so "bf16 needs sm_80" is
+   true of tensor cores and false of the dtype. Here the kernels were compiled
+   with `CUDA_COMPUTE_CAP=75` and simply have no bf16 symbol to call.
 
 ## Verified runs
 

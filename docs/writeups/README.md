@@ -16,6 +16,7 @@ left open.
 | F — Geometric & equivariant nets | [f-geometric.md](f-geometric.md) | [pdf/f-geometric.pdf](pdf/f-geometric.pdf) | complete |
 | G — Scaling & systems | [g-scaling-systems.md](g-scaling-systems.md) | — | stub |
 | H — Computer vision & OCR | [h-computer-vision.md](h-computer-vision.md) | [pdf/h-computer-vision.pdf](pdf/h-computer-vision.pdf) | complete |
+| I — Speech — recognition & synthesis | [i-speech.md](i-speech.md) | — | stub |
 
 Stubs are created by `tools/scaffold.py` from the ladder spec, so a new part
 arrives with its writeup outline already in place.

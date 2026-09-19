@@ -68,9 +68,18 @@ Three things to know before trying it:
   defines `__hmax_nan`/`__hmin_nan` under `#if __CUDA_ARCH__ < 800`, but 12.8
   defines them itself for arch >= 530, so `nvcc` fails on `src/affine.cu`.
   Adding `&& CUDART_VERSION < 12000` to that guard fixes it.
-- **`--bf16` needs sm_80.** On an older card it fails with
+- **candle has no bf16 kernels for sm_75.** On a T4 the bf16 path dies with
   `DriverError(CUDA_ERROR_NOT_FOUND, "named symbol not found")`, which names a
   missing symbol rather than the missing capability. Omit the flag.
+
+  Worth stating precisely, because an earlier version of this note said "bf16
+  needs sm_80" and that is too broad. bf16 *tensor cores* arrived with sm_80;
+  the dtype itself is not gated on it. PyTorch runs bf16 on the same T4 quite
+  happily — `torch.cuda.is_bf16_supported()` returns `True` and rung G2 measures
+  it at **0.77x fp32 throughput**, emulated rather than accelerated. What fails
+  here is specific to this build: kernels compiled with `CUDA_COMPUTE_CAP=75`
+  contain no bf16 symbols at all, so candle gets a link-time absence where torch
+  gets a slow software path.
 - **A CPU-only build does not work on `ignite-perf`.** `qwen3_5`, `gemma4` and
   `unlimited_ocr` call `candle_nn::fused::static_decode`, which is behind
   `#[cfg(feature = "cuda")]`, from call sites that are not: 51 errors in

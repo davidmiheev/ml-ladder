@@ -124,3 +124,20 @@ Folder: `parts/h_computer_vision/`
 - **H6.** OCR as a vision-language model — PaddleOCR-VL and Unlimited-OCR read from source, against the H5 pipeline — `parts/h_computer_vision/h6_ocr_vlm_architectures.py`
   - the architectural answer to H5: a NaViT encoder plus an ERNIE decoder, and a DeepSeek-OCR-lineage dual tower, replace detect-then-recognize with one autoregressive decode
 
+## I. Speech — recognition & synthesis
+
+*the third modality; reuses C's sequence models and H's CTC on a signal that is continuous in time, where the interesting problems are the front end and the alignment*
+
+**Lab:** [torchaudio tutorials — pipelines, feature extraction and forced alignment](https://docs.pytorch.org/audio/stable/tutorials/)
+
+Folder: `parts/i_speech/`
+
+- **I1.** Audio front end from scratch — STFT, mel filterbank and MFCCs, against torchaudio's — `parts/i_speech/i1_audio_frontend.py`
+  - the features are the modelling decision: window length trades time against frequency resolution, and the mel scale is a claim about perception, not physics
+- **I2.** Speech recognition with CTC on a small corpus, and the same audio through Whisper — `parts/i_speech/i2_asr_ctc_whisper.py`
+  - H3's CTC decoder on a new signal; the pretrained encoder-decoder is the baseline that says what the small model's error is actually made of
+- **I3.** Text-to-speech: a mel-spectrogram predictor plus a vocoder, evaluated without listening — `parts/i_speech/i3_tts_vocoder.py`
+  - synthesis has E's measurement problem in a harder form — the honest metrics are mel distance, an ASR round-trip WER, and a speaker/prosody check
+- **I4.** Streaming and latency — chunked inference against full-utterance, with the accuracy it costs — `parts/i_speech/i4_streaming_latency.py`
+  - where speech stops being sequence modelling and becomes a systems problem; ties to G2's throughput/memory accounting
+
