@@ -1,0 +1,1030 @@
+{
+  "part": "G",
+  "title": "Scaling & systems",
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "reference_seed": 0,
+  "swept_rungs": [
+    "G1",
+    "G2",
+    "G3"
+  ],
+  "rungs": {
+    "G1": {
+      "title": "Fit your own scaling-law curve (loss vs. params/data/compute) on a small model family",
+      "metrics": {
+        "D/124928/epochs_of_data": {
+          "reference": 0.12444837595905381,
+          "median": 0.12444837595905381,
+          "min": 0.12444837595905381,
+          "max": 0.12444837595905381,
+          "n_seeds": 3
+        },
+        "D/124928/val_loss": {
+          "reference": 2.702720582485199,
+          "median": 2.702720582485199,
+          "min": 2.6945524364709854,
+          "max": 2.7138941138982773,
+          "n_seeds": 3
+        },
+        "D/249856/epochs_of_data": {
+          "reference": 0.24889675191810762,
+          "median": 0.24889675191810762,
+          "min": 0.24889675191810762,
+          "max": 0.24889675191810762,
+          "n_seeds": 3
+        },
+        "D/249856/val_loss": {
+          "reference": 2.552992343902588,
+          "median": 2.552992343902588,
+          "min": 2.5283508002758026,
+          "max": 2.553749531507492,
+          "n_seeds": 3
+        },
+        "D/499712/epochs_of_data": {
+          "reference": 0.49779350383621523,
+          "median": 0.49779350383621523,
+          "min": 0.49779350383621523,
+          "max": 0.49779350383621523,
+          "n_seeds": 3
+        },
+        "D/499712/val_loss": {
+          "reference": 2.438334196805954,
+          "median": 2.419795721769333,
+          "min": 2.414198577404022,
+          "max": 2.438334196805954,
+          "n_seeds": 3
+        },
+        "D/999424/epochs_of_data": {
+          "reference": 0.9955870076724305,
+          "median": 0.9955870076724305,
+          "min": 0.9955870076724305,
+          "max": 0.9955870076724305,
+          "n_seeds": 3
+        },
+        "D/999424/val_loss": {
+          "reference": 2.274476647377014,
+          "median": 2.2550377547740936,
+          "min": 2.2517375349998474,
+          "max": 2.274476647377014,
+          "n_seeds": 3
+        },
+        "N/128/parameters": {
+          "reference": 396800.0,
+          "median": 396800.0,
+          "min": 396800.0,
+          "max": 396800.0,
+          "n_seeds": 3
+        },
+        "N/128/val_loss": {
+          "reference": 2.0124900937080383,
+          "median": 2.0037493854761124,
+          "min": 1.9971913173794746,
+          "max": 2.0124900937080383,
+          "n_seeds": 3
+        },
+        "N/32/parameters": {
+          "reference": 25472.0,
+          "median": 25472.0,
+          "min": 25472.0,
+          "max": 25472.0,
+          "n_seeds": 3
+        },
+        "N/32/val_loss": {
+          "reference": 2.4353435933589935,
+          "median": 2.4353435933589935,
+          "min": 2.434941977262497,
+          "max": 2.43985353410244,
+          "n_seeds": 3
+        },
+        "N/48/parameters": {
+          "reference": 56640.0,
+          "median": 56640.0,
+          "min": 56640.0,
+          "max": 56640.0,
+          "n_seeds": 3
+        },
+        "N/48/val_loss": {
+          "reference": 2.3470816910266876,
+          "median": 2.3470816910266876,
+          "min": 2.3412317484617233,
+          "max": 2.3574014455080032,
+          "n_seeds": 3
+        },
+        "N/64/parameters": {
+          "reference": 100096.0,
+          "median": 100096.0,
+          "min": 100096.0,
+          "max": 100096.0,
+          "n_seeds": 3
+        },
+        "N/64/val_loss": {
+          "reference": 2.274476647377014,
+          "median": 2.2550377547740936,
+          "min": 2.2517375349998474,
+          "max": 2.274476647377014,
+          "n_seeds": 3
+        },
+        "N/96/parameters": {
+          "reference": 223872.0,
+          "median": 223872.0,
+          "min": 223872.0,
+          "max": 223872.0,
+          "n_seeds": 3
+        },
+        "N/96/val_loss": {
+          "reference": 2.094874769449234,
+          "median": 2.094874769449234,
+          "min": 2.088847890496254,
+          "max": 2.0979340076446533,
+          "n_seeds": 3
+        },
+        "corpus/tokens": {
+          "reference": 1115394.0,
+          "median": 1115394.0,
+          "min": 1115394.0,
+          "max": 1115394.0,
+          "n_seeds": 3
+        },
+        "corpus/vocab": {
+          "reference": 65.0,
+          "median": 65.0,
+          "min": 65.0,
+          "max": 65.0,
+          "n_seeds": 3
+        },
+        "flops/attention_share": {
+          "reference": 0.14285714285714285,
+          "median": 0.14285714285714285,
+          "min": 0.14285714285714285,
+          "max": 0.14285714285714285,
+          "n_seeds": 3
+        },
+        "flops/compute_over_rule": {
+          "reference": 1.208984375,
+          "median": 1.208984375,
+          "min": 1.208984375,
+          "max": 1.208984375,
+          "n_seeds": 3
+        },
+        "isoflop/2.7e+12/16/tokens": {
+          "reference": 39892992.0,
+          "median": 39892992.0,
+          "min": 39892992.0,
+          "max": 39892992.0,
+          "n_seeds": 3
+        },
+        "isoflop/2.7e+12/16/val_loss": {
+          "reference": 2.053419254720211,
+          "median": 2.0262700468301773,
+          "min": 2.002940684556961,
+          "max": 2.053419254720211,
+          "n_seeds": 3
+        },
+        "isoflop/2.7e+12/24/tokens": {
+          "reference": 20903936.0,
+          "median": 20903936.0,
+          "min": 20903936.0,
+          "max": 20903936.0,
+          "n_seeds": 3
+        },
+        "isoflop/2.7e+12/24/val_loss": {
+          "reference": 1.9604875519871712,
+          "median": 1.9358950480818748,
+          "min": 1.9189640060067177,
+          "max": 1.9604875519871712,
+          "n_seeds": 3
+        },
+        "isoflop/2.7e+12/32/tokens": {
+          "reference": 12912640.0,
+          "median": 12912640.0,
+          "min": 12912640.0,
+          "max": 12912640.0,
+          "n_seeds": 3
+        },
+        "isoflop/2.7e+12/32/val_loss": {
+          "reference": 1.918717809021473,
+          "median": 1.9010034650564194,
+          "min": 1.8963660448789597,
+          "max": 1.918717809021473,
+          "n_seeds": 3
+        },
+        "isoflop/2.7e+12/48/tokens": {
+          "reference": 6365184.0,
+          "median": 6365184.0,
+          "min": 6365184.0,
+          "max": 6365184.0,
+          "n_seeds": 3
+        },
+        "isoflop/2.7e+12/48/val_loss": {
+          "reference": 1.8766031935811043,
+          "median": 1.8766031935811043,
+          "min": 1.8638631999492645,
+          "max": 1.8887011781334877,
+          "n_seeds": 3
+        },
+        "isoflop/2.7e+12/64/tokens": {
+          "reference": 3786752.0,
+          "median": 3786752.0,
+          "min": 3786752.0,
+          "max": 3786752.0,
+          "n_seeds": 3
+        },
+        "isoflop/2.7e+12/64/val_loss": {
+          "reference": 1.8698371574282646,
+          "median": 1.8698371574282646,
+          "min": 1.864247277379036,
+          "max": 1.8760592490434647,
+          "n_seeds": 3
+        },
+        "isoflop/2.7e+12/96/tokens": {
+          "reference": 1785856.0,
+          "median": 1785856.0,
+          "min": 1785856.0,
+          "max": 1785856.0,
+          "n_seeds": 3
+        },
+        "isoflop/2.7e+12/96/val_loss": {
+          "reference": 1.9266536980867386,
+          "median": 1.9160497710108757,
+          "min": 1.9131738245487213,
+          "max": 1.9266536980867386,
+          "n_seeds": 3
+        },
+        "isoflop/2.7e+12/best_loss": {
+          "reference": 1.8698371574282646,
+          "median": 1.864247277379036,
+          "min": 1.8638631999492645,
+          "max": 1.8698371574282646,
+          "n_seeds": 3
+        },
+        "isoflop/2.7e+12/interior_minimum": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "isoflop/2.7e+12/optimal_epochs": {
+          "reference": 3.772213887676893,
+          "median": 3.772213887676893,
+          "min": 3.772213887676893,
+          "max": 6.340746761979331,
+          "n_seeds": 3
+        },
+        "isoflop/2.7e+12/optimal_parameters": {
+          "reference": 100096.0,
+          "median": 100096.0,
+          "min": 56640.0,
+          "max": 100096.0,
+          "n_seeds": 3
+        },
+        "isoflop/2.7e+12/optimal_tokens": {
+          "reference": 3786752.0,
+          "median": 3786752.0,
+          "min": 3786752.0,
+          "max": 6365184.0,
+          "n_seeds": 3
+        },
+        "isoflop/2.7e+12/optimal_width": {
+          "reference": 64.0,
+          "median": 64.0,
+          "min": 48.0,
+          "max": 64.0,
+          "n_seeds": 3
+        },
+        "isoflop/2.7e+12/tokens_per_parameter": {
+          "reference": 37.831202046035806,
+          "median": 37.831202046035806,
+          "min": 37.831202046035806,
+          "max": 112.37966101694916,
+          "n_seeds": 3
+        },
+        "isoflop/3e+11/16/tokens": {
+          "reference": 4431872.0,
+          "median": 4431872.0,
+          "min": 4431872.0,
+          "max": 4431872.0,
+          "n_seeds": 3
+        },
+        "isoflop/3e+11/16/val_loss": {
+          "reference": 2.299653097987175,
+          "median": 2.299653097987175,
+          "min": 2.2919622659683228,
+          "max": 2.303833618760109,
+          "n_seeds": 3
+        },
+        "isoflop/3e+11/24/tokens": {
+          "reference": 2322432.0,
+          "median": 2322432.0,
+          "min": 2322432.0,
+          "max": 2322432.0,
+          "n_seeds": 3
+        },
+        "isoflop/3e+11/24/val_loss": {
+          "reference": 2.3416469991207123,
+          "median": 2.3208464831113815,
+          "min": 2.311715006828308,
+          "max": 2.3416469991207123,
+          "n_seeds": 3
+        },
+        "isoflop/3e+11/32/tokens": {
+          "reference": 1435648.0,
+          "median": 1435648.0,
+          "min": 1435648.0,
+          "max": 1435648.0,
+          "n_seeds": 3
+        },
+        "isoflop/3e+11/32/val_loss": {
+          "reference": 2.360868975520134,
+          "median": 2.3723766654729843,
+          "min": 2.360868975520134,
+          "max": 2.378895118832588,
+          "n_seeds": 3
+        },
+        "isoflop/3e+11/48/tokens": {
+          "reference": 706560.0,
+          "median": 706560.0,
+          "min": 706560.0,
+          "max": 706560.0,
+          "n_seeds": 3
+        },
+        "isoflop/3e+11/48/val_loss": {
+          "reference": 2.414883106946945,
+          "median": 2.4162016808986664,
+          "min": 2.414883106946945,
+          "max": 2.422070622444153,
+          "n_seeds": 3
+        },
+        "isoflop/3e+11/64/tokens": {
+          "reference": 419840.0,
+          "median": 419840.0,
+          "min": 419840.0,
+          "max": 419840.0,
+          "n_seeds": 3
+        },
+        "isoflop/3e+11/64/val_loss": {
+          "reference": 2.466633304953575,
+          "median": 2.454565167427063,
+          "min": 2.446894809603691,
+          "max": 2.466633304953575,
+          "n_seeds": 3
+        },
+        "isoflop/3e+11/96/tokens": {
+          "reference": 198656.0,
+          "median": 198656.0,
+          "min": 198656.0,
+          "max": 198656.0,
+          "n_seeds": 3
+        },
+        "isoflop/3e+11/96/val_loss": {
+          "reference": 2.520088627934456,
+          "median": 2.5054782181978226,
+          "min": 2.498559907078743,
+          "max": 2.520088627934456,
+          "n_seeds": 3
+        },
+        "isoflop/3e+11/best_loss": {
+          "reference": 2.299653097987175,
+          "median": 2.299653097987175,
+          "min": 2.2919622659683228,
+          "max": 2.303833618760109,
+          "n_seeds": 3
+        },
+        "isoflop/3e+11/interior_minimum": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "isoflop/3e+11/optimal_epochs": {
+          "reference": 4.414857140580204,
+          "median": 4.414857140580204,
+          "min": 4.414857140580204,
+          "max": 4.414857140580204,
+          "n_seeds": 3
+        },
+        "isoflop/3e+11/optimal_parameters": {
+          "reference": 6592.0,
+          "median": 6592.0,
+          "min": 6592.0,
+          "max": 6592.0,
+          "n_seeds": 3
+        },
+        "isoflop/3e+11/optimal_tokens": {
+          "reference": 4431872.0,
+          "median": 4431872.0,
+          "min": 4431872.0,
+          "max": 4431872.0,
+          "n_seeds": 3
+        },
+        "isoflop/3e+11/optimal_width": {
+          "reference": 16.0,
+          "median": 16.0,
+          "min": 16.0,
+          "max": 16.0,
+          "n_seeds": 3
+        },
+        "isoflop/3e+11/tokens_per_parameter": {
+          "reference": 672.3106796116505,
+          "median": 672.3106796116505,
+          "min": 672.3106796116505,
+          "max": 672.3106796116505,
+          "n_seeds": 3
+        },
+        "isoflop/9e+11/16/tokens": {
+          "reference": 13297664.0,
+          "median": 13297664.0,
+          "min": 13297664.0,
+          "max": 13297664.0,
+          "n_seeds": 3
+        },
+        "isoflop/9e+11/16/val_loss": {
+          "reference": 2.1369266510009766,
+          "median": 2.1148671358823776,
+          "min": 2.109407916665077,
+          "max": 2.1369266510009766,
+          "n_seeds": 3
+        },
+        "isoflop/9e+11/24/tokens": {
+          "reference": 6967296.0,
+          "median": 6967296.0,
+          "min": 6967296.0,
+          "max": 6967296.0,
+          "n_seeds": 3
+        },
+        "isoflop/9e+11/24/val_loss": {
+          "reference": 2.1183032989501953,
+          "median": 2.0645262002944946,
+          "min": 2.051464557647705,
+          "max": 2.1183032989501953,
+          "n_seeds": 3
+        },
+        "isoflop/9e+11/32/tokens": {
+          "reference": 4304896.0,
+          "median": 4304896.0,
+          "min": 4304896.0,
+          "max": 4304896.0,
+          "n_seeds": 3
+        },
+        "isoflop/9e+11/32/val_loss": {
+          "reference": 2.1138492822647095,
+          "median": 2.078872710466385,
+          "min": 2.0750054866075516,
+          "max": 2.1138492822647095,
+          "n_seeds": 3
+        },
+        "isoflop/9e+11/48/tokens": {
+          "reference": 2121728.0,
+          "median": 2121728.0,
+          "min": 2121728.0,
+          "max": 2121728.0,
+          "n_seeds": 3
+        },
+        "isoflop/9e+11/48/val_loss": {
+          "reference": 2.1754975467920303,
+          "median": 2.1699251979589462,
+          "min": 2.144050732254982,
+          "max": 2.1754975467920303,
+          "n_seeds": 3
+        },
+        "isoflop/9e+11/64/tokens": {
+          "reference": 1261568.0,
+          "median": 1261568.0,
+          "min": 1261568.0,
+          "max": 1261568.0,
+          "n_seeds": 3
+        },
+        "isoflop/9e+11/64/val_loss": {
+          "reference": 2.1938677430152893,
+          "median": 2.1785334795713425,
+          "min": 2.1773590445518494,
+          "max": 2.1938677430152893,
+          "n_seeds": 3
+        },
+        "isoflop/9e+11/96/tokens": {
+          "reference": 595968.0,
+          "median": 595968.0,
+          "min": 595968.0,
+          "max": 595968.0,
+          "n_seeds": 3
+        },
+        "isoflop/9e+11/96/val_loss": {
+          "reference": 2.267437130212784,
+          "median": 2.265932932496071,
+          "min": 2.2456362694501877,
+          "max": 2.267437130212784,
+          "n_seeds": 3
+        },
+        "isoflop/9e+11/best_loss": {
+          "reference": 2.1138492822647095,
+          "median": 2.0645262002944946,
+          "min": 2.051464557647705,
+          "max": 2.1138492822647095,
+          "n_seeds": 3
+        },
+        "isoflop/9e+11/interior_minimum": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "isoflop/9e+11/optimal_epochs": {
+          "reference": 4.288368627310346,
+          "median": 6.940547131355755,
+          "min": 4.288368627310346,
+          "max": 6.940547131355755,
+          "n_seeds": 3
+        },
+        "isoflop/9e+11/optimal_parameters": {
+          "reference": 25472.0,
+          "median": 14496.0,
+          "min": 14496.0,
+          "max": 25472.0,
+          "n_seeds": 3
+        },
+        "isoflop/9e+11/optimal_tokens": {
+          "reference": 4304896.0,
+          "median": 6967296.0,
+          "min": 4304896.0,
+          "max": 6967296.0,
+          "n_seeds": 3
+        },
+        "isoflop/9e+11/optimal_width": {
+          "reference": 32.0,
+          "median": 24.0,
+          "min": 24.0,
+          "max": 32.0,
+          "n_seeds": 3
+        },
+        "isoflop/9e+11/tokens_per_parameter": {
+          "reference": 169.00502512562815,
+          "median": 480.63576158940396,
+          "min": 169.00502512562815,
+          "max": 480.63576158940396,
+          "n_seeds": 3
+        },
+        "isoflop/exponent_is_trustworthy": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "isoflop/exponents_sum": {
+          "reference": 1.1664531476357112,
+          "median": 1.1664531476357096,
+          "min": 1.1436608502467784,
+          "max": 1.1664531476357112,
+          "n_seeds": 3
+        },
+        "isoflop/interior_minima": {
+          "reference": 2.0,
+          "median": 2.0,
+          "min": 2.0,
+          "max": 2.0,
+          "n_seeds": 3
+        },
+        "isoflop/max_epochs_of_data": {
+          "reference": 39.73983467715425,
+          "median": 39.73983467715425,
+          "min": 39.73983467715425,
+          "max": 39.73983467715425,
+          "n_seeds": 3
+        },
+        "isoflop/params_exponent": {
+          "reference": 1.2380495653173107,
+          "median": 1.2380495653173103,
+          "min": 0.9788979601647555,
+          "max": 1.2380495653173107,
+          "n_seeds": 3
+        },
+        "isoflop/tokens_exponent": {
+          "reference": -0.0715964176815995,
+          "median": -0.0715964176815995,
+          "min": -0.07159641768160058,
+          "max": 0.164762890082023,
+          "n_seeds": 3
+        },
+        "isoflop/tokens_per_parameter": {
+          "reference": 37.831202046035806,
+          "median": 37.831202046035806,
+          "min": 37.831202046035806,
+          "max": 112.37966101694916,
+          "n_seeds": 3
+        },
+        "law/D/exponent": {
+          "reference": 0.08129265750524506,
+          "median": 0.08373345208599607,
+          "min": 0.08129265750524506,
+          "max": 0.08857090478227649,
+          "n_seeds": 3
+        },
+        "law/D/exponent_high": {
+          "reference": 0.11731439759509854,
+          "median": 0.11731439759509854,
+          "min": 0.11201627973596269,
+          "max": 0.14933986765577292,
+          "n_seeds": 3
+        },
+        "law/D/exponent_low": {
+          "reference": 0.08129265750524506,
+          "median": 0.08373345208599607,
+          "min": 0.08129265750524506,
+          "max": 0.08857090478227649,
+          "n_seeds": 3
+        },
+        "law/D/irreducible": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "law/D/irreducible_high": {
+          "reference": 0.7600400285583391,
+          "median": 0.7600400285583391,
+          "min": 0.5166016389821705,
+          "max": 1.0797052949174004,
+          "n_seeds": 3
+        },
+        "law/D/irreducible_low": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "law/D/r2": {
+          "reference": 0.994141746345594,
+          "median": 0.9952533586424734,
+          "min": 0.994141746345594,
+          "max": 0.9969251913591141,
+          "n_seeds": 3
+        },
+        "law/N/exponent": {
+          "reference": 0.07210268263972662,
+          "median": 0.07392522224463635,
+          "min": 0.07210268263972662,
+          "max": 0.07443280761257441,
+          "n_seeds": 3
+        },
+        "law/N/exponent_high": {
+          "reference": 0.1136618797676817,
+          "median": 0.10995055104114494,
+          "min": 0.10475945436946511,
+          "max": 0.1136618797676817,
+          "n_seeds": 3
+        },
+        "law/N/exponent_low": {
+          "reference": 0.07210268263972662,
+          "median": 0.07392522224463635,
+          "min": 0.07210268263972662,
+          "max": 0.07443280761257441,
+          "n_seeds": 3
+        },
+        "law/N/irreducible": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "law/N/irreducible_high": {
+          "reference": 0.8079971192019026,
+          "median": 0.7122064325647582,
+          "min": 0.6495864235873061,
+          "max": 0.8079971192019026,
+          "n_seeds": 3
+        },
+        "law/N/irreducible_low": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "law/N/r2": {
+          "reference": 0.973975261096601,
+          "median": 0.9782061809922875,
+          "min": 0.973975261096601,
+          "max": 0.9854724393172554,
+          "n_seeds": 3
+        },
+        "shape/48x8/parameters": {
+          "reference": 226272.0,
+          "median": 226272.0,
+          "min": 226272.0,
+          "max": 226272.0,
+          "n_seeds": 3
+        },
+        "shape/48x8/val_loss": {
+          "reference": 2.2210905998945236,
+          "median": 2.2210905998945236,
+          "min": 2.1996853798627853,
+          "max": 2.2269514203071594,
+          "n_seeds": 3
+        },
+        "shape/96x2/parameters": {
+          "reference": 223872.0,
+          "median": 223872.0,
+          "min": 223872.0,
+          "max": 223872.0,
+          "n_seeds": 3
+        },
+        "shape/96x2/val_loss": {
+          "reference": 2.094874769449234,
+          "median": 2.094874769449234,
+          "min": 2.088847890496254,
+          "max": 2.0979340076446533,
+          "n_seeds": 3
+        },
+        "shape/gap_in_law_terms": {
+          "reference": 1.1939438178894068,
+          "median": 1.178912330567202,
+          "min": 1.0166148587731196,
+          "max": 1.1939438178894068,
+          "n_seeds": 3
+        },
+        "shape/loss_gap": {
+          "reference": 0.1262158304452896,
+          "median": 0.1262158304452896,
+          "min": 0.11083748936653137,
+          "max": 0.1290174126625061,
+          "n_seeds": 3
+        },
+        "shape/parameter_ratio": {
+          "reference": 0.9893932965634281,
+          "median": 0.9893932965634281,
+          "min": 0.9893932965634281,
+          "max": 0.9893932965634281,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 852.786
+    },
+    "G2": {
+      "title": "Mixed-precision + gradient-accumulation training, profiled for throughput and memory",
+      "metrics": {
+        "accumulation/mean_vs_sum": {
+          "reference": 4.0,
+          "median": 4.0,
+          "min": 4.0,
+          "max": 4.0,
+          "n_seeds": 3
+        },
+        "format/bf16/eps": {
+          "reference": 0.0078125,
+          "median": 0.0078125,
+          "min": 0.0078125,
+          "max": 0.0078125,
+          "n_seeds": 3
+        },
+        "format/bf16/smallest_normal": {
+          "reference": 1.1754943508222875e-38,
+          "median": 1.1754943508222875e-38,
+          "min": 1.1754943508222875e-38,
+          "max": 1.1754943508222875e-38,
+          "n_seeds": 3
+        },
+        "format/bf16_eps_over_fp16": {
+          "reference": 8.0,
+          "median": 8.0,
+          "min": 8.0,
+          "max": 8.0,
+          "n_seeds": 3
+        },
+        "format/bf16_range_over_fp16": {
+          "reference": 1.925929944387236e-34,
+          "median": 1.925929944387236e-34,
+          "min": 1.925929944387236e-34,
+          "max": 1.925929944387236e-34,
+          "n_seeds": 3
+        },
+        "format/fp16/eps": {
+          "reference": 0.0009765625,
+          "median": 0.0009765625,
+          "min": 0.0009765625,
+          "max": 0.0009765625,
+          "n_seeds": 3
+        },
+        "format/fp16/smallest_normal": {
+          "reference": 6.103515625e-05,
+          "median": 6.103515625e-05,
+          "min": 6.103515625e-05,
+          "max": 6.103515625e-05,
+          "n_seeds": 3
+        },
+        "format/fp32/eps": {
+          "reference": 1.1920928955078125e-07,
+          "median": 1.1920928955078125e-07,
+          "min": 1.1920928955078125e-07,
+          "max": 1.1920928955078125e-07,
+          "n_seeds": 3
+        },
+        "format/fp32/smallest_normal": {
+          "reference": 1.1754943508222875e-38,
+          "median": 1.1754943508222875e-38,
+          "min": 1.1754943508222875e-38,
+          "max": 1.1754943508222875e-38,
+          "n_seeds": 3
+        },
+        "hardware/bf16_supported": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "hardware/capability_major": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "hardware/capability_minor": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "hardware/cuda": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "hardware/fp16_tensor_cores": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "skipped/needs_gpu": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 1.449
+    },
+    "G3": {
+      "title": "Rust/Candle port of one transformer-block forward pass, as a comprehension exercise for [[ignite-catalog]]",
+      "metrics": {
+        "agreement/batches_checked": {
+          "reference": 2.0,
+          "median": 2.0,
+          "min": 2.0,
+          "max": 2.0,
+          "n_seeds": 3
+        },
+        "agreement/relative": {
+          "reference": 8.906415871479112e-08,
+          "median": 8.364018810880225e-08,
+          "min": 8.20904233478359e-08,
+          "max": 8.906415871479112e-08,
+          "n_seeds": 3
+        },
+        "batch1/exact/max_abs": {
+          "reference": 4.76837158203125e-07,
+          "median": 4.76837158203125e-07,
+          "min": 4.76837158203125e-07,
+          "max": 4.76837158203125e-07,
+          "n_seeds": 3
+        },
+        "batch1/exact/relative": {
+          "reference": 8.906415871479112e-08,
+          "median": 8.364018810880225e-08,
+          "min": 8.061263656600204e-08,
+          "max": 8.906415871479112e-08,
+          "n_seeds": 3
+        },
+        "batch1/tanh/max_abs": {
+          "reference": 0.00014221668243408203,
+          "median": 0.00014221668243408203,
+          "min": 0.00013014674186706543,
+          "max": 0.00014254450798034668,
+          "n_seeds": 3
+        },
+        "batch1/tanh/relative": {
+          "reference": 3.584233854780905e-05,
+          "median": 3.599182309699245e-05,
+          "min": 3.584233854780905e-05,
+          "max": 3.721018947544508e-05,
+          "n_seeds": 3
+        },
+        "batch4/exact/max_abs": {
+          "reference": 4.76837158203125e-07,
+          "median": 4.76837158203125e-07,
+          "min": 4.76837158203125e-07,
+          "max": 4.76837158203125e-07,
+          "n_seeds": 3
+        },
+        "batch4/exact/relative": {
+          "reference": 8.123356565192807e-08,
+          "median": 8.20904233478359e-08,
+          "min": 8.123356565192807e-08,
+          "max": 8.285999086865559e-08,
+          "n_seeds": 3
+        },
+        "batch4/tanh/max_abs": {
+          "reference": 0.00014334917068481445,
+          "median": 0.00014334917068481445,
+          "min": 0.00014019012451171875,
+          "max": 0.00014835596084594727,
+          "n_seeds": 3
+        },
+        "batch4/tanh/relative": {
+          "reference": 3.925554847228341e-05,
+          "median": 3.925554847228341e-05,
+          "min": 3.859317803289741e-05,
+          "max": 3.966992153436877e-05,
+          "n_seeds": 3
+        },
+        "block/parameters": {
+          "reference": 49984.0,
+          "median": 49984.0,
+          "min": 49984.0,
+          "max": 49984.0,
+          "n_seeds": 3
+        },
+        "build/ok": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "gelu/tanh_over_exact": {
+          "reference": 440.7558443120862,
+          "median": 470.1300889796766,
+          "min": 440.7558443120862,
+          "max": 474.29259105401184,
+          "n_seeds": 3
+        },
+        "gelu/tanh_relative": {
+          "reference": 3.925554847228341e-05,
+          "median": 3.925554847228341e-05,
+          "min": 3.859317803289741e-05,
+          "max": 3.966992153436877e-05,
+          "n_seeds": 3
+        },
+        "speed/rust_process_ms": {
+          "reference": 6.985602378845215,
+          "median": 6.833229064941406,
+          "min": 6.7969465255737305,
+          "max": 6.985602378845215,
+          "n_seeds": 3
+        },
+        "speed/thread_oversubscription": {
+          "reference": 1.1479641915303744,
+          "median": 1.1479641915303744,
+          "min": 1.1020683756836442,
+          "max": 1.1586235594650516,
+          "n_seeds": 3
+        },
+        "speed/torch_1_threads_ms": {
+          "reference": 0.46288013458251953,
+          "median": 0.4669761657714844,
+          "min": 0.46288013458251953,
+          "max": 0.4779624938964844,
+          "n_seeds": 3
+        },
+        "speed/torch_2_threads_ms": {
+          "reference": 0.4235649108886719,
+          "median": 0.4256582260131836,
+          "min": 0.4235649108886719,
+          "max": 0.4320859909057617,
+          "n_seeds": 3
+        },
+        "speed/torch_4_threads_ms": {
+          "reference": 0.40321826934814453,
+          "median": 0.41252613067626953,
+          "min": 0.40321826934814453,
+          "max": 0.42372703552246094,
+          "n_seeds": 3
+        },
+        "speed/torch_best_ms": {
+          "reference": 0.40321826934814453,
+          "median": 0.41252613067626953,
+          "min": 0.40321826934814453,
+          "max": 0.42372703552246094,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 1.389
+    }
+  },
+  "figures": 9
+}
