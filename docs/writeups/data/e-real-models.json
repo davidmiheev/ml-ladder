@@ -1,7 +1,7 @@
 {
   "what": "Attempting to run FLUX.1-schnell through the candle fork, which E5 prices from its config",
   "date": "2026-09-19",
-  "status": "not completed: two blockers fixed, the run itself was cut off when the GPU session was reclaimed",
+  "status": "still not completed after two attempts; both blockers are fixed and the build succeeds, but the run has not produced an image",
   "blockers_fixed": [
     {
       "blocker": "black-forest-labs/FLUX.1-schnell is a gated repo; the example hardcodes it and dies with a 401 before doing anything",
@@ -14,5 +14,14 @@
     }
   ],
   "also_hit": "the T4's 113 GB disk filled at 82 GB with the T5-XXL encoder, the CLIP encoder, the FLUX GGUF and three LLM caches resident at once; the run needs the LLM caches cleared first",
-  "builds": "yes, 34s incrementally with both fixes"
+  "builds": "yes, 34s incrementally with both fixes",
+  "why_it_keeps_failing": {
+    "budget": "a from-scratch candle build (35m50s when it competes with the download for I/O) plus ~56 GB of weights, against Colab sessions that last roughly 50 minutes. Same structural problem as Qwen3.6-27B.",
+    "disk": "113 GB filled to 105 GB with the build target and all five components resident"
+  },
+  "the_download_is_mostly_one_file": {
+    "finding": "google/t5-v1_1-xxl at refs/pr/2 ships model.safetensors in float32 -- an 11B encoder at 4 bytes a parameter is ~44 GB, the bulk of the 56 GB. The FLUX transformer itself is 12.64 GB quantized and the autoencoder 0.34 GB.",
+    "implication": "a --t5-repo flag pointing at an f16 mirror would cut the download roughly in half and very likely bring the whole run inside one session. The example converts to the run dtype at load anyway, so the f32 bytes are downloaded only to be halved in memory.",
+    "status": "not implemented"
+  }
 }

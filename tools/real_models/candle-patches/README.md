@@ -134,3 +134,17 @@ BOS from a broken kernel — and I had guessed the kernel.
 `Qwen3.6-8B-A1.6B` (a community REAP-pruned derivative) produces token soup
 through the same binary and flags that Qwen3.5-4B answers correctly with — the
 derivative, not the example.
+
+### FLUX still has not produced an image
+
+Both blockers above are fixed and the example builds, but the run has not
+completed in two attempts: a from-scratch build (35m50s when it shares I/O with
+the download) plus ~56 GB of weights does not fit a ~50-minute session.
+
+Most of that 56 GB is one file. `google/t5-v1_1-xxl` at `refs/pr/2` ships
+`model.safetensors` in **float32** — an 11B encoder at four bytes a parameter is
+~44 GB — while the quantized FLUX transformer is 12.64 GB and the autoencoder
+0.34 GB. The example converts to the run dtype at load, so those f32 bytes are
+downloaded only to be halved in memory. A `--t5-repo` flag pointing at an f16
+mirror would roughly halve the download and probably bring the run inside one
+session. Not implemented.
