@@ -22,9 +22,13 @@ exponent**, so it cannot underflow where fp32 would not and needs no scaler at
 all; it pays with three fewer mantissa bits. fp16 keeps precision and loses
 range, which is exactly the wrong trade for gradients — hence `GradScaler`
 existing for one of the two and not the other. Whether you get the choice is a
-property of the silicon: bf16 arrived with Ampere (sm_80), so on a Turing T4
-(sm_75) there are fp16 tensor cores and no bf16 path at all, and this rung
-reports which one it was actually able to run.
+property of the silicon, and asking the library is not the same as asking the
+silicon. bf16 tensor cores arrived with Ampere (sm_80), but on a Turing T4
+``torch.cuda.is_bf16_supported()`` returns **True** — the dtype works, it is
+simply emulated. Measured on that T4, fp16 runs at 2.59x fp32 and bf16 at
+**0.78x**: slower than the format it was meant to replace. Only the throughput
+number distinguishes "supported" from "accelerated", which is why this rung
+measures the arm instead of trusting the capability flag.
 
 **Gradient accumulation** buys effective batch size with time instead of
 memory: run $k$ micro-batches, sum their gradients, step once. Its failure mode
@@ -63,7 +67,8 @@ def device_report() -> dict[str, object]:
         "name": torch.cuda.get_device_name(index),
         "capability": (major, minor),
         "cuda": True,
-        # bf16 needs sm_80; torch's own check agrees but is worth cross-reading.
+        # Worth cross-reading against the capability: torch answers True on
+        # sm_75, where bf16 is emulated rather than accelerated.
         "bf16_supported": bool(torch.cuda.is_bf16_supported()),
         "fp16_tensor_cores": major >= 7,
     }
@@ -82,7 +87,7 @@ def float_ranges() -> dict[str, dict[str, float]]:
     }
 
 
-def build_model(exp: Experiment, vocab_size: int, device, *, width: int | None = None):
+def build_model(exp: Experiment, vocab_size: int, device, *, width: int | None = None, heads: int | None = None):
     torch = vision.require_torch()
     from parts.c_sequence_attention.c3_transformer_from_scratch import make_transformer
 
@@ -91,7 +96,7 @@ def build_model(exp: Experiment, vocab_size: int, device, *, width: int | None =
     model = CharTransformer(
         vocab_size,
         width=width if width is not None else exp["width"],
-        heads=exp["heads"],
+        heads=heads if heads is not None else exp["heads"],
         depth=exp["depth"],
         block_size=exp["block_size"],
         positional="learned",
@@ -110,6 +115,7 @@ def train_arm(
     micro_batch: int | None = None,
     use_scaler: bool = True,
     width: int | None = None,
+    heads: int | None = None,
     steps: int | None = None,
 ) -> dict[str, float]:
     """One training configuration, timed and profiled.
@@ -124,7 +130,7 @@ def train_arm(
     completely wrong number.
     """
     torch = vision.require_torch()
-    model, _ = build_model(exp, vocab_size, device, width=width)
+    model, _ = build_model(exp, vocab_size, device, width=width, heads=heads)
     optimizer = torch.optim.AdamW(model.parameters(), lr=exp["lr"])
     rng = np.random.default_rng(exp.seed)
     measured_steps = steps if steps is not None else exp["steps"]
@@ -247,6 +253,7 @@ def gradient_norm(*, exp: Experiment, ids, vocab_size: int, device, accumulate: 
         # AMP's speedup is a claim about matrix shapes, so the widths are swept.
         "amp_widths": [64, 128, 256, 512],
         "amp_steps": 20,
+        "amp_heads": 4,
     },
     description="Mixed precision and gradient accumulation, profiled for throughput, memory and correctness.",
 )
@@ -335,9 +342,14 @@ def run(exp: Experiment) -> dict[str, float]:
             if precision in throughput:
                 summary[f"precision/{precision}/speedup"] = throughput[precision] / throughput["fp32"]
                 summary[f"precision/{precision}/memory_ratio"] = memory[precision] / max(memory["fp32"], 1e-9)
+                # "Supported" and "accelerated" are different questions, and
+                # only this ratio answers the second one.
+                accelerated = summary[f"precision/{precision}/speedup"] > 1.0
+                summary[f"precision/{precision}/accelerated"] = float(accelerated)
                 print(
                     f"[g2] {precision} is {summary[f'precision/{precision}/speedup']:.2f}x fp32's throughput "
                     f"at {summary[f'precision/{precision}/memory_ratio']:.2f}x its peak memory"
+                    + ("" if accelerated else "  <- supported by the library, not accelerated by the hardware")
                 )
 
     # -- does fp16 actually need the scaler here? -----------------------------
@@ -354,7 +366,16 @@ def run(exp: Experiment) -> dict[str, float]:
     # -- AMP's speedup is a claim about shapes --------------------------------
     speedups: dict[str, list[float]] = {"fp16 speedup": []}
     for width in exp["amp_widths"]:
-        shared = {"exp": exp, "ids": ids, "vocab_size": vocab_size, "device": device, "width": width}
+        # Four heads, not the rung's default six: the swept widths have to be
+        # divisible by the head count, and 64 is not divisible by 6.
+        shared = {
+            "exp": exp,
+            "ids": ids,
+            "vocab_size": vocab_size,
+            "device": device,
+            "width": width,
+            "heads": exp["amp_heads"],
+        }
         reference = train_arm(**shared, precision="fp32", steps=exp["amp_steps"])
         mixed = train_arm(**shared, precision="fp16", steps=exp["amp_steps"])
         ratio = mixed["tokens_per_second"] / max(reference["tokens_per_second"], 1e-9)
