@@ -190,6 +190,56 @@ def plot_scatter(
     return fig
 
 
+def plot_fit(
+    x: ArrayLike,
+    y: ArrayLike,
+    *,
+    curve: tuple[ArrayLike, ArrayLike] | None = None,
+    title: str = "",
+    xlabel: str = "x",
+    ylabel: str = "y",
+    logx: bool = False,
+    logy: bool = False,
+    points_label: str = "measured",
+    curve_label: str = "fit",
+    annotate: Sequence[str] | None = None,
+) -> Figure:
+    """Measured points with a fitted curve through them.
+
+    The figure a scaling law needs and ``plot_curves`` cannot give: the points
+    are data and the line is a model of them, so they are drawn differently on
+    purpose. Log axes are the default reading for a power law, where the fit is
+    a straight line and a bad fit is obvious by eye rather than only in $R^2$.
+
+    ``annotate`` labels individual points (a width, a budget) so the reader can
+    tell which run sits where without counting along the axis.
+    """
+    use_house_style()
+    xs = np.asarray(x, dtype=np.float64)
+    ys = np.asarray(y, dtype=np.float64)
+    fig, ax = plt.subplots()
+    if curve is not None:
+        ax.plot(
+            np.asarray(curve[0], dtype=np.float64),
+            np.asarray(curve[1], dtype=np.float64),
+            linewidth=1.6,
+            color=PALETTE[1],
+            label=curve_label,
+            zorder=1,
+        )
+    ax.scatter(xs, ys, s=44, color=PALETTE[0], edgecolor="white", linewidth=0.8, zorder=2, label=points_label)
+    if annotate is not None:
+        for position_x, position_y, note in zip(xs, ys, annotate, strict=True):
+            ax.annotate(note, (position_x, position_y), textcoords="offset points", xytext=(6, 5), fontsize=7.5)
+    if logx:
+        ax.set_xscale("log")
+    if logy:
+        ax.set_yscale("log")
+    ax.set(title=title, xlabel=xlabel, ylabel=ylabel)
+    ax.legend()
+    return fig
+
+
 def plot_decision_boundary(
     predict: Callable[[NDArray[np.float64]], ArrayLike],
     features: ArrayLike,
