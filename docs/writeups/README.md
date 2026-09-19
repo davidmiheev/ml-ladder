@@ -13,7 +13,7 @@ left open.
 | C — Sequence models & attention | [c-sequence-attention.md](c-sequence-attention.md) | [pdf/c-sequence-attention.pdf](pdf/c-sequence-attention.pdf) | complete |
 | D — Self-supervised & representation learning | [d-self-supervised.md](d-self-supervised.md) | [pdf/d-self-supervised.pdf](pdf/d-self-supervised.pdf) | complete |
 | E — Generative models | [e-generative.md](e-generative.md) | [pdf/e-generative.pdf](pdf/e-generative.pdf) | complete |
-| F — Geometric & equivariant nets | [f-geometric.md](f-geometric.md) | — | stub |
+| F — Geometric & equivariant nets | [f-geometric.md](f-geometric.md) | [pdf/f-geometric.pdf](pdf/f-geometric.pdf) | complete |
 | G — Scaling & systems | [g-scaling-systems.md](g-scaling-systems.md) | — | stub |
 | H — Computer vision & OCR | [h-computer-vision.md](h-computer-vision.md) | [pdf/h-computer-vision.pdf](pdf/h-computer-vision.pdf) | complete |
 

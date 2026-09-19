@@ -1024,7 +1024,7 @@
           "n_seeds": 3
         }
       },
-      "elapsed_sec_median": 162.764
+      "elapsed_sec_median": 152.714
     },
     "F2": {
       "title": "GCN and GraphSAGE on a node-classification benchmark (Cora/PubMed)",
@@ -1177,17 +1177,17 @@
           "n_seeds": 3
         },
         "depth/arms_bound_by_budget": {
-          "reference": 3.0,
-          "median": 3.0,
-          "min": 0.0,
+          "reference": 2.0,
+          "median": 4.0,
+          "min": 2.0,
           "max": 4.0,
           "n_seeds": 3
         },
         "depth/gcn/1/best_epoch": {
-          "reference": 192.0,
-          "median": 8.0,
-          "min": 6.0,
-          "max": 192.0,
+          "reference": 491.0,
+          "median": 491.0,
+          "min": 8.0,
+          "max": 553.0,
           "n_seeds": 3
         },
         "depth/gcn/1/smoothness": {
@@ -1197,116 +1197,158 @@
           "max": 0.0557585209608078,
           "n_seeds": 3
         },
+        "depth/gcn/1/smoothness_over_mlp": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
         "depth/gcn/1/test_accuracy": {
-          "reference": 0.7870000004768372,
+          "reference": 0.7910000085830688,
           "median": 0.7609999775886536,
-          "min": 0.6949999928474426,
-          "max": 0.7870000004768372,
+          "min": 0.7390000224113464,
+          "max": 0.7910000085830688,
           "n_seeds": 3
         },
         "depth/gcn/2/best_epoch": {
-          "reference": 102.0,
+          "reference": 521.0,
           "median": 63.0,
           "min": 21.0,
-          "max": 102.0,
+          "max": 521.0,
           "n_seeds": 3
         },
         "depth/gcn/2/smoothness": {
-          "reference": 0.6129912734031677,
+          "reference": 0.5800914764404297,
           "median": 0.6259487867355347,
-          "min": 0.6129912734031677,
+          "min": 0.5800914764404297,
           "max": 0.7374849319458008,
           "n_seeds": 3
         },
+        "depth/gcn/2/smoothness_over_mlp": {
+          "reference": 0.1028626561164856,
+          "median": 0.1028626561164856,
+          "min": -0.0836641788482666,
+          "max": 0.2097039818763733,
+          "n_seeds": 3
+        },
         "depth/gcn/2/test_accuracy": {
-          "reference": 0.8069999814033508,
+          "reference": 0.8080000281333923,
           "median": 0.8069999814033508,
           "min": 0.7770000100135803,
-          "max": 0.8069999814033508,
+          "max": 0.8080000281333923,
           "n_seeds": 3
         },
         "depth/gcn/3/best_epoch": {
-          "reference": 130.0,
-          "median": 199.0,
-          "min": 130.0,
-          "max": 237.0,
+          "reference": 314.0,
+          "median": 314.0,
+          "min": 199.0,
+          "max": 553.0,
           "n_seeds": 3
         },
         "depth/gcn/3/smoothness": {
-          "reference": 0.5153341293334961,
-          "median": 0.5153341293334961,
+          "reference": 0.5020543932914734,
+          "median": 0.5020543932914734,
           "min": 0.5008236765861511,
-          "max": 0.5767106413841248,
+          "max": 0.5591405630111694,
+          "n_seeds": 3
+        },
+        "depth/gcn/3/smoothness_over_mlp": {
+          "reference": 0.005228102207183838,
+          "median": 0.005228102207183838,
+          "min": -0.16343313455581665,
+          "max": 0.032254695892333984,
           "n_seeds": 3
         },
         "depth/gcn/3/test_accuracy": {
-          "reference": 0.7910000085830688,
-          "median": 0.7910000085830688,
-          "min": 0.7570000290870667,
-          "max": 0.7950000166893005,
+          "reference": 0.7990000247955322,
+          "median": 0.7950000166893005,
+          "min": 0.7590000033378601,
+          "max": 0.7990000247955322,
           "n_seeds": 3
         },
         "depth/gcn/4/best_epoch": {
           "reference": 263.0,
-          "median": 221.0,
-          "min": 184.0,
-          "max": 263.0,
+          "median": 263.0,
+          "min": 221.0,
+          "max": 451.0,
           "n_seeds": 3
         },
         "depth/gcn/4/smoothness": {
           "reference": 0.5445142984390259,
-          "median": 0.49943241477012634,
+          "median": 0.47816202044487,
           "min": 0.46339184045791626,
           "max": 0.5445142984390259,
+          "n_seeds": 3
+        },
+        "depth/gcn/4/smoothness_over_mlp": {
+          "reference": 0.06984272599220276,
+          "median": -0.005086272954940796,
+          "min": -0.06960940361022949,
+          "max": 0.06984272599220276,
           "n_seeds": 3
         },
         "depth/gcn/4/test_accuracy": {
           "reference": 0.7900000214576721,
           "median": 0.7900000214576721,
           "min": 0.7089999914169312,
-          "max": 0.8009999990463257,
+          "max": 0.8050000071525574,
           "n_seeds": 3
         },
         "depth/gcn/6/best_epoch": {
-          "reference": 289.0,
-          "median": 289.0,
-          "min": 256.0,
-          "max": 292.0,
+          "reference": 566.0,
+          "median": 415.0,
+          "min": 362.0,
+          "max": 566.0,
           "n_seeds": 3
         },
         "depth/gcn/6/smoothness": {
-          "reference": 0.4788777530193329,
-          "median": 0.4788777530193329,
-          "min": 0.4414428472518921,
-          "max": 0.6047332286834717,
+          "reference": 0.43351003527641296,
+          "median": 0.44915440678596497,
+          "min": 0.43351003527641296,
+          "max": 0.5689447522163391,
+          "n_seeds": 3
+        },
+        "depth/gcn/6/smoothness_over_mlp": {
+          "reference": -0.503302663564682,
+          "median": -0.05672493577003479,
+          "min": -0.503302663564682,
+          "max": -0.03007793426513672,
           "n_seeds": 3
         },
         "depth/gcn/6/test_accuracy": {
-          "reference": 0.7400000095367432,
-          "median": 0.7129999995231628,
-          "min": 0.6890000104904175,
-          "max": 0.7400000095367432,
+          "reference": 0.7409999966621399,
+          "median": 0.7310000061988831,
+          "min": 0.6980000138282776,
+          "max": 0.7409999966621399,
           "n_seeds": 3
         },
         "depth/gcn/8/best_epoch": {
-          "reference": 180.0,
-          "median": 180.0,
+          "reference": 515.0,
+          "median": 515.0,
           "min": 0.0,
-          "max": 284.0,
+          "max": 577.0,
           "n_seeds": 3
         },
         "depth/gcn/8/smoothness": {
-          "reference": 0.6703446507453918,
-          "median": 0.6703446507453918,
-          "min": 0.5636940598487854,
+          "reference": 0.5534970760345459,
+          "median": 0.579890787601471,
+          "min": 0.5534970760345459,
           "max": 0.9989284873008728,
           "n_seeds": 3
         },
+        "depth/gcn/8/smoothness_over_mlp": {
+          "reference": -0.4464948773384094,
+          "median": -0.001066744327545166,
+          "min": -0.4464948773384094,
+          "max": 0.06711393594741821,
+          "n_seeds": 3
+        },
         "depth/gcn/8/test_accuracy": {
-          "reference": 0.6549999713897705,
-          "median": 0.6129999756813049,
+          "reference": 0.652999997138977,
+          "median": 0.6449999809265137,
           "min": 0.30000001192092896,
-          "max": 0.6549999713897705,
+          "max": 0.652999997138977,
           "n_seeds": 3
         },
         "depth/gcn/best_depth": {
@@ -1317,24 +1359,185 @@
           "n_seeds": 3
         },
         "depth/gcn/deepest_drop": {
-          "reference": 0.15200001001358032,
-          "median": 0.1940000057220459,
-          "min": 0.15200001001358032,
+          "reference": 0.15500003099441528,
+          "median": 0.16200000047683716,
+          "min": 0.15500003099441528,
           "max": 0.47699999809265137,
           "n_seeds": 3
         },
+        "depth/gcn/excess_rise": {
+          "reference": -0.549357533454895,
+          "median": -0.21077072620391846,
+          "min": -0.549357533454895,
+          "max": 0.15077811479568481,
+          "n_seeds": 3
+        },
         "depth/gcn/smoothness_rise": {
-          "reference": 0.614586129784584,
-          "median": 0.614586129784584,
-          "min": 0.5079355388879776,
-          "max": 0.943169966340065,
+          "reference": -0.02659440040588379,
+          "median": -0.02659440040588379,
+          "min": -0.04605799913406372,
+          "max": 0.261443555355072,
+          "n_seeds": 3
+        },
+        "depth/input_features_smoothness": {
+          "reference": 0.0557585209608078,
+          "median": 0.0557585209608078,
+          "min": 0.0557585209608078,
+          "max": 0.0557585209608078,
+          "n_seeds": 3
+        },
+        "depth/mlp/1/best_epoch": {
+          "reference": 21.0,
+          "median": 23.0,
+          "min": 21.0,
+          "max": 62.0,
+          "n_seeds": 3
+        },
+        "depth/mlp/1/smoothness": {
+          "reference": 0.0557585209608078,
+          "median": 0.0557585209608078,
+          "min": 0.0557585209608078,
+          "max": 0.0557585209608078,
+          "n_seeds": 3
+        },
+        "depth/mlp/1/test_accuracy": {
+          "reference": 0.546999990940094,
+          "median": 0.5440000295639038,
+          "min": 0.5080000162124634,
+          "max": 0.546999990940094,
+          "n_seeds": 3
+        },
+        "depth/mlp/2/best_epoch": {
+          "reference": 522.0,
+          "median": 216.0,
+          "min": 24.0,
+          "max": 522.0,
+          "n_seeds": 3
+        },
+        "depth/mlp/2/smoothness": {
+          "reference": 0.4772288203239441,
+          "median": 0.5277809500694275,
+          "min": 0.4772288203239441,
+          "max": 0.7096129655838013,
+          "n_seeds": 3
+        },
+        "depth/mlp/2/test_accuracy": {
+          "reference": 0.5649999976158142,
+          "median": 0.5559999942779541,
+          "min": 0.5009999871253967,
+          "max": 0.5649999976158142,
+          "n_seeds": 3
+        },
+        "depth/mlp/3/best_epoch": {
+          "reference": 218.0,
+          "median": 158.0,
+          "min": 21.0,
+          "max": 218.0,
+          "n_seeds": 3
+        },
+        "depth/mlp/3/smoothness": {
+          "reference": 0.49682629108428955,
+          "median": 0.49682629108428955,
+          "min": 0.46856898069381714,
+          "max": 0.7225736975669861,
+          "n_seeds": 3
+        },
+        "depth/mlp/3/test_accuracy": {
+          "reference": 0.5,
+          "median": 0.4950000047683716,
+          "min": 0.49000000953674316,
+          "max": 0.5,
+          "n_seeds": 3
+        },
+        "depth/mlp/4/best_epoch": {
+          "reference": 190.0,
+          "median": 109.0,
+          "min": 94.0,
+          "max": 190.0,
+          "n_seeds": 3
+        },
+        "depth/mlp/4/smoothness": {
+          "reference": 0.4746715724468231,
+          "median": 0.4832482933998108,
+          "min": 0.4746715724468231,
+          "max": 0.5330012440681458,
+          "n_seeds": 3
+        },
+        "depth/mlp/4/test_accuracy": {
+          "reference": 0.4129999876022339,
+          "median": 0.4129999876022339,
+          "min": 0.3930000066757202,
+          "max": 0.47600001096725464,
+          "n_seeds": 3
+        },
+        "depth/mlp/6/best_epoch": {
+          "reference": 28.0,
+          "median": 370.0,
+          "min": 28.0,
+          "max": 471.0,
+          "n_seeds": 3
+        },
+        "depth/mlp/6/smoothness": {
+          "reference": 0.936812698841095,
+          "median": 0.5990226864814758,
+          "min": 0.5058793425559998,
+          "max": 0.936812698841095,
+          "n_seeds": 3
+        },
+        "depth/mlp/6/test_accuracy": {
+          "reference": 0.3869999945163727,
+          "median": 0.3869999945163727,
+          "min": 0.36800000071525574,
+          "max": 0.38999998569488525,
+          "n_seeds": 3
+        },
+        "depth/mlp/8/best_epoch": {
+          "reference": 27.0,
+          "median": 27.0,
+          "min": 0.0,
+          "max": 428.0,
+          "n_seeds": 3
+        },
+        "depth/mlp/8/smoothness": {
+          "reference": 0.9999919533729553,
+          "median": 0.9999919533729553,
+          "min": 0.5127768516540527,
+          "max": 0.999995231628418,
+          "n_seeds": 3
+        },
+        "depth/mlp/8/test_accuracy": {
+          "reference": 0.30399999022483826,
+          "median": 0.30399999022483826,
+          "min": 0.30000001192092896,
+          "max": 0.4000000059604645,
+          "n_seeds": 3
+        },
+        "depth/mlp/best_depth": {
+          "reference": 2.0,
+          "median": 2.0,
+          "min": 1.0,
+          "max": 2.0,
+          "n_seeds": 3
+        },
+        "depth/mlp/deepest_drop": {
+          "reference": 0.26100000739097595,
+          "median": 0.25599998235702515,
+          "min": 0.1080000102519989,
+          "max": 0.26100000739097595,
+          "n_seeds": 3
+        },
+        "depth/mlp/smoothness_rise": {
+          "reference": 0.5227631330490112,
+          "median": 0.4722142815589905,
+          "min": -0.19683611392974854,
+          "max": 0.5227631330490112,
           "n_seeds": 3
         },
         "depth/sage/1/best_epoch": {
-          "reference": 132.0,
-          "median": 132.0,
+          "reference": 383.0,
+          "median": 383.0,
           "min": 64.0,
-          "max": 253.0,
+          "max": 569.0,
           "n_seeds": 3
         },
         "depth/sage/1/smoothness": {
@@ -1344,137 +1547,186 @@
           "max": 0.0557585209608078,
           "n_seeds": 3
         },
+        "depth/sage/1/smoothness_over_mlp": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
         "depth/sage/1/test_accuracy": {
-          "reference": 0.7450000047683716,
-          "median": 0.7329999804496765,
+          "reference": 0.7580000162124634,
+          "median": 0.7369999885559082,
           "min": 0.7229999899864197,
-          "max": 0.7450000047683716,
+          "max": 0.7580000162124634,
           "n_seeds": 3
         },
         "depth/sage/2/best_epoch": {
-          "reference": 171.0,
-          "median": 237.0,
-          "min": 171.0,
-          "max": 289.0,
+          "reference": 421.0,
+          "median": 475.0,
+          "min": 421.0,
+          "max": 569.0,
           "n_seeds": 3
         },
         "depth/sage/2/smoothness": {
-          "reference": 0.5758451223373413,
-          "median": 0.5690968632698059,
-          "min": 0.5324710011482239,
-          "max": 0.5758451223373413,
+          "reference": 0.5252394676208496,
+          "median": 0.5252394676208496,
+          "min": 0.513899564743042,
+          "max": 0.538985013961792,
+          "n_seeds": 3
+        },
+        "depth/sage/2/smoothness_over_mlp": {
+          "reference": 0.04801064729690552,
+          "median": 0.011204063892364502,
+          "min": -0.19571340084075928,
+          "max": 0.04801064729690552,
           "n_seeds": 3
         },
         "depth/sage/2/test_accuracy": {
-          "reference": 0.800000011920929,
-          "median": 0.7900000214576721,
-          "min": 0.7639999985694885,
-          "max": 0.800000011920929,
+          "reference": 0.8019999861717224,
+          "median": 0.7860000133514404,
+          "min": 0.7699999809265137,
+          "max": 0.8019999861717224,
           "n_seeds": 3
         },
         "depth/sage/3/best_epoch": {
-          "reference": 299.0,
-          "median": 121.0,
+          "reference": 345.0,
+          "median": 345.0,
           "min": 70.0,
-          "max": 299.0,
+          "max": 362.0,
           "n_seeds": 3
         },
         "depth/sage/3/smoothness": {
-          "reference": 0.4145618677139282,
-          "median": 0.49302437901496887,
-          "min": 0.4145618677139282,
+          "reference": 0.4103856086730957,
+          "median": 0.489310622215271,
+          "min": 0.4103856086730957,
           "max": 0.5068860650062561,
           "n_seeds": 3
         },
+        "depth/sage/3/smoothness_over_mlp": {
+          "reference": -0.08644068241119385,
+          "median": -0.08644068241119385,
+          "min": -0.21568763256072998,
+          "max": 0.020741641521453857,
+          "n_seeds": 3
+        },
         "depth/sage/3/test_accuracy": {
-          "reference": 0.796999990940094,
-          "median": 0.7749999761581421,
+          "reference": 0.800000011920929,
+          "median": 0.7900000214576721,
           "min": 0.7590000033378601,
-          "max": 0.796999990940094,
+          "max": 0.800000011920929,
           "n_seeds": 3
         },
         "depth/sage/4/best_epoch": {
           "reference": 33.0,
-          "median": 80.0,
+          "median": 172.0,
           "min": 33.0,
-          "max": 172.0,
+          "max": 584.0,
           "n_seeds": 3
         },
         "depth/sage/4/smoothness": {
           "reference": 0.45872798562049866,
-          "median": 0.4388062357902527,
+          "median": 0.4362441301345825,
           "min": 0.4101698398590088,
           "max": 0.45872798562049866,
+          "n_seeds": 3
+        },
+        "depth/sage/4/smoothness_over_mlp": {
+          "reference": -0.015943586826324463,
+          "median": -0.073078453540802,
+          "min": -0.09675711393356323,
+          "max": -0.015943586826324463,
           "n_seeds": 3
         },
         "depth/sage/4/test_accuracy": {
           "reference": 0.7879999876022339,
           "median": 0.7559999823570251,
-          "min": 0.7329999804496765,
+          "min": 0.746999979019165,
           "max": 0.7879999876022339,
           "n_seeds": 3
         },
         "depth/sage/6/best_epoch": {
-          "reference": 247.0,
-          "median": 269.0,
-          "min": 247.0,
-          "max": 296.0,
+          "reference": 524.0,
+          "median": 524.0,
+          "min": 301.0,
+          "max": 565.0,
           "n_seeds": 3
         },
         "depth/sage/6/smoothness": {
-          "reference": 0.4697861671447754,
-          "median": 0.46365174651145935,
-          "min": 0.4291585683822632,
-          "max": 0.4697861671447754,
+          "reference": 0.48473572731018066,
+          "median": 0.45217135548591614,
+          "min": 0.41733717918395996,
+          "max": 0.48473572731018066,
+          "n_seeds": 3
+        },
+        "depth/sage/6/smoothness_over_mlp": {
+          "reference": -0.4520769715309143,
+          "median": -0.1468513309955597,
+          "min": -0.4520769715309143,
+          "max": -0.0885421633720398,
           "n_seeds": 3
         },
         "depth/sage/6/test_accuracy": {
-          "reference": 0.6069999933242798,
-          "median": 0.734000027179718,
-          "min": 0.6069999933242798,
-          "max": 0.7459999918937683,
+          "reference": 0.7400000095367432,
+          "median": 0.7400000095367432,
+          "min": 0.7300000190734863,
+          "max": 0.75,
           "n_seeds": 3
         },
         "depth/sage/8/best_epoch": {
-          "reference": 280.0,
-          "median": 260.0,
-          "min": 153.0,
-          "max": 280.0,
+          "reference": 548.0,
+          "median": 548.0,
+          "min": 334.0,
+          "max": 573.0,
           "n_seeds": 3
         },
         "depth/sage/8/smoothness": {
-          "reference": 0.4047841727733612,
-          "median": 0.43686443567276,
-          "min": 0.4047841727733612,
-          "max": 0.6234689354896545,
+          "reference": 0.3833152949810028,
+          "median": 0.42559126019477844,
+          "min": 0.3833152949810028,
+          "max": 0.45179224014282227,
+          "n_seeds": 3
+        },
+        "depth/sage/8/smoothness_over_mlp": {
+          "reference": -0.6166766583919525,
+          "median": -0.5482029914855957,
+          "min": -0.6166766583919525,
+          "max": -0.08718559145927429,
           "n_seeds": 3
         },
         "depth/sage/8/test_accuracy": {
-          "reference": 0.6610000133514404,
-          "median": 0.6610000133514404,
-          "min": 0.550000011920929,
-          "max": 0.6840000152587891,
+          "reference": 0.7009999752044678,
+          "median": 0.6899999976158142,
+          "min": 0.6690000295639038,
+          "max": 0.7009999752044678,
           "n_seeds": 3
         },
         "depth/sage/best_depth": {
           "reference": 2.0,
           "median": 2.0,
           "min": 2.0,
-          "max": 2.0,
+          "max": 3.0,
           "n_seeds": 3
         },
         "depth/sage/deepest_drop": {
-          "reference": 0.13899999856948853,
-          "median": 0.13899999856948853,
+          "reference": 0.10100001096725464,
+          "median": 0.10100001096725464,
           "min": 0.07999998331069946,
-          "max": 0.24000000953674316,
+          "max": 0.12099999189376831,
+          "n_seeds": 3
+        },
+        "depth/sage/excess_rise": {
+          "reference": -0.664687305688858,
+          "median": -0.5594070553779602,
+          "min": -0.664687305688858,
+          "max": 0.10852780938148499,
           "n_seeds": 3
         },
         "depth/sage/smoothness_rise": {
-          "reference": 0.3490256518125534,
-          "median": 0.3811059147119522,
-          "min": 0.3490256518125534,
-          "max": 0.5677104145288467,
+          "reference": -0.1419241726398468,
+          "median": -0.08830830454826355,
+          "min": -0.1419241726398468,
+          "max": -0.08719277381896973,
           "n_seeds": 3
         },
         "homophily/0.05/gcn/test_accuracy": {
@@ -1737,8 +1989,8 @@
           "n_seeds": 3
         }
       },
-      "elapsed_sec_median": 514.146
+      "elapsed_sec_median": 1101.563
     }
   },
-  "figures": 12
+  "figures": 14
 }
