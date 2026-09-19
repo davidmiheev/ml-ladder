@@ -543,12 +543,17 @@ def run(exp: Experiment) -> dict[str, float]:
 
     gaps = {arm: [sweep[arm][i] - sweep["mlp"][i] for i in range(len(exp["homophilies"]))] for arm in ("gcn", "sage")}
     for arm, gap in gaps.items():
-        summary[f"homophily/{arm}/crossover"] = crossover(list(exp["homophilies"]), gap)
+        # Interpolated over the *measured* homophily of each sampled graph, not
+        # the value that was asked for. The dial is calibrated to ~0.001 so the
+        # two barely differ now -- but the crossover is the headline number of
+        # this sweep, and it should be a statement about the graphs that were
+        # actually trained on.
+        summary[f"homophily/{arm}/crossover"] = crossover(measured_homophily, gap)
         summary[f"homophily/{arm}/gap_at_lowest"] = gap[0]
         summary[f"homophily/{arm}/gap_at_highest"] = gap[-1]
         print(
             f"[f2] {arm} beats the graph-blind MLP above homophily "
-            f"{summary[f'homophily/{arm}/crossover']:.3f}; at h={exp['homophilies'][0]:.2f} it is {gap[0]:+.3f}"
+            f"{summary[f'homophily/{arm}/crossover']:.3f}; at h={measured_homophily[0]:.2f} it is {gap[0]:+.3f}"
         )
     summary["homophily/sage_over_gcn_at_lowest"] = sweep["sage"][0] - sweep["gcn"][0]
     summary["homophily/predicted_crossover"] = predicted_crossover(exp["sbm_classes"], exp["sbm_degree"])
@@ -620,8 +625,8 @@ def run(exp: Experiment) -> dict[str, float]:
         "homophily",
         plotting.plot_curves(
             sweep,
-            x=exp["homophilies"],
-            title="SBM accuracy against homophily (h=0.25 is the four-class random floor)",
+            x=measured_homophily,
+            title="SBM accuracy against measured homophily (0.25 is the four-class random floor)",
             xlabel="homophily",
             ylabel="test accuracy",
             marker="o",
@@ -631,7 +636,7 @@ def run(exp: Experiment) -> dict[str, float]:
         "homophily_gap",
         plotting.plot_curves(
             gaps,
-            x=exp["homophilies"],
+            x=measured_homophily,
             title="Accuracy gained over the graph-blind MLP -- negative means the edges hurt",
             xlabel="homophily",
             ylabel="accuracy difference",
