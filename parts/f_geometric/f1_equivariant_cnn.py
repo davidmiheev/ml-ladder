@@ -454,11 +454,17 @@ def run(exp: Experiment) -> dict[str, float]:
         summary["parameters/p4_over_plain"] = summary["p4/parameters"] / summary["plain/parameters"]
 
     # -- figures --------------------------------------------------------------
+    # The error curves are logarithmic, and 0 degrees is the identity: every arm
+    # scores exactly zero there, which a log axis can only render as a hole. The
+    # metric is still recorded for all angles; the figure drops the point that
+    # carries no information rather than plotting a gap and explaining it.
+    turned = [i for i, a in enumerate(exp["angles"]) if a % 360 != 0]
+    turned_angles = [exp["angles"][i] for i in turned]
     exp.log_figure(
         "equivariance",
         plotting.plot_curves(
-            equivariance,
-            x=exp["angles"],
+            {arm: [values[i] for i in turned] for arm, values in equivariance.items()},
+            x=turned_angles,
             title="Equivariance error of the feature maps (the floor is the resampler)",
             xlabel="rotation (degrees)",
             ylabel="relative error",
@@ -469,8 +475,8 @@ def run(exp: Experiment) -> dict[str, float]:
     exp.log_figure(
         "invariance_pooled",
         plotting.plot_curves(
-            invariance,
-            x=exp["angles"],
+            {arm: [values[i] for i in turned] for arm, values in invariance.items()},
+            x=turned_angles,
             title="Invariance of the pooled vector -- flattered by the global average",
             xlabel="rotation (degrees)",
             ylabel="relative error",
