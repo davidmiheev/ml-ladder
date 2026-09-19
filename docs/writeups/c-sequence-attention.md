@@ -584,7 +584,7 @@ the constructor's other uses of the unprefixed builder are `dtype()` and
 this config sets `tie_word_embeddings: true`.
 
 I concluded from that that the fork's `gemma4` f16 path was wrong on sm_75.
-**That conclusion was premature, and the answer was already written down in the
+**That conclusion was wrong, and the answer was already written down in the
 repository I had not read yet.** The catalog's `candle-llm-safetensors`
 executor carries this comment:
 
@@ -597,12 +597,23 @@ A copy-loop is exactly what I saw, on exactly that checkpoint. I had reached for
 missing token — and the thing that distinguishes them is that one of them was
 already diagnosed by someone who had run the model more than twice.
 
-The honest status is narrower than either claim. I added the same BOS prepend to
-the example; in the one configuration I then tried (BOS, no chat template) the
-output was still not readable, and the GPU session was reclaimed before I could
-try BOS together with the chat template. So: **the degeneration has a documented
-cause that fits the symptom exactly, my fix for it is unverified, and the f16
-accusation is withdrawn.**
+With the same BOS prepend added to the example, on the same binary, the same
+card, the same f16 and the same chat template:
+
+> Grouped-query attention reduces KV cache size by grouping queries, which
+> allows the model to share key and value states across multiple queries. This
+> sharing significantly reduces the total number of unique key and value vectors
+> that need to be stored in the cache for a given sequence length.
+
+5.89 tok/s with the template, 24.55 on a bare prompt. **"thought" repeated to the
+token limit before the prepend, a correct answer after** — a controlled pair
+where the only difference is one token, which is what it takes to tell a missing
+BOS from a broken kernel. The f16 accusation is withdrawn.
+
+Two of the three patches Gemma-4 needed, incidentally, are things `qwen3_5.rs`
+already does for itself in the same fork: it detects the
+`model.language_model` prefix rather than assuming `model.`, and it already has
+load-time quantization. `gemma4` is the sibling that fell behind.
 
 **DeepSeek-V2-Lite** needed the quantization the example did not have. It is
 now wired: the same load-time `Proj` that `gemma4` and `qwen3_5` use — quantize
@@ -619,9 +630,12 @@ for it** — the GPU session was reclaimed during the 31.4 GB download, twice, s
 no token has been generated through it. Wiring that has never run is a claim,
 not a result, and it is recorded here as one.
 
-**Qwen3.6/3.8** have `qwen3_5.rs` in `candle-transformers` but no example
-binary; the catalog's `candle-llm-safetensors` executor is what drives them, and
-it needs the ignite SDK submodule this session cannot fetch.
+**Qwen3.6/3.8** had `qwen3_5.rs` in `candle-transformers` and no binary to
+invoke it, so that binary is now written: `--quant q8_0..q2k`, `--dtype`, and
+Qwen's chat template, building clean in 16.6s against the warm tree. Whether it
+*runs* is a separate claim from whether it builds, and at the time of writing
+the 55.6 GB checkpoint was still downloading — so the example is reported as
+built, not as verified.
 
 ---
 

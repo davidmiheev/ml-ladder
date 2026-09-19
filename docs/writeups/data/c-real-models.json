@@ -51,15 +51,16 @@
       "dtype": "float16",
       "device": "Colab T4",
       "load_seconds": 32.68,
-      "tokens_per_second": 25.67,
-      "output": "degenerate -- the word 'thought' repeated to the token limit",
-      "control": "transformers at float16, same model, same card, same prompt and chat template: a correct answer at 9.63 tok/s. So the degeneration is not float16 precision.",
+      "tokens_per_second": 5.89,
+      "output": "correct: 'Grouped-query attention reduces KV cache size by grouping queries, which allows the model to share key and value states across multiple queries. This sharing significantly reduces the total number of unique key and value vectors that need to be stored in the cache for a given sequence length.'",
       "patches_needed": [
-        "TextModel loads the decoder from `model.*`, but a multimodal checkpoint keeps it at `model.language_model.*`, so text-only loading of gemma-4-E2B-it fails at model.embed_tokens.weight. Added a constructor taking the decoder's own prefix.",
-        "the example hardcodes bf16 on GPU, which needs sm_80; added a --dtype flag so an sm_75 card can ask for f16."
+        "TextModel loads the decoder from `model.*`, but a multimodal checkpoint keeps it at `model.language_model.*`, so text-only loading of gemma-4-E2B-it fails at model.embed_tokens.weight. Added a constructor taking the decoder's own prefix. (qwen3_5.rs already does this detection itself -- gemma4 is the one lagging its sibling.)",
+        "the example hardcodes bf16 on GPU, which needs sm_80; added a --dtype flag so an sm_75 card can ask for f16.",
+        "the example never prepended BOS; added the prepend the catalog executor documents. This is the one that mattered."
       ],
       "patch_is_behaviour_preserving": "the prefix change only alters where the decoder loads from: the constructor's other uses of the unprefixed builder are dtype() and device(), which are prefix-independent, and the one root-level weight (lm_head) is not reached because this config sets tie_word_embeddings=true",
-      "conclusion": "WITHDRAWN: I concluded the fork's gemma4 f16 path was wrong on sm_75. The catalog's candle-llm-safetensors executor already documents the cause -- gemma-4-e2b-it ships a tokenizer.json with no BOS post-processor, and gemma-family models degenerate into token copy-loops without one, which is exactly the symptom. The same BOS prepend was added to the example; in the one configuration then tried (BOS, no chat template) the output was still not readable, and the session was reclaimed before BOS could be tried together with the chat template. The fix is unverified and the f16 accusation is withdrawn.",
+      "tokens_per_second_note": "5.89 tok/s with the chat template, 24.55 tok/s on a bare prompt",
+      "resolved": "VERIFIED. The degeneration was a missing BOS token, exactly as the catalog's candle-llm-safetensors executor documents: gemma-4-e2b-it ships a tokenizer.json with no BOS post-processor and gemma-family models fall into token copy-loops without one. Same binary, same card, same f16, same chat template: 'thought' repeated to the limit before the BOS prepend, a correct answer after. My earlier claim that the fork's gemma4 f16 path was wrong on sm_75 is withdrawn -- it was never a precision or kernel problem.",
       "cause_documented_in": "ignite-catalog perf/exp-executors: models/executors/exp/candle-llm-safetensors/src/lib.rs"
     }
   ],
@@ -77,13 +78,19 @@
   "not_run": {
     "Qwen/Qwen3.8-Flash-Next": "360 GB of weights; out of reach on any accelerator available here",
     "bf16 or AWQ Qwen 27B": "55.6 GB bf16, and 20.4/21.0 GB as 4-bit AWQ, against a 15.4 GB T4 -- the GGUF route at 3 bpw is what made these runnable at all",
-    "deepseek-ai/DeepSeek-V2-Lite via candle": "quantization wired (see tools/real_models/candle-patches), compiles, flags live, never run end to end",
-    "Qwen3.6 / Qwen3.8 via candle": "qwen3_5.rs has no example binary; the catalog's candle-llm-safetensors executor drives it but needs the ignite SDK submodule, which is private and not fetchable from this session"
+    "deepseek-ai/DeepSeek-V2-Lite via candle": "quantization wired (see tools/real_models/candle-patches), compiles, flags live, never run end to end"
   },
   "candle_build": {
     "fork": "davidmiheev/candle @ ignite-perf (9aa02f1)",
     "first_build_reported_by_cargo": "18m 44s with CUDA_COMPUTE_CAP=75",
     "additional_examples_seconds": 37,
     "see": "h-real-models.json for the two build fixes this needed"
+  },
+  "qwen3_5_example": {
+    "what": "candle-transformers has had qwen3_5.rs with no binary to invoke it; tools/real_models/candle-patches/qwen3_5-example.rs is that binary",
+    "flags": "--quant q8_0..q2k (a 27B is 55.6 GB in bf16, so this is not optional), --dtype, and Qwen's chat template",
+    "builds": "clean in 16.6s incrementally, CUDA_COMPUTE_CAP=75",
+    "note": "qwen3_5.rs already detects the model.language_model prefix itself and already has load-time quantization with a GGUF disk cache -- the two things gemma4 needed patching for",
+    "status": "built; the run was still downloading the 55.6 GB checkpoint when last checked"
   }
 }

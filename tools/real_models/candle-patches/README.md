@@ -78,3 +78,29 @@ the ignite SDK taken out: hub loading instead of `AssetLoader`, the same
 sliding-window n-gram suppression, the ordinary KV-cache decode rather than
 static R-SWA, and `--no-crops` for the global-only path. It reads part H's test
 pages at **CER 0.229** (8 of 10 exactly) through the global view.
+
+## The missing qwen3_5 binary
+
+`qwen3_5-example.rs` goes at `candle-examples/examples/qwen3_5/main.rs`.
+`candle-transformers` has carried `qwen3_5.rs` — the Gated-DeltaNet hybrid stack
+behind Qwen3.6 and Qwen3.8 — with no example to invoke it. This is that example:
+`--quant q8_0..q2k` (a 27B is 55.6 GB in bf16, so it is not optional on anything
+smaller than an A100), `--dtype` for pre-sm_80 cards, and Qwen's chat template.
+
+Worth noting while patching `gemma4`: `qwen3_5.rs` **already** detects the
+`model.language_model` prefix itself and **already** has load-time quantization
+with a GGUF disk cache. Both are things `gemma4` had to be patched for. The two
+siblings have drifted, and `gemma4` is the one behind.
+
+## Gemma-4: the BOS fix, verified
+
+The third `gemma4` patch is the one that mattered. `gemma-4-E2B-it` ships a
+`tokenizer.json` with no BOS post-processor, and gemma-family models fall into
+token copy-loops without one — which your `candle-llm-safetensors` executor
+already documents. Same binary, same T4, same f16, same chat template:
+
+- **without** the BOS prepend: the word "thought" repeated to the token limit
+- **with** it: a correct two-sentence answer, 5.89 tok/s
+
+A one-token difference, which is exactly what it takes to distinguish a missing
+BOS from a broken kernel — and I had guessed the kernel.
