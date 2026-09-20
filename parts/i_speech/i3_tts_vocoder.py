@@ -23,13 +23,18 @@ That second stage is the reason this rung can exist on a CPU, and it is also a
 cost before it measures anything else — and the answer depends entirely on
 which metric you ask, which is the most useful thing this rung found.
 
-Re-analysing Griffin-Lim's output of a *real* clip costs **2.803 mel distance**,
-a large number next to the acoustic model's own 1.214. Put the same audio
-through the recogniser and the cost is **zero**: 0.194 CER clean, 0.194 CER
-vocoded. So Griffin-Lim destroys a great deal of spectral detail and none of the
-intelligibility, and the whole gap to the synthesised audio's 0.775 belongs to
-the acoustic model. "The vocoder puts a ceiling on quality" is true of one
-metric and false of the other.
+Re-analysing Griffin-Lim's output of a *real* clip costs **2.76 mel distance**,
+a large number next to the acoustic model's own 0.64. Put the same audio through
+the recogniser and the cost is **0.025 CER** — the judge reads the clean audio
+at 0.000 and the vocoded audio at 0.050. So Griffin-Lim destroys a great deal of
+spectral detail and almost none of the intelligibility, and 0.400 of the
+synthesised audio's 0.500 error belongs to the acoustic model. "The vocoder puts
+a ceiling on quality" is true of one metric and nearly false of the other.
+
+(An earlier, under-trained judge put the vocoder's cost at exactly zero. It also
+read *clean human speech* at 0.194, so it was in no position to tell. The
+numbers above come from a recogniser that reads the same clean audio at 0.000,
+which is the only reason the decomposition can be believed.)
 
 **Three metrics, none of which is a listening test.**
 

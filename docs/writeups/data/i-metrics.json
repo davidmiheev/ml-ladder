@@ -291,7 +291,7 @@
           "n_seeds": 3
         }
       },
-      "elapsed_sec_median": 1.921
+      "elapsed_sec_median": 2.04
     },
     "I2": {
       "title": "Speech recognition with CTC on a small corpus, and the same audio through Whisper",
@@ -549,7 +549,7 @@
           "n_seeds": 3
         }
       },
-      "elapsed_sec_median": 1169.822
+      "elapsed_sec_median": 1164.698
     },
     "I3": {
       "title": "Text-to-speech: a mel-spectrogram predictor plus a vocoder, evaluated without listening",
@@ -639,10 +639,17 @@
           "n_seeds": 3
         },
         "roundtrip/cer": {
-          "reference": 0.775,
-          "median": 0.775,
-          "min": 0.725,
-          "max": 0.8,
+          "reference": 0.45,
+          "median": 0.5,
+          "min": 0.45,
+          "max": 0.55,
+          "n_seeds": 3
+        },
+        "roundtrip/clean_real_cer": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.3,
           "n_seeds": 3
         },
         "roundtrip/eight/correct": {
@@ -653,31 +660,31 @@
           "n_seeds": 3
         },
         "roundtrip/exact": {
-          "reference": 0.0,
-          "median": 0.0,
-          "min": 0.0,
-          "max": 0.0,
+          "reference": 0.4,
+          "median": 0.3,
+          "min": 0.1,
+          "max": 0.4,
           "n_seeds": 3
         },
         "roundtrip/five/correct": {
-          "reference": 0.0,
-          "median": 0.0,
+          "reference": 1.0,
+          "median": 1.0,
           "min": 0.0,
-          "max": 0.0,
+          "max": 1.0,
           "n_seeds": 3
         },
         "roundtrip/four/correct": {
-          "reference": 0.0,
+          "reference": 1.0,
           "median": 0.0,
           "min": 0.0,
-          "max": 0.0,
+          "max": 1.0,
           "n_seeds": 3
         },
         "roundtrip/nine/correct": {
-          "reference": 0.0,
-          "median": 0.0,
-          "min": 0.0,
-          "max": 0.0,
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
           "n_seeds": 3
         },
         "roundtrip/one/correct": {
@@ -688,10 +695,10 @@
           "n_seeds": 3
         },
         "roundtrip/recognizer_val_cer": {
-          "reference": 0.905,
-          "median": 0.8575,
-          "min": 0.85625,
-          "max": 0.905,
+          "reference": 0.2125,
+          "median": 0.23625,
+          "min": 0.2125,
+          "max": 0.30625,
           "n_seeds": 3
         },
         "roundtrip/seven/correct": {
@@ -708,6 +715,13 @@
           "max": 0.0,
           "n_seeds": 3
         },
+        "roundtrip/synthesiser_cost": {
+          "reference": 0.4,
+          "median": 0.4,
+          "min": 0.2,
+          "max": 0.525,
+          "n_seeds": 3
+        },
         "roundtrip/three/correct": {
           "reference": 0.0,
           "median": 0.0,
@@ -716,17 +730,24 @@
           "n_seeds": 3
         },
         "roundtrip/two/correct": {
-          "reference": 0.0,
-          "median": 0.0,
+          "reference": 1.0,
+          "median": 1.0,
           "min": 0.0,
-          "max": 0.0,
+          "max": 1.0,
           "n_seeds": 3
         },
         "roundtrip/vocoded_real_cer": {
-          "reference": 0.5,
-          "median": 0.225,
-          "min": 0.15,
-          "max": 0.5,
+          "reference": 0.05,
+          "median": 0.05,
+          "min": 0.025,
+          "max": 0.3,
+          "n_seeds": 3
+        },
+        "roundtrip/vocoder_cost": {
+          "reference": 0.05,
+          "median": 0.025,
+          "min": 0.0,
+          "max": 0.05,
           "n_seeds": 3
         },
         "roundtrip/zero/correct": {
@@ -772,7 +793,7 @@
           "n_seeds": 3
         }
       },
-      "elapsed_sec_median": 428.156
+      "elapsed_sec_median": 415.8
     },
     "I4": {
       "title": "Streaming and latency \u2014 chunked inference against full-utterance, with the accuracy it costs",
@@ -1009,28 +1030,28 @@
           "n_seeds": 3
         },
         "wallclock/chunked_ms": {
-          "reference": 30.000019073486328,
-          "median": 28.909385204315186,
-          "min": 26.513755321502686,
-          "max": 30.000019073486328,
+          "reference": 29.35323715209961,
+          "median": 29.35323715209961,
+          "min": 28.973913192749023,
+          "max": 30.84200620651245,
           "n_seeds": 3
         },
         "wallclock/offline_ms": {
-          "reference": 6.115615367889404,
-          "median": 6.15769624710083,
-          "min": 6.115615367889404,
-          "max": 6.3102126121521,
+          "reference": 5.654633045196533,
+          "median": 5.887627601623535,
+          "min": 5.654633045196533,
+          "max": 6.237602233886719,
           "n_seeds": 3
         },
         "wallclock/overhead": {
-          "reference": 4.905478397317817,
-          "median": 4.581364683123669,
-          "min": 4.30579136377276,
-          "max": 4.905478397317817,
+          "reference": 5.191006545868514,
+          "median": 4.944529171635629,
+          "min": 4.921152483346495,
+          "max": 5.191006545868514,
           "n_seeds": 3
         }
       },
-      "elapsed_sec_median": 1159.335
+      "elapsed_sec_median": 1105.63
     }
   },
   "figures": 16
