@@ -19,9 +19,17 @@ part:
    spectrogram is missing.
 
 That second stage is the reason this rung can exist on a CPU, and it is also a
-*measurement* rather than an assumption — Griffin-Lim puts a ceiling on quality
-that has nothing to do with the acoustic model, and the rung measures the
-ceiling before it measures anything else.
+*measurement* rather than an assumption. The rung measures the vocoder's own
+cost before it measures anything else — and the answer depends entirely on
+which metric you ask, which is the most useful thing this rung found.
+
+Re-analysing Griffin-Lim's output of a *real* clip costs **2.803 mel distance**,
+a large number next to the acoustic model's own 1.214. Put the same audio
+through the recogniser and the cost is **zero**: 0.194 CER clean, 0.194 CER
+vocoded. So Griffin-Lim destroys a great deal of spectral detail and none of the
+intelligibility, and the whole gap to the synthesised audio's 0.775 belongs to
+the acoustic model. "The vocoder puts a ceiling on quality" is true of one
+metric and false of the other.
 
 **Three metrics, none of which is a listening test.**
 
@@ -390,10 +398,10 @@ def run(exp: Experiment) -> dict[str, float]:
     summary["roundtrip/clean_real_cer"] = character_error_rate(
         transcribe(recognizer, clean_split, device=device), clean_real.transcripts
     )
-    summary["roundtrip/vocoder_cost"] = summary["roundtrip/vocoded_real_cer"] - summary["roundtrip/clean_real_cer"]
     summary["roundtrip/vocoded_real_cer"] = character_error_rate(
         transcribe(recognizer, vocoded_split, device=device), vocoded_real.transcripts
     )
+    summary["roundtrip/vocoder_cost"] = summary["roundtrip/vocoded_real_cer"] - summary["roundtrip/clean_real_cer"]
     summary["roundtrip/synthesiser_cost"] = summary["roundtrip/cer"] - summary["roundtrip/vocoded_real_cer"]
     print(
         f"[i3] round trip, same speaker throughout: clean audio "
