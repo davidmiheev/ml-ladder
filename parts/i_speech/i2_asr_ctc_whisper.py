@@ -57,13 +57,26 @@ def log_mel_features(waveform, *, config: audio.FrontEndConfig) -> NDArray[np.fl
     return log_compress(mel_spectrogram(waveform, config=config)).astype(np.float32)
 
 
-def normalize(features: NDArray[np.float32], mean: NDArray[np.float32], std: NDArray[np.float32]):
-    """Per-mel-band standardisation, using statistics from the training speakers only.
+def normalize(features: NDArray[np.float32], mean, std, *, mode: str = "global"):
+    """Per-mel-band standardisation, by corpus statistics or by utterance.
 
-    Computed on train and applied to everything, because the alternative —
-    per-utterance normalisation — would quietly remove exactly the speaker
-    differences this rung is trying to measure generalisation across.
+    An earlier version of this rung did only the first and justified it in
+    writing: per-utterance normalisation "would quietly remove exactly the
+    speaker differences this rung is trying to measure generalisation across".
+    That reasoning is backwards. The rung is not trying to *measure* speaker
+    differences, it is trying to generalise across them, and subtracting each
+    utterance's own long-term spectrum is the oldest trick in speech recognition
+    for exactly that: **cepstral mean normalisation** removes the channel and
+    the speaker's average vocal-tract shape, which are nuisance, and leaves the
+    variation over time, which is the signal.
+
+    So it is an arm rather than a decision, and the sweep says which is right.
     """
+    if mode == "utterance":
+        # The clip's own statistics: what a streaming system can compute from
+        # the utterance it is currently holding, and nothing else.
+        mean = features.mean(axis=1)
+        std = features.std(axis=1) + 1e-5
     return (features - mean[:, None]) / std[:, None]
 
 
@@ -108,13 +121,13 @@ def make_speech_crnn(*, n_mels: int, num_symbols: int, channels: int, hidden: in
     return SpeechCRNN
 
 
-def prepare(clips: audio.Clips, *, config: audio.FrontEndConfig, mean=None, std=None):
+def prepare(clips: audio.Clips, *, config: audio.FrontEndConfig, mean=None, std=None, mode: str = "global"):
     """Features, targets and both length vectors for a whole split."""
     features = [log_mel_features(w, config=config) for w in clips.waveforms]
     if mean is None or std is None:
         stacked = np.concatenate(features, axis=1)
         mean, std = stacked.mean(axis=1), stacked.std(axis=1) + 1e-5
-    features = [normalize(f, mean, std) for f in features]
+    features = [normalize(f, mean, std, mode=mode) for f in features]
     lengths = np.asarray([f.shape[1] for f in features], dtype=np.int64)
     padded = np.zeros((len(features), config.n_mels, int(lengths.max())), dtype=np.float32)
     for row, item in enumerate(features):
@@ -293,6 +306,7 @@ def whisper_transcribe(clips: audio.Clips, *, model_name: str, config: audio.Fro
         "lr": 3e-3,
         "eval_every": 5,
         "beam_width": 8,
+        "normalizations": ["global", "utterance"],
         "whisper": "openai/whisper-tiny",
         "whisper_clips": 40,
     },
@@ -319,15 +333,56 @@ def run(exp: Experiment) -> dict[str, float]:
         f"test {len(test_clips)} ({sorted(set(test_clips.speakers))})"
     )
 
-    train = prepare(train_clips, config=config)
-    mean, std = train[-2], train[-1]
-    validation = (*prepare(validation_clips, config=config, mean=mean, std=std)[:4], validation_clips.transcripts)
-    test = (*prepare(test_clips, config=config, mean=mean, std=std)[:4], test_clips.transcripts)
+    # -- normalisation, which an earlier version of this rung decided by
+    # -- argument and got wrong. Both arms, same everything else.
+    arms = {}
+    for mode in exp["normalizations"]:
+        split = prepare(train_clips, config=config, mode=mode)
+        arm_mean, arm_std = split[-2], split[-1]
+        arm_validation = (
+            *prepare(validation_clips, config=config, mean=arm_mean, std=arm_std, mode=mode)[:4],
+            validation_clips.transcripts,
+        )
+        arm_test = (
+            *prepare(test_clips, config=config, mean=arm_mean, std=arm_std, mode=mode)[:4],
+            test_clips.transcripts,
+        )
+        arm_model, arm_curve, arm_cer, _ = train_ctc(
+            split, arm_validation, exp=exp, config=config, device=device, progress=f"i2 {mode}"
+        )
+        arm_predictions = transcribe(arm_model, arm_test, device=device)
+        arms[mode] = {
+            "model": arm_model,
+            "curve": arm_curve,
+            "val_cer": arm_cer,
+            "test_cer": character_error_rate(arm_predictions, test_clips.transcripts),
+            "split": split,
+            "test": arm_test,
+            "validation": arm_validation,
+            "stats": (arm_mean, arm_std),
+        }
+        summary[f"normalization/{mode}/val_cer"] = arm_cer
+        summary[f"normalization/{mode}/test_cer"] = arms[mode]["test_cer"]
+        print(f"[i2] normalisation '{mode}': val CER {arm_cer:.3f}, test CER {arms[mode]['test_cer']:.3f}")
 
-    model, curve, best_validation_cer, _ = train_ctc(
-        train, validation, exp=exp, config=config, device=device, progress="i2 speaker-held-out"
-    )
-    summary["ctc/val_cer"] = best_validation_cer
+    best_mode = min(arms, key=lambda mode: arms[mode]["val_cer"])
+    summary["normalization/best_is_utterance"] = float(best_mode == "utterance")
+    if len(arms) > 1:
+        other = next(mode for mode in arms if mode != best_mode)
+        summary["normalization/gain"] = arms[other]["test_cer"] - arms[best_mode]["test_cer"]
+        if abs(summary["normalization/gain"]) < 1e-9:
+            print(f"[i2] the two normalisations are indistinguishable on this budget ({best_mode} chosen on val)")
+        else:
+            print(
+                f"[i2] '{best_mode}' wins by {summary['normalization/gain']:.3f} test CER, "
+                f"with everything else held fixed"
+            )
+
+    chosen = arms[best_mode]
+    model, curve = chosen["model"], chosen["curve"]
+    test = chosen["test"]
+    summary["ctc/normalization"] = float(best_mode == "utterance")
+    summary["ctc/val_cer"] = chosen["val_cer"]
     summary["ctc/train_loss"] = curve[-1]
 
     greedy = transcribe(model, test, device=device)
@@ -354,14 +409,14 @@ def run(exp: Experiment) -> dict[str, float]:
     shuffled_validation = clips.select(
         np.isin(np.arange(len(clips)), order[cut + len(test_clips) : cut + len(test_clips) + len(validation_clips)])
     )
-    leaky_train = prepare(shuffled_train, config=config)
+    leaky_train = prepare(shuffled_train, config=config, mode=best_mode)
     leaky_mean, leaky_std = leaky_train[-2], leaky_train[-1]
     leaky_validation = (
-        *prepare(shuffled_validation, config=config, mean=leaky_mean, std=leaky_std)[:4],
+        *prepare(shuffled_validation, config=config, mean=leaky_mean, std=leaky_std, mode=best_mode)[:4],
         shuffled_validation.transcripts,
     )
     leaky_test = (
-        *prepare(shuffled_test, config=config, mean=leaky_mean, std=leaky_std)[:4],
+        *prepare(shuffled_test, config=config, mean=leaky_mean, std=leaky_std, mode=best_mode)[:4],
         shuffled_test.transcripts,
     )
     leaky_model, _, _, _ = train_ctc(
