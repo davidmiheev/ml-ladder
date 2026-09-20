@@ -240,6 +240,23 @@ def word_error_rate(predictions: list[str], truths: list[str]) -> float:
     return wer(predictions, truths)
 
 
+#: Spoken digits that Whisper writes as numerals. This is not a homophone fold
+#: and not a charitable reading: "1." *is* a correct transcription of someone
+#: saying "one", in a different orthography. An earlier version of this rung
+#: stripped non-alphabetic characters and scored every numeral as an empty
+#: string, which understated the baseline by counting the model's correct
+#: answers as silence -- the metric measuring its own cleaning rule.
+NUMERALS = {str(index): word for index, word in enumerate(audio.DIGIT_WORDS)}
+
+
+def clean_transcript(text: str) -> str:
+    """A transcription reduced to a bare digit word, numerals included."""
+    stripped = text.strip().strip(".!?,\u2019'\" ").lower()
+    if stripped in NUMERALS:
+        return NUMERALS[stripped]
+    return "".join(character for character in stripped if character.isalpha())
+
+
 #: Orthographic variants that are the *same sounds* as a digit word. A speech
 #: model that emits "too" for "two" has done its acoustic job and failed a
 #: spelling test that only a language model can pass, so scoring both ways
@@ -291,7 +308,7 @@ def whisper_transcribe(clips: audio.Clips, *, model_name: str, config: audio.Fro
         with torch.no_grad():
             ids = model.generate(inputs.input_features, max_new_tokens=16, language="en", task="transcribe")
         text = processor.batch_decode(ids, skip_special_tokens=True)[0]
-        outputs.append("".join(character for character in text.lower() if character.isalpha()))
+        outputs.append(clean_transcript(text))
     return outputs
 
 
