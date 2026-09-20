@@ -408,6 +408,44 @@ def plot_histogram(
     return fig
 
 
+def plot_spectrograms(
+    panels: Mapping[str, ArrayLike],
+    *,
+    title: str = "",
+    xlabel: str = "frame",
+    rate: float | None = None,
+    hop: int | None = None,
+) -> Figure:
+    """Stacked time-frequency images sharing a time axis.
+
+    Part I's figure. Each panel is ``(feature, time)`` and they are drawn one
+    above another with ``origin="lower"`` so low frequencies sit at the bottom,
+    which is the convention every spectrogram in the literature uses and the
+    opposite of matplotlib's default for images.
+
+    The panels deliberately do *not* share a colour scale: a power spectrogram,
+    a log-mel and a cepstrum have different units, and forcing one scale on them
+    would render two of the three as flat colour.
+    """
+    use_house_style()
+    items = list(panels.items())
+    fig, axes = plt.subplots(len(items), 1, figsize=(7.2, 1.9 * len(items) + 0.8), squeeze=False)
+    for axis, (label, values) in zip(axes[:, 0], items, strict=True):
+        data = np.asarray(values, dtype=np.float64)
+        extent = None
+        if rate is not None and hop is not None:
+            extent = (0.0, data.shape[1] * hop / rate * 1000.0, 0.0, float(data.shape[0]))
+        axis.imshow(data, aspect="auto", origin="lower", cmap="magma", interpolation="nearest", extent=extent)
+        axis.set_ylabel(label, fontsize=8)
+        axis.grid(False)
+        axis.set_xticklabels([]) if axis is not axes[-1, 0] else None
+    axes[-1, 0].set_xlabel("time (ms)" if rate is not None and hop is not None else xlabel)
+    if title:
+        fig.suptitle(title)
+    fig.tight_layout()
+    return fig
+
+
 def plot_panel_rows(
     rows: Sequence[ArrayLike],
     labels: Sequence[str],

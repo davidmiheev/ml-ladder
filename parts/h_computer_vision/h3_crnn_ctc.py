@@ -33,14 +33,19 @@ from mlladder import Experiment, experiment, plotting, synth, torchkit, vision
 BLANK = 0
 
 
-def encode_text(text: str) -> list[int]:
+#: The symbol set this rung recognises. Parameterised on the functions below
+#: rather than read from a global, because rung I2 runs the same CTC decoders
+#: over a 15-letter speech alphabet; the decoding is not specific to text lines
+#: and duplicating a prefix beam search to say so would be worse.
+DEFAULT_ALPHABET = synth.ALPHABET + " "
+
+
+def encode_text(text: str, *, alphabet: str = DEFAULT_ALPHABET) -> list[int]:
     """Characters to CTC targets. Spaces are a symbol like any other."""
-    alphabet = synth.ALPHABET + " "
     return [alphabet.index(character) + 1 for character in text]
 
 
-def decode_ids(ids: list[int]) -> str:
-    alphabet = synth.ALPHABET + " "
+def decode_ids(ids: list[int], *, alphabet: str = DEFAULT_ALPHABET) -> str:
     return "".join(alphabet[index - 1] for index in ids if index != BLANK)
 
 
@@ -112,7 +117,7 @@ def word_error_rate(predictions: list[str], truths: list[str]) -> float:
 # -- decoding ----------------------------------------------------------------
 
 
-def greedy_decode(log_probabilities: NDArray[np.float32]) -> str:
+def greedy_decode(log_probabilities: NDArray[np.float32], *, alphabet: str = DEFAULT_ALPHABET) -> str:
     """Best symbol per column, then collapse repeats and drop blanks.
 
     This is the cheap decoder, and it is *not* the most likely string: it is the
@@ -127,10 +132,10 @@ def greedy_decode(log_probabilities: NDArray[np.float32]) -> str:
         if index != previous and index != BLANK:
             collapsed.append(int(index))
         previous = int(index)
-    return decode_ids(collapsed)
+    return decode_ids(collapsed, alphabet=alphabet)
 
 
-def beam_decode(log_probabilities: NDArray[np.float32], *, beam_width: int) -> str:
+def beam_decode(log_probabilities: NDArray[np.float32], *, beam_width: int, alphabet: str = DEFAULT_ALPHABET) -> str:
     r"""Prefix beam search: score *strings*, not alignments.
 
     The distinction is the whole point. A string's probability is the sum over
@@ -180,7 +185,7 @@ def beam_decode(log_probabilities: NDArray[np.float32], *, beam_width: int) -> s
                     add((*prefix, symbol), -np.inf, total + score)
         beams = dict(sorted(next_beams.items(), key=lambda item: -np.logaddexp(*item[1]))[:beam_width])
     best = max(beams.items(), key=lambda item: np.logaddexp(*item[1]))[0]
-    return decode_ids(list(best))
+    return decode_ids(list(best), alphabet=alphabet)
 
 
 def make_crnn(*, num_symbols: int, channels: int, hidden: int):
