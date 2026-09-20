@@ -1,0 +1,39 @@
+{
+  "what": "Whisper tiny.en through the davidmiheev/candle fork (ignite-perf), on part I's own held-out speaker",
+  "date": "2026-09-20",
+  "hardware": "Kaggle Tesla T4, sm_75, CUDA 12.8, torch 2.10.0+cu128",
+  "kernel": "https://www.kaggle.com/code/davidmiheev/ml-ladder-whisper-candle",
+  "headline": "The fork's whisper returns an EMPTY transcription for every one of 40 isolated spoken digits, while the transformers implementation of the same weights reads them at 0.75 exact-match. The same binary transcribes the example's own long samples correctly, so this is a property of the fork's decode on short utterances and not of the build or of the harness around it.",
+  "measured": {
+    "candle_exact_match": 0.0,
+    "transformers_exact_match": 0.75,
+    "candle_runs": 40,
+    "candle_nonzero_exits": 0,
+    "candle_output_shape": "loads pcm, builds mel [1, 80, 3000], reports one segment, emits no text",
+    "unpadded_control": "identical -- empty with and without 0.5 s of leading/trailing silence",
+    "positive_control": {
+      "sample:jfk": "1.8s-10.4s:  and so my fellow Americans ask not what your country can do for you ask what you can do for your country",
+      "sample:gb1": "30.0s -- 60.0s 1.8s-4.4s:  and the Lord was a crew of seven. Colonel Rick Husband, Lieutenant Colonel Michael Anderson, "
+    }
+  },
+  "resampler_question": "The ignite-catalog transcription executor resamples 8 kHz to 16 kHz with plain linear interpolation and no anti-aliasing filter. Run against scipy's polyphase resampler on the same clips and the same engines, the two give IDENTICAL scores: 0.75 for transformers either way. On this corpus the crude resampler costs nothing.",
+  "lead_not_verified": "candle-examples/examples/whisper/main.rs in this fork carries a heavily rewritten apply_timestamp_rules with custom rule blocks that upstream does not have. A decoder that closes its first timestamp pair immediately would produce exactly what is observed -- a segment with no content tokens -- and would do so on short utterances while leaving long ones intact, which matches jfk and gb1 transcribing correctly. This was NOT verified; it is where to look.",
+  "build": {
+    "seconds": 701.1,
+    "features": "cuda symphonia",
+    "fixes_required": [
+      "candle-transformers does not build without CUDA: candle_nn::fused::static_decode is #[cfg(feature = \"cuda\")] but called from ungated sites. 52 errors with --features mkl. This contradicts ignite-catalog's whisper-cpu.yaml, which declares gpu.required: false.",
+      "candle-examples declares symphonia 0.6.0 (Cargo.lock pins 0.6.1) while its audio code uses the 0.5 API -- AudioBufferRef, codecs::DecoderOptions, core::conv, core::probe. 6 errors, breaking every symphonia example: whisper, encodec, mimi, snac. Pinned to 0.5.4 to build.",
+      "the whisper target additionally requires --features symphonia alongside cuda",
+      "CUDA 12.8 needs the compatibility.cuh __hmax_nan guard extended with CURART_VERSION < 12000",
+      "the Kaggle image ships no Rust and no libcuda.so on the usual paths; the driver is at /usr/local/nvidia/lib64"
+    ]
+  },
+  "my_own_errors_on_the_way": [
+    "scored a numeral transcription ('1.', '3') as an empty string by stripping non-alphabetic characters, which understated transformers from 0.75 to 0.25 -- the same bug was in rung I2",
+    "piped cargo into tail, so the build reported tail's exit status (the BUILD_EXIT=0 trap)",
+    "passed --timestamps false to a clap flag that takes no value",
+    "parsed '0.0s -- 1.8s:' when the example prints '0.0s-1.8s:'",
+    "published the candle checkout into /kaggle/working, making the output undownloadable"
+  ]
+}
