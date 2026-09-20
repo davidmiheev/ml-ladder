@@ -334,10 +334,15 @@ def run(exp: Experiment) -> dict[str, float]:
         tracker=exp.tracker,
         seed=exp.seed,
     )
-    train_split = prepare(train_clips, config=config)
+    # Per-utterance normalisation, the arm I2 measured as worth 0.29 CER. An
+    # earlier version of this rung left it at the default and trained a judge
+    # that read *real human speech* at 0.905 CER -- a round-trip metric is only
+    # as good as the recogniser behind it, and that one could not do the job it
+    # was being asked to certify.
+    train_split = prepare(train_clips, config=config, mode="utterance")
     mean, std = train_split[-2], train_split[-1]
     validation_split = (
-        *prepare(validation_clips, config=config, mean=mean, std=std)[:4],
+        *prepare(validation_clips, config=config, mean=mean, std=std, mode="utterance")[:4],
         validation_clips.transcripts,
     )
     recognizer, _, asr_val_cer, _ = train_ctc(train_split, validation_split, exp=asr_exp, config=config, device=device)
@@ -346,7 +351,10 @@ def run(exp: Experiment) -> dict[str, float]:
     synthetic_clips = audio.Clips(
         waveforms=waveforms, digits=np.arange(10, dtype=np.int64), speakers=["synthetic"] * 10, rate=config.rate
     )
-    synthetic_split = (*prepare(synthetic_clips, config=config, mean=mean, std=std)[:4], synthetic_clips.transcripts)
+    synthetic_split = (
+        *prepare(synthetic_clips, config=config, mean=mean, std=std, mode="utterance")[:4],
+        synthetic_clips.transcripts,
+    )
     heard = transcribe(recognizer, synthetic_split, device=device)
     summary["roundtrip/cer"] = character_error_rate(heard, synthetic_clips.transcripts)
     summary["roundtrip/exact"] = float(
@@ -361,14 +369,38 @@ def run(exp: Experiment) -> dict[str, float]:
         speakers=["vocoded"] * 10,
         rate=config.rate,
     )
-    vocoded_split = (*prepare(vocoded_real, config=config, mean=mean, std=std)[:4], vocoded_real.transcripts)
+    vocoded_split = (
+        *prepare(vocoded_real, config=config, mean=mean, std=std, mode="utterance")[:4],
+        vocoded_real.transcripts,
+    )
+    # The third rung of the ladder the round trip needs: the same speaker's
+    # *clean* audio. Without it "vocoded scores 0.22" has nothing to sit
+    # against, because this speaker is in the recogniser's training set and the
+    # held-out validation number is about a different voice entirely.
+    clean_real = audio.Clips(
+        waveforms=list(voice.waveforms[:10]),
+        digits=voice.digits[:10],
+        speakers=["clean"] * 10,
+        rate=config.rate,
+    )
+    clean_split = (
+        *prepare(clean_real, config=config, mean=mean, std=std, mode="utterance")[:4],
+        clean_real.transcripts,
+    )
+    summary["roundtrip/clean_real_cer"] = character_error_rate(
+        transcribe(recognizer, clean_split, device=device), clean_real.transcripts
+    )
+    summary["roundtrip/vocoder_cost"] = summary["roundtrip/vocoded_real_cer"] - summary["roundtrip/clean_real_cer"]
     summary["roundtrip/vocoded_real_cer"] = character_error_rate(
         transcribe(recognizer, vocoded_split, device=device), vocoded_real.transcripts
     )
+    summary["roundtrip/synthesiser_cost"] = summary["roundtrip/cer"] - summary["roundtrip/vocoded_real_cer"]
     print(
-        f"[i3] round trip: the recognizer reads the synthesiser at CER {summary['roundtrip/cer']:.3f} "
-        f"(exact {summary['roundtrip/exact']:.1f}); it reads *real* audio through the same vocoder at "
-        f"CER {summary['roundtrip/vocoded_real_cer']:.3f}, and held-out human speech at {asr_val_cer:.3f}"
+        f"[i3] round trip, same speaker throughout: clean audio "
+        f"{summary['roundtrip/clean_real_cer']:.3f} -> through the vocoder "
+        f"{summary['roundtrip/vocoded_real_cer']:.3f} ({summary['roundtrip/vocoder_cost']:+.3f}) -> "
+        f"synthesised {summary['roundtrip/cer']:.3f} ({summary['roundtrip/synthesiser_cost']:+.3f}). "
+        f"The judge reads a held-out human voice at {asr_val_cer:.3f}"
     )
     for digit, text in enumerate(heard):
         summary[f"roundtrip/{audio.DIGIT_WORDS[digit]}/correct"] = float(text == audio.DIGIT_WORDS[digit])
@@ -444,11 +476,12 @@ def run(exp: Experiment) -> dict[str, float]:
         "roundtrip",
         plotting.plot_comparison(
             {
-                "human speech": summary["roundtrip/recognizer_val_cer"],
+                "clean, same voice": summary["roundtrip/clean_real_cer"],
                 "real, vocoded": summary["roundtrip/vocoded_real_cer"],
                 "synthesised": summary["roundtrip/cer"],
+                "held-out human": summary["roundtrip/recognizer_val_cer"],
             },
-            title="What the recognizer makes of each -- the vocoder's share is the middle bar",
+            title="One voice through three stages: each step's cost is the gap to the bar before it",
             ylabel="CER",
         ),
     )

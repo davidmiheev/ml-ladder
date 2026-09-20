@@ -1,0 +1,1037 @@
+{
+  "part": "I",
+  "title": "Speech \u2014 recognition & synthesis",
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "reference_seed": 0,
+  "swept_rungs": [
+    "I1",
+    "I2",
+    "I3",
+    "I4"
+  ],
+  "rungs": {
+    "I1": {
+      "title": "Audio front end from scratch \u2014 STFT, mel filterbank and MFCCs, against torchaudio's",
+      "metrics": {
+        "corpus/clips": {
+          "reference": 40.0,
+          "median": 40.0,
+          "min": 40.0,
+          "max": 40.0,
+          "n_seeds": 3
+        },
+        "corpus/mean_duration_s": {
+          "reference": 0.4224093556404114,
+          "median": 0.4146905839443207,
+          "min": 0.38747185468673706,
+          "max": 0.4224093556404114,
+          "n_seeds": 3
+        },
+        "dct/correlation_after": {
+          "reference": 0.17686752005484413,
+          "median": 0.17686752005484413,
+          "min": 0.17352813019835123,
+          "max": 0.17993313277765594,
+          "n_seeds": 3
+        },
+        "dct/correlation_before": {
+          "reference": 0.7150043603961742,
+          "median": 0.6952103136229864,
+          "min": 0.687087007006681,
+          "max": 0.7150043603961742,
+          "n_seeds": 3
+        },
+        "dct/decorrelation": {
+          "reference": 4.042598438506185,
+          "median": 4.006326310485376,
+          "min": 3.8185685782268743,
+          "max": 4.042598438506185,
+          "n_seeds": 3
+        },
+        "dct/truncation_residual": {
+          "reference": 0.10781304416669968,
+          "median": 0.10852691250577612,
+          "min": 0.10781304416669968,
+          "max": 0.11247993822377711,
+          "n_seeds": 3
+        },
+        "mel/filters_above_half_nyquist": {
+          "reference": 12.0,
+          "median": 12.0,
+          "min": 12.0,
+          "max": 12.0,
+          "n_seeds": 3
+        },
+        "mel/filters_below_half_nyquist": {
+          "reference": 28.0,
+          "median": 28.0,
+          "min": 28.0,
+          "max": 28.0,
+          "n_seeds": 3
+        },
+        "mel/highest_spacing_hz": {
+          "reference": 187.5,
+          "median": 187.5,
+          "min": 187.5,
+          "max": 187.5,
+          "n_seeds": 3
+        },
+        "mel/lowest_spacing_hz": {
+          "reference": 37.5,
+          "median": 37.5,
+          "min": 37.5,
+          "max": 37.5,
+          "n_seeds": 3
+        },
+        "mel/quietest_energy": {
+          "reference": 9.466396936673623e-09,
+          "median": 9.466396936673623e-09,
+          "min": 9.466396936673623e-09,
+          "max": 3.367203649680835e-08,
+          "n_seeds": 3
+        },
+        "mel/spacing_ratio": {
+          "reference": 5.0,
+          "median": 5.0,
+          "min": 5.0,
+          "max": 5.0,
+          "n_seeds": 3
+        },
+        "reference/available": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "reference/filterbank": {
+          "reference": 2.497724024600178e-06,
+          "median": 2.497724024600178e-06,
+          "min": 2.497724024600178e-06,
+          "max": 2.497724024600178e-06,
+          "n_seeds": 3
+        },
+        "reference/log_guard_cost": {
+          "reference": 27492.275088832288,
+          "median": 27492.275088832288,
+          "min": 22050.608459627998,
+          "max": 39890.16081185045,
+          "n_seeds": 3
+        },
+        "reference/mel": {
+          "reference": 1.0009424654996717e-06,
+          "median": 1.1364883062070858e-06,
+          "min": 1.0009424654996717e-06,
+          "max": 1.2472815600854888e-06,
+          "n_seeds": 3
+        },
+        "reference/mfcc": {
+          "reference": 1.2640264378638728e-06,
+          "median": 1.2640264378638728e-06,
+          "min": 8.711662686249851e-07,
+          "max": 1.5759638838508778e-06,
+          "n_seeds": 3
+        },
+        "reference/mfcc_clamped": {
+          "reference": 0.034750962549310364,
+          "median": 0.034750962549310364,
+          "min": 0.034750962549310364,
+          "max": 0.034750962549310364,
+          "n_seeds": 3
+        },
+        "reference/spectrogram": {
+          "reference": 1.752947202285494e-07,
+          "median": 1.752947202285494e-07,
+          "min": 1.752947202285494e-07,
+          "max": 1.7542714357310163e-07,
+          "n_seeds": 3
+        },
+        "window/1024/bin_width_hz": {
+          "reference": 7.8125,
+          "median": 7.8125,
+          "min": 7.8125,
+          "max": 7.8125,
+          "n_seeds": 3
+        },
+        "window/1024/finest_separation_hz": {
+          "reference": 20.0,
+          "median": 20.0,
+          "min": 20.0,
+          "max": 20.0,
+          "n_seeds": 3
+        },
+        "window/1024/impulse_spread_ms": {
+          "reference": 96.0,
+          "median": 96.0,
+          "min": 96.0,
+          "max": 96.0,
+          "n_seeds": 3
+        },
+        "window/128/bin_width_hz": {
+          "reference": 62.5,
+          "median": 62.5,
+          "min": 62.5,
+          "max": 62.5,
+          "n_seeds": 3
+        },
+        "window/128/finest_separation_hz": {
+          "reference": 160.0,
+          "median": 160.0,
+          "min": 160.0,
+          "max": 160.0,
+          "n_seeds": 3
+        },
+        "window/128/impulse_spread_ms": {
+          "reference": 12.0,
+          "median": 12.0,
+          "min": 12.0,
+          "max": 12.0,
+          "n_seeds": 3
+        },
+        "window/256/bin_width_hz": {
+          "reference": 31.25,
+          "median": 31.25,
+          "min": 31.25,
+          "max": 31.25,
+          "n_seeds": 3
+        },
+        "window/256/finest_separation_hz": {
+          "reference": 80.0,
+          "median": 80.0,
+          "min": 80.0,
+          "max": 80.0,
+          "n_seeds": 3
+        },
+        "window/256/impulse_spread_ms": {
+          "reference": 24.0,
+          "median": 24.0,
+          "min": 24.0,
+          "max": 24.0,
+          "n_seeds": 3
+        },
+        "window/32/bin_width_hz": {
+          "reference": 250.0,
+          "median": 250.0,
+          "min": 250.0,
+          "max": 250.0,
+          "n_seeds": 3
+        },
+        "window/32/finest_separation_hz": {
+          "reference": 640.0,
+          "median": 640.0,
+          "min": 640.0,
+          "max": 640.0,
+          "n_seeds": 3
+        },
+        "window/32/impulse_spread_ms": {
+          "reference": 3.0,
+          "median": 3.0,
+          "min": 3.0,
+          "max": 3.0,
+          "n_seeds": 3
+        },
+        "window/512/bin_width_hz": {
+          "reference": 15.625,
+          "median": 15.625,
+          "min": 15.625,
+          "max": 15.625,
+          "n_seeds": 3
+        },
+        "window/512/finest_separation_hz": {
+          "reference": 40.0,
+          "median": 40.0,
+          "min": 40.0,
+          "max": 40.0,
+          "n_seeds": 3
+        },
+        "window/512/impulse_spread_ms": {
+          "reference": 48.0,
+          "median": 48.0,
+          "min": 48.0,
+          "max": 48.0,
+          "n_seeds": 3
+        },
+        "window/64/bin_width_hz": {
+          "reference": 125.0,
+          "median": 125.0,
+          "min": 125.0,
+          "max": 125.0,
+          "n_seeds": 3
+        },
+        "window/64/finest_separation_hz": {
+          "reference": 320.0,
+          "median": 320.0,
+          "min": 320.0,
+          "max": 320.0,
+          "n_seeds": 3
+        },
+        "window/64/impulse_spread_ms": {
+          "reference": 6.0,
+          "median": 6.0,
+          "min": 6.0,
+          "max": 6.0,
+          "n_seeds": 3
+        },
+        "window/resolution_product_mean": {
+          "reference": 1920.0,
+          "median": 1920.0,
+          "min": 1920.0,
+          "max": 1920.0,
+          "n_seeds": 3
+        },
+        "window/resolution_product_spread": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 1.921
+    },
+    "I2": {
+      "title": "Speech recognition with CTC on a small corpus, and the same audio through Whisper",
+      "metrics": {
+        "corpus/clips": {
+          "reference": 1200.0,
+          "median": 1200.0,
+          "min": 1200.0,
+          "max": 1200.0,
+          "n_seeds": 3
+        },
+        "corpus/test": {
+          "reference": 200.0,
+          "median": 200.0,
+          "min": 200.0,
+          "max": 200.0,
+          "n_seeds": 3
+        },
+        "corpus/train": {
+          "reference": 800.0,
+          "median": 800.0,
+          "min": 800.0,
+          "max": 800.0,
+          "n_seeds": 3
+        },
+        "corpus/train_speakers": {
+          "reference": 4.0,
+          "median": 4.0,
+          "min": 4.0,
+          "max": 4.0,
+          "n_seeds": 3
+        },
+        "ctc/beam/cer": {
+          "reference": 0.365,
+          "median": 0.31375,
+          "min": 0.27,
+          "max": 0.365,
+          "n_seeds": 3
+        },
+        "ctc/beam/exact": {
+          "reference": 0.465,
+          "median": 0.545,
+          "min": 0.465,
+          "max": 0.625,
+          "n_seeds": 3
+        },
+        "ctc/beam/wer": {
+          "reference": 0.535,
+          "median": 0.455,
+          "min": 0.375,
+          "max": 0.535,
+          "n_seeds": 3
+        },
+        "ctc/beam_gain_cer": {
+          "reference": 0.003750000000000031,
+          "median": 0.003750000000000031,
+          "min": 0.0012500000000000289,
+          "max": 0.0050000000000000044,
+          "n_seeds": 3
+        },
+        "ctc/greedy/cer": {
+          "reference": 0.36875,
+          "median": 0.315,
+          "min": 0.275,
+          "max": 0.36875,
+          "n_seeds": 3
+        },
+        "ctc/greedy/exact": {
+          "reference": 0.46,
+          "median": 0.54,
+          "min": 0.46,
+          "max": 0.615,
+          "n_seeds": 3
+        },
+        "ctc/greedy/wer": {
+          "reference": 0.54,
+          "median": 0.46,
+          "min": 0.385,
+          "max": 0.54,
+          "n_seeds": 3
+        },
+        "ctc/normalization": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "ctc/train_loss": {
+          "reference": 0.10318621814250946,
+          "median": 0.10318621814250946,
+          "min": 0.01101639081723988,
+          "max": 0.11710577428340913,
+          "n_seeds": 3
+        },
+        "ctc/val_cer": {
+          "reference": 0.2125,
+          "median": 0.22,
+          "min": 0.2125,
+          "max": 0.30625,
+          "n_seeds": 3
+        },
+        "leak/ratio": {
+          "reference": 4.334148550724638,
+          "median": 5.0211,
+          "min": 4.334148550724638,
+          "max": 6.042361111111112,
+          "n_seeds": 3
+        },
+        "leak/shuffled_cer": {
+          "reference": 0.08508014796547472,
+          "median": 0.06273525721455459,
+          "min": 0.045512010113780026,
+          "max": 0.08508014796547472,
+          "n_seeds": 3
+        },
+        "leak/speaker_held_out_cer": {
+          "reference": 0.36875,
+          "median": 0.315,
+          "min": 0.275,
+          "max": 0.36875,
+          "n_seeds": 3
+        },
+        "normalization/best_is_utterance": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "normalization/gain": {
+          "reference": 0.29125,
+          "median": 0.29125,
+          "min": 0.17875000000000002,
+          "max": 0.5,
+          "n_seeds": 3
+        },
+        "normalization/global/test_cer": {
+          "reference": 0.66,
+          "median": 0.66,
+          "min": 0.49375,
+          "max": 0.775,
+          "n_seeds": 3
+        },
+        "normalization/global/val_cer": {
+          "reference": 0.8975,
+          "median": 0.8425,
+          "min": 0.83875,
+          "max": 0.8975,
+          "n_seeds": 3
+        },
+        "normalization/utterance/test_cer": {
+          "reference": 0.36875,
+          "median": 0.315,
+          "min": 0.275,
+          "max": 0.36875,
+          "n_seeds": 3
+        },
+        "normalization/utterance/val_cer": {
+          "reference": 0.2125,
+          "median": 0.22,
+          "min": 0.2125,
+          "max": 0.30625,
+          "n_seeds": 3
+        },
+        "whisper/advantage_cer": {
+          "reference": -0.5071428571428571,
+          "median": -0.6357142857142857,
+          "min": -0.7142857142857143,
+          "max": -0.5071428571428571,
+          "n_seeds": 3
+        },
+        "whisper/advantage_exact": {
+          "reference": 0.0,
+          "median": -0.125,
+          "min": -0.35,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "whisper/available": {
+          "reference": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n_seeds": 3
+        },
+        "whisper/cer": {
+          "reference": 0.7571428571428571,
+          "median": 0.7571428571428571,
+          "min": 0.7571428571428571,
+          "max": 0.7571428571428571,
+          "n_seeds": 3
+        },
+        "whisper/cer_homophone_folded": {
+          "reference": 0.7571428571428571,
+          "median": 0.7571428571428571,
+          "min": 0.7571428571428571,
+          "max": 0.7571428571428571,
+          "n_seeds": 3
+        },
+        "whisper/clips": {
+          "reference": 40.0,
+          "median": 40.0,
+          "min": 40.0,
+          "max": 40.0,
+          "n_seeds": 3
+        },
+        "whisper/ctc_on_same_clips_cer": {
+          "reference": 0.25,
+          "median": 0.12142857142857143,
+          "min": 0.04285714285714286,
+          "max": 0.25,
+          "n_seeds": 3
+        },
+        "whisper/ctc_on_same_clips_exact": {
+          "reference": 0.55,
+          "median": 0.675,
+          "min": 0.55,
+          "max": 0.9,
+          "n_seeds": 3
+        },
+        "whisper/ctc_on_same_clips_wer": {
+          "reference": 0.45,
+          "median": 0.325,
+          "min": 0.1,
+          "max": 0.45,
+          "n_seeds": 3
+        },
+        "whisper/exact": {
+          "reference": 0.55,
+          "median": 0.55,
+          "min": 0.55,
+          "max": 0.55,
+          "n_seeds": 3
+        },
+        "whisper/exact_homophone_folded": {
+          "reference": 0.55,
+          "median": 0.55,
+          "min": 0.55,
+          "max": 0.55,
+          "n_seeds": 3
+        },
+        "whisper/homophone_share": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "whisper/wer": {
+          "reference": 0.45,
+          "median": 0.45,
+          "min": 0.45,
+          "max": 0.45,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 1169.822
+    },
+    "I3": {
+      "title": "Text-to-speech: a mel-spectrogram predictor plus a vocoder, evaluated without listening",
+      "metrics": {
+        "acoustic/train_l1": {
+          "reference": 1.4370534420013428,
+          "median": 1.4523471593856812,
+          "min": 1.4370534420013428,
+          "max": 1.5418411493301392,
+          "n_seeds": 3
+        },
+        "corpus/clips": {
+          "reference": 200.0,
+          "median": 200.0,
+          "min": 200.0,
+          "max": 200.0,
+          "n_seeds": 3
+        },
+        "corpus/frames": {
+          "reference": 48.0,
+          "median": 48.0,
+          "min": 48.0,
+          "max": 48.0,
+          "n_seeds": 3
+        },
+        "duration/mean_error_ms": {
+          "reference": 22.4,
+          "median": 26.4,
+          "min": 22.4,
+          "max": 28.0,
+          "n_seeds": 3
+        },
+        "duration/reference_mean_ms": {
+          "reference": 331.2,
+          "median": 331.2,
+          "min": 331.2,
+          "max": 331.2,
+          "n_seeds": 3
+        },
+        "duration/relative_error": {
+          "reference": 0.06763285024154589,
+          "median": 0.07971014492753623,
+          "min": 0.06763285024154589,
+          "max": 0.08454106280193237,
+          "n_seeds": 3
+        },
+        "mel/constant_baseline": {
+          "reference": 1.5043559529709938,
+          "median": 1.5043559529709938,
+          "min": 1.5043559529709938,
+          "max": 1.5043559529709938,
+          "n_seeds": 3
+        },
+        "mel/distance": {
+          "reference": 0.6010706632562044,
+          "median": 0.6356696705433107,
+          "min": 0.6010706632562044,
+          "max": 0.7523267762665637,
+          "n_seeds": 3
+        },
+        "mel/gain_over_constant": {
+          "reference": 0.9032852897147894,
+          "median": 0.8686862824276831,
+          "min": 0.75202917670443,
+          "max": 0.9032852897147894,
+          "n_seeds": 3
+        },
+        "mel/within_word_spread": {
+          "reference": 1.6725430732512148,
+          "median": 1.6725430732512148,
+          "min": 1.6725430732512148,
+          "max": 1.6725430732512148,
+          "n_seeds": 3
+        },
+        "pipeline/mel_distance": {
+          "reference": 3.846104091448211,
+          "median": 3.9547470429276785,
+          "min": 3.846104091448211,
+          "max": 4.0581400189713275,
+          "n_seeds": 3
+        },
+        "pipeline/over_ceiling": {
+          "reference": 1.0838123780160394,
+          "median": 1.1934322314059154,
+          "min": 1.0838123780160394,
+          "max": 1.3236206763568514,
+          "n_seeds": 3
+        },
+        "roundtrip/cer": {
+          "reference": 0.775,
+          "median": 0.775,
+          "min": 0.725,
+          "max": 0.8,
+          "n_seeds": 3
+        },
+        "roundtrip/eight/correct": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "roundtrip/exact": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "roundtrip/five/correct": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "roundtrip/four/correct": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "roundtrip/nine/correct": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "roundtrip/one/correct": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "roundtrip/recognizer_val_cer": {
+          "reference": 0.905,
+          "median": 0.8575,
+          "min": 0.85625,
+          "max": 0.905,
+          "n_seeds": 3
+        },
+        "roundtrip/seven/correct": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "roundtrip/six/correct": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "roundtrip/three/correct": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "roundtrip/two/correct": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "roundtrip/vocoded_real_cer": {
+          "reference": 0.5,
+          "median": 0.225,
+          "min": 0.15,
+          "max": 0.5,
+          "n_seeds": 3
+        },
+        "roundtrip/zero/correct": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "speaker/gap_to_nearest_other": {
+          "reference": 3.5113365395982954,
+          "median": 3.596271415741696,
+          "min": 3.5113365395982954,
+          "max": 3.6862838029871674,
+          "n_seeds": 3
+        },
+        "speaker/gap_to_target": {
+          "reference": 4.386602360298979,
+          "median": 4.495795352969177,
+          "min": 4.386602360298979,
+          "max": 4.598977626343894,
+          "n_seeds": 3
+        },
+        "speaker/margin": {
+          "reference": -0.8752658207006836,
+          "median": -0.8995239372274808,
+          "min": -0.9126938233567263,
+          "max": -0.8752658207006836,
+          "n_seeds": 3
+        },
+        "speaker/matches_target": {
+          "reference": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "n_seeds": 3
+        },
+        "vocoder/ceiling_mel_distance": {
+          "reference": 2.762291713432172,
+          "median": 2.761314811521763,
+          "min": 2.734519342614476,
+          "max": 2.762291713432172,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 428.156
+    },
+    "I4": {
+      "title": "Streaming and latency \u2014 chunked inference against full-utterance, with the accuracy it costs",
+      "metrics": {
+        "algorithmic/offline_latency_ms": {
+          "reference": 392.0,
+          "median": 392.0,
+          "min": 392.0,
+          "max": 392.0,
+          "n_seeds": 3
+        },
+        "algorithmic/streaming_latency_ms": {
+          "reference": 64.0,
+          "median": 64.0,
+          "min": 64.0,
+          "max": 64.0,
+          "n_seeds": 3
+        },
+        "bidirectional/parameters": {
+          "reference": 910928.0,
+          "median": 910928.0,
+          "min": 910928.0,
+          "max": 910928.0,
+          "n_seeds": 3
+        },
+        "causal/cer": {
+          "reference": 0.6475,
+          "median": 0.6725,
+          "min": 0.6475,
+          "max": 0.7308333333333333,
+          "n_seeds": 3
+        },
+        "causal/cost": {
+          "reference": 0.21833333333333332,
+          "median": 0.25666666666666665,
+          "min": 0.21833333333333332,
+          "max": 0.26999999999999996,
+          "n_seeds": 3
+        },
+        "causal/parameter_ratio": {
+          "reference": 1.2158326453901955,
+          "median": 1.2158326453901955,
+          "min": 1.2158326453901955,
+          "max": 1.2158326453901955,
+          "n_seeds": 3
+        },
+        "causal/parameters": {
+          "reference": 1107536.0,
+          "median": 1107536.0,
+          "min": 1107536.0,
+          "max": 1107536.0,
+          "n_seeds": 3
+        },
+        "chunk/16/cer": {
+          "reference": 0.6341666666666667,
+          "median": 0.6341666666666667,
+          "min": 0.5708333333333333,
+          "max": 0.6441666666666667,
+          "n_seeds": 3
+        },
+        "chunk/16/latency_ms": {
+          "reference": 128.0,
+          "median": 128.0,
+          "min": 128.0,
+          "max": 128.0,
+          "n_seeds": 3
+        },
+        "chunk/32/cer": {
+          "reference": 0.5716666666666667,
+          "median": 0.5716666666666667,
+          "min": 0.5316666666666666,
+          "max": 0.575,
+          "n_seeds": 3
+        },
+        "chunk/32/latency_ms": {
+          "reference": 256.0,
+          "median": 256.0,
+          "min": 256.0,
+          "max": 256.0,
+          "n_seeds": 3
+        },
+        "chunk/4/cer": {
+          "reference": 0.8458333333333333,
+          "median": 0.8458333333333333,
+          "min": 0.8041666666666667,
+          "max": 0.8608333333333333,
+          "n_seeds": 3
+        },
+        "chunk/4/latency_ms": {
+          "reference": 32.0,
+          "median": 32.0,
+          "min": 32.0,
+          "max": 32.0,
+          "n_seeds": 3
+        },
+        "chunk/8/cer": {
+          "reference": 0.7208333333333333,
+          "median": 0.7208333333333333,
+          "min": 0.6766666666666666,
+          "max": 0.755,
+          "n_seeds": 3
+        },
+        "chunk/8/latency_ms": {
+          "reference": 64.0,
+          "median": 64.0,
+          "min": 64.0,
+          "max": 64.0,
+          "n_seeds": 3
+        },
+        "chunk/cost_at_largest": {
+          "reference": 0.14250000000000002,
+          "median": 0.1291666666666666,
+          "min": 0.10083333333333327,
+          "max": 0.14250000000000002,
+          "n_seeds": 3
+        },
+        "chunk/cost_at_smallest": {
+          "reference": 0.4166666666666667,
+          "median": 0.40166666666666667,
+          "min": 0.38666666666666666,
+          "max": 0.4166666666666667,
+          "n_seeds": 3
+        },
+        "corpus/test": {
+          "reference": 300.0,
+          "median": 300.0,
+          "min": 300.0,
+          "max": 300.0,
+          "n_seeds": 3
+        },
+        "frame_ms": {
+          "reference": 8.0,
+          "median": 8.0,
+          "min": 8.0,
+          "max": 8.0,
+          "n_seeds": 3
+        },
+        "lookahead/0/cer": {
+          "reference": 0.7208333333333333,
+          "median": 0.7208333333333333,
+          "min": 0.6766666666666666,
+          "max": 0.755,
+          "n_seeds": 3
+        },
+        "lookahead/0/latency_ms": {
+          "reference": 64.0,
+          "median": 64.0,
+          "min": 64.0,
+          "max": 64.0,
+          "n_seeds": 3
+        },
+        "lookahead/16/cer": {
+          "reference": 0.5791666666666667,
+          "median": 0.5791666666666667,
+          "min": 0.5291666666666667,
+          "max": 0.5833333333333334,
+          "n_seeds": 3
+        },
+        "lookahead/16/latency_ms": {
+          "reference": 192.0,
+          "median": 192.0,
+          "min": 192.0,
+          "max": 192.0,
+          "n_seeds": 3
+        },
+        "lookahead/2/cer": {
+          "reference": 0.6716666666666666,
+          "median": 0.6716666666666666,
+          "min": 0.6483333333333333,
+          "max": 0.705,
+          "n_seeds": 3
+        },
+        "lookahead/2/latency_ms": {
+          "reference": 80.0,
+          "median": 80.0,
+          "min": 80.0,
+          "max": 80.0,
+          "n_seeds": 3
+        },
+        "lookahead/4/cer": {
+          "reference": 0.6391666666666667,
+          "median": 0.6391666666666667,
+          "min": 0.6125,
+          "max": 0.6758333333333333,
+          "n_seeds": 3
+        },
+        "lookahead/4/latency_ms": {
+          "reference": 96.0,
+          "median": 96.0,
+          "min": 96.0,
+          "max": 96.0,
+          "n_seeds": 3
+        },
+        "lookahead/8/cer": {
+          "reference": 0.6191666666666666,
+          "median": 0.6191666666666666,
+          "min": 0.565,
+          "max": 0.635,
+          "n_seeds": 3
+        },
+        "lookahead/8/latency_ms": {
+          "reference": 128.0,
+          "median": 128.0,
+          "min": 128.0,
+          "max": 128.0,
+          "n_seeds": 3
+        },
+        "lookahead/cer_per_10ms": {
+          "reference": 0.011067708333333329,
+          "median": 0.011523437499999997,
+          "min": 0.011067708333333329,
+          "max": 0.01341145833333333,
+          "n_seeds": 3
+        },
+        "lookahead/recovered_cer": {
+          "reference": 0.1416666666666666,
+          "median": 0.14749999999999996,
+          "min": 0.1416666666666666,
+          "max": 0.17166666666666663,
+          "n_seeds": 3
+        },
+        "lookahead/remaining_gap": {
+          "reference": 0.15000000000000008,
+          "median": 0.12666666666666665,
+          "min": 0.10916666666666669,
+          "max": 0.15000000000000008,
+          "n_seeds": 3
+        },
+        "offline/cer": {
+          "reference": 0.42916666666666664,
+          "median": 0.42916666666666664,
+          "min": 0.4025,
+          "max": 0.4741666666666667,
+          "n_seeds": 3
+        },
+        "wallclock/chunked_ms": {
+          "reference": 30.000019073486328,
+          "median": 28.909385204315186,
+          "min": 26.513755321502686,
+          "max": 30.000019073486328,
+          "n_seeds": 3
+        },
+        "wallclock/offline_ms": {
+          "reference": 6.115615367889404,
+          "median": 6.15769624710083,
+          "min": 6.115615367889404,
+          "max": 6.3102126121521,
+          "n_seeds": 3
+        },
+        "wallclock/overhead": {
+          "reference": 4.905478397317817,
+          "median": 4.581364683123669,
+          "min": 4.30579136377276,
+          "max": 4.905478397317817,
+          "n_seeds": 3
+        }
+      },
+      "elapsed_sec_median": 1159.335
+    }
+  },
+  "figures": 16
+}
