@@ -184,7 +184,7 @@ def voiced_frames(log_mel: NDArray[np.float64], *, threshold: float = 0.25) -> i
         "epochs": 400,
         "lr": 3e-3,
         "griffin_lim_iterations": 64,
-        "asr_epochs": 60,
+        "asr_epochs": 40,
         "asr_channels": 32,
         "asr_hidden": 128,
         "target_speaker": "george",
@@ -243,8 +243,8 @@ def run(exp: Experiment) -> dict[str, float]:
         ceiling.append(mel_distance(rebuilt, reference))
     summary["vocoder/ceiling_mel_distance"] = float(np.mean(ceiling))
     print(
-        f"[i3] vocoder ceiling: re-analysing Griffin-Lim's output of a *real* clip already costs "
-        f"{summary['vocoder/ceiling_mel_distance']:.3f} mel distance -- no synthesiser can score below this"
+        f"[i3] vocoder ceiling: re-analysing Griffin-Lim's output of a *real* clip costs "
+        f"{summary['vocoder/ceiling_mel_distance']:.3f} mel distance before any synthesiser is involved"
     )
 
     # -- train the acoustic model ---------------------------------------------
@@ -289,10 +289,26 @@ def run(exp: Experiment) -> dict[str, float]:
         if len(members) >= 2:
             within.extend(mel_distance(members[i], members[i + 1]) for i in range(len(members) - 1))
     summary["mel/within_word_spread"] = float(np.mean(within)) if within else float("nan")
+    # The ceiling above bounds the *pipeline*, not the acoustic model: the
+    # predicted mel never passes through Griffin-Lim, so comparing the two
+    # directly -- as an earlier version of this rung did -- puts a waveform
+    # round-trip next to a spectrogram prediction and calls one a bound on the
+    # other. This is the number the ceiling actually bounds.
+    pipeline = [
+        mel_distance(log_compress(mel_spectrogram(waveforms[digit], config=config)), references[digit])
+        for digit in range(10)
+    ]
+    summary["pipeline/mel_distance"] = float(np.mean(pipeline))
+    summary["pipeline/over_ceiling"] = summary["pipeline/mel_distance"] - summary["vocoder/ceiling_mel_distance"]
     print(
-        f"[i3] mel distance {summary['mel/distance']:.3f}; a constant spectrogram scores "
-        f"{summary['mel/constant_baseline']:.3f} and two real recordings of the same digit differ by "
-        f"{summary['mel/within_word_spread']:.3f} -- the metric's own noise floor"
+        f"[i3] mel distance {summary['mel/distance']:.3f} for the acoustic model alone; a constant "
+        f"spectrogram scores {summary['mel/constant_baseline']:.3f} and two real recordings of the same "
+        f"digit differ by {summary['mel/within_word_spread']:.3f} -- the metric's own noise floor"
+    )
+    print(
+        f"[i3] through the vocoder the whole pipeline scores {summary['pipeline/mel_distance']:.3f}, "
+        f"against the vocoder's own {summary['vocoder/ceiling_mel_distance']:.3f} on real audio "
+        f"({summary['pipeline/over_ceiling']:+.3f}) -- that comparison is like for like and the one above is not"
     )
 
     # -- metric 2: the ASR round trip ----------------------------------------
@@ -417,8 +433,10 @@ def run(exp: Experiment) -> dict[str, float]:
                 "two real clips": summary["mel/within_word_spread"],
                 "the synthesiser": summary["mel/distance"],
                 "one constant mel": summary["mel/constant_baseline"],
+                "vocoder on real audio": summary["vocoder/ceiling_mel_distance"],
+                "the whole pipeline": summary["pipeline/mel_distance"],
             },
-            title="Mel distance, with the floor and the ceiling that make it readable",
+            title="Mel distance -- the first three measure the mel, the last two the waveform",
             ylabel="mel distance",
         ),
     )

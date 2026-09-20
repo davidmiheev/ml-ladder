@@ -441,13 +441,22 @@ def run(exp: Experiment) -> dict[str, float]:
         summary["whisper/wer"] = word_error_rate(whisper, subset)
         summary["whisper/exact"] = float(np.mean([p == t for p, t in zip(whisper, subset, strict=True)]))
         summary["whisper/clips"] = float(len(whisper))
+        # Scored on the *same* clips, because Whisper runs on a subset: an exact
+        # match rate computed over 40 clips and one over 200 are not comparable
+        # however tempting the table looks.
         matched = character_error_rate(greedy[: len(whisper)], subset)
         summary["whisper/ctc_on_same_clips_cer"] = matched
+        summary["whisper/ctc_on_same_clips_wer"] = word_error_rate(greedy[: len(whisper)], subset)
+        summary["whisper/ctc_on_same_clips_exact"] = float(
+            np.mean([p == t for p, t in zip(greedy[: len(whisper)], subset, strict=True)])
+        )
         summary["whisper/advantage_cer"] = matched - summary["whisper/cer"]
+        summary["whisper/advantage_exact"] = summary["whisper/exact"] - summary["whisper/ctc_on_same_clips_exact"]
         print(
             f"[i2] whisper-tiny on {len(whisper)} of the same clips: CER {summary['whisper/cer']:.3f}, "
             f"WER {summary['whisper/wer']:.3f}, exact {summary['whisper/exact']:.3f} "
-            f"(the CTC model scores CER {matched:.3f} on those clips)"
+            f"(the CTC model scores CER {matched:.3f}, exact "
+            f"{summary['whisper/ctc_on_same_clips_exact']:.3f} on those same clips)"
         )
 
         # How much of that error is spelling rather than hearing.

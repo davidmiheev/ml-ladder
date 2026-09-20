@@ -73,11 +73,18 @@ def chunked_logits(model, features: NDArray[np.float32], *, chunk: int, lookahea
 def make_causal_crnn(*, n_mels: int, num_symbols: int, channels: int, hidden: int):
     """I2's recogniser with the backward pass removed.
 
-    One flag — ``bidirectional=False`` — and a doubled hidden size so the
-    parameter count is matched, because otherwise "causal is worse" would be
-    partly "causal is smaller". The convolution is already causal in effect: it
-    strides only in frequency, so no time step ever mixes with its neighbours
-    there.
+    One flag — ``bidirectional=False`` — and a doubled hidden size, so that
+    "causal is worse" is not partly "causal is smaller". Doubling does not make
+    the counts equal: a unidirectional GRU of width $2h$ has more parameters
+    than a bidirectional one of width $h$, because the recurrent matrix is
+    $(2h)^2$ against two of $h^2$. Measured here it is **1.22x** the
+    bidirectional model, which is reported as ``causal/parameter_ratio`` rather
+    than described as matched. The direction of the bias is the useful part:
+    the causal arm is the larger one, so any accuracy it still gives up is a
+    cost of causality and not of capacity.
+
+    The convolution is already causal in effect: it strides only in frequency,
+    so no time step ever mixes with its neighbours there.
     """
     vision.require_torch()
     from torch import nn
@@ -117,7 +124,7 @@ def make_causal_crnn(*, n_mels: int, num_symbols: int, channels: int, hidden: in
         "per_combination": 30,
         "channels": 32,
         "hidden": 128,
-        "epochs": 60,
+        "epochs": 40,
         "batch_size": 32,
         "lr": 3e-3,
         "eval_every": 10,
