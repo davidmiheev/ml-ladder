@@ -28,6 +28,8 @@ Run with ``ladder run I2`` (``--help`` for flags).
 
 from __future__ import annotations
 
+import time
+
 import numpy as np
 from numpy.typing import NDArray
 
@@ -123,8 +125,13 @@ def prepare(clips: audio.Clips, *, config: audio.FrontEndConfig, mean=None, std=
     return padded, lengths, flat, target_lengths, mean, std
 
 
-def train_ctc(train, validation, *, exp: Experiment, config: audio.FrontEndConfig, device):
-    """Full-batch-free training loop with validation-CER model selection."""
+def train_ctc(train, validation, *, exp: Experiment, config: audio.FrontEndConfig, device, progress: str = ""):
+    """Minibatch training loop with validation-CER model selection.
+
+    ``progress`` names the arm in the per-eval log line. A speech rung on CPU
+    runs for long enough that a silent loop is indistinguishable from a hung
+    one, which cost twenty minutes of not knowing.
+    """
     torch = vision.require_torch()
 
     torchkit.seed_torch(exp.seed)
@@ -142,6 +149,7 @@ def train_ctc(train, validation, *, exp: Experiment, config: audio.FrontEndConfi
     rng = np.random.default_rng(exp.seed)
     order = np.arange(len(lengths))
     curve: list[float] = []
+    started = time.time()
     best_state, best_cer = None, float("inf")
     for epoch in range(exp["epochs"]):
         model.train()
@@ -175,6 +183,12 @@ def train_ctc(train, validation, *, exp: Experiment, config: audio.FrontEndConfi
             cer = character_error_rate(predictions, validation[-1])
             if cer < best_cer:
                 best_cer, best_state = cer, {k: v.detach().clone() for k, v in model.state_dict().items()}
+            if progress:
+                print(
+                    f"[{progress}] epoch {epoch + 1:>3}/{exp['epochs']}  loss {curve[-1]:.3f}  "
+                    f"val CER {cer:.3f}  ({time.time() - started:.0f}s)",
+                    flush=True,
+                )
     if best_state is not None:
         model.load_state_dict(best_state)
     return model, curve, best_cer, (mean, std)
@@ -271,16 +285,16 @@ def whisper_transcribe(clips: audio.Clips, *, model_name: str, config: audio.Fro
 @experiment(
     "i2_asr_ctc_whisper",
     defaults={
-        "per_combination": 30,
+        "per_combination": 20,
         "channels": 32,
         "hidden": 128,
-        "epochs": 60,
+        "epochs": 40,
         "batch_size": 32,
         "lr": 3e-3,
         "eval_every": 5,
         "beam_width": 8,
         "whisper": "openai/whisper-tiny",
-        "whisper_clips": 60,
+        "whisper_clips": 40,
     },
     description="A CTC speech recogniser on spoken digits, split by speaker, against Whisper on the same audio.",
 )
@@ -310,7 +324,9 @@ def run(exp: Experiment) -> dict[str, float]:
     validation = (*prepare(validation_clips, config=config, mean=mean, std=std)[:4], validation_clips.transcripts)
     test = (*prepare(test_clips, config=config, mean=mean, std=std)[:4], test_clips.transcripts)
 
-    model, curve, best_validation_cer, _ = train_ctc(train, validation, exp=exp, config=config, device=device)
+    model, curve, best_validation_cer, _ = train_ctc(
+        train, validation, exp=exp, config=config, device=device, progress="i2 speaker-held-out"
+    )
     summary["ctc/val_cer"] = best_validation_cer
     summary["ctc/train_loss"] = curve[-1]
 
@@ -348,7 +364,9 @@ def run(exp: Experiment) -> dict[str, float]:
         *prepare(shuffled_test, config=config, mean=leaky_mean, std=leaky_std)[:4],
         shuffled_test.transcripts,
     )
-    leaky_model, _, _, _ = train_ctc(leaky_train, leaky_validation, exp=exp, config=config, device=device)
+    leaky_model, _, _, _ = train_ctc(
+        leaky_train, leaky_validation, exp=exp, config=config, device=device, progress="i2 shuffled"
+    )
     leaky_predictions = transcribe(leaky_model, leaky_test, device=device)
     summary["leak/shuffled_cer"] = character_error_rate(leaky_predictions, shuffled_test.transcripts)
     summary["leak/speaker_held_out_cer"] = summary["ctc/greedy/cer"]
