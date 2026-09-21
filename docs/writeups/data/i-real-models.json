@@ -1,9 +1,9 @@
 {
-  "what": "Whisper tiny.en through the davidmiheev/candle fork (ignite-perf), on part I's own held-out speaker",
+  "what": "Whisper tiny.en through candle-examples/examples/whisper in the davidmiheev/candle fork (ignite-perf), on part I's own held-out speaker. NOT the ignite-catalog candle-transcription executor -- see scope_correction.",
   "date": "2026-09-20",
   "hardware": "Kaggle Tesla T4, sm_75, CUDA 12.8, torch 2.10.0+cu128",
   "kernel": "https://www.kaggle.com/code/davidmiheev/ml-ladder-whisper-candle",
-  "headline": "The fork's whisper returns an EMPTY transcription for every one of 40 isolated spoken digits, while the transformers implementation of the same weights reads them at 0.75 exact-match. The same binary transcribes the example's own long samples correctly, so this is a property of the fork's decode on short utterances and not of the build or of the harness around it.",
+  "headline": "The fork's whisper EXAMPLE returns an empty transcription for every one of 40 isolated spoken digits, while the transformers implementation of the same weights reads them at 0.75 exact-match. The same binary transcribes the example's own long samples correctly, so this is a property of that example's decode on short utterances and not of the build or of the harness around it.",
   "measured": {
     "candle_exact_match": 0.0,
     "transformers_exact_match": 0.75,
@@ -35,5 +35,11 @@
     "passed --timestamps false to a clap flag that takes no value",
     "parsed '0.0s -- 1.8s:' when the example prints '0.0s-1.8s:'",
     "published the candle checkout into /kaggle/working, making the output undownloadable"
-  ]
+  ],
+  "scope_correction": {
+    "what_was_run": "candle-examples/examples/whisper from davidmiheev/candle@ignite-perf",
+    "what_was_NOT_run": "models/executors/exp/candle-transcription from ignite-catalog@perf/exp-executors",
+    "why_it_matters": "They share the model (candle_transformers::models::whisper) and nothing else that decides this result. The executor carries its own Decoder (lib.rs:389) with zero references to apply_timestamp_rules -- the rewritten function this record names as the lead -- decodes each window at a single temperature with no fallback loop, and resolves a no_timestamps_token. So the empty-transcription finding most likely does NOT transfer to the executor, and an earlier version of this record said 'the fork's whisper' in a way that implied it did.",
+    "status": "the executor's behaviour on short utterances is untested"
+  }
 }

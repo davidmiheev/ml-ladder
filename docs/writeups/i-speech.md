@@ -460,14 +460,23 @@ state across chunks would remove the 4.9×. Neither is implemented.
 7. **Designing for a constraint beat retrofitting it.** A causal model with zero
    lookahead latency (0.673) beats chunking a bidirectional one (0.721), which is
    worth about four frames of delay for free.
-8. **Running the real model found three defects the config could not.** Whisper
-   through the candle fork returns an *empty* transcription for all 40 isolated
-   digits while transformers reads the same files at 0.75 — established as real
-   by a control showing the same binary transcribing the example's own long
-   samples correctly. Getting that far also required fixing a
+8. **Running the real model found three defects the config could not.** The
+   candle fork's whisper *example* returns an empty transcription for all 40
+   isolated digits while transformers reads the same files at 0.75 — established
+   as real by a control showing the same binary transcribing the example's own
+   long samples correctly. Getting that far also required fixing a
    `candle-transformers` that will not build without CUDA (contradicting the
    catalog's own `whisper-cpu.yaml`) and a `candle-examples` that declares
-   symphonia 0.6 while using the 0.5 API. Details in
+   symphonia 0.6 while using the 0.5 API.
+
+   **The scope of that first finding is the example, not the production path.**
+   ignite-catalog's `candle-transcription` executor shares the model and none of
+   the decode: it has its own `Decoder`, no `apply_timestamp_rules` at all — the
+   function this record names as the lead — no temperature-fallback loop, and a
+   `no_timestamps_token`. So the empty transcriptions most likely do *not*
+   transfer to it, and the executor is untested. Saying "the fork's whisper"
+   without that qualification, as an earlier version of this section did, points
+   the finding at code it was never run against. Details in
    [`data/i-real-models.json`](data/i-real-models.json).
 9. **Five of my own mistakes in this part were metrics, not models.** A scoring
    rule that counted `"1."` as silence; a judge that could not hear; a ceiling
