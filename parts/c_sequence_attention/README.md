@@ -72,9 +72,14 @@ At matched budgets on this corpus, **recurrence beats the transformer**:
 | C3 transformer at C1's budget | 242k | 2.508 |
 
 500 steps, 64-character context and 250k characters of Shakespeare is a regime
-transformers are not built for, and the transformer here gets no warmup (part
-B5's lesson about Adam's schedule applies directly). The writeup takes this
-apart rather than explaining it away.
+transformers are not built for. The missing warmup was the first suspect, and a
+GPU rerun ruled it out (2.310 without, 2.312 with). The same study on enwik8
+then showed where attention does win: a 4M transformer copies a sequence 512
+symbols back perfectly where a same-size LSTM fails at 128, and a 25M
+transformer is the best language model at 64 and 256 bytes of context. At
+1024 bytes, with a 49M-token budget, it is still too under-trained to profit
+([writeup](../../docs/writeups/c-sequence-attention.md#part-c-at-scale-more-context-more-data-a-bigger-transformer),
+[`tools/gpu/c_context_scaling.py`](../../tools/gpu/c_context_scaling.py)).
 
 ## C5 — what changed since C3
 
