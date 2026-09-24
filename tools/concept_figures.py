@@ -1660,6 +1660,281 @@ def h5_pipeline():
 
 
 # =============================================================================
+# Part I
+
+
+def _spoken_digit(digit: int = 7, speaker: str = "jackson"):
+    from mlladder import audio
+
+    clips = audio.load_fsdd(speakers=(speaker,), per_combination=1, digits=(digit,))
+    return clips.waveforms[0], audio.FrontEndConfig()
+
+
+@concept("i", "i1_concept_frontend")
+def i1_frontend():
+    """A real spoken 'seven' through I1's own front end, stage by stage."""
+    from parts.i_speech.i1_audio_frontend import (
+        dct_matrix,
+        frame,
+        hann_window,
+        log_compress,
+        mel_filterbank,
+        power_spectrogram,
+    )
+
+    wave, cfg = _spoken_digit()
+    power = power_spectrogram(wave, n_fft=cfg.n_fft, hop=cfg.hop)
+    bank = mel_filterbank(n_fft=cfg.n_fft, n_mels=cfg.n_mels, rate=cfg.rate)
+    bank = np.asarray(bank)
+    if bank.shape[0] != cfg.n_mels:
+        bank = bank.T
+    log_mel = log_compress(bank @ power)
+    mfccs = dct_matrix(13, cfg.n_mels) @ log_mel
+    frames = frame(wave, n_fft=cfg.n_fft, hop=cfg.hop)
+    loud = int(np.argmax((frames**2).sum(1)))
+    seconds = np.arange(len(wave)) / cfg.rate
+    duration = len(wave) / cfg.rate
+    plotting.use_house_style()
+    fig, axes = plt.subplots(2, 3, figsize=(13, 6.2))
+    ax = axes[0, 0]
+    ax.plot(seconds, wave, color=P[0], linewidth=0.5)
+    ax.axvspan(
+        loud * cfg.hop / cfg.rate - cfg.n_fft / 2 / cfg.rate,
+        loud * cfg.hop / cfg.rate + cfg.n_fft / 2 / cfg.rate,
+        color=P[1],
+        alpha=0.3,
+    )
+    ax.set_title("1. waveform, 8 kHz: 'seven' (shaded: one 32 ms frame)", fontsize=9)
+    ax.set_xlabel("seconds")
+    ax = axes[0, 1]
+    ax.plot(frames[loud], color=GREY, linewidth=0.7, label="raw frame")
+    ax.plot(frames[loud] * hann_window(cfg.n_fft), color=P[0], linewidth=0.9, label="× Hann window")
+    ax.set_title("2. frame × window (tapers the edges so\nthe FFT does not see a jump)", fontsize=9)
+    ax.set_xlabel("sample in frame")
+    ax.legend(fontsize=7)
+    ax = axes[0, 2]
+    ax.imshow(
+        10 * np.log10(power + 1e-10), origin="lower", aspect="auto", cmap="magma", extent=(0, duration, 0, cfg.rate / 2)
+    )
+    ax.set_title(
+        "3. power spectrogram |FFT|², one column per\nframe (8 ms apart), 129 linear-frequency bins", fontsize=9
+    )
+    ax.set_xlabel("seconds")
+    ax.set_ylabel("Hz")
+    ax = axes[1, 0]
+    freqs = np.linspace(0, cfg.rate / 2, bank.shape[1])
+    for m in range(0, cfg.n_mels, 2):
+        ax.plot(freqs, bank[m], linewidth=0.7, color=P[m % 4])
+    ax.set_title("4. 40 mel filters: narrow at low frequencies,\nwide at high ones, like the ear", fontsize=9)
+    ax.set_xlabel("Hz")
+    ax = axes[1, 1]
+    ax.imshow(log_mel, origin="lower", aspect="auto", cmap="magma", extent=(0, duration, 0, cfg.n_mels))
+    ax.set_title("5. log-mel spectrogram: 40 numbers per frame\n(what I2–I4 and Whisper actually read)", fontsize=9)
+    ax.set_xlabel("seconds")
+    ax.set_ylabel("mel band")
+    ax = axes[1, 2]
+    ax.imshow(mfccs, origin="lower", aspect="auto", cmap="RdBu_r", extent=(0, duration, 0, 13))
+    ax.set_title("6. MFCCs: a DCT of each log-mel column,\nkeeping 13 smooth-envelope coefficients", fontsize=9)
+    ax.set_xlabel("seconds")
+    ax.set_ylabel("coefficient")
+    fig.suptitle("The speech front end, computed by I1's own functions on a real recording", fontsize=10.5)
+    fig.tight_layout()
+    return fig
+
+
+@concept("i", "i2_concept_recognisers")
+def i2_recognisers():
+    """The small CTC recogniser against Whisper's encoder-decoder, including how little of Whisper's window a digit fills."""
+    from parts.i_speech.i2_asr_ctc_whisper import log_mel_features
+
+    wave, cfg = _spoken_digit()
+    features = np.asarray(log_mel_features(wave, config=cfg))
+    if features.shape[0] != cfg.n_mels:
+        features = features.T
+    duration = len(wave) / cfg.rate
+    plotting.use_house_style()
+    fig = plt.figure(figsize=(13, 4.6))
+    grid = fig.add_gridspec(2, 2, width_ratios=[1, 1.25], height_ratios=[1, 1])
+    ax = fig.add_subplot(grid[:, 0])
+    ax.imshow(features, origin="lower", aspect="auto", cmap="magma", extent=(0, duration, 0, cfg.n_mels))
+    frames = features.shape[1]
+    voiced = np.flatnonzero(features.mean(0) > np.percentile(features.mean(0), 45))
+    letters = dict(zip(np.linspace(voiced[0], voiced[-1], 5).astype(int).tolist(), "seven", strict=True))
+    for index in range(frames):
+        if index in letters:
+            ax.text(
+                (index + 0.5) * duration / frames,
+                -3.5,
+                letters[index],
+                ha="center",
+                fontsize=8.5,
+                color=P[4],
+                fontweight="bold",
+            )
+        elif index % 5 == 0 and all(abs(index - k) > 2 for k in letters):
+            ax.text((index + 0.5) * duration / frames, -3.5, "∅", ha="center", fontsize=7, color="#999")
+    ax.set_ylim(-6, cfg.n_mels)
+    ax.set_xlabel("seconds")
+    ax.set_title(
+        "I2's recogniser: conv + BiGRU over log-mel frames, CTC over\nletters and blanks per frame (placement illustrative)",
+        fontsize=9,
+    )
+    ax = fig.add_subplot(grid[0, 1])
+    ax.set_axis_off()
+    ax.set_xlim(-0.5, 10.5)
+    ax.set_ylim(-0.6, 1.4)
+    stages = [
+        (0.8, "80-mel, 30 s", None),
+        (3.3, "audio encoder", P[0]),
+        (6.0, "text decoder", P[1]),
+        (8.9, "'Seven.'", None),
+    ]
+    for x, label, color in stages:
+        box(ax, x, 0.4, label, w=2.0, h=0.6, color=color, fontsize=8.5)
+    for (x0, *_), (x1, *_) in itertools.pairwise(stages):
+        arrow(ax, (x0 + 1.02, 0.4), (x1 - 1.02, 0.4))
+    ax.text(
+        5,
+        1.25,
+        "Whisper: a transformer encoder-decoder trained on 680k hours of transcribed audio",
+        ha="center",
+        fontsize=9,
+        fontweight="bold",
+    )
+    ax = fig.add_subplot(grid[1, 1])
+    ax.barh([0], [30], color="#e8e8e8", edgecolor=GREY)
+    ax.barh([0], [duration], color=P[4])
+    ax.set_xlim(0, 30)
+    ax.set_yticks([])
+    ax.set_xlabel("seconds of Whisper's fixed input window")
+    ax.set_title(
+        f"every input is padded to 30 s: this digit ({duration:.2f} s) is {duration / 30:.1%} of what the encoder sees",
+        fontsize=8.5,
+    )
+    fig.tight_layout()
+    return fig
+
+
+@concept("i", "i3_concept_tts")
+def i3_tts():
+    """The synthesis chain, and I3's Griffin-Lim run on a real recording's own spectrogram (the vocoder's ceiling)."""
+    from parts.i_speech.i1_audio_frontend import hann_window
+    from parts.i_speech.i3_tts_vocoder import _stft, griffin_lim
+
+    wave, cfg = _spoken_digit()
+    frames = 1 + len(wave) // cfg.hop
+    magnitude = np.abs(_stft(wave.astype(np.float64), window=hann_window(cfg.n_fft), hop=cfg.hop, frames=frames))
+    rebuilt = griffin_lim(magnitude, n_fft=cfg.n_fft, hop=cfg.hop, iterations=64, rng=0)
+    rebuilt_mag = np.abs(_stft(rebuilt.astype(np.float64), window=hann_window(cfg.n_fft), hop=cfg.hop, frames=frames))
+    scale = np.linalg.norm(magnitude) / max(np.linalg.norm(rebuilt_mag), 1e-12)
+    convergence = np.linalg.norm(magnitude - scale * rebuilt_mag) / np.linalg.norm(magnitude)
+    plotting.use_house_style()
+    fig = plt.figure(figsize=(13, 5.2))
+    grid = fig.add_gridspec(2, 2, height_ratios=[0.7, 1])
+    ax = fig.add_subplot(grid[0, :])
+    ax.set_axis_off()
+    ax.set_xlim(-0.5, 13.4)
+    ax.set_ylim(-0.4, 1.2)
+    stages = [
+        (0.7, "text: '7'", None),
+        (3.4, "acoustic model\n(embedding + GRU)", P[0]),
+        (6.4, "mel spectrogram\n48 frames", None),
+        (9.3, "vocoder: Griffin-Lim\n(recover the phase)", P[1]),
+        (12.1, "waveform", None),
+    ]
+    for x, label, color in stages:
+        box(ax, x, 0.4, label, w=2.2, h=0.7, color=color, fontsize=8.5)
+    for (x0, *_), (x1, *_) in itertools.pairwise(stages):
+        arrow(ax, (x0 + 1.12, 0.4), (x1 - 1.12, 0.4))
+    ax.text(
+        6.4,
+        1.1,
+        "text-to-speech in two stages: predict what the sound looks like, then turn that picture into sound",
+        ha="center",
+        fontsize=9.5,
+        fontweight="bold",
+    )
+    duration = len(wave) / cfg.rate
+    for col, (mag, title) in enumerate(
+        (
+            (magnitude, "a real recording's spectrogram (the input to the vocoder)"),
+            (rebuilt_mag, f"after Griffin-Lim from that exact spectrogram: {convergence:.0%} spectral error"),
+        )
+    ):
+        ax = fig.add_subplot(grid[1, col])
+        ax.imshow(
+            20 * np.log10(mag + 1e-6),
+            origin="lower",
+            aspect="auto",
+            cmap="magma",
+            extent=(0, duration, 0, cfg.rate / 2),
+        )
+        ax.set_title(title, fontsize=9)
+        ax.set_xlabel("seconds")
+        ax.set_ylabel("Hz")
+    fig.tight_layout()
+    return fig
+
+
+@concept("i", "i4_concept_streaming")
+def i4_streaming():
+    """Chunks, lookahead, and the latency they imply, in I4's own units (8 ms frames)."""
+    fig, ax = canvas(12.5, 3.8, (-0.5, 44), (-2.4, 3.6))
+    chunk, lookahead, frames = 8, 4, 40
+    for f in range(frames):
+        colour = P[0] if f < 16 else (P[1] if f < 24 else (P[3] if f < 28 else "#dddddd"))
+        ax.add_patch(
+            Rectangle(
+                (f, 0),
+                0.9,
+                0.9,
+                facecolor=colour
+                + ("55" if colour.startswith("#") and len(colour) == 7 and colour != "#dddddd" else ""),
+                edgecolor="white",
+            )
+        )
+    for boundary in range(0, frames + 1, chunk):
+        ax.plot([boundary - 0.05, boundary - 0.05], [-0.25, 1.15], color=GREY, linewidth=0.8)
+    ax.annotate("", xy=(24, 1.6), xytext=(16, 1.6), arrowprops={"arrowstyle": "<->", "color": P[1]})
+    ax.text(20, 1.9, f"current chunk: {chunk} frames = {chunk * 8} ms", ha="center", fontsize=8.5, color=P[1])
+    ax.annotate("", xy=(28, 1.6), xytext=(24, 1.6), arrowprops={"arrowstyle": "<->", "color": P[3]})
+    ax.text(
+        28.5,
+        2.5,
+        f"lookahead: {lookahead} frames = {lookahead * 8} ms of future audio",
+        ha="center",
+        fontsize=8.5,
+        color=P[3],
+    )
+    ax.text(8, 1.3, "already heard", ha="center", fontsize=8.5, color=P[0])
+    ax.text(34, 1.3, "not yet spoken", ha="center", fontsize=8.5, color=GREY)
+    ax.text(
+        20,
+        -0.9,
+        "the model must emit its output for the gold chunk after seeing only blue + gold + green:",
+        ha="center",
+        fontsize=8.5,
+    )
+    ax.text(
+        20,
+        -1.6,
+        "algorithmic latency = chunk + lookahead (the audio it must wait for) · plus compute time per chunk",
+        ha="center",
+        fontsize=8.5,
+        color=P[4],
+    )
+    ax.text(
+        20,
+        3.3,
+        "streaming recognition: answer while the speaker is still talking",
+        ha="center",
+        fontsize=10,
+        fontweight="bold",
+    )
+    return fig
+
+
+# =============================================================================
 
 
 def main() -> None:

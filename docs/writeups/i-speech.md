@@ -3,7 +3,7 @@
 > **Status:** complete (I1–I4) · **Constraint:** 8 kHz spoken digits from six speakers; four cores and no GPU, so widths and budgets are small and stated per rung
 > **Numbers:** seeds 0–2, reference seed 0 · raw values in [`data/i-metrics.json`](data/i-metrics.json); the candle-fork run in [`data/i-real-models.json`](data/i-real-models.json)
 > **Reproduce:** `ladder run I1` … `I4` (needs `uv sync --extra torch --extra speech`), or `uv run python tools/writeup_figures.py I`
-> **Hardware:** all four rungs on 4 CPU cores; the Whisper-through-candle comparison on a Kaggle Tesla T4
+> **Hardware:** all four rungs on 4 CPU cores; Whisper through the candle fork's example and through ignite-catalog's executor on a Kaggle Tesla T4
 
 *the third modality; reuses C's sequence models and H's CTC on a signal that is continuous in time*
 
@@ -42,6 +42,35 @@ nothing on another.
 **Question.** The STFT/mel/MFCC stack is four decisions copied from the 1980s.
 What is each one doing, and would you notice if you got one wrong?
 
+### The idea
+
+A microphone records **air pressure over time**: 8000 numbers per second for
+this corpus. Speech models almost never read that raw waveform. They read a
+**spectrogram**, a picture of which frequencies are present at each moment,
+because that is where the information that distinguishes sounds lives
+(vowels are patterns of resonant frequencies called *formants*).
+
+Turning one into the other takes a fixed stack of steps, the **front end**:
+
+1. **Framing** — cut the signal into short overlapping slices (32 ms, every
+   8 ms), short enough that speech is roughly steady within one.
+2. **Windowing** — taper each slice to zero at its edges (a Hann window), so
+   the frequency analysis does not see an artificial jump.
+3. **FFT → power spectrum** — measure the energy at each frequency in each
+   slice.
+4. **Mel filterbank** — pool the frequencies into 40 bands spaced the way human
+   hearing resolves pitch: fine at low frequencies, coarse at high ones.
+5. **Log** — compress the huge dynamic range, as hearing does. The result, the
+   **log-mel spectrogram**, is what I2–I4 and Whisper read.
+6. **DCT → MFCCs** (optional) — summarise each log-mel column by its smooth
+   envelope in 13 decorrelated numbers, the classical speech feature.
+
+![The front end, stage by stage](figures/i/i1_concept_frontend.png)
+
+*A real recording of "seven" through the rung's own functions. The waveform
+becomes a power spectrogram (formant bands visible as horizontal stripes),
+then 40 mel bands, then 13 MFCCs.*
+
 ### The math
 
 **Framing is a trade with a fixed exchange rate.** A window of $N$ samples at
@@ -70,6 +99,18 @@ by construction, so their outputs are strongly correlated, and a
 diagonal-covariance Gaussian model could not cope with that. It is an
 orthonormal DCT-II, so truncating to 13 coefficients is a projection whose
 residual can be measured rather than an arbitrary crop.
+
+### What we measure, and why
+
+- **Relative error against torchaudio, stage by stage** — each stage is checked
+  separately against a reference implementation, so a mismatch is pinned to the
+  stage that causes it, not discovered at the end of the pipeline.
+- **Frequency resolution** — whether two tones a given distance apart show up as
+  two peaks. **Time resolution** — how far a single click smears across frames.
+  Together they measure the window-length trade-off the math derives.
+- **Off-diagonal correlation of MFCCs vs log-mels** — the reason for the DCT
+  step, measured: MFCC coefficients should be much less correlated with each
+  other than neighbouring mel bands are.
 
 ### What I built
 
@@ -154,6 +195,33 @@ the window sweep traces out.
 audio frames unchanged — and what does a pretrained model's error rate tell you
 that a small model's does not?
 
+### The idea
+
+**Automatic speech recognition (ASR)** turns audio into text. This rung uses
+two very different systems on the same held-out speaker:
+
+- **A small CTC recogniser**, trained here: H3's text-line reader moved from
+  image columns to audio frames. A few convolutions over the frequency axis, a
+  bidirectional GRU across time, and a letter-or-blank prediction per frame,
+  collapsed by CTC into a word. Trained on four speakers saying digits.
+- **Whisper**, OpenAI's pretrained model, used zero-shot. A transformer
+  **encoder-decoder**: the encoder reads a log-mel spectrogram, and the decoder
+  *writes* the transcript token by token like a language model, attending to
+  the encoder (C2's attention, at scale). It was trained on 680,000 hours of
+  transcribed audio, so it brings knowledge of language and of many voices that
+  a model trained on 800 clips cannot have.
+
+One property of Whisper matters later in this writeup. It always processes a
+**30-second window**, padding shorter audio with silence, so a half-second
+digit is a tiny fraction of what it sees.
+
+![The two recognisers](figures/i/i2_concept_recognisers.png)
+
+*Left: the log-mel frames of "seven" that the CTC model reads, with an
+illustrative per-frame labelling (letters where the sound is, blanks
+elsewhere). Right: Whisper's pipeline, and how little of its fixed 30-second
+window a spoken digit fills.*
+
 ### The math
 
 **CTC does not know what a frame is.** It needs a monotonic alignment between
@@ -178,6 +246,22 @@ term, a channel term and the phonetic variation over time. The first two are
 approximately constant across an utterance, so subtracting the utterance's own
 mean removes them and leaves the third. That is the argument, and it is old;
 the rung makes it an arm because I wrote the opposite into the code first.
+
+### What we measure, and why
+
+- **CER** (character error rate, H3) and **WER** (word error rate) on a speaker
+  the model never heard. For isolated digits WER is simply the fraction of
+  digits misrecognised.
+- **Held-out speaker vs shuffled split** — the same model scored when test clips
+  come from *unseen* speakers versus from speakers also in training. The gap
+  measures how much a random split flatters a speech model by letting it
+  memorise voices.
+- **Normalisation arms** — per-utterance vs corpus-wide feature normalisation.
+  It turned out to be the single largest effect, which is why it is an arm and
+  not a footnote.
+- **Whisper on matched clips**, with transcripts cleaned the same way for both
+  models (numerals mapped to words, homophones like "to"/"two" handled). Without
+  that, the metric would be scoring spelling conventions rather than recognition.
 
 ### What I built
 
@@ -248,7 +332,7 @@ says no.
 a spoken digit as a numeral — "1.", "3" — and the rung stripped non-alphabetic
 characters before scoring, turning correct answers into empty strings. In *this*
 rung the fix changed nothing, because multilingual whisper-tiny spells digits as
-words. In the candle comparison below, which uses `tiny.en`, the same fix moved
+words. In the [candle comparison](#whisper-through-the-candle-fork-actually-run), which uses `tiny.en`, the same fix moved
 the score from 0.25 to 0.75. Same bug, one place it mattered and one place it
 did not, and no way to know which without checking both.
 
@@ -268,6 +352,31 @@ Graves et al. (2006) for CTC; Radford et al. (2022) for Whisper.
 
 **Question.** Synthesis is scored by human listening tests. What can you
 honestly conclude from a synthesiser you cannot hear?
+
+### The idea
+
+**Text-to-speech (TTS)** runs recognition in reverse: from text, produce audio.
+Modern systems split it in two:
+
+1. an **acoustic model** predicts a mel spectrogram from the text: what the
+   sound should *look* like over time. Here it is tiny: an embedding of the
+   digit and a GRU that emits a fixed 48 frames;
+2. a **vocoder** turns that spectrogram into a waveform. The hard part is that a
+   spectrogram records only *how much* energy each frequency has, not its
+   **phase** (where in its cycle each wave is), and a waveform needs both.
+   **Griffin-Lim** guesses the phase and refines the guess iteratively until
+   the result's spectrogram matches the target. Neural vocoders learn this
+   instead.
+
+Synthesis quality is normally judged by people listening. This rung asks what
+can be concluded honestly *without* a listening test, using objective metrics
+and the controls that make them readable.
+
+![The TTS chain, and the vocoder's own ceiling](figures/i/i3_concept_tts.png)
+
+*Top: the two-stage chain. Bottom: Griffin-Lim given a real recording's exact
+spectrogram. It still loses about 10% (visible as smearing and noise), so even a
+perfect acoustic model could not do better than this through this vocoder.*
 
 ### The math
 
@@ -290,6 +399,24 @@ trip asks the one question with an objective answer, *is the intended word
 recoverable*, and is blind to everything ASR is invariant to, which is most of
 what makes speech sound human. A duration and speaker-envelope check catches the
 failure the first two miss: collapsing every voice into one.
+
+### What we measure, and why
+
+- **Mel distance** between synthesised and real spectrograms — how close the
+  acoustic model's picture is. It is read against two controls: a constant
+  "average digit" spectrogram (a model that learned nothing) from above, and the
+  distance between two real recordings of the same digit (natural variation)
+  from below.
+- **Intelligibility by machine**: run I2's recogniser on the synthesised audio
+  and measure CER. The chain *clean speech → vocoded speech → synthesised
+  speech*, all on one voice, separates what the vocoder loses from what the
+  acoustic model loses.
+- **Duration error** — how far the length of the synthesised speech (its voiced
+  frames) is from a real recording's, a crude check that catches output that
+  is silent, clipped or too long.
+- **Speaker match** — which training speaker the synthesised voice is closest
+  to. A model trained on several voices can average them into a voice that
+  belongs to nobody.
 
 ### What I built
 
@@ -377,6 +504,32 @@ Griffin & Lim (1984); Shen et al. (2018) for the two-stage split.
 **Question.** Every number in I2 used the whole utterance. What does answering
 *while* someone speaks cost?
 
+### The idea
+
+Every result in I2 used the **whole** recording before answering. A live system
+(dictation, voice assistants, captions) has to answer **while** the person is
+still speaking, and that changes the problem.
+
+I2's recogniser is **bidirectional**: its understanding of each moment uses
+audio from *after* that moment, which does not exist yet in a live stream.
+There are three standard responses:
+
+- **chunking** — process audio in short blocks as it arrives, each one on its
+  own, so the model never sees past the end of its current block;
+- **lookahead** — wait for a little future audio before committing to an
+  output: better accuracy, bought with delay;
+- **a causal model** — one built to only ever look backwards, so it needs no
+  future at all.
+
+The cost of each is **latency**: how long after a sound is spoken its
+transcription can appear.
+
+![Chunks, lookahead and latency](figures/i/i4_concept_streaming.png)
+
+*Audio arrives in 8 ms frames. To emit its output for the current chunk (gold)
+the model may use everything already heard (blue) plus the lookahead (green),
+so it must wait for the end of the chunk plus the lookahead.*
+
 ### The math
 
 The whole rung is one inequality. Write $R(t)$ for the set of input frames the
@@ -407,6 +560,20 @@ responses, and the rung measures all three:
 Algorithmic latency and wall-clock are reported separately, because the first is
 a property of the architecture and reproduces anywhere while the second is a
 property of this CPU today.
+
+### What we measure, and why
+
+- **CER against chunk size and lookahead** — how much accuracy streaming costs,
+  and how much lookahead buys back.
+- **Algorithmic latency** (ms) — how long the model must wait for audio, from
+  the chunk and lookahead alone. It is a property of the design, so it
+  reproduces on any machine.
+- **Wall-clock time per chunk** — the compute delay on this CPU, reported
+  separately because it is a property of the hardware on the day, not of the
+  design.
+- **The causal model's CER**, with its parameter ratio to the bidirectional one
+  stated (1.22×, not matched), since a comparison between models of different
+  size has to say so.
 
 ### What I built
 
@@ -473,6 +640,114 @@ the torchaudio streaming tutorials in this part's lab reference.
 
 ---
 
+## Whisper through the candle fork, actually run
+
+Part I's own Whisper numbers (I2) come from transformers. The accompanying
+candle fork implements Whisper too, and ignite-catalog serves it through a
+`candle-transcription` executor, so both were run on a Kaggle T4 on this part's
+held-out speaker. Raw records:
+[`data/i-real-models.json`](data/i-real-models.json) (summary) and
+[`data/i-whisper-executor.json`](data/i-whisper-executor.json) (every
+transcript).
+
+**Two different pieces of code, and the difference matters.** The first run used
+the fork's `candle-examples/examples/whisper`. The second ran the catalog's
+executor itself: its own request path (symphonia decode, a linear resampler,
+candle's mel), its own `Decoder`, one request per file exactly as the handler
+does, with only the ignite SDK plumbing removed (request parsing and the asset
+loader, replaced by a local directory holding the same four files). They share
+the model weights and the network, and almost nothing that decides the output.
+
+### The example: empty transcriptions
+
+The fork's whisper *example* returns an **empty transcription for all 40
+isolated digits**, while transformers reads the same files at 0.75. A control
+rules out the harness: the same binary transcribes the example's own long
+samples (JFK, a news clip) correctly. The unverified lead is a heavily rewritten
+`apply_timestamp_rules` in that example. Building it at all required two fixes:
+`candle-transformers` does not compile without CUDA (contradicting the catalog's
+own `whisper-cpu.yaml`, which declares `gpu.required: false`), and
+`candle-examples` declares symphonia 0.6 while its code uses the 0.5 API.
+
+### The executor: it transcribes, and it has four defects of its own
+
+Seven arms, 61 requests each: 50 isolated digits (the raw 8 kHz files, which the
+executor resamples itself), ten four-digit sequences, and the JFK clip. Two
+models: `tiny.en`, and `large-v3-turbo`, the model the catalog registers for this
+executor. transformers ran on the same bytes, both with its own `generate` and
+with a greedy loop that copies the executor's decode step by step. The loop
+reproduces `generate` exactly (61/61 on tiny.en), so it is a faithful stand-in.
+
+![The executor against transformers](figures/i/i_whisper_executor.png)
+
+| | digits exact | sequence WER | JFK |
+| --- | --- | --- | --- |
+| executor, tiny.en (eager = static = CUDA graph = CPU) | 0.58 | 0.250 | perfect |
+| executor, large-v3-turbo, language auto | 0.60 | 0.025 | perfect |
+| executor, large-v3-turbo, language=en | 0.58 | 0.025 | perfect |
+| transformers, tiny.en | 0.48 | 0.100 | perfect |
+| transformers, large-v3-turbo | 0.64 | 0.025 | perfect |
+
+What this establishes:
+
+1. **The executor never returns an empty transcription**: 0 of 427 requests
+   across all arms. The example's failure does not reach the production decode
+   path.
+2. **The fork's optimised paths are exact.** Static decode, the captured CUDA
+   graph and CPU all produce **byte-identical text** to eager decoding on every
+   request, for both models. (They are not faster here, because the executor
+   reloads the model on every request and that dominates: 0.48 s per tiny.en
+   request on the T4 against 2.98 s on CPU; 1.9–2.9 s for turbo.)
+3. **Language detection is meaningless on English-only models.** The executor
+   picks the highest-scoring `<|xx|>` token from the vocabulary, and `tiny.en`
+   has those tokens but was never trained on them. It reports JFK as **`sq`
+   (Albanian)** and the digits as `ms`, `km`, `hi`, `ca`, and the reported
+   language even changes between eager, static and CPU runs whose text is
+   identical. The language is reported and not injected, so the text is
+   unaffected, but the response's `language` field is wrong for every `.en`
+   model.
+4. **The prompt carries a token English-only models never saw.** The executor
+   always decodes from `[SOT, (language), transcribe, notimestamps]`, while
+   English-only Whisper was trained from `[SOT, notimestamps]`. Feeding
+   transformers the executor's prompt reproduces the effect: isolated digits go
+   from 0.48 to **0.64** and sequences from 0.10 to **0.175** WER. The
+   out-of-distribution token changes behaviour, better on single words and
+   worse on runs of them, and matching it raises candle/transformers agreement
+   from 32 to **46 of 61** transcripts.
+5. **Token suppression is silently off for the registered model.** The executor
+   reads `suppress_tokens` from `config.json`. `large-v3-turbo` keeps them in
+   `generation_config.json`, so the executor suppresses nothing where
+   transformers suppresses the usual list.
+6. **The asset name says 80 mel filters, and 80 would crash.** The executor loads
+   `melfilters80.bytes`. `large-v3-turbo` uses 128 mel bins, and handed a
+   genuine 80-filter file the request **panics** (`index out of bounds` in
+   candle's `whisper/audio.rs`). So production either stores 128 filters under
+   the name "80", or this path crashes on the model it serves. Which one is not
+   visible from outside the asset store.
+
+Also measured: auto language detection runs the encoder twice (once to detect,
+once to decode), which costs **0.9 s per turbo request** (2.83 s against 1.94 s
+with the language given), and omitting the language token changes 13 of 61
+turbo transcripts (`Oui.` against `We.` for a spoken "three", `3.` against
+`three.`).
+
+**What is not explained.** With prompts matched, candle and transformers still
+disagree on 15 of 61 tiny.en transcripts, including hallucinations only candle
+produces for a single spoken digit ("Thank you for watching.", "for the next
+couple of months."). The candidates are the mel front end (candle's own FFT,
+padding and filter file, against transformers' feature extractor) and f32
+against fp16. That comparison was not run.
+
+### Open threads
+
+Fix and re-measure: skip detection for `.en` checkpoints, drop the task token
+where the model was not trained with it, read `generation_config.json`, and name
+the mel asset by `num_mel_bins`. Then diff candle's `pcm_to_mel` against
+transformers' feature extractor on the same waveform, stage by stage as I1
+does against torchaudio, to locate the remaining disagreement.
+
+---
+
 ## What part I settled
 
 1. **Three stages agreeing to $10^{-6}$ is what makes the fourth's
@@ -500,24 +775,16 @@ the torchaudio streaming tutorials in this part's lab reference.
 7. **Designing for a constraint beat retrofitting it.** A causal model with zero
    lookahead latency (0.673) beats chunking a bidirectional one (0.721), which is
    worth about four frames of delay for free.
-8. **Running the real model found three defects the config could not.** The
-   candle fork's whisper *example* returns an empty transcription for all 40
-   isolated digits while transformers reads the same files at 0.75 — established
-   as real by a control showing the same binary transcribing the example's own
-   long samples correctly. Getting that far also required fixing a
-   `candle-transformers` that will not build without CUDA (contradicting the
-   catalog's own `whisper-cpu.yaml`) and a `candle-examples` that declares
-   symphonia 0.6 while using the 0.5 API.
-
-   **The scope of that first finding is the example, not the production path.**
-   ignite-catalog's `candle-transcription` executor shares the model and none of
-   the decode: it has its own `Decoder`, no `apply_timestamp_rules` at all — the
-   function this record names as the lead — no temperature-fallback loop, and a
-   `no_timestamps_token`. So the empty transcriptions most likely do *not*
-   transfer to it, and the executor is untested. Saying "the fork's whisper"
-   without that qualification, as an earlier version of this section did, points
-   the finding at code it was never run against. Details in
-   [`data/i-real-models.json`](data/i-real-models.json).
+8. **Running the real models found defects no config could show.** The fork's
+   whisper *example* returns empty text for every isolated digit. The catalog's
+   executor does not (0 of 427 requests empty), and its static-decode and
+   CUDA-graph paths match eager decoding byte for byte. It has four defects of
+   its own: a language report that calls JFK Albanian on English-only models, a
+   task token those models were never trained with (in transformers it raises
+   digit accuracy by 0.16 and worsens sequence WER by 0.075), token suppression skipped for the
+   registered model, and an asset named for 80 mel filters that panics if it
+   holds 80. Details in
+   [Whisper through the candle fork](#whisper-through-the-candle-fork-actually-run).
 9. **Five of my own mistakes in this part were metrics, not models.** A scoring
    rule that counted `"1."` as silence; a judge that could not hear; a ceiling
    compared against the wrong quantity; a control drawn from the wrong speaker; a

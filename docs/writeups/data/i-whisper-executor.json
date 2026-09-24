@@ -1,0 +1,4362 @@
+{
+ "what": "Per-request transcripts from ignite-catalog's candle-transcription executor (perf/exp-executors) built against davidmiheev/candle@ignite-perf, plus transformers controls on the same bytes. Summary and interpretation in i-real-models.json under executor_run.",
+ "candle_commit": "9aa02f1069b7fd9ad018bd12cdca1024dcede579",
+ "hardware": "Kaggle Tesla T4 (sm_75), CUDA 12.8",
+ "clips": "FSDD speaker yweweler, digits 0-9 x recordings 0-4 (the untouched 8 kHz files, resampled by the executor itself); ten 4-digit sequences built with numpy default_rng(0), 0.25 s gaps; samples_jfk.wav as the long-form control",
+ "arms": {
+  "tiny.en/cuda-eager": {
+   "scores": {
+    "digit_wer": 0.88,
+    "digit_exact": 0.58,
+    "sequence_wer": 0.25,
+    "long_wer": 0.0,
+    "empty": 0,
+    "median_s": 0.48,
+    "languages_reported": {
+     "ms": 28,
+     "km": 11,
+     "ca": 11,
+     "hi": 7,
+     "pl": 1,
+     "cy": 1
+    }
+   },
+   "env": {},
+   "prompt": null,
+   "transcripts": {
+    "0_yweweler_0.wav": {
+     "text": " Bureau.",
+     "seconds": 13.597,
+     "language": "km"
+    },
+    "0_yweweler_1.wav": {
+     "text": " and a new hero.",
+     "seconds": 0.534,
+     "language": "ms"
+    },
+    "0_yweweler_2.wav": {
+     "text": " and a new year old.",
+     "seconds": 0.508,
+     "language": "km"
+    },
+    "0_yweweler_3.wav": {
+     "text": " You",
+     "seconds": 0.461,
+     "language": "hi"
+    },
+    "0_yweweler_4.wav": {
+     "text": " 0.",
+     "seconds": 0.477,
+     "language": "ms"
+    },
+    "1_yweweler_0.wav": {
+     "text": " 1.",
+     "seconds": 0.474,
+     "language": "ln"
+    },
+    "1_yweweler_1.wav": {
+     "text": " 1",
+     "seconds": 0.471,
+     "language": "ms"
+    },
+    "1_yweweler_2.wav": {
+     "text": " 1.",
+     "seconds": 0.482,
+     "language": "ms"
+    },
+    "1_yweweler_3.wav": {
+     "text": " 1.",
+     "seconds": 0.489,
+     "language": "ca"
+    },
+    "1_yweweler_4.wav": {
+     "text": " 1.",
+     "seconds": 0.473,
+     "language": "ms"
+    },
+    "2_yweweler_0.wav": {
+     "text": " 2.",
+     "seconds": 0.481,
+     "language": "ca"
+    },
+    "2_yweweler_1.wav": {
+     "text": " to",
+     "seconds": 0.543,
+     "language": "ms"
+    },
+    "2_yweweler_2.wav": {
+     "text": " to",
+     "seconds": 0.476,
+     "language": "ms"
+    },
+    "2_yweweler_3.wav": {
+     "text": " Thank you.",
+     "seconds": 0.476,
+     "language": "ms"
+    },
+    "2_yweweler_4.wav": {
+     "text": " 2.",
+     "seconds": 0.488,
+     "language": "pl"
+    },
+    "3_yweweler_0.wav": {
+     "text": " We",
+     "seconds": 0.475,
+     "language": "ca"
+    },
+    "3_yweweler_1.wav": {
+     "text": " 3",
+     "seconds": 0.471,
+     "language": "ms"
+    },
+    "3_yweweler_2.wav": {
+     "text": " Thank you for watching!",
+     "seconds": 0.501,
+     "language": "ms"
+    },
+    "3_yweweler_3.wav": {
+     "text": " We",
+     "seconds": 0.468,
+     "language": "ms"
+    },
+    "3_yweweler_4.wav": {
+     "text": " 3",
+     "seconds": 0.458,
+     "language": "ms"
+    },
+    "4_yweweler_0.wav": {
+     "text": " 4.",
+     "seconds": 0.469,
+     "language": "km"
+    },
+    "4_yweweler_1.wav": {
+     "text": " All",
+     "seconds": 0.461,
+     "language": "ms"
+    },
+    "4_yweweler_2.wav": {
+     "text": " 4.",
+     "seconds": 0.475,
+     "language": "ms"
+    },
+    "4_yweweler_3.wav": {
+     "text": " for the next couple of months.",
+     "seconds": 0.503,
+     "language": "ms"
+    },
+    "4_yweweler_4.wav": {
+     "text": " or",
+     "seconds": 0.488,
+     "language": "km"
+    },
+    "5_yweweler_0.wav": {
+     "text": " Bye.",
+     "seconds": 0.47,
+     "language": "ms"
+    },
+    "5_yweweler_1.wav": {
+     "text": " Bye.",
+     "seconds": 0.463,
+     "language": "hi"
+    },
+    "5_yweweler_2.wav": {
+     "text": " 5.",
+     "seconds": 0.474,
+     "language": "hi"
+    },
+    "5_yweweler_3.wav": {
+     "text": " Bye.",
+     "seconds": 0.484,
+     "language": "hi"
+    },
+    "5_yweweler_4.wav": {
+     "text": " 5.",
+     "seconds": 0.474,
+     "language": "ca"
+    },
+    "6_yweweler_0.wav": {
+     "text": " Thank you",
+     "seconds": 0.474,
+     "language": "ms"
+    },
+    "6_yweweler_1.wav": {
+     "text": " .",
+     "seconds": 0.472,
+     "language": "ca"
+    },
+    "6_yweweler_2.wav": {
+     "text": " Thank you",
+     "seconds": 0.487,
+     "language": "ca"
+    },
+    "6_yweweler_3.wav": {
+     "text": " you",
+     "seconds": 0.474,
+     "language": "ms"
+    },
+    "6_yweweler_4.wav": {
+     "text": " Thank you for watching.",
+     "seconds": 0.489,
+     "language": "ms"
+    },
+    "7_yweweler_0.wav": {
+     "text": " 7.",
+     "seconds": 0.477,
+     "language": "hi"
+    },
+    "7_yweweler_1.wav": {
+     "text": " 7",
+     "seconds": 0.479,
+     "language": "ms"
+    },
+    "7_yweweler_2.wav": {
+     "text": " Heaven.",
+     "seconds": 0.475,
+     "language": "ca"
+    },
+    "7_yweweler_3.wav": {
+     "text": " 7",
+     "seconds": 0.471,
+     "language": "hi"
+    },
+    "7_yweweler_4.wav": {
+     "text": " Evan",
+     "seconds": 0.478,
+     "language": "ca"
+    },
+    "8_yweweler_0.wav": {
+     "text": " 8.",
+     "seconds": 0.473,
+     "language": "ms"
+    },
+    "8_yweweler_1.wav": {
+     "text": " 8.",
+     "seconds": 0.473,
+     "language": "ms"
+    },
+    "8_yweweler_2.wav": {
+     "text": " 8.",
+     "seconds": 0.481,
+     "language": "ms"
+    },
+    "8_yweweler_3.wav": {
+     "text": " 8.",
+     "seconds": 0.481,
+     "language": "ms"
+    },
+    "8_yweweler_4.wav": {
+     "text": " 8.",
+     "seconds": 0.493,
+     "language": "ms"
+    },
+    "9_yweweler_0.wav": {
+     "text": " 9.",
+     "seconds": 0.474,
+     "language": "ca"
+    },
+    "9_yweweler_1.wav": {
+     "text": " 9.",
+     "seconds": 0.469,
+     "language": "hi"
+    },
+    "9_yweweler_2.wav": {
+     "text": " 9.",
+     "seconds": 0.47,
+     "language": "ca"
+    },
+    "9_yweweler_3.wav": {
+     "text": " 9",
+     "seconds": 0.467,
+     "language": "cy"
+    },
+    "9_yweweler_4.wav": {
+     "text": " 9.",
+     "seconds": 0.469,
+     "language": "ca"
+    },
+    "seq_0.wav": {
+     "text": " 2 5 7 6",
+     "seconds": 0.475,
+     "language": "ms"
+    },
+    "seq_1.wav": {
+     "text": " 1.",
+     "seconds": 0.467,
+     "language": "km"
+    },
+    "seq_2.wav": {
+     "text": " 7 9 5",
+     "seconds": 0.481,
+     "language": "km"
+    },
+    "seq_3.wav": {
+     "text": " 0. 7. 6. 3.",
+     "seconds": 0.511,
+     "language": "km"
+    },
+    "seq_4.wav": {
+     "text": " 8-7",
+     "seconds": 0.484,
+     "language": "km"
+    },
+    "seq_5.wav": {
+     "text": " 2, 5, or 0.",
+     "seconds": 0.492,
+     "language": "ms"
+    },
+    "seq_6.wav": {
+     "text": " 1.",
+     "seconds": 0.475,
+     "language": "km"
+    },
+    "seq_7.wav": {
+     "text": " 5, 7, 3, 4.",
+     "seconds": 0.495,
+     "language": "km"
+    },
+    "seq_8.wav": {
+     "text": " 3, 6, 9, 9.",
+     "seconds": 0.478,
+     "language": "ms"
+    },
+    "seq_9.wav": {
+     "text": " 3 8 5 1",
+     "seconds": 0.465,
+     "language": "km"
+    },
+    "samples_jfk.wav": {
+     "text": " And so my fellow Americans ask not what your country can do for you ask what you can do for your country",
+     "seconds": 0.577,
+     "language": "sq"
+    }
+   }
+  },
+  "tiny.en/cuda-static": {
+   "scores": {
+    "digit_wer": 0.88,
+    "digit_exact": 0.58,
+    "sequence_wer": 0.25,
+    "long_wer": 0.0,
+    "empty": 0,
+    "median_s": 0.48,
+    "languages_reported": {
+     "ms": 28,
+     "hi": 12,
+     "km": 11,
+     "ca": 5,
+     "pl": 2,
+     "cy": 1
+    }
+   },
+   "env": {
+    "ASR_STATIC_DECODE": "448"
+   },
+   "prompt": null,
+   "transcripts": {
+    "0_yweweler_0.wav": {
+     "text": " Bureau.",
+     "seconds": 1.041,
+     "language": "km"
+    },
+    "0_yweweler_1.wav": {
+     "text": " and a new hero.",
+     "seconds": 0.498,
+     "language": "ms"
+    },
+    "0_yweweler_2.wav": {
+     "text": " and a new year old.",
+     "seconds": 0.488,
+     "language": "km"
+    },
+    "0_yweweler_3.wav": {
+     "text": " You",
+     "seconds": 0.483,
+     "language": "hi"
+    },
+    "0_yweweler_4.wav": {
+     "text": " 0.",
+     "seconds": 0.474,
+     "language": "ms"
+    },
+    "1_yweweler_0.wav": {
+     "text": " 1.",
+     "seconds": 0.494,
+     "language": "ln"
+    },
+    "1_yweweler_1.wav": {
+     "text": " 1",
+     "seconds": 0.481,
+     "language": "ms"
+    },
+    "1_yweweler_2.wav": {
+     "text": " 1.",
+     "seconds": 0.473,
+     "language": "ms"
+    },
+    "1_yweweler_3.wav": {
+     "text": " 1.",
+     "seconds": 0.478,
+     "language": "ms"
+    },
+    "1_yweweler_4.wav": {
+     "text": " 1.",
+     "seconds": 0.512,
+     "language": "ms"
+    },
+    "2_yweweler_0.wav": {
+     "text": " 2.",
+     "seconds": 0.474,
+     "language": "ms"
+    },
+    "2_yweweler_1.wav": {
+     "text": " to",
+     "seconds": 0.477,
+     "language": "ms"
+    },
+    "2_yweweler_2.wav": {
+     "text": " to",
+     "seconds": 0.48,
+     "language": "ca"
+    },
+    "2_yweweler_3.wav": {
+     "text": " Thank you.",
+     "seconds": 0.473,
+     "language": "ms"
+    },
+    "2_yweweler_4.wav": {
+     "text": " 2.",
+     "seconds": 0.472,
+     "language": "pl"
+    },
+    "3_yweweler_0.wav": {
+     "text": " We",
+     "seconds": 0.47,
+     "language": "hi"
+    },
+    "3_yweweler_1.wav": {
+     "text": " 3",
+     "seconds": 0.467,
+     "language": "ms"
+    },
+    "3_yweweler_2.wav": {
+     "text": " Thank you for watching!",
+     "seconds": 0.484,
+     "language": "ms"
+    },
+    "3_yweweler_3.wav": {
+     "text": " We",
+     "seconds": 0.479,
+     "language": "hi"
+    },
+    "3_yweweler_4.wav": {
+     "text": " 3",
+     "seconds": 0.471,
+     "language": "ca"
+    },
+    "4_yweweler_0.wav": {
+     "text": " 4.",
+     "seconds": 0.477,
+     "language": "km"
+    },
+    "4_yweweler_1.wav": {
+     "text": " All",
+     "seconds": 0.477,
+     "language": "ms"
+    },
+    "4_yweweler_2.wav": {
+     "text": " 4.",
+     "seconds": 0.478,
+     "language": "ms"
+    },
+    "4_yweweler_3.wav": {
+     "text": " for the next couple of months.",
+     "seconds": 0.484,
+     "language": "hi"
+    },
+    "4_yweweler_4.wav": {
+     "text": " or",
+     "seconds": 0.479,
+     "language": "km"
+    },
+    "5_yweweler_0.wav": {
+     "text": " Bye.",
+     "seconds": 0.472,
+     "language": "hi"
+    },
+    "5_yweweler_1.wav": {
+     "text": " Bye.",
+     "seconds": 0.493,
+     "language": "hi"
+    },
+    "5_yweweler_2.wav": {
+     "text": " 5.",
+     "seconds": 0.479,
+     "language": "hi"
+    },
+    "5_yweweler_3.wav": {
+     "text": " Bye.",
+     "seconds": 0.475,
+     "language": "hi"
+    },
+    "5_yweweler_4.wav": {
+     "text": " 5.",
+     "seconds": 0.476,
+     "language": "hi"
+    },
+    "6_yweweler_0.wav": {
+     "text": " Thank you",
+     "seconds": 0.511,
+     "language": "ms"
+    },
+    "6_yweweler_1.wav": {
+     "text": " .",
+     "seconds": 0.477,
+     "language": "pl"
+    },
+    "6_yweweler_2.wav": {
+     "text": " Thank you",
+     "seconds": 0.477,
+     "language": "ms"
+    },
+    "6_yweweler_3.wav": {
+     "text": " you",
+     "seconds": 0.479,
+     "language": "ms"
+    },
+    "6_yweweler_4.wav": {
+     "text": " Thank you for watching.",
+     "seconds": 0.493,
+     "language": "ca"
+    },
+    "7_yweweler_0.wav": {
+     "text": " 7.",
+     "seconds": 0.478,
+     "language": "hi"
+    },
+    "7_yweweler_1.wav": {
+     "text": " 7",
+     "seconds": 0.48,
+     "language": "ms"
+    },
+    "7_yweweler_2.wav": {
+     "text": " Heaven.",
+     "seconds": 0.481,
+     "language": "hi"
+    },
+    "7_yweweler_3.wav": {
+     "text": " 7",
+     "seconds": 0.478,
+     "language": "hi"
+    },
+    "7_yweweler_4.wav": {
+     "text": " Evan",
+     "seconds": 0.48,
+     "language": "ca"
+    },
+    "8_yweweler_0.wav": {
+     "text": " 8.",
+     "seconds": 0.486,
+     "language": "ca"
+    },
+    "8_yweweler_1.wav": {
+     "text": " 8.",
+     "seconds": 0.478,
+     "language": "ms"
+    },
+    "8_yweweler_2.wav": {
+     "text": " 8.",
+     "seconds": 0.478,
+     "language": "ms"
+    },
+    "8_yweweler_3.wav": {
+     "text": " 8.",
+     "seconds": 0.483,
+     "language": "ms"
+    },
+    "8_yweweler_4.wav": {
+     "text": " 8.",
+     "seconds": 0.488,
+     "language": "ms"
+    },
+    "9_yweweler_0.wav": {
+     "text": " 9.",
+     "seconds": 0.471,
+     "language": "ms"
+    },
+    "9_yweweler_1.wav": {
+     "text": " 9.",
+     "seconds": 0.479,
+     "language": "ms"
+    },
+    "9_yweweler_2.wav": {
+     "text": " 9.",
+     "seconds": 0.479,
+     "language": "ms"
+    },
+    "9_yweweler_3.wav": {
+     "text": " 9",
+     "seconds": 0.466,
+     "language": "cy"
+    },
+    "9_yweweler_4.wav": {
+     "text": " 9.",
+     "seconds": 0.468,
+     "language": "ms"
+    },
+    "seq_0.wav": {
+     "text": " 2 5 7 6",
+     "seconds": 0.478,
+     "language": "ms"
+    },
+    "seq_1.wav": {
+     "text": " 1.",
+     "seconds": 0.502,
+     "language": "km"
+    },
+    "seq_2.wav": {
+     "text": " 7 9 5",
+     "seconds": 0.471,
+     "language": "km"
+    },
+    "seq_3.wav": {
+     "text": " 0. 7. 6. 3.",
+     "seconds": 0.481,
+     "language": "km"
+    },
+    "seq_4.wav": {
+     "text": " 8-7",
+     "seconds": 0.48,
+     "language": "km"
+    },
+    "seq_5.wav": {
+     "text": " 2, 5, or 0.",
+     "seconds": 0.489,
+     "language": "ms"
+    },
+    "seq_6.wav": {
+     "text": " 1.",
+     "seconds": 0.469,
+     "language": "km"
+    },
+    "seq_7.wav": {
+     "text": " 5, 7, 3, 4.",
+     "seconds": 0.493,
+     "language": "km"
+    },
+    "seq_8.wav": {
+     "text": " 3, 6, 9, 9.",
+     "seconds": 0.483,
+     "language": "ms"
+    },
+    "seq_9.wav": {
+     "text": " 3 8 5 1",
+     "seconds": 0.464,
+     "language": "km"
+    },
+    "samples_jfk.wav": {
+     "text": " And so my fellow Americans ask not what your country can do for you ask what you can do for your country",
+     "seconds": 0.507,
+     "language": "sq"
+    }
+   }
+  },
+  "tiny.en/cuda-static-graph": {
+   "scores": {
+    "digit_wer": 0.88,
+    "digit_exact": 0.58,
+    "sequence_wer": 0.25,
+    "long_wer": 0.0,
+    "empty": 0,
+    "median_s": 0.47,
+    "languages_reported": {
+     "ms": 30,
+     "km": 11,
+     "ca": 9,
+     "hi": 7,
+     "pl": 1,
+     "cy": 1
+    }
+   },
+   "env": {
+    "ASR_STATIC_DECODE": "448",
+    "ASR_CUDA_GRAPH": "1"
+   },
+   "prompt": null,
+   "transcripts": {
+    "0_yweweler_0.wav": {
+     "text": " Bureau.",
+     "seconds": 0.718,
+     "language": "km"
+    },
+    "0_yweweler_1.wav": {
+     "text": " and a new hero.",
+     "seconds": 0.465,
+     "language": "ms"
+    },
+    "0_yweweler_2.wav": {
+     "text": " and a new year old.",
+     "seconds": 0.475,
+     "language": "km"
+    },
+    "0_yweweler_3.wav": {
+     "text": " You",
+     "seconds": 0.469,
+     "language": "hi"
+    },
+    "0_yweweler_4.wav": {
+     "text": " 0.",
+     "seconds": 0.483,
+     "language": "ms"
+    },
+    "1_yweweler_0.wav": {
+     "text": " 1.",
+     "seconds": 0.472,
+     "language": "ln"
+    },
+    "1_yweweler_1.wav": {
+     "text": " 1",
+     "seconds": 0.468,
+     "language": "ca"
+    },
+    "1_yweweler_2.wav": {
+     "text": " 1.",
+     "seconds": 0.47,
+     "language": "ms"
+    },
+    "1_yweweler_3.wav": {
+     "text": " 1.",
+     "seconds": 0.483,
+     "language": "ms"
+    },
+    "1_yweweler_4.wav": {
+     "text": " 1.",
+     "seconds": 0.491,
+     "language": "ms"
+    },
+    "2_yweweler_0.wav": {
+     "text": " 2.",
+     "seconds": 0.503,
+     "language": "ms"
+    },
+    "2_yweweler_1.wav": {
+     "text": " to",
+     "seconds": 0.472,
+     "language": "ms"
+    },
+    "2_yweweler_2.wav": {
+     "text": " to",
+     "seconds": 0.47,
+     "language": "ms"
+    },
+    "2_yweweler_3.wav": {
+     "text": " Thank you.",
+     "seconds": 0.484,
+     "language": "ms"
+    },
+    "2_yweweler_4.wav": {
+     "text": " 2.",
+     "seconds": 0.473,
+     "language": "pl"
+    },
+    "3_yweweler_0.wav": {
+     "text": " We",
+     "seconds": 0.515,
+     "language": "hi"
+    },
+    "3_yweweler_1.wav": {
+     "text": " 3",
+     "seconds": 0.465,
+     "language": "ms"
+    },
+    "3_yweweler_2.wav": {
+     "text": " Thank you for watching!",
+     "seconds": 0.487,
+     "language": "hi"
+    },
+    "3_yweweler_3.wav": {
+     "text": " We",
+     "seconds": 0.478,
+     "language": "ms"
+    },
+    "3_yweweler_4.wav": {
+     "text": " 3",
+     "seconds": 0.474,
+     "language": "ms"
+    },
+    "4_yweweler_0.wav": {
+     "text": " 4.",
+     "seconds": 0.479,
+     "language": "km"
+    },
+    "4_yweweler_1.wav": {
+     "text": " All",
+     "seconds": 0.474,
+     "language": "ms"
+    },
+    "4_yweweler_2.wav": {
+     "text": " 4.",
+     "seconds": 0.48,
+     "language": "ms"
+    },
+    "4_yweweler_3.wav": {
+     "text": " for the next couple of months.",
+     "seconds": 0.486,
+     "language": "ms"
+    },
+    "4_yweweler_4.wav": {
+     "text": " or",
+     "seconds": 0.467,
+     "language": "km"
+    },
+    "5_yweweler_0.wav": {
+     "text": " Bye.",
+     "seconds": 0.453,
+     "language": "ms"
+    },
+    "5_yweweler_1.wav": {
+     "text": " Bye.",
+     "seconds": 0.471,
+     "language": "hi"
+    },
+    "5_yweweler_2.wav": {
+     "text": " 5.",
+     "seconds": 0.466,
+     "language": "hi"
+    },
+    "5_yweweler_3.wav": {
+     "text": " Bye.",
+     "seconds": 0.475,
+     "language": "hi"
+    },
+    "5_yweweler_4.wav": {
+     "text": " 5.",
+     "seconds": 0.477,
+     "language": "ca"
+    },
+    "6_yweweler_0.wav": {
+     "text": " Thank you",
+     "seconds": 0.48,
+     "language": "ms"
+    },
+    "6_yweweler_1.wav": {
+     "text": " .",
+     "seconds": 0.486,
+     "language": "ms"
+    },
+    "6_yweweler_2.wav": {
+     "text": " Thank you",
+     "seconds": 0.472,
+     "language": "ca"
+    },
+    "6_yweweler_3.wav": {
+     "text": " you",
+     "seconds": 0.47,
+     "language": "ms"
+    },
+    "6_yweweler_4.wav": {
+     "text": " Thank you for watching.",
+     "seconds": 0.472,
+     "language": "ca"
+    },
+    "7_yweweler_0.wav": {
+     "text": " 7.",
+     "seconds": 0.468,
+     "language": "ms"
+    },
+    "7_yweweler_1.wav": {
+     "text": " 7",
+     "seconds": 0.47,
+     "language": "ms"
+    },
+    "7_yweweler_2.wav": {
+     "text": " Heaven.",
+     "seconds": 0.459,
+     "language": "ca"
+    },
+    "7_yweweler_3.wav": {
+     "text": " 7",
+     "seconds": 0.46,
+     "language": "hi"
+    },
+    "7_yweweler_4.wav": {
+     "text": " Evan",
+     "seconds": 0.462,
+     "language": "ca"
+    },
+    "8_yweweler_0.wav": {
+     "text": " 8.",
+     "seconds": 0.467,
+     "language": "ms"
+    },
+    "8_yweweler_1.wav": {
+     "text": " 8.",
+     "seconds": 0.464,
+     "language": "ms"
+    },
+    "8_yweweler_2.wav": {
+     "text": " 8.",
+     "seconds": 0.467,
+     "language": "ms"
+    },
+    "8_yweweler_3.wav": {
+     "text": " 8.",
+     "seconds": 0.484,
+     "language": "ms"
+    },
+    "8_yweweler_4.wav": {
+     "text": " 8.",
+     "seconds": 0.478,
+     "language": "ms"
+    },
+    "9_yweweler_0.wav": {
+     "text": " 9.",
+     "seconds": 0.477,
+     "language": "ms"
+    },
+    "9_yweweler_1.wav": {
+     "text": " 9.",
+     "seconds": 0.472,
+     "language": "ca"
+    },
+    "9_yweweler_2.wav": {
+     "text": " 9.",
+     "seconds": 0.478,
+     "language": "ca"
+    },
+    "9_yweweler_3.wav": {
+     "text": " 9",
+     "seconds": 0.464,
+     "language": "cy"
+    },
+    "9_yweweler_4.wav": {
+     "text": " 9.",
+     "seconds": 0.467,
+     "language": "ms"
+    },
+    "seq_0.wav": {
+     "text": " 2 5 7 6",
+     "seconds": 0.476,
+     "language": "ms"
+    },
+    "seq_1.wav": {
+     "text": " 1.",
+     "seconds": 0.49,
+     "language": "km"
+    },
+    "seq_2.wav": {
+     "text": " 7 9 5",
+     "seconds": 0.504,
+     "language": "km"
+    },
+    "seq_3.wav": {
+     "text": " 0. 7. 6. 3.",
+     "seconds": 0.484,
+     "language": "km"
+    },
+    "seq_4.wav": {
+     "text": " 8-7",
+     "seconds": 0.486,
+     "language": "km"
+    },
+    "seq_5.wav": {
+     "text": " 2, 5, or 0.",
+     "seconds": 0.479,
+     "language": "ms"
+    },
+    "seq_6.wav": {
+     "text": " 1.",
+     "seconds": 0.472,
+     "language": "km"
+    },
+    "seq_7.wav": {
+     "text": " 5, 7, 3, 4.",
+     "seconds": 0.486,
+     "language": "km"
+    },
+    "seq_8.wav": {
+     "text": " 3, 6, 9, 9.",
+     "seconds": 0.478,
+     "language": "ca"
+    },
+    "seq_9.wav": {
+     "text": " 3 8 5 1",
+     "seconds": 0.474,
+     "language": "km"
+    },
+    "samples_jfk.wav": {
+     "text": " And so my fellow Americans ask not what your country can do for you ask what you can do for your country",
+     "seconds": 0.515,
+     "language": "sq"
+    }
+   }
+  },
+  "turbo/cuda-eager-auto": {
+   "scores": {
+    "digit_wer": 0.52,
+    "digit_exact": 0.6,
+    "sequence_wer": 0.025,
+    "long_wer": 0.0,
+    "empty": 0,
+    "median_s": 2.83,
+    "languages_reported": {
+     "en": 59,
+     "es": 1,
+     "ko": 1
+    }
+   },
+   "env": {},
+   "prompt": null,
+   "transcripts": {
+    "0_yweweler_0.wav": {
+     "text": " hero.",
+     "seconds": 2.995,
+     "language": "en"
+    },
+    "0_yweweler_1.wav": {
+     "text": " rule.",
+     "seconds": 2.788,
+     "language": "en"
+    },
+    "0_yweweler_2.wav": {
+     "text": " Bureau.",
+     "seconds": 2.685,
+     "language": "en"
+    },
+    "0_yweweler_3.wav": {
+     "text": " Zero.",
+     "seconds": 2.694,
+     "language": "en"
+    },
+    "0_yweweler_4.wav": {
+     "text": " Leroy.",
+     "seconds": 2.702,
+     "language": "en"
+    },
+    "1_yweweler_0.wav": {
+     "text": " Juan.",
+     "seconds": 2.664,
+     "language": "en"
+    },
+    "1_yweweler_1.wav": {
+     "text": " on.",
+     "seconds": 2.67,
+     "language": "en"
+    },
+    "1_yweweler_2.wav": {
+     "text": " One.",
+     "seconds": 2.675,
+     "language": "en"
+    },
+    "1_yweweler_3.wav": {
+     "text": " Come on.",
+     "seconds": 2.715,
+     "language": "en"
+    },
+    "1_yweweler_4.wav": {
+     "text": " one.",
+     "seconds": 2.745,
+     "language": "en"
+    },
+    "2_yweweler_0.wav": {
+     "text": " - Two.",
+     "seconds": 2.751,
+     "language": "en"
+    },
+    "2_yweweler_1.wav": {
+     "text": " to",
+     "seconds": 2.74,
+     "language": "en"
+    },
+    "2_yweweler_2.wav": {
+     "text": " Two.",
+     "seconds": 2.754,
+     "language": "en"
+    },
+    "2_yweweler_3.wav": {
+     "text": " - Two.",
+     "seconds": 2.76,
+     "language": "en"
+    },
+    "2_yweweler_4.wav": {
+     "text": " 2.",
+     "seconds": 2.757,
+     "language": "en"
+    },
+    "3_yweweler_0.wav": {
+     "text": " 3.",
+     "seconds": 2.768,
+     "language": "en"
+    },
+    "3_yweweler_1.wav": {
+     "text": " 3.",
+     "seconds": 2.738,
+     "language": "en"
+    },
+    "3_yweweler_2.wav": {
+     "text": " be",
+     "seconds": 2.754,
+     "language": "en"
+    },
+    "3_yweweler_3.wav": {
+     "text": " Oui.",
+     "seconds": 2.771,
+     "language": "en"
+    },
+    "3_yweweler_4.wav": {
+     "text": " 3.",
+     "seconds": 2.775,
+     "language": "en"
+    },
+    "4_yweweler_0.wav": {
+     "text": " 4",
+     "seconds": 2.787,
+     "language": "en"
+    },
+    "4_yweweler_1.wav": {
+     "text": " 4.",
+     "seconds": 2.763,
+     "language": "ko"
+    },
+    "4_yweweler_2.wav": {
+     "text": " or",
+     "seconds": 2.749,
+     "language": "es"
+    },
+    "4_yweweler_3.wav": {
+     "text": " Oh.",
+     "seconds": 2.761,
+     "language": "en"
+    },
+    "4_yweweler_4.wav": {
+     "text": " Åh.",
+     "seconds": 2.787,
+     "language": "en"
+    },
+    "5_yweweler_0.wav": {
+     "text": " Bye.",
+     "seconds": 2.793,
+     "language": "en"
+    },
+    "5_yweweler_1.wav": {
+     "text": " 5.",
+     "seconds": 2.804,
+     "language": "en"
+    },
+    "5_yweweler_2.wav": {
+     "text": " Bye.",
+     "seconds": 2.816,
+     "language": "en"
+    },
+    "5_yweweler_3.wav": {
+     "text": " 5.",
+     "seconds": 2.826,
+     "language": "en"
+    },
+    "5_yweweler_4.wav": {
+     "text": " 5.",
+     "seconds": 2.837,
+     "language": "en"
+    },
+    "6_yweweler_0.wav": {
+     "text": " For sakes.",
+     "seconds": 2.873,
+     "language": "en"
+    },
+    "6_yweweler_1.wav": {
+     "text": " Thank you.",
+     "seconds": 2.867,
+     "language": "en"
+    },
+    "6_yweweler_2.wav": {
+     "text": " Sí.",
+     "seconds": 2.874,
+     "language": "en"
+    },
+    "6_yweweler_3.wav": {
+     "text": " Thank you.",
+     "seconds": 2.885,
+     "language": "en"
+    },
+    "6_yweweler_4.wav": {
+     "text": " Thank you.",
+     "seconds": 2.913,
+     "language": "en"
+    },
+    "7_yweweler_0.wav": {
+     "text": " Seven.",
+     "seconds": 2.906,
+     "language": "en"
+    },
+    "7_yweweler_1.wav": {
+     "text": " Seven.",
+     "seconds": 2.942,
+     "language": "en"
+    },
+    "7_yweweler_2.wav": {
+     "text": " heaven.",
+     "seconds": 2.93,
+     "language": "en"
+    },
+    "7_yweweler_3.wav": {
+     "text": " Seven.",
+     "seconds": 2.926,
+     "language": "en"
+    },
+    "7_yweweler_4.wav": {
+     "text": " Seven.",
+     "seconds": 2.937,
+     "language": "en"
+    },
+    "8_yweweler_0.wav": {
+     "text": " Eight.",
+     "seconds": 2.951,
+     "language": "en"
+    },
+    "8_yweweler_1.wav": {
+     "text": " Eight.",
+     "seconds": 2.966,
+     "language": "en"
+    },
+    "8_yweweler_2.wav": {
+     "text": " Eight.",
+     "seconds": 2.901,
+     "language": "en"
+    },
+    "8_yweweler_3.wav": {
+     "text": " eight.",
+     "seconds": 2.901,
+     "language": "en"
+    },
+    "8_yweweler_4.wav": {
+     "text": " 8.",
+     "seconds": 2.885,
+     "language": "en"
+    },
+    "9_yweweler_0.wav": {
+     "text": " 9.",
+     "seconds": 2.858,
+     "language": "en"
+    },
+    "9_yweweler_1.wav": {
+     "text": " 9.",
+     "seconds": 2.844,
+     "language": "en"
+    },
+    "9_yweweler_2.wav": {
+     "text": " 9.",
+     "seconds": 2.83,
+     "language": "en"
+    },
+    "9_yweweler_3.wav": {
+     "text": " Nine.",
+     "seconds": 2.867,
+     "language": "en"
+    },
+    "9_yweweler_4.wav": {
+     "text": " Nine.",
+     "seconds": 2.829,
+     "language": "en"
+    },
+    "seq_0.wav": {
+     "text": " two five seven six",
+     "seconds": 2.829,
+     "language": "en"
+    },
+    "seq_1.wav": {
+     "text": " 0 7 1 6",
+     "seconds": 2.835,
+     "language": "en"
+    },
+    "seq_2.wav": {
+     "text": " Seven. Nine. Five. Six.",
+     "seconds": 2.878,
+     "language": "en"
+    },
+    "seq_3.wav": {
+     "text": " 0 7 6 3",
+     "seconds": 2.845,
+     "language": "en"
+    },
+    "seq_4.wav": {
+     "text": " 9 1 8 7",
+     "seconds": 2.84,
+     "language": "en"
+    },
+    "seq_5.wav": {
+     "text": " two, five, four, zero.",
+     "seconds": 2.915,
+     "language": "en"
+    },
+    "seq_6.wav": {
+     "text": " 0 1 9",
+     "seconds": 2.862,
+     "language": "en"
+    },
+    "seq_7.wav": {
+     "text": " five seven three four",
+     "seconds": 2.865,
+     "language": "en"
+    },
+    "seq_8.wav": {
+     "text": " Three, six, nine, nine.",
+     "seconds": 2.905,
+     "language": "en"
+    },
+    "seq_9.wav": {
+     "text": " 3 8 5 1",
+     "seconds": 2.861,
+     "language": "en"
+    },
+    "samples_jfk.wav": {
+     "text": " And so, my fellow Americans, ask not what your country can do for you, ask what you can do for your country.",
+     "seconds": 3.055,
+     "language": "en"
+    }
+   }
+  },
+  "turbo/cuda-eager-en": {
+   "scores": {
+    "digit_wer": 0.6,
+    "digit_exact": 0.58,
+    "sequence_wer": 0.025,
+    "long_wer": 0.0,
+    "empty": 0,
+    "median_s": 1.94,
+    "languages_reported": {
+     "en": 61
+    }
+   },
+   "env": {
+    "EXEC_LANGUAGE": "en"
+   },
+   "prompt": null,
+   "transcripts": {
+    "0_yweweler_0.wav": {
+     "text": " hero.",
+     "seconds": 2.168,
+     "language": "en"
+    },
+    "0_yweweler_1.wav": {
+     "text": " rule.",
+     "seconds": 1.943,
+     "language": "en"
+    },
+    "0_yweweler_2.wav": {
+     "text": " Bureau.",
+     "seconds": 1.928,
+     "language": "en"
+    },
+    "0_yweweler_3.wav": {
+     "text": " Zero.",
+     "seconds": 1.947,
+     "language": "en"
+    },
+    "0_yweweler_4.wav": {
+     "text": " Leroy.",
+     "seconds": 1.956,
+     "language": "en"
+    },
+    "1_yweweler_0.wav": {
+     "text": " Juan.",
+     "seconds": 1.933,
+     "language": "en"
+    },
+    "1_yweweler_1.wav": {
+     "text": " on.",
+     "seconds": 1.918,
+     "language": "en"
+    },
+    "1_yweweler_2.wav": {
+     "text": " One.",
+     "seconds": 1.937,
+     "language": "en"
+    },
+    "1_yweweler_3.wav": {
+     "text": " Come on.",
+     "seconds": 1.941,
+     "language": "en"
+    },
+    "1_yweweler_4.wav": {
+     "text": " One.",
+     "seconds": 1.949,
+     "language": "en"
+    },
+    "2_yweweler_0.wav": {
+     "text": " - Two.",
+     "seconds": 1.946,
+     "language": "en"
+    },
+    "2_yweweler_1.wav": {
+     "text": " to",
+     "seconds": 1.92,
+     "language": "en"
+    },
+    "2_yweweler_2.wav": {
+     "text": " Two.",
+     "seconds": 1.924,
+     "language": "en"
+    },
+    "2_yweweler_3.wav": {
+     "text": " - Two.",
+     "seconds": 1.953,
+     "language": "en"
+    },
+    "2_yweweler_4.wav": {
+     "text": " Two.",
+     "seconds": 1.928,
+     "language": "en"
+    },
+    "3_yweweler_0.wav": {
+     "text": " three.",
+     "seconds": 1.914,
+     "language": "en"
+    },
+    "3_yweweler_1.wav": {
+     "text": " three.",
+     "seconds": 1.954,
+     "language": "en"
+    },
+    "3_yweweler_2.wav": {
+     "text": " be.",
+     "seconds": 1.928,
+     "language": "en"
+    },
+    "3_yweweler_3.wav": {
+     "text": " We.",
+     "seconds": 1.943,
+     "language": "en"
+    },
+    "3_yweweler_4.wav": {
+     "text": " three.",
+     "seconds": 1.948,
+     "language": "en"
+    },
+    "4_yweweler_0.wav": {
+     "text": " 4",
+     "seconds": 1.928,
+     "language": "en"
+    },
+    "4_yweweler_1.wav": {
+     "text": " Oh.",
+     "seconds": 1.965,
+     "language": "en"
+    },
+    "4_yweweler_2.wav": {
+     "text": " or",
+     "seconds": 1.935,
+     "language": "en"
+    },
+    "4_yweweler_3.wav": {
+     "text": " Oh.",
+     "seconds": 1.992,
+     "language": "en"
+    },
+    "4_yweweler_4.wav": {
+     "text": " Oh.",
+     "seconds": 1.918,
+     "language": "en"
+    },
+    "5_yweweler_0.wav": {
+     "text": " Bye.",
+     "seconds": 1.902,
+     "language": "en"
+    },
+    "5_yweweler_1.wav": {
+     "text": " 5.",
+     "seconds": 1.911,
+     "language": "en"
+    },
+    "5_yweweler_2.wav": {
+     "text": " Bye.",
+     "seconds": 1.932,
+     "language": "en"
+    },
+    "5_yweweler_3.wav": {
+     "text": " 5.",
+     "seconds": 1.912,
+     "language": "en"
+    },
+    "5_yweweler_4.wav": {
+     "text": " 5.",
+     "seconds": 1.93,
+     "language": "en"
+    },
+    "6_yweweler_0.wav": {
+     "text": " For sakes.",
+     "seconds": 1.956,
+     "language": "en"
+    },
+    "6_yweweler_1.wav": {
+     "text": " Thank you.",
+     "seconds": 1.94,
+     "language": "en"
+    },
+    "6_yweweler_2.wav": {
+     "text": " I think.",
+     "seconds": 1.965,
+     "language": "en"
+    },
+    "6_yweweler_3.wav": {
+     "text": " Thank you.",
+     "seconds": 1.939,
+     "language": "en"
+    },
+    "6_yweweler_4.wav": {
+     "text": " See you next week.",
+     "seconds": 1.958,
+     "language": "en"
+    },
+    "7_yweweler_0.wav": {
+     "text": " Seven.",
+     "seconds": 1.927,
+     "language": "en"
+    },
+    "7_yweweler_1.wav": {
+     "text": " Seven.",
+     "seconds": 1.932,
+     "language": "en"
+    },
+    "7_yweweler_2.wav": {
+     "text": " heaven.",
+     "seconds": 1.927,
+     "language": "en"
+    },
+    "7_yweweler_3.wav": {
+     "text": " Seven.",
+     "seconds": 1.922,
+     "language": "en"
+    },
+    "7_yweweler_4.wav": {
+     "text": " Seven.",
+     "seconds": 1.927,
+     "language": "en"
+    },
+    "8_yweweler_0.wav": {
+     "text": " Eight.",
+     "seconds": 1.934,
+     "language": "en"
+    },
+    "8_yweweler_1.wav": {
+     "text": " Eight.",
+     "seconds": 1.945,
+     "language": "en"
+    },
+    "8_yweweler_2.wav": {
+     "text": " Eight.",
+     "seconds": 1.914,
+     "language": "en"
+    },
+    "8_yweweler_3.wav": {
+     "text": " 8",
+     "seconds": 1.927,
+     "language": "en"
+    },
+    "8_yweweler_4.wav": {
+     "text": " 8.",
+     "seconds": 1.938,
+     "language": "en"
+    },
+    "9_yweweler_0.wav": {
+     "text": " 9.",
+     "seconds": 1.937,
+     "language": "en"
+    },
+    "9_yweweler_1.wav": {
+     "text": " Nine.",
+     "seconds": 1.938,
+     "language": "en"
+    },
+    "9_yweweler_2.wav": {
+     "text": " 9.",
+     "seconds": 1.953,
+     "language": "en"
+    },
+    "9_yweweler_3.wav": {
+     "text": " Nine.",
+     "seconds": 1.929,
+     "language": "en"
+    },
+    "9_yweweler_4.wav": {
+     "text": " Nine.",
+     "seconds": 1.906,
+     "language": "en"
+    },
+    "seq_0.wav": {
+     "text": " two five seven six",
+     "seconds": 1.947,
+     "language": "en"
+    },
+    "seq_1.wav": {
+     "text": " 0 7 1 6",
+     "seconds": 1.963,
+     "language": "en"
+    },
+    "seq_2.wav": {
+     "text": " Seven. Nine. Five. Six.",
+     "seconds": 1.985,
+     "language": "en"
+    },
+    "seq_3.wav": {
+     "text": " 0 7 6 3",
+     "seconds": 1.97,
+     "language": "en"
+    },
+    "seq_4.wav": {
+     "text": " 9 1 8 7",
+     "seconds": 1.968,
+     "language": "en"
+    },
+    "seq_5.wav": {
+     "text": " two, five, four, zero.",
+     "seconds": 1.966,
+     "language": "en"
+    },
+    "seq_6.wav": {
+     "text": " 0 1 9",
+     "seconds": 1.918,
+     "language": "en"
+    },
+    "seq_7.wav": {
+     "text": " five seven three four",
+     "seconds": 1.939,
+     "language": "en"
+    },
+    "seq_8.wav": {
+     "text": " Three, six, nine, nine.",
+     "seconds": 1.984,
+     "language": "en"
+    },
+    "seq_9.wav": {
+     "text": " 3 8 5 1",
+     "seconds": 1.911,
+     "language": "en"
+    },
+    "samples_jfk.wav": {
+     "text": " And so, my fellow Americans, ask not what your country can do for you, ask what you can do for your country.",
+     "seconds": 2.107,
+     "language": "en"
+    }
+   }
+  },
+  "turbo/cuda-static-graph-auto": {
+   "scores": {
+    "digit_wer": 0.52,
+    "digit_exact": 0.6,
+    "sequence_wer": 0.025,
+    "long_wer": 0.0,
+    "empty": 0,
+    "median_s": 2.88,
+    "languages_reported": {
+     "en": 59,
+     "es": 1,
+     "ko": 1
+    }
+   },
+   "env": {
+    "ASR_STATIC_DECODE": "448",
+    "ASR_CUDA_GRAPH": "1"
+   },
+   "prompt": null,
+   "transcripts": {
+    "0_yweweler_0.wav": {
+     "text": " hero.",
+     "seconds": 3.092,
+     "language": "en"
+    },
+    "0_yweweler_1.wav": {
+     "text": " rule.",
+     "seconds": 2.881,
+     "language": "en"
+    },
+    "0_yweweler_2.wav": {
+     "text": " Bureau.",
+     "seconds": 2.88,
+     "language": "en"
+    },
+    "0_yweweler_3.wav": {
+     "text": " Zero.",
+     "seconds": 2.865,
+     "language": "en"
+    },
+    "0_yweweler_4.wav": {
+     "text": " Leroy.",
+     "seconds": 2.859,
+     "language": "en"
+    },
+    "1_yweweler_0.wav": {
+     "text": " Juan.",
+     "seconds": 2.899,
+     "language": "en"
+    },
+    "1_yweweler_1.wav": {
+     "text": " on.",
+     "seconds": 2.885,
+     "language": "en"
+    },
+    "1_yweweler_2.wav": {
+     "text": " One.",
+     "seconds": 2.861,
+     "language": "en"
+    },
+    "1_yweweler_3.wav": {
+     "text": " Come on.",
+     "seconds": 2.904,
+     "language": "en"
+    },
+    "1_yweweler_4.wav": {
+     "text": " one.",
+     "seconds": 2.862,
+     "language": "en"
+    },
+    "2_yweweler_0.wav": {
+     "text": " - Two.",
+     "seconds": 2.866,
+     "language": "en"
+    },
+    "2_yweweler_1.wav": {
+     "text": " to",
+     "seconds": 2.848,
+     "language": "en"
+    },
+    "2_yweweler_2.wav": {
+     "text": " Two.",
+     "seconds": 2.87,
+     "language": "en"
+    },
+    "2_yweweler_3.wav": {
+     "text": " - Two.",
+     "seconds": 2.844,
+     "language": "en"
+    },
+    "2_yweweler_4.wav": {
+     "text": " 2.",
+     "seconds": 2.86,
+     "language": "en"
+    },
+    "3_yweweler_0.wav": {
+     "text": " 3.",
+     "seconds": 2.928,
+     "language": "en"
+    },
+    "3_yweweler_1.wav": {
+     "text": " 3.",
+     "seconds": 2.881,
+     "language": "en"
+    },
+    "3_yweweler_2.wav": {
+     "text": " be",
+     "seconds": 2.844,
+     "language": "en"
+    },
+    "3_yweweler_3.wav": {
+     "text": " Oui.",
+     "seconds": 2.862,
+     "language": "en"
+    },
+    "3_yweweler_4.wav": {
+     "text": " 3.",
+     "seconds": 2.861,
+     "language": "en"
+    },
+    "4_yweweler_0.wav": {
+     "text": " 4",
+     "seconds": 2.858,
+     "language": "en"
+    },
+    "4_yweweler_1.wav": {
+     "text": " 4.",
+     "seconds": 2.866,
+     "language": "ko"
+    },
+    "4_yweweler_2.wav": {
+     "text": " or",
+     "seconds": 2.898,
+     "language": "es"
+    },
+    "4_yweweler_3.wav": {
+     "text": " Oh.",
+     "seconds": 2.849,
+     "language": "en"
+    },
+    "4_yweweler_4.wav": {
+     "text": " Åh.",
+     "seconds": 2.872,
+     "language": "en"
+    },
+    "5_yweweler_0.wav": {
+     "text": " Bye.",
+     "seconds": 2.879,
+     "language": "en"
+    },
+    "5_yweweler_1.wav": {
+     "text": " 5.",
+     "seconds": 2.878,
+     "language": "en"
+    },
+    "5_yweweler_2.wav": {
+     "text": " Bye.",
+     "seconds": 2.866,
+     "language": "en"
+    },
+    "5_yweweler_3.wav": {
+     "text": " 5.",
+     "seconds": 2.865,
+     "language": "en"
+    },
+    "5_yweweler_4.wav": {
+     "text": " 5.",
+     "seconds": 2.889,
+     "language": "en"
+    },
+    "6_yweweler_0.wav": {
+     "text": " For sakes.",
+     "seconds": 2.885,
+     "language": "en"
+    },
+    "6_yweweler_1.wav": {
+     "text": " Thank you.",
+     "seconds": 2.865,
+     "language": "en"
+    },
+    "6_yweweler_2.wav": {
+     "text": " Sí.",
+     "seconds": 2.876,
+     "language": "en"
+    },
+    "6_yweweler_3.wav": {
+     "text": " Thank you.",
+     "seconds": 2.878,
+     "language": "en"
+    },
+    "6_yweweler_4.wav": {
+     "text": " Thank you.",
+     "seconds": 2.859,
+     "language": "en"
+    },
+    "7_yweweler_0.wav": {
+     "text": " Seven.",
+     "seconds": 2.862,
+     "language": "en"
+    },
+    "7_yweweler_1.wav": {
+     "text": " Seven.",
+     "seconds": 2.884,
+     "language": "en"
+    },
+    "7_yweweler_2.wav": {
+     "text": " heaven.",
+     "seconds": 2.894,
+     "language": "en"
+    },
+    "7_yweweler_3.wav": {
+     "text": " Seven.",
+     "seconds": 2.894,
+     "language": "en"
+    },
+    "7_yweweler_4.wav": {
+     "text": " Seven.",
+     "seconds": 2.886,
+     "language": "en"
+    },
+    "8_yweweler_0.wav": {
+     "text": " Eight.",
+     "seconds": 2.861,
+     "language": "en"
+    },
+    "8_yweweler_1.wav": {
+     "text": " Eight.",
+     "seconds": 2.885,
+     "language": "en"
+    },
+    "8_yweweler_2.wav": {
+     "text": " Eight.",
+     "seconds": 2.856,
+     "language": "en"
+    },
+    "8_yweweler_3.wav": {
+     "text": " eight.",
+     "seconds": 2.894,
+     "language": "en"
+    },
+    "8_yweweler_4.wav": {
+     "text": " 8.",
+     "seconds": 2.871,
+     "language": "en"
+    },
+    "9_yweweler_0.wav": {
+     "text": " 9.",
+     "seconds": 2.855,
+     "language": "en"
+    },
+    "9_yweweler_1.wav": {
+     "text": " 9.",
+     "seconds": 2.858,
+     "language": "en"
+    },
+    "9_yweweler_2.wav": {
+     "text": " 9.",
+     "seconds": 2.862,
+     "language": "en"
+    },
+    "9_yweweler_3.wav": {
+     "text": " Nine.",
+     "seconds": 2.877,
+     "language": "en"
+    },
+    "9_yweweler_4.wav": {
+     "text": " Nine.",
+     "seconds": 2.868,
+     "language": "en"
+    },
+    "seq_0.wav": {
+     "text": " two five seven six",
+     "seconds": 2.914,
+     "language": "en"
+    },
+    "seq_1.wav": {
+     "text": " 0 7 1 6",
+     "seconds": 2.905,
+     "language": "en"
+    },
+    "seq_2.wav": {
+     "text": " Seven. Nine. Five. Six.",
+     "seconds": 2.879,
+     "language": "en"
+    },
+    "seq_3.wav": {
+     "text": " 0 7 6 3",
+     "seconds": 2.894,
+     "language": "en"
+    },
+    "seq_4.wav": {
+     "text": " 9 1 8 7",
+     "seconds": 2.879,
+     "language": "en"
+    },
+    "seq_5.wav": {
+     "text": " two, five, four, zero.",
+     "seconds": 2.906,
+     "language": "en"
+    },
+    "seq_6.wav": {
+     "text": " 0 1 9",
+     "seconds": 2.877,
+     "language": "en"
+    },
+    "seq_7.wav": {
+     "text": " five seven three four",
+     "seconds": 2.895,
+     "language": "en"
+    },
+    "seq_8.wav": {
+     "text": " Three, six, nine, nine.",
+     "seconds": 2.907,
+     "language": "en"
+    },
+    "seq_9.wav": {
+     "text": " 3 8 5 1",
+     "seconds": 2.881,
+     "language": "en"
+    },
+    "samples_jfk.wav": {
+     "text": " And so, my fellow Americans, ask not what your country can do for you, ask what you can do for your country.",
+     "seconds": 2.973,
+     "language": "en"
+    }
+   }
+  },
+  "tiny.en/cpu": {
+   "scores": {
+    "digit_wer": 0.88,
+    "digit_exact": 0.58,
+    "sequence_wer": 0.25,
+    "long_wer": 0.0,
+    "empty": 0,
+    "median_s": 2.98,
+    "languages_reported": {
+     "ms": 31,
+     "km": 11,
+     "hi": 9,
+     "ca": 4,
+     "pl": 3,
+     "cy": 1
+    }
+   },
+   "env": {
+    "IGNITE_DEVICE": "cpu"
+   },
+   "prompt": null,
+   "transcripts": {
+    "0_yweweler_0.wav": {
+     "text": " Bureau.",
+     "seconds": 3.011,
+     "language": "km"
+    },
+    "0_yweweler_1.wav": {
+     "text": " and a new hero.",
+     "seconds": 3.057,
+     "language": "ms"
+    },
+    "0_yweweler_2.wav": {
+     "text": " and a new year old.",
+     "seconds": 3.169,
+     "language": "km"
+    },
+    "0_yweweler_3.wav": {
+     "text": " You",
+     "seconds": 2.872,
+     "language": "hi"
+    },
+    "0_yweweler_4.wav": {
+     "text": " 0.",
+     "seconds": 2.915,
+     "language": "ms"
+    },
+    "1_yweweler_0.wav": {
+     "text": " 1.",
+     "seconds": 2.955,
+     "language": "ln"
+    },
+    "1_yweweler_1.wav": {
+     "text": " 1",
+     "seconds": 2.96,
+     "language": "ms"
+    },
+    "1_yweweler_2.wav": {
+     "text": " 1.",
+     "seconds": 3.049,
+     "language": "ms"
+    },
+    "1_yweweler_3.wav": {
+     "text": " 1.",
+     "seconds": 2.976,
+     "language": "ms"
+    },
+    "1_yweweler_4.wav": {
+     "text": " 1.",
+     "seconds": 3.048,
+     "language": "ms"
+    },
+    "2_yweweler_0.wav": {
+     "text": " 2.",
+     "seconds": 2.979,
+     "language": "pl"
+    },
+    "2_yweweler_1.wav": {
+     "text": " to",
+     "seconds": 2.975,
+     "language": "ms"
+    },
+    "2_yweweler_2.wav": {
+     "text": " to",
+     "seconds": 2.986,
+     "language": "ms"
+    },
+    "2_yweweler_3.wav": {
+     "text": " Thank you.",
+     "seconds": 2.985,
+     "language": "pl"
+    },
+    "2_yweweler_4.wav": {
+     "text": " 2.",
+     "seconds": 2.967,
+     "language": "ms"
+    },
+    "3_yweweler_0.wav": {
+     "text": " We",
+     "seconds": 2.957,
+     "language": "ms"
+    },
+    "3_yweweler_1.wav": {
+     "text": " 3",
+     "seconds": 3.055,
+     "language": "ms"
+    },
+    "3_yweweler_2.wav": {
+     "text": " Thank you for watching!",
+     "seconds": 3.179,
+     "language": "ms"
+    },
+    "3_yweweler_3.wav": {
+     "text": " We",
+     "seconds": 2.919,
+     "language": "ms"
+    },
+    "3_yweweler_4.wav": {
+     "text": " 3",
+     "seconds": 2.972,
+     "language": "pl"
+    },
+    "4_yweweler_0.wav": {
+     "text": " 4.",
+     "seconds": 2.973,
+     "language": "km"
+    },
+    "4_yweweler_1.wav": {
+     "text": " All",
+     "seconds": 2.895,
+     "language": "hi"
+    },
+    "4_yweweler_2.wav": {
+     "text": " 4.",
+     "seconds": 2.985,
+     "language": "ms"
+    },
+    "4_yweweler_3.wav": {
+     "text": " for the next couple of months.",
+     "seconds": 3.191,
+     "language": "hi"
+    },
+    "4_yweweler_4.wav": {
+     "text": " or",
+     "seconds": 2.972,
+     "language": "km"
+    },
+    "5_yweweler_0.wav": {
+     "text": " Bye.",
+     "seconds": 2.952,
+     "language": "hi"
+    },
+    "5_yweweler_1.wav": {
+     "text": " Bye.",
+     "seconds": 2.996,
+     "language": "hi"
+    },
+    "5_yweweler_2.wav": {
+     "text": " 5.",
+     "seconds": 3.036,
+     "language": "hi"
+    },
+    "5_yweweler_3.wav": {
+     "text": " Bye.",
+     "seconds": 2.979,
+     "language": "hi"
+    },
+    "5_yweweler_4.wav": {
+     "text": " 5.",
+     "seconds": 3.04,
+     "language": "ms"
+    },
+    "6_yweweler_0.wav": {
+     "text": " Thank you",
+     "seconds": 3.024,
+     "language": "ms"
+    },
+    "6_yweweler_1.wav": {
+     "text": " .",
+     "seconds": 2.946,
+     "language": "ms"
+    },
+    "6_yweweler_2.wav": {
+     "text": " Thank you",
+     "seconds": 2.986,
+     "language": "ms"
+    },
+    "6_yweweler_3.wav": {
+     "text": " you",
+     "seconds": 2.952,
+     "language": "ms"
+    },
+    "6_yweweler_4.wav": {
+     "text": " Thank you for watching.",
+     "seconds": 3.049,
+     "language": "ms"
+    },
+    "7_yweweler_0.wav": {
+     "text": " 7.",
+     "seconds": 2.933,
+     "language": "ms"
+    },
+    "7_yweweler_1.wav": {
+     "text": " 7",
+     "seconds": 2.94,
+     "language": "ms"
+    },
+    "7_yweweler_2.wav": {
+     "text": " Heaven.",
+     "seconds": 2.962,
+     "language": "ms"
+    },
+    "7_yweweler_3.wav": {
+     "text": " 7",
+     "seconds": 2.934,
+     "language": "ca"
+    },
+    "7_yweweler_4.wav": {
+     "text": " Evan",
+     "seconds": 2.946,
+     "language": "ca"
+    },
+    "8_yweweler_0.wav": {
+     "text": " 8.",
+     "seconds": 2.915,
+     "language": "ms"
+    },
+    "8_yweweler_1.wav": {
+     "text": " 8.",
+     "seconds": 2.992,
+     "language": "ca"
+    },
+    "8_yweweler_2.wav": {
+     "text": " 8.",
+     "seconds": 2.966,
+     "language": "ms"
+    },
+    "8_yweweler_3.wav": {
+     "text": " 8.",
+     "seconds": 2.97,
+     "language": "ms"
+    },
+    "8_yweweler_4.wav": {
+     "text": " 8.",
+     "seconds": 2.964,
+     "language": "ms"
+    },
+    "9_yweweler_0.wav": {
+     "text": " 9.",
+     "seconds": 2.926,
+     "language": "hi"
+    },
+    "9_yweweler_1.wav": {
+     "text": " 9.",
+     "seconds": 2.981,
+     "language": "hi"
+    },
+    "9_yweweler_2.wav": {
+     "text": " 9.",
+     "seconds": 2.991,
+     "language": "ms"
+    },
+    "9_yweweler_3.wav": {
+     "text": " 9",
+     "seconds": 2.96,
+     "language": "cy"
+    },
+    "9_yweweler_4.wav": {
+     "text": " 9.",
+     "seconds": 3.008,
+     "language": "ms"
+    },
+    "seq_0.wav": {
+     "text": " 2 5 7 6",
+     "seconds": 3.085,
+     "language": "ca"
+    },
+    "seq_1.wav": {
+     "text": " 1.",
+     "seconds": 2.983,
+     "language": "km"
+    },
+    "seq_2.wav": {
+     "text": " 7 9 5",
+     "seconds": 3.037,
+     "language": "km"
+    },
+    "seq_3.wav": {
+     "text": " 0. 7. 6. 3.",
+     "seconds": 3.313,
+     "language": "km"
+    },
+    "seq_4.wav": {
+     "text": " 8-7",
+     "seconds": 3.022,
+     "language": "km"
+    },
+    "seq_5.wav": {
+     "text": " 2, 5, or 0.",
+     "seconds": 3.216,
+     "language": "ms"
+    },
+    "seq_6.wav": {
+     "text": " 1.",
+     "seconds": 3.035,
+     "language": "km"
+    },
+    "seq_7.wav": {
+     "text": " 5, 7, 3, 4.",
+     "seconds": 3.241,
+     "language": "km"
+    },
+    "seq_8.wav": {
+     "text": " 3, 6, 9, 9.",
+     "seconds": 3.276,
+     "language": "ms"
+    },
+    "seq_9.wav": {
+     "text": " 3 8 5 1",
+     "seconds": 3.086,
+     "language": "km"
+    },
+    "samples_jfk.wav": {
+     "text": " And so my fellow Americans ask not what your country can do for you ask what you can do for your country",
+     "seconds": 4.072,
+     "language": "sq"
+    }
+   }
+  },
+  "transformers/tiny.en": {
+   "scores": {
+    "digit_wer": 0.72,
+    "digit_exact": 0.48,
+    "sequence_wer": 0.1,
+    "long_wer": 0.0,
+    "empty": 0,
+    "median_s": 0.03
+   },
+   "env": null,
+   "prompt": null,
+   "transcripts": {
+    "0_yweweler_0.wav": {
+     "text": " Zero.",
+     "seconds": 1.455
+    },
+    "0_yweweler_1.wav": {
+     "text": " Zero.",
+     "seconds": 0.049
+    },
+    "0_yweweler_2.wav": {
+     "text": " You're all.",
+     "seconds": 0.062
+    },
+    "0_yweweler_3.wav": {
+     "text": " You're all.",
+     "seconds": 0.069
+    },
+    "0_yweweler_4.wav": {
+     "text": " Zero.",
+     "seconds": 0.049
+    },
+    "1_yweweler_0.wav": {
+     "text": " 1.",
+     "seconds": 0.038
+    },
+    "1_yweweler_1.wav": {
+     "text": " One.",
+     "seconds": 0.042
+    },
+    "1_yweweler_2.wav": {
+     "text": " 1.",
+     "seconds": 0.043
+    },
+    "1_yweweler_3.wav": {
+     "text": " 1.",
+     "seconds": 0.039
+    },
+    "1_yweweler_4.wav": {
+     "text": " one.",
+     "seconds": 0.034
+    },
+    "2_yweweler_0.wav": {
+     "text": " to.",
+     "seconds": 0.034
+    },
+    "2_yweweler_1.wav": {
+     "text": " to",
+     "seconds": 0.028
+    },
+    "2_yweweler_2.wav": {
+     "text": " Thank you.",
+     "seconds": 0.041
+    },
+    "2_yweweler_3.wav": {
+     "text": " Thank you.",
+     "seconds": 0.038
+    },
+    "2_yweweler_4.wav": {
+     "text": " Two.",
+     "seconds": 0.03
+    },
+    "3_yweweler_0.wav": {
+     "text": " Be",
+     "seconds": 0.025
+    },
+    "3_yweweler_1.wav": {
+     "text": " free.",
+     "seconds": 0.031
+    },
+    "3_yweweler_2.wav": {
+     "text": " Bye.",
+     "seconds": 0.031
+    },
+    "3_yweweler_3.wav": {
+     "text": " We.",
+     "seconds": 0.031
+    },
+    "3_yweweler_4.wav": {
+     "text": " free.",
+     "seconds": 0.031
+    },
+    "4_yweweler_0.wav": {
+     "text": " Four.",
+     "seconds": 0.031
+    },
+    "4_yweweler_1.wav": {
+     "text": " All.",
+     "seconds": 0.031
+    },
+    "4_yweweler_2.wav": {
+     "text": " Or...",
+     "seconds": 0.031
+    },
+    "4_yweweler_3.wav": {
+     "text": " Oh.",
+     "seconds": 0.03
+    },
+    "4_yweweler_4.wav": {
+     "text": " Oh.",
+     "seconds": 0.035
+    },
+    "5_yweweler_0.wav": {
+     "text": " Bye.",
+     "seconds": 0.034
+    },
+    "5_yweweler_1.wav": {
+     "text": " Bye.",
+     "seconds": 0.031
+    },
+    "5_yweweler_2.wav": {
+     "text": " Bye.",
+     "seconds": 0.032
+    },
+    "5_yweweler_3.wav": {
+     "text": " Bye.",
+     "seconds": 0.032
+    },
+    "5_yweweler_4.wav": {
+     "text": " 5.",
+     "seconds": 0.031
+    },
+    "6_yweweler_0.wav": {
+     "text": " Hey.",
+     "seconds": 0.031
+    },
+    "6_yweweler_1.wav": {
+     "text": " Thank you.",
+     "seconds": 0.035
+    },
+    "6_yweweler_2.wav": {
+     "text": " Thank you.",
+     "seconds": 0.037
+    },
+    "6_yweweler_3.wav": {
+     "text": " Thank you.",
+     "seconds": 0.037
+    },
+    "6_yweweler_4.wav": {
+     "text": " Thank you.",
+     "seconds": 0.037
+    },
+    "7_yweweler_0.wav": {
+     "text": " 7.",
+     "seconds": 0.03
+    },
+    "7_yweweler_1.wav": {
+     "text": " 7",
+     "seconds": 0.024
+    },
+    "7_yweweler_2.wav": {
+     "text": " Heaven.",
+     "seconds": 0.031
+    },
+    "7_yweweler_3.wav": {
+     "text": " 7",
+     "seconds": 0.027
+    },
+    "7_yweweler_4.wav": {
+     "text": " Evan.",
+     "seconds": 0.034
+    },
+    "8_yweweler_0.wav": {
+     "text": " 8.",
+     "seconds": 0.031
+    },
+    "8_yweweler_1.wav": {
+     "text": " aid.",
+     "seconds": 0.031
+    },
+    "8_yweweler_2.wav": {
+     "text": " 8.",
+     "seconds": 0.032
+    },
+    "8_yweweler_3.wav": {
+     "text": " paid.",
+     "seconds": 0.03
+    },
+    "8_yweweler_4.wav": {
+     "text": " 8.",
+     "seconds": 0.03
+    },
+    "9_yweweler_0.wav": {
+     "text": " 9.",
+     "seconds": 0.031
+    },
+    "9_yweweler_1.wav": {
+     "text": " 9.",
+     "seconds": 0.031
+    },
+    "9_yweweler_2.wav": {
+     "text": " 9.",
+     "seconds": 0.031
+    },
+    "9_yweweler_3.wav": {
+     "text": " 9",
+     "seconds": 0.025
+    },
+    "9_yweweler_4.wav": {
+     "text": " 9.",
+     "seconds": 0.031
+    },
+    "seq_0.wav": {
+     "text": " 2 5 7 6",
+     "seconds": 0.044
+    },
+    "seq_1.wav": {
+     "text": " zero, seven, one, take.",
+     "seconds": 0.068
+    },
+    "seq_2.wav": {
+     "text": " 7, 9, 5, 6.",
+     "seconds": 0.07
+    },
+    "seq_3.wav": {
+     "text": " 0, 7, 6, 3.",
+     "seconds": 0.07
+    },
+    "seq_4.wav": {
+     "text": " 9 1 8 7",
+     "seconds": 0.044
+    },
+    "seq_5.wav": {
+     "text": " 2, 5, or 0.",
+     "seconds": 0.063
+    },
+    "seq_6.wav": {
+     "text": " 1, 9,",
+     "seconds": 0.043
+    },
+    "seq_7.wav": {
+     "text": " 5, 7, 3, 4.",
+     "seconds": 0.069
+    },
+    "seq_8.wav": {
+     "text": " 3, 6, 9, 9.",
+     "seconds": 0.069
+    },
+    "seq_9.wav": {
+     "text": " 3 8 5 1",
+     "seconds": 0.041
+    },
+    "samples_jfk.wav": {
+     "text": " And so my fellow Americans ask not what your country can do for you, ask what you can do for your country.",
+     "seconds": 0.175
+    }
+   }
+  },
+  "hf-greedy/tiny.en/trained_prompt": {
+   "scores": {
+    "digit_wer": 0.72,
+    "digit_exact": 0.48,
+    "sequence_wer": 0.1,
+    "long_wer": 0.0,
+    "empty": 0,
+    "median_s": 0.03
+   },
+   "env": null,
+   "prompt": null,
+   "transcripts": {
+    "0_yweweler_0.wav": {
+     "text": " Zero.",
+     "seconds": 0.727
+    },
+    "0_yweweler_1.wav": {
+     "text": " Zero.",
+     "seconds": 0.046
+    },
+    "0_yweweler_2.wav": {
+     "text": " You're all.",
+     "seconds": 0.061
+    },
+    "0_yweweler_3.wav": {
+     "text": " You're all.",
+     "seconds": 0.049
+    },
+    "0_yweweler_4.wav": {
+     "text": " Zero.",
+     "seconds": 0.036
+    },
+    "1_yweweler_0.wav": {
+     "text": " 1.",
+     "seconds": 0.038
+    },
+    "1_yweweler_1.wav": {
+     "text": " One.",
+     "seconds": 0.037
+    },
+    "1_yweweler_2.wav": {
+     "text": " 1.",
+     "seconds": 0.031
+    },
+    "1_yweweler_3.wav": {
+     "text": " 1.",
+     "seconds": 0.03
+    },
+    "1_yweweler_4.wav": {
+     "text": " one.",
+     "seconds": 0.029
+    },
+    "2_yweweler_0.wav": {
+     "text": " to.",
+     "seconds": 0.03
+    },
+    "2_yweweler_1.wav": {
+     "text": " to",
+     "seconds": 0.023
+    },
+    "2_yweweler_2.wav": {
+     "text": " Thank you.",
+     "seconds": 0.033
+    },
+    "2_yweweler_3.wav": {
+     "text": " Thank you.",
+     "seconds": 0.035
+    },
+    "2_yweweler_4.wav": {
+     "text": " Two.",
+     "seconds": 0.029
+    },
+    "3_yweweler_0.wav": {
+     "text": " Be",
+     "seconds": 0.023
+    },
+    "3_yweweler_1.wav": {
+     "text": " free.",
+     "seconds": 0.028
+    },
+    "3_yweweler_2.wav": {
+     "text": " Bye.",
+     "seconds": 0.027
+    },
+    "3_yweweler_3.wav": {
+     "text": " We.",
+     "seconds": 0.029
+    },
+    "3_yweweler_4.wav": {
+     "text": " free.",
+     "seconds": 0.027
+    },
+    "4_yweweler_0.wav": {
+     "text": " Four.",
+     "seconds": 0.027
+    },
+    "4_yweweler_1.wav": {
+     "text": " All.",
+     "seconds": 0.026
+    },
+    "4_yweweler_2.wav": {
+     "text": " Or...",
+     "seconds": 0.027
+    },
+    "4_yweweler_3.wav": {
+     "text": " Oh.",
+     "seconds": 0.026
+    },
+    "4_yweweler_4.wav": {
+     "text": " Oh.",
+     "seconds": 0.028
+    },
+    "5_yweweler_0.wav": {
+     "text": " Bye.",
+     "seconds": 0.027
+    },
+    "5_yweweler_1.wav": {
+     "text": " Bye.",
+     "seconds": 0.027
+    },
+    "5_yweweler_2.wav": {
+     "text": " Bye.",
+     "seconds": 0.027
+    },
+    "5_yweweler_3.wav": {
+     "text": " Bye.",
+     "seconds": 0.027
+    },
+    "5_yweweler_4.wav": {
+     "text": " 5.",
+     "seconds": 0.027
+    },
+    "6_yweweler_0.wav": {
+     "text": " Hey.",
+     "seconds": 0.027
+    },
+    "6_yweweler_1.wav": {
+     "text": " Thank you.",
+     "seconds": 0.033
+    },
+    "6_yweweler_2.wav": {
+     "text": " Thank you.",
+     "seconds": 0.032
+    },
+    "6_yweweler_3.wav": {
+     "text": " Thank you.",
+     "seconds": 0.032
+    },
+    "6_yweweler_4.wav": {
+     "text": " Thank you.",
+     "seconds": 0.032
+    },
+    "7_yweweler_0.wav": {
+     "text": " 7.",
+     "seconds": 0.026
+    },
+    "7_yweweler_1.wav": {
+     "text": " 7",
+     "seconds": 0.021
+    },
+    "7_yweweler_2.wav": {
+     "text": " Heaven.",
+     "seconds": 0.027
+    },
+    "7_yweweler_3.wav": {
+     "text": " 7",
+     "seconds": 0.021
+    },
+    "7_yweweler_4.wav": {
+     "text": " Evan.",
+     "seconds": 0.027
+    },
+    "8_yweweler_0.wav": {
+     "text": " 8.",
+     "seconds": 0.027
+    },
+    "8_yweweler_1.wav": {
+     "text": " aid.",
+     "seconds": 0.028
+    },
+    "8_yweweler_2.wav": {
+     "text": " 8.",
+     "seconds": 0.027
+    },
+    "8_yweweler_3.wav": {
+     "text": " paid.",
+     "seconds": 0.027
+    },
+    "8_yweweler_4.wav": {
+     "text": " 8.",
+     "seconds": 0.028
+    },
+    "9_yweweler_0.wav": {
+     "text": " 9.",
+     "seconds": 0.027
+    },
+    "9_yweweler_1.wav": {
+     "text": " 9.",
+     "seconds": 0.026
+    },
+    "9_yweweler_2.wav": {
+     "text": " 9.",
+     "seconds": 0.027
+    },
+    "9_yweweler_3.wav": {
+     "text": " 9",
+     "seconds": 0.021
+    },
+    "9_yweweler_4.wav": {
+     "text": " 9.",
+     "seconds": 0.026
+    },
+    "seq_0.wav": {
+     "text": " 2 5 7 6",
+     "seconds": 0.038
+    },
+    "seq_1.wav": {
+     "text": " zero, seven, one, take.",
+     "seconds": 0.061
+    },
+    "seq_2.wav": {
+     "text": " 7, 9, 5, 6.",
+     "seconds": 0.061
+    },
+    "seq_3.wav": {
+     "text": " 0, 7, 6, 3.",
+     "seconds": 0.06
+    },
+    "seq_4.wav": {
+     "text": " 9 1 8 7",
+     "seconds": 0.038
+    },
+    "seq_5.wav": {
+     "text": " 2, 5, or 0.",
+     "seconds": 0.055
+    },
+    "seq_6.wav": {
+     "text": " 1, 9,",
+     "seconds": 0.039
+    },
+    "seq_7.wav": {
+     "text": " 5, 7, 3, 4.",
+     "seconds": 0.06
+    },
+    "seq_8.wav": {
+     "text": " 3, 6, 9, 9.",
+     "seconds": 0.059
+    },
+    "seq_9.wav": {
+     "text": " 3 8 5 1",
+     "seconds": 0.038
+    },
+    "samples_jfk.wav": {
+     "text": " And so my fellow Americans ask not what your country can do for you, ask what you can do for your country.",
+     "seconds": 0.187
+    }
+   }
+  },
+  "hf-greedy/tiny.en/executor_prompt_auto": {
+   "scores": {
+    "digit_wer": 0.56,
+    "digit_exact": 0.64,
+    "sequence_wer": 0.175,
+    "long_wer": 0.0,
+    "empty": 0,
+    "median_s": 0.03
+   },
+   "env": null,
+   "prompt": null,
+   "transcripts": {
+    "0_yweweler_0.wav": {
+     "text": " 0.",
+     "seconds": 0.027
+    },
+    "0_yweweler_1.wav": {
+     "text": " Zero.",
+     "seconds": 0.027
+    },
+    "0_yweweler_2.wav": {
+     "text": " You're all.",
+     "seconds": 0.038
+    },
+    "0_yweweler_3.wav": {
+     "text": " You",
+     "seconds": 0.021
+    },
+    "0_yweweler_4.wav": {
+     "text": " Zero.",
+     "seconds": 0.027
+    },
+    "1_yweweler_0.wav": {
+     "text": " 1.",
+     "seconds": 0.027
+    },
+    "1_yweweler_1.wav": {
+     "text": " 1",
+     "seconds": 0.021
+    },
+    "1_yweweler_2.wav": {
+     "text": " 1.",
+     "seconds": 0.027
+    },
+    "1_yweweler_3.wav": {
+     "text": " 1.",
+     "seconds": 0.027
+    },
+    "1_yweweler_4.wav": {
+     "text": " 1.",
+     "seconds": 0.027
+    },
+    "2_yweweler_0.wav": {
+     "text": " to",
+     "seconds": 0.022
+    },
+    "2_yweweler_1.wav": {
+     "text": " to",
+     "seconds": 0.022
+    },
+    "2_yweweler_2.wav": {
+     "text": " to",
+     "seconds": 0.022
+    },
+    "2_yweweler_3.wav": {
+     "text": " Thank you.",
+     "seconds": 0.033
+    },
+    "2_yweweler_4.wav": {
+     "text": " 2.",
+     "seconds": 0.027
+    },
+    "3_yweweler_0.wav": {
+     "text": " B.",
+     "seconds": 0.027
+    },
+    "3_yweweler_1.wav": {
+     "text": " 3",
+     "seconds": 0.021
+    },
+    "3_yweweler_2.wav": {
+     "text": " Thank you for watching!",
+     "seconds": 0.044
+    },
+    "3_yweweler_3.wav": {
+     "text": " We",
+     "seconds": 0.021
+    },
+    "3_yweweler_4.wav": {
+     "text": " 3",
+     "seconds": 0.022
+    },
+    "4_yweweler_0.wav": {
+     "text": " 4.",
+     "seconds": 0.027
+    },
+    "4_yweweler_1.wav": {
+     "text": " all",
+     "seconds": 0.021
+    },
+    "4_yweweler_2.wav": {
+     "text": " 4.",
+     "seconds": 0.027
+    },
+    "4_yweweler_3.wav": {
+     "text": " or",
+     "seconds": 0.022
+    },
+    "4_yweweler_4.wav": {
+     "text": " or",
+     "seconds": 0.021
+    },
+    "5_yweweler_0.wav": {
+     "text": " Bye.",
+     "seconds": 0.027
+    },
+    "5_yweweler_1.wav": {
+     "text": " 5.",
+     "seconds": 0.027
+    },
+    "5_yweweler_2.wav": {
+     "text": " I",
+     "seconds": 0.021
+    },
+    "5_yweweler_3.wav": {
+     "text": " 5.",
+     "seconds": 0.027
+    },
+    "5_yweweler_4.wav": {
+     "text": " 5.",
+     "seconds": 0.027
+    },
+    "6_yweweler_0.wav": {
+     "text": " Thank you",
+     "seconds": 0.027
+    },
+    "6_yweweler_1.wav": {
+     "text": ".",
+     "seconds": 0.022
+    },
+    "6_yweweler_2.wav": {
+     "text": " Thank you",
+     "seconds": 0.03
+    },
+    "6_yweweler_3.wav": {
+     "text": ".",
+     "seconds": 0.023
+    },
+    "6_yweweler_4.wav": {
+     "text": ".",
+     "seconds": 0.023
+    },
+    "7_yweweler_0.wav": {
+     "text": " 7.",
+     "seconds": 0.03
+    },
+    "7_yweweler_1.wav": {
+     "text": " 7",
+     "seconds": 0.023
+    },
+    "7_yweweler_2.wav": {
+     "text": " Heaven.",
+     "seconds": 0.027
+    },
+    "7_yweweler_3.wav": {
+     "text": " 7",
+     "seconds": 0.021
+    },
+    "7_yweweler_4.wav": {
+     "text": " Evan",
+     "seconds": 0.022
+    },
+    "8_yweweler_0.wav": {
+     "text": " 8.",
+     "seconds": 0.03
+    },
+    "8_yweweler_1.wav": {
+     "text": " 8.",
+     "seconds": 0.03
+    },
+    "8_yweweler_2.wav": {
+     "text": " 8.",
+     "seconds": 0.029
+    },
+    "8_yweweler_3.wav": {
+     "text": " 8.",
+     "seconds": 0.029
+    },
+    "8_yweweler_4.wav": {
+     "text": " 8.",
+     "seconds": 0.027
+    },
+    "9_yweweler_0.wav": {
+     "text": " 9.",
+     "seconds": 0.028
+    },
+    "9_yweweler_1.wav": {
+     "text": " 9.",
+     "seconds": 0.028
+    },
+    "9_yweweler_2.wav": {
+     "text": " 9.",
+     "seconds": 0.028
+    },
+    "9_yweweler_3.wav": {
+     "text": " 9",
+     "seconds": 0.022
+    },
+    "9_yweweler_4.wav": {
+     "text": " 9.",
+     "seconds": 0.028
+    },
+    "seq_0.wav": {
+     "text": " 2 5 7 6",
+     "seconds": 0.039
+    },
+    "seq_1.wav": {
+     "text": " 0.",
+     "seconds": 0.029
+    },
+    "seq_2.wav": {
+     "text": " 7 9 5 6",
+     "seconds": 0.042
+    },
+    "seq_3.wav": {
+     "text": " 0. 7. 6. 3.",
+     "seconds": 0.065
+    },
+    "seq_4.wav": {
+     "text": " 9 1 8 7",
+     "seconds": 0.052
+    },
+    "seq_5.wav": {
+     "text": " 2, 5, or 0.",
+     "seconds": 0.056
+    },
+    "seq_6.wav": {
+     "text": " 1",
+     "seconds": 0.022
+    },
+    "seq_7.wav": {
+     "text": " 5, 7, 3, 4.",
+     "seconds": 0.083
+    },
+    "seq_8.wav": {
+     "text": " 3, 6, 9, 9.",
+     "seconds": 0.065
+    },
+    "seq_9.wav": {
+     "text": " 3 8 5 1",
+     "seconds": 0.039
+    },
+    "samples_jfk.wav": {
+     "text": " And so my fellow Americans ask not what your country can do for you ask what you can do for your country",
+     "seconds": 0.144
+    }
+   }
+  },
+  "hf-generate/tiny.en": {
+   "scores": {
+    "digit_wer": 0.72,
+    "digit_exact": 0.48,
+    "sequence_wer": 0.1,
+    "long_wer": 0.0,
+    "empty": 0,
+    "median_s": 0.0
+   },
+   "env": null,
+   "prompt": null,
+   "transcripts": {
+    "0_yweweler_0.wav": {
+     "text": " Zero.",
+     "seconds": 0.0
+    },
+    "0_yweweler_1.wav": {
+     "text": " Zero.",
+     "seconds": 0.0
+    },
+    "0_yweweler_2.wav": {
+     "text": " You're all.",
+     "seconds": 0.0
+    },
+    "0_yweweler_3.wav": {
+     "text": " You're all.",
+     "seconds": 0.0
+    },
+    "0_yweweler_4.wav": {
+     "text": " Zero.",
+     "seconds": 0.0
+    },
+    "1_yweweler_0.wav": {
+     "text": " 1.",
+     "seconds": 0.0
+    },
+    "1_yweweler_1.wav": {
+     "text": " One.",
+     "seconds": 0.0
+    },
+    "1_yweweler_2.wav": {
+     "text": " 1.",
+     "seconds": 0.0
+    },
+    "1_yweweler_3.wav": {
+     "text": " 1.",
+     "seconds": 0.0
+    },
+    "1_yweweler_4.wav": {
+     "text": " one.",
+     "seconds": 0.0
+    },
+    "2_yweweler_0.wav": {
+     "text": " to.",
+     "seconds": 0.0
+    },
+    "2_yweweler_1.wav": {
+     "text": " to",
+     "seconds": 0.0
+    },
+    "2_yweweler_2.wav": {
+     "text": " Thank you.",
+     "seconds": 0.0
+    },
+    "2_yweweler_3.wav": {
+     "text": " Thank you.",
+     "seconds": 0.0
+    },
+    "2_yweweler_4.wav": {
+     "text": " Two.",
+     "seconds": 0.0
+    },
+    "3_yweweler_0.wav": {
+     "text": " Be",
+     "seconds": 0.0
+    },
+    "3_yweweler_1.wav": {
+     "text": " free.",
+     "seconds": 0.0
+    },
+    "3_yweweler_2.wav": {
+     "text": " Bye.",
+     "seconds": 0.0
+    },
+    "3_yweweler_3.wav": {
+     "text": " We.",
+     "seconds": 0.0
+    },
+    "3_yweweler_4.wav": {
+     "text": " free.",
+     "seconds": 0.0
+    },
+    "4_yweweler_0.wav": {
+     "text": " Four.",
+     "seconds": 0.0
+    },
+    "4_yweweler_1.wav": {
+     "text": " All.",
+     "seconds": 0.0
+    },
+    "4_yweweler_2.wav": {
+     "text": " Or...",
+     "seconds": 0.0
+    },
+    "4_yweweler_3.wav": {
+     "text": " Oh.",
+     "seconds": 0.0
+    },
+    "4_yweweler_4.wav": {
+     "text": " Oh.",
+     "seconds": 0.0
+    },
+    "5_yweweler_0.wav": {
+     "text": " Bye.",
+     "seconds": 0.0
+    },
+    "5_yweweler_1.wav": {
+     "text": " Bye.",
+     "seconds": 0.0
+    },
+    "5_yweweler_2.wav": {
+     "text": " Bye.",
+     "seconds": 0.0
+    },
+    "5_yweweler_3.wav": {
+     "text": " Bye.",
+     "seconds": 0.0
+    },
+    "5_yweweler_4.wav": {
+     "text": " 5.",
+     "seconds": 0.0
+    },
+    "6_yweweler_0.wav": {
+     "text": " Hey.",
+     "seconds": 0.0
+    },
+    "6_yweweler_1.wav": {
+     "text": " Thank you.",
+     "seconds": 0.0
+    },
+    "6_yweweler_2.wav": {
+     "text": " Thank you.",
+     "seconds": 0.0
+    },
+    "6_yweweler_3.wav": {
+     "text": " Thank you.",
+     "seconds": 0.0
+    },
+    "6_yweweler_4.wav": {
+     "text": " Thank you.",
+     "seconds": 0.0
+    },
+    "7_yweweler_0.wav": {
+     "text": " 7.",
+     "seconds": 0.0
+    },
+    "7_yweweler_1.wav": {
+     "text": " 7",
+     "seconds": 0.0
+    },
+    "7_yweweler_2.wav": {
+     "text": " Heaven.",
+     "seconds": 0.0
+    },
+    "7_yweweler_3.wav": {
+     "text": " 7",
+     "seconds": 0.0
+    },
+    "7_yweweler_4.wav": {
+     "text": " Evan.",
+     "seconds": 0.0
+    },
+    "8_yweweler_0.wav": {
+     "text": " 8.",
+     "seconds": 0.0
+    },
+    "8_yweweler_1.wav": {
+     "text": " aid.",
+     "seconds": 0.0
+    },
+    "8_yweweler_2.wav": {
+     "text": " 8.",
+     "seconds": 0.0
+    },
+    "8_yweweler_3.wav": {
+     "text": " paid.",
+     "seconds": 0.0
+    },
+    "8_yweweler_4.wav": {
+     "text": " 8.",
+     "seconds": 0.0
+    },
+    "9_yweweler_0.wav": {
+     "text": " 9.",
+     "seconds": 0.0
+    },
+    "9_yweweler_1.wav": {
+     "text": " 9.",
+     "seconds": 0.0
+    },
+    "9_yweweler_2.wav": {
+     "text": " 9.",
+     "seconds": 0.0
+    },
+    "9_yweweler_3.wav": {
+     "text": " 9",
+     "seconds": 0.0
+    },
+    "9_yweweler_4.wav": {
+     "text": " 9.",
+     "seconds": 0.0
+    },
+    "seq_0.wav": {
+     "text": " 2 5 7 6",
+     "seconds": 0.0
+    },
+    "seq_1.wav": {
+     "text": " zero, seven, one, take.",
+     "seconds": 0.0
+    },
+    "seq_2.wav": {
+     "text": " 7, 9, 5, 6.",
+     "seconds": 0.0
+    },
+    "seq_3.wav": {
+     "text": " 0, 7, 6, 3.",
+     "seconds": 0.0
+    },
+    "seq_4.wav": {
+     "text": " 9 1 8 7",
+     "seconds": 0.0
+    },
+    "seq_5.wav": {
+     "text": " 2, 5, or 0.",
+     "seconds": 0.0
+    },
+    "seq_6.wav": {
+     "text": " 1, 9,",
+     "seconds": 0.0
+    },
+    "seq_7.wav": {
+     "text": " 5, 7, 3, 4.",
+     "seconds": 0.0
+    },
+    "seq_8.wav": {
+     "text": " 3, 6, 9, 9.",
+     "seconds": 0.0
+    },
+    "seq_9.wav": {
+     "text": " 3 8 5 1",
+     "seconds": 0.0
+    },
+    "samples_jfk.wav": {
+     "text": " And so my fellow Americans ask not what your country can do for you, ask what you can do for your country.",
+     "seconds": 0.0
+    }
+   }
+  },
+  "hf-greedy/large-v3-turbo/trained_prompt": {
+   "scores": {
+    "digit_wer": 0.46,
+    "digit_exact": 0.66,
+    "sequence_wer": 0.025,
+    "long_wer": 0.0,
+    "empty": 0,
+    "median_s": 0.16
+   },
+   "env": null,
+   "prompt": null,
+   "transcripts": {
+    "0_yweweler_0.wav": {
+     "text": " zero.",
+     "seconds": 0.455
+    },
+    "0_yweweler_1.wav": {
+     "text": " Bureau.",
+     "seconds": 0.157
+    },
+    "0_yweweler_2.wav": {
+     "text": " - Zero.",
+     "seconds": 0.165
+    },
+    "0_yweweler_3.wav": {
+     "text": " Zero.",
+     "seconds": 0.151
+    },
+    "0_yweweler_4.wav": {
+     "text": " Leroy.",
+     "seconds": 0.169
+    },
+    "1_yweweler_0.wav": {
+     "text": " Juan.",
+     "seconds": 0.153
+    },
+    "1_yweweler_1.wav": {
+     "text": " One.",
+     "seconds": 0.155
+    },
+    "1_yweweler_2.wav": {
+     "text": " One.",
+     "seconds": 0.154
+    },
+    "1_yweweler_3.wav": {
+     "text": " Juan.",
+     "seconds": 0.154
+    },
+    "1_yweweler_4.wav": {
+     "text": " Juan.",
+     "seconds": 0.154
+    },
+    "2_yweweler_0.wav": {
+     "text": " - Two.",
+     "seconds": 0.164
+    },
+    "2_yweweler_1.wav": {
+     "text": " to",
+     "seconds": 0.148
+    },
+    "2_yweweler_2.wav": {
+     "text": " Two.",
+     "seconds": 0.156
+    },
+    "2_yweweler_3.wav": {
+     "text": " too.",
+     "seconds": 0.156
+    },
+    "2_yweweler_4.wav": {
+     "text": " two",
+     "seconds": 0.148
+    },
+    "3_yweweler_0.wav": {
+     "text": " 3.",
+     "seconds": 0.156
+    },
+    "3_yweweler_1.wav": {
+     "text": " Three.",
+     "seconds": 0.158
+    },
+    "3_yweweler_2.wav": {
+     "text": " be",
+     "seconds": 0.152
+    },
+    "3_yweweler_3.wav": {
+     "text": " We",
+     "seconds": 0.15
+    },
+    "3_yweweler_4.wav": {
+     "text": " 3.",
+     "seconds": 0.156
+    },
+    "4_yweweler_0.wav": {
+     "text": " for",
+     "seconds": 0.149
+    },
+    "4_yweweler_1.wav": {
+     "text": " for",
+     "seconds": 0.15
+    },
+    "4_yweweler_2.wav": {
+     "text": " or",
+     "seconds": 0.15
+    },
+    "4_yweweler_3.wav": {
+     "text": " Oh.",
+     "seconds": 0.157
+    },
+    "4_yweweler_4.wav": {
+     "text": " Oh.",
+     "seconds": 0.155
+    },
+    "5_yweweler_0.wav": {
+     "text": " 5.",
+     "seconds": 0.16
+    },
+    "5_yweweler_1.wav": {
+     "text": " Five.",
+     "seconds": 0.156
+    },
+    "5_yweweler_2.wav": {
+     "text": " Five.",
+     "seconds": 0.157
+    },
+    "5_yweweler_3.wav": {
+     "text": " Five.",
+     "seconds": 0.151
+    },
+    "5_yweweler_4.wav": {
+     "text": " 5.",
+     "seconds": 0.154
+    },
+    "6_yweweler_0.wav": {
+     "text": " six.",
+     "seconds": 0.155
+    },
+    "6_yweweler_1.wav": {
+     "text": " do.",
+     "seconds": 0.156
+    },
+    "6_yweweler_2.wav": {
+     "text": " - See.",
+     "seconds": 0.161
+    },
+    "6_yweweler_3.wav": {
+     "text": " Thank you.",
+     "seconds": 0.161
+    },
+    "6_yweweler_4.wav": {
+     "text": " Thank you.",
+     "seconds": 0.162
+    },
+    "7_yweweler_0.wav": {
+     "text": " Seven.",
+     "seconds": 0.153
+    },
+    "7_yweweler_1.wav": {
+     "text": " Seven.",
+     "seconds": 0.157
+    },
+    "7_yweweler_2.wav": {
+     "text": " Heaven.",
+     "seconds": 0.158
+    },
+    "7_yweweler_3.wav": {
+     "text": " Seven.",
+     "seconds": 0.159
+    },
+    "7_yweweler_4.wav": {
+     "text": " heaven.",
+     "seconds": 0.157
+    },
+    "8_yweweler_0.wav": {
+     "text": " Eight.",
+     "seconds": 0.155
+    },
+    "8_yweweler_1.wav": {
+     "text": " eight,",
+     "seconds": 0.156
+    },
+    "8_yweweler_2.wav": {
+     "text": " Eight.",
+     "seconds": 0.155
+    },
+    "8_yweweler_3.wav": {
+     "text": " eight.",
+     "seconds": 0.157
+    },
+    "8_yweweler_4.wav": {
+     "text": " 8",
+     "seconds": 0.15
+    },
+    "9_yweweler_0.wav": {
+     "text": " Nine.",
+     "seconds": 0.157
+    },
+    "9_yweweler_1.wav": {
+     "text": " Nine.",
+     "seconds": 0.157
+    },
+    "9_yweweler_2.wav": {
+     "text": " 9th.",
+     "seconds": 0.166
+    },
+    "9_yweweler_3.wav": {
+     "text": " Nine.",
+     "seconds": 0.156
+    },
+    "9_yweweler_4.wav": {
+     "text": " 9.",
+     "seconds": 0.156
+    },
+    "seq_0.wav": {
+     "text": " two five seven six",
+     "seconds": 0.17
+    },
+    "seq_1.wav": {
+     "text": " 0 7 1 6",
+     "seconds": 0.168
+    },
+    "seq_2.wav": {
+     "text": " Seven. Nine. Five. Six.",
+     "seconds": 0.196
+    },
+    "seq_3.wav": {
+     "text": " 0 7 6 3",
+     "seconds": 0.171
+    },
+    "seq_4.wav": {
+     "text": " 9 1 8 7",
+     "seconds": 0.169
+    },
+    "seq_5.wav": {
+     "text": " two, five, four, zero.",
+     "seconds": 0.195
+    },
+    "seq_6.wav": {
+     "text": " 0 1 9",
+     "seconds": 0.162
+    },
+    "seq_7.wav": {
+     "text": " five seven three four",
+     "seconds": 0.173
+    },
+    "seq_8.wav": {
+     "text": " Three, six, nine, nine.",
+     "seconds": 0.208
+    },
+    "seq_9.wav": {
+     "text": " 3, 8, 5, 1",
+     "seconds": 0.188
+    },
+    "samples_jfk.wav": {
+     "text": " And so, my fellow Americans, ask not what your country can do for you, ask what you can do for your country.",
+     "seconds": 0.318
+    }
+   }
+  },
+  "hf-greedy/large-v3-turbo/executor_prompt_auto": {
+   "scores": {
+    "digit_wer": 0.56,
+    "digit_exact": 0.62,
+    "sequence_wer": 0.025,
+    "long_wer": 0.0,
+    "empty": 0,
+    "median_s": 0.16
+   },
+   "env": null,
+   "prompt": null,
+   "transcripts": {
+    "0_yweweler_0.wav": {
+     "text": " zero.",
+     "seconds": 0.154
+    },
+    "0_yweweler_1.wav": {
+     "text": " Bureau.",
+     "seconds": 0.16
+    },
+    "0_yweweler_2.wav": {
+     "text": " -",
+     "seconds": 0.155
+    },
+    "0_yweweler_3.wav": {
+     "text": " Zero.",
+     "seconds": 0.16
+    },
+    "0_yweweler_4.wav": {
+     "text": " Leroy.",
+     "seconds": 0.171
+    },
+    "1_yweweler_0.wav": {
+     "text": " Juan.",
+     "seconds": 0.158
+    },
+    "1_yweweler_1.wav": {
+     "text": " One.",
+     "seconds": 0.158
+    },
+    "1_yweweler_2.wav": {
+     "text": " One.",
+     "seconds": 0.157
+    },
+    "1_yweweler_3.wav": {
+     "text": " Juan.",
+     "seconds": 0.16
+    },
+    "1_yweweler_4.wav": {
+     "text": " Juan.",
+     "seconds": 0.159
+    },
+    "2_yweweler_0.wav": {
+     "text": " - Two.",
+     "seconds": 0.166
+    },
+    "2_yweweler_1.wav": {
+     "text": " to",
+     "seconds": 0.153
+    },
+    "2_yweweler_2.wav": {
+     "text": " Two.",
+     "seconds": 0.163
+    },
+    "2_yweweler_3.wav": {
+     "text": " too.",
+     "seconds": 0.158
+    },
+    "2_yweweler_4.wav": {
+     "text": " two",
+     "seconds": 0.152
+    },
+    "3_yweweler_0.wav": {
+     "text": " 3.",
+     "seconds": 0.16
+    },
+    "3_yweweler_1.wav": {
+     "text": " 3.",
+     "seconds": 0.159
+    },
+    "3_yweweler_2.wav": {
+     "text": " be",
+     "seconds": 0.153
+    },
+    "3_yweweler_3.wav": {
+     "text": " Oui.",
+     "seconds": 0.16
+    },
+    "3_yweweler_4.wav": {
+     "text": " 3.",
+     "seconds": 0.163
+    },
+    "4_yweweler_0.wav": {
+     "text": " for",
+     "seconds": 0.152
+    },
+    "4_yweweler_1.wav": {
+     "text": " 4.",
+     "seconds": 0.159
+    },
+    "4_yweweler_2.wav": {
+     "text": " or",
+     "seconds": 0.152
+    },
+    "4_yweweler_3.wav": {
+     "text": " Oh.",
+     "seconds": 0.159
+    },
+    "4_yweweler_4.wav": {
+     "text": " -",
+     "seconds": 0.153
+    },
+    "5_yweweler_0.wav": {
+     "text": " 5.",
+     "seconds": 0.16
+    },
+    "5_yweweler_1.wav": {
+     "text": " Five.",
+     "seconds": 0.16
+    },
+    "5_yweweler_2.wav": {
+     "text": " Five.",
+     "seconds": 0.16
+    },
+    "5_yweweler_3.wav": {
+     "text": " Five.",
+     "seconds": 0.161
+    },
+    "5_yweweler_4.wav": {
+     "text": " 5.",
+     "seconds": 0.161
+    },
+    "6_yweweler_0.wav": {
+     "text": " six.",
+     "seconds": 0.161
+    },
+    "6_yweweler_1.wav": {
+     "text": " Thank you.",
+     "seconds": 0.166
+    },
+    "6_yweweler_2.wav": {
+     "text": " See you next week.",
+     "seconds": 0.177
+    },
+    "6_yweweler_3.wav": {
+     "text": " Thank you.",
+     "seconds": 0.164
+    },
+    "6_yweweler_4.wav": {
+     "text": " Thank you.",
+     "seconds": 0.166
+    },
+    "7_yweweler_0.wav": {
+     "text": " Seven.",
+     "seconds": 0.162
+    },
+    "7_yweweler_1.wav": {
+     "text": " Seven.",
+     "seconds": 0.161
+    },
+    "7_yweweler_2.wav": {
+     "text": " Heaven.",
+     "seconds": 0.161
+    },
+    "7_yweweler_3.wav": {
+     "text": " Seven.",
+     "seconds": 0.164
+    },
+    "7_yweweler_4.wav": {
+     "text": " heaven.",
+     "seconds": 0.162
+    },
+    "8_yweweler_0.wav": {
+     "text": " Eight.",
+     "seconds": 0.161
+    },
+    "8_yweweler_1.wav": {
+     "text": " eight,",
+     "seconds": 0.162
+    },
+    "8_yweweler_2.wav": {
+     "text": " Eight.",
+     "seconds": 0.162
+    },
+    "8_yweweler_3.wav": {
+     "text": " eight.",
+     "seconds": 0.162
+    },
+    "8_yweweler_4.wav": {
+     "text": " 8",
+     "seconds": 0.155
+    },
+    "9_yweweler_0.wav": {
+     "text": " Nine.",
+     "seconds": 0.164
+    },
+    "9_yweweler_1.wav": {
+     "text": " Nine.",
+     "seconds": 0.164
+    },
+    "9_yweweler_2.wav": {
+     "text": " 9th.",
+     "seconds": 0.168
+    },
+    "9_yweweler_3.wav": {
+     "text": " Nine.",
+     "seconds": 0.161
+    },
+    "9_yweweler_4.wav": {
+     "text": " Nein.",
+     "seconds": 0.161
+    },
+    "seq_0.wav": {
+     "text": " two five seven six",
+     "seconds": 0.174
+    },
+    "seq_1.wav": {
+     "text": " 0 7 1 6",
+     "seconds": 0.174
+    },
+    "seq_2.wav": {
+     "text": " Seven. Nine. Five. Six.",
+     "seconds": 0.201
+    },
+    "seq_3.wav": {
+     "text": " 0 7 6 3",
+     "seconds": 0.172
+    },
+    "seq_4.wav": {
+     "text": " 9 1 8 7",
+     "seconds": 0.173
+    },
+    "seq_5.wav": {
+     "text": " two, five, four, zero.",
+     "seconds": 0.199
+    },
+    "seq_6.wav": {
+     "text": " 0 1 9",
+     "seconds": 0.167
+    },
+    "seq_7.wav": {
+     "text": " five seven three four",
+     "seconds": 0.177
+    },
+    "seq_8.wav": {
+     "text": " Three, six, nine, nine.",
+     "seconds": 0.2
+    },
+    "seq_9.wav": {
+     "text": " 3, 8, 5, 1",
+     "seconds": 0.195
+    },
+    "samples_jfk.wav": {
+     "text": " And so, my fellow Americans, ask not what your country can do for you, ask what you can do for your country.",
+     "seconds": 0.317
+    }
+   }
+  },
+  "hf-greedy/large-v3-turbo/executor_prompt_en": {
+   "scores": {
+    "digit_wer": 0.46,
+    "digit_exact": 0.66,
+    "sequence_wer": 0.025,
+    "long_wer": 0.0,
+    "empty": 0,
+    "median_s": 0.16
+   },
+   "env": null,
+   "prompt": null,
+   "transcripts": {
+    "0_yweweler_0.wav": {
+     "text": " zero.",
+     "seconds": 0.159
+    },
+    "0_yweweler_1.wav": {
+     "text": " Bureau.",
+     "seconds": 0.163
+    },
+    "0_yweweler_2.wav": {
+     "text": " - Zero.",
+     "seconds": 0.17
+    },
+    "0_yweweler_3.wav": {
+     "text": " Zero.",
+     "seconds": 0.161
+    },
+    "0_yweweler_4.wav": {
+     "text": " Leroy.",
+     "seconds": 0.178
+    },
+    "1_yweweler_0.wav": {
+     "text": " Juan.",
+     "seconds": 0.164
+    },
+    "1_yweweler_1.wav": {
+     "text": " One.",
+     "seconds": 0.163
+    },
+    "1_yweweler_2.wav": {
+     "text": " One.",
+     "seconds": 0.162
+    },
+    "1_yweweler_3.wav": {
+     "text": " Juan.",
+     "seconds": 0.163
+    },
+    "1_yweweler_4.wav": {
+     "text": " Juan.",
+     "seconds": 0.165
+    },
+    "2_yweweler_0.wav": {
+     "text": " - Two.",
+     "seconds": 0.169
+    },
+    "2_yweweler_1.wav": {
+     "text": " to",
+     "seconds": 0.157
+    },
+    "2_yweweler_2.wav": {
+     "text": " Two.",
+     "seconds": 0.163
+    },
+    "2_yweweler_3.wav": {
+     "text": " too.",
+     "seconds": 0.163
+    },
+    "2_yweweler_4.wav": {
+     "text": " two",
+     "seconds": 0.156
+    },
+    "3_yweweler_0.wav": {
+     "text": " 3.",
+     "seconds": 0.164
+    },
+    "3_yweweler_1.wav": {
+     "text": " Three.",
+     "seconds": 0.165
+    },
+    "3_yweweler_2.wav": {
+     "text": " be",
+     "seconds": 0.157
+    },
+    "3_yweweler_3.wav": {
+     "text": " We",
+     "seconds": 0.159
+    },
+    "3_yweweler_4.wav": {
+     "text": " 3.",
+     "seconds": 0.169
+    },
+    "4_yweweler_0.wav": {
+     "text": " for",
+     "seconds": 0.16
+    },
+    "4_yweweler_1.wav": {
+     "text": " for",
+     "seconds": 0.159
+    },
+    "4_yweweler_2.wav": {
+     "text": " or",
+     "seconds": 0.159
+    },
+    "4_yweweler_3.wav": {
+     "text": " Oh.",
+     "seconds": 0.167
+    },
+    "4_yweweler_4.wav": {
+     "text": " Oh.",
+     "seconds": 0.164
+    },
+    "5_yweweler_0.wav": {
+     "text": " 5.",
+     "seconds": 0.165
+    },
+    "5_yweweler_1.wav": {
+     "text": " Five.",
+     "seconds": 0.164
+    },
+    "5_yweweler_2.wav": {
+     "text": " Five.",
+     "seconds": 0.164
+    },
+    "5_yweweler_3.wav": {
+     "text": " Five.",
+     "seconds": 0.167
+    },
+    "5_yweweler_4.wav": {
+     "text": " 5.",
+     "seconds": 0.167
+    },
+    "6_yweweler_0.wav": {
+     "text": " six.",
+     "seconds": 0.158
+    },
+    "6_yweweler_1.wav": {
+     "text": " do.",
+     "seconds": 0.165
+    },
+    "6_yweweler_2.wav": {
+     "text": " - See.",
+     "seconds": 0.169
+    },
+    "6_yweweler_3.wav": {
+     "text": " Thank you.",
+     "seconds": 0.169
+    },
+    "6_yweweler_4.wav": {
+     "text": " Thank you.",
+     "seconds": 0.17
+    },
+    "7_yweweler_0.wav": {
+     "text": " Seven.",
+     "seconds": 0.164
+    },
+    "7_yweweler_1.wav": {
+     "text": " Seven.",
+     "seconds": 0.162
+    },
+    "7_yweweler_2.wav": {
+     "text": " Heaven.",
+     "seconds": 0.163
+    },
+    "7_yweweler_3.wav": {
+     "text": " Seven.",
+     "seconds": 0.166
+    },
+    "7_yweweler_4.wav": {
+     "text": " heaven.",
+     "seconds": 0.164
+    },
+    "8_yweweler_0.wav": {
+     "text": " Eight.",
+     "seconds": 0.166
+    },
+    "8_yweweler_1.wav": {
+     "text": " eight,",
+     "seconds": 0.164
+    },
+    "8_yweweler_2.wav": {
+     "text": " Eight.",
+     "seconds": 0.166
+    },
+    "8_yweweler_3.wav": {
+     "text": " eight.",
+     "seconds": 0.165
+    },
+    "8_yweweler_4.wav": {
+     "text": " 8",
+     "seconds": 0.157
+    },
+    "9_yweweler_0.wav": {
+     "text": " Nine.",
+     "seconds": 0.166
+    },
+    "9_yweweler_1.wav": {
+     "text": " Nine.",
+     "seconds": 0.166
+    },
+    "9_yweweler_2.wav": {
+     "text": " 9th.",
+     "seconds": 0.171
+    },
+    "9_yweweler_3.wav": {
+     "text": " Nine.",
+     "seconds": 0.163
+    },
+    "9_yweweler_4.wav": {
+     "text": " 9.",
+     "seconds": 0.167
+    },
+    "seq_0.wav": {
+     "text": " two five seven six",
+     "seconds": 0.19
+    },
+    "seq_1.wav": {
+     "text": " 0 7 1 6",
+     "seconds": 0.174
+    },
+    "seq_2.wav": {
+     "text": " Seven. Nine. Five. Six.",
+     "seconds": 0.202
+    },
+    "seq_3.wav": {
+     "text": " 0 7 6 3",
+     "seconds": 0.176
+    },
+    "seq_4.wav": {
+     "text": " 9 1 8 7",
+     "seconds": 0.178
+    },
+    "seq_5.wav": {
+     "text": " two, five, four, zero.",
+     "seconds": 0.206
+    },
+    "seq_6.wav": {
+     "text": " 0 1 9",
+     "seconds": 0.171
+    },
+    "seq_7.wav": {
+     "text": " five seven three four",
+     "seconds": 0.178
+    },
+    "seq_8.wav": {
+     "text": " Three, six, nine, nine.",
+     "seconds": 0.205
+    },
+    "seq_9.wav": {
+     "text": " 3, 8, 5, 1",
+     "seconds": 0.2
+    },
+    "samples_jfk.wav": {
+     "text": " And so, my fellow Americans, ask not what your country can do for you, ask what you can do for your country.",
+     "seconds": 0.319
+    }
+   }
+  },
+  "hf-generate/large-v3-turbo": {
+   "scores": {
+    "digit_wer": 0.48,
+    "digit_exact": 0.64,
+    "sequence_wer": 0.025,
+    "long_wer": 0.0,
+    "empty": 0,
+    "median_s": 0.0
+   },
+   "env": null,
+   "prompt": null,
+   "transcripts": {
+    "0_yweweler_0.wav": {
+     "text": " zero.",
+     "seconds": 0.0
+    },
+    "0_yweweler_1.wav": {
+     "text": " Bureau.",
+     "seconds": 0.0
+    },
+    "0_yweweler_2.wav": {
+     "text": " Hero.",
+     "seconds": 0.0
+    },
+    "0_yweweler_3.wav": {
+     "text": " Zero.",
+     "seconds": 0.0
+    },
+    "0_yweweler_4.wav": {
+     "text": " Leroy.",
+     "seconds": 0.0
+    },
+    "1_yweweler_0.wav": {
+     "text": " Juan.",
+     "seconds": 0.0
+    },
+    "1_yweweler_1.wav": {
+     "text": " One.",
+     "seconds": 0.0
+    },
+    "1_yweweler_2.wav": {
+     "text": " One.",
+     "seconds": 0.0
+    },
+    "1_yweweler_3.wav": {
+     "text": " Juan.",
+     "seconds": 0.0
+    },
+    "1_yweweler_4.wav": {
+     "text": " Juan.",
+     "seconds": 0.0
+    },
+    "2_yweweler_0.wav": {
+     "text": " Two.",
+     "seconds": 0.0
+    },
+    "2_yweweler_1.wav": {
+     "text": " to",
+     "seconds": 0.0
+    },
+    "2_yweweler_2.wav": {
+     "text": " Two.",
+     "seconds": 0.0
+    },
+    "2_yweweler_3.wav": {
+     "text": " too.",
+     "seconds": 0.0
+    },
+    "2_yweweler_4.wav": {
+     "text": " two",
+     "seconds": 0.0
+    },
+    "3_yweweler_0.wav": {
+     "text": " 3.",
+     "seconds": 0.0
+    },
+    "3_yweweler_1.wav": {
+     "text": " Three.",
+     "seconds": 0.0
+    },
+    "3_yweweler_2.wav": {
+     "text": " be",
+     "seconds": 0.0
+    },
+    "3_yweweler_3.wav": {
+     "text": " We",
+     "seconds": 0.0
+    },
+    "3_yweweler_4.wav": {
+     "text": " 3.",
+     "seconds": 0.0
+    },
+    "4_yweweler_0.wav": {
+     "text": " for",
+     "seconds": 0.0
+    },
+    "4_yweweler_1.wav": {
+     "text": " for",
+     "seconds": 0.0
+    },
+    "4_yweweler_2.wav": {
+     "text": " or",
+     "seconds": 0.0
+    },
+    "4_yweweler_3.wav": {
+     "text": " Oh.",
+     "seconds": 0.0
+    },
+    "4_yweweler_4.wav": {
+     "text": " Oh.",
+     "seconds": 0.0
+    },
+    "5_yweweler_0.wav": {
+     "text": " 5.",
+     "seconds": 0.0
+    },
+    "5_yweweler_1.wav": {
+     "text": " Five.",
+     "seconds": 0.0
+    },
+    "5_yweweler_2.wav": {
+     "text": " Five.",
+     "seconds": 0.0
+    },
+    "5_yweweler_3.wav": {
+     "text": " Five.",
+     "seconds": 0.0
+    },
+    "5_yweweler_4.wav": {
+     "text": " 5.",
+     "seconds": 0.0
+    },
+    "6_yweweler_0.wav": {
+     "text": " six.",
+     "seconds": 0.0
+    },
+    "6_yweweler_1.wav": {
+     "text": " do.",
+     "seconds": 0.0
+    },
+    "6_yweweler_2.wav": {
+     "text": " See.",
+     "seconds": 0.0
+    },
+    "6_yweweler_3.wav": {
+     "text": " Thank you.",
+     "seconds": 0.0
+    },
+    "6_yweweler_4.wav": {
+     "text": " Thank you.",
+     "seconds": 0.0
+    },
+    "7_yweweler_0.wav": {
+     "text": " Seven.",
+     "seconds": 0.0
+    },
+    "7_yweweler_1.wav": {
+     "text": " Seven.",
+     "seconds": 0.0
+    },
+    "7_yweweler_2.wav": {
+     "text": " Heaven.",
+     "seconds": 0.0
+    },
+    "7_yweweler_3.wav": {
+     "text": " Seven.",
+     "seconds": 0.0
+    },
+    "7_yweweler_4.wav": {
+     "text": " heaven.",
+     "seconds": 0.0
+    },
+    "8_yweweler_0.wav": {
+     "text": " Eight.",
+     "seconds": 0.0
+    },
+    "8_yweweler_1.wav": {
+     "text": " eight,",
+     "seconds": 0.0
+    },
+    "8_yweweler_2.wav": {
+     "text": " Eight.",
+     "seconds": 0.0
+    },
+    "8_yweweler_3.wav": {
+     "text": " eight.",
+     "seconds": 0.0
+    },
+    "8_yweweler_4.wav": {
+     "text": " 8",
+     "seconds": 0.0
+    },
+    "9_yweweler_0.wav": {
+     "text": " Nine.",
+     "seconds": 0.0
+    },
+    "9_yweweler_1.wav": {
+     "text": " Nine.",
+     "seconds": 0.0
+    },
+    "9_yweweler_2.wav": {
+     "text": " 9th.",
+     "seconds": 0.0
+    },
+    "9_yweweler_3.wav": {
+     "text": " Nine.",
+     "seconds": 0.0
+    },
+    "9_yweweler_4.wav": {
+     "text": " 9.",
+     "seconds": 0.0
+    },
+    "seq_0.wav": {
+     "text": " two five seven six",
+     "seconds": 0.0
+    },
+    "seq_1.wav": {
+     "text": " 0 7 1 6",
+     "seconds": 0.0
+    },
+    "seq_2.wav": {
+     "text": " Seven. Nine. Five. Six.",
+     "seconds": 0.0
+    },
+    "seq_3.wav": {
+     "text": " 0 7 6 3",
+     "seconds": 0.0
+    },
+    "seq_4.wav": {
+     "text": " 9 1 8 7",
+     "seconds": 0.0
+    },
+    "seq_5.wav": {
+     "text": " two, five, four, zero.",
+     "seconds": 0.0
+    },
+    "seq_6.wav": {
+     "text": " 0 1 9",
+     "seconds": 0.0
+    },
+    "seq_7.wav": {
+     "text": " five seven three four",
+     "seconds": 0.0
+    },
+    "seq_8.wav": {
+     "text": " Three, six, nine, nine.",
+     "seconds": 0.0
+    },
+    "seq_9.wav": {
+     "text": " 3, 8, 5, 1",
+     "seconds": 0.0
+    },
+    "samples_jfk.wav": {
+     "text": " And so, my fellow Americans, ask not what your country can do for you, ask what you can do for your country.",
+     "seconds": 0.0
+    }
+   }
+  }
+ }
+}

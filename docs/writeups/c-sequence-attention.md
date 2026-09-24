@@ -152,10 +152,13 @@ LSTM still wins.
 
 ### Open threads
 
-GRUs, to see how much of the LSTM's benefit survives with one
-gate fewer. Truncated BPTT over a longer context, which is how these models were
-actually trained. And the recall probe with a proper budget sweep, to find where
-the LSTM's 63-step gradient becomes 63-step learning.
+GRUs and longer context have since been run on a GPU, in
+[Part C at scale](#part-c-at-scale-more-context-more-data-a-bigger-transformer):
+on enwik8 the GRU is the best of the three recurrences at every context, and a
+4.5M-parameter LSTM fails a copy task at 128 symbols. Still open: truncated BPTT
+over a context longer than one window, which is how these models were actually
+trained, and the recall probe with a proper budget sweep, to find where the
+LSTM's 63-step gradient becomes 63-step learning.
 
 ### Further reading
 
@@ -422,9 +425,13 @@ worth more than the flexibility of attention, and that regime is small.
 
 ### Open threads
 
-Warmup plus a cosine schedule, which would make the comparison
-above fair to the transformer — the obvious next run. Longer context, where the
-recurrent models must lose. RoPE instead of additive encodings. And KV caching,
+Warmup and longer context, the two runs this section
+called obvious, have been done in
+[Part C at scale](#part-c-at-scale-more-context-more-data-a-bigger-transformer).
+Warmup changed nothing (2.310 → 2.312), and longer context did *not* make the
+recurrent models lose at a 49M-token budget. The transformer is the one model
+using the long context, but it was too under-trained to profit. Still open: RoPE
+instead of additive encodings. And KV caching,
 which is the difference between a sampler that is $O(T)$ per token and one that
 is $O(T^2)$.
 
@@ -731,6 +738,158 @@ question that decides anything.
 [DeepSeek-V2](https://arxiv.org/abs/2405.04434) for MLA;
 [RoFormer](https://arxiv.org/abs/2104.09864);
 and candle's `qwen3_5.rs`, `deepseek2.rs` and `gemma4/` for the implementations.
+
+---
+
+## Part C at scale: more context, more data, a bigger transformer
+
+C1 and C3 compared recurrence and attention at 64 characters of context,
+250k characters of text and 500 steps, and the wide vanilla RNN won. C3 said
+why that was not the end of the story and listed the runs that would settle it:
+warmup for the transformer, and longer context "where the recurrent models must
+lose". C1 listed GRUs. Those runs are here, on a Kaggle T4, driven by
+[`tools/gpu/c_context_scaling.py`](../../tools/gpu/c_context_scaling.py). Raw
+values are in [`data/c-gpu.json`](data/c-gpu.json). Every number is a median over
+seeds 0–2.
+
+### The idea
+
+Three questions, three experiments:
+
+1. **Was C3's loss just the missing warmup?** Rerun C1/C3's exact regime (same
+   corpus slice, context, batch, steps, peak learning rate, the hand-written C1
+   cells and the C3 transformer), with and without linear warmup plus cosine
+   decay.
+2. **Does attention win once there is context worth attending to?** Train on
+   **enwik8**, the standard byte-level benchmark: the first 100 MB of an English
+   Wikipedia dump, markup included, with long-range structure (tags that open and
+   close hundreds of bytes apart, repeated names, tables). Five models: a vanilla
+   RNN, a GRU and an LSTM, each ~4.5M parameters, a transformer matched to them
+   (~4M), and a **bigger transformer (~25M)**. Each is trained at 64, 256 and 1024
+   bytes of context, on the **same 16,384 tokens per step** (so a longer
+   context means fewer sequences per batch, not more data), for 3000 steps: 49M
+   tokens, about half an epoch.
+3. **Can each architecture remember at all?** A **copy task**: $n$ random
+   symbols, then the same $n$ again. The second half is predictable only by
+   looking exactly $n$ positions back, so accuracy there measures usable memory
+   and nothing else.
+
+The recurrences use cuDNN's `nn.RNN/GRU/LSTM` (the same equations as C1's cells,
+which would take hours as a Python loop at 1024 steps). The transformer is C3's
+own class with attention routed through PyTorch's fused kernel, checked against
+C3's explicit softmax to $1.2\times10^{-7}$ before any training.
+
+### What we measure, and why
+
+- **Bits per byte** on 256 KiB of held-out enwik8: cross-entropy in base 2, the
+  enwik8 convention (C1's bits per character, for bytes). For scale: Graves'
+  2013 LSTM reached 1.67, later recurrent models about 1.25, and large
+  transformers below 1.0.
+- **Loss by position in the window** — the direct measure of *using* context.
+  The prediction at position $t$ has $t$ bytes of history, so a model that
+  exploits long context keeps improving as $t$ grows, and one that does not goes
+  flat.
+- **Copy-task accuracy on the repeated half** (chance $1/32$).
+- **Training throughput** (tokens per second, fp16, T4) — what each design costs
+  as context grows.
+
+### Results
+
+**1. Warmup does not rescue C3's transformer.**
+
+| model | constant LR (C1/C3's setting) | warmup + cosine |
+| --- | --- | --- |
+| vanilla RNN, wide | 2.269 | **2.251** |
+| LSTM | 2.319 | 2.448 |
+| transformer | 2.310 | 2.312 |
+
+C3's leading explanation for its result was wrong: with warmup the transformer
+scores 2.312 against 2.310 without it. The wide RNN still wins, and cosine decay
+*hurts* the LSTM by 0.13 bits. At 500 steps, a schedule that spends its second
+half at a lower learning rate costs the slowest learner the most.
+
+![Warmup in C1/C3's regime](figures/c/c_gpu_shakespeare_warmup.png)
+
+**2. Memory: the transformer copies 512 symbols back perfectly; the LSTM cannot copy 128.**
+
+| $n$ | LSTM (4.5M) | transformer (4M) |
+| --- | --- | --- |
+| 32 | 0.903 | **1.000** |
+| 128 | 0.031 (chance) | **1.000** |
+| 512 | 0.031 (chance) | **0.999** |
+
+This is the cleanest result in the section. A recurrent model has to squeeze
+$n$ random symbols (5 bits each) through its fixed state and fails once that
+state is too small. Attention simply looks back $n$ positions, whatever $n$ is.
+C2's bottleneck, measured on the architecture that removed it.
+
+![Copy task](figures/c/c_gpu_copy.png)
+
+**3. enwik8: the bigger transformer is the best model, but more context did not help it at this budget.**
+
+| context | RNN | GRU | LSTM | transformer 4M | **transformer 25M** |
+| --- | --- | --- | --- | --- | --- |
+| 64 | 1.854 | 1.795 | 1.883 | 1.837 | **1.718** |
+| 256 | 1.791 | 1.701 | 1.838 | 1.863 | **1.668** |
+| 1024 | 1.804 | **1.687** | 1.848 | 2.043 | 1.721 |
+
+![Bits per byte against context](figures/c/c_gpu_enwik8_context.png)
+
+The 25M transformer posts the best number in the table, 1.668 at 256 bytes.
+Among the size-matched ~4M models, however, the **GRU wins at every context**,
+and the matched transformer gets *worse* as context grows, ending unstable at
+1024 (seed range 2.01–2.18). So the promised crossover, "longer context, where
+the recurrent models must lose", did not happen at this budget, and the bigger
+transformer lost ground from 256 to 1024.
+
+The loss-by-position curve says why, and it is not "attention cannot use the
+context":
+
+| trained at 1024 | positions 64–256 | 256–512 | 768–1024 |
+| --- | --- | --- | --- |
+| GRU | 1.675 | 1.687 | 1.666 |
+| transformer 25M | 1.751 | 1.722 | **1.658** |
+| *transformer 25M trained at 256, same positions* | *1.622* | — | — |
+
+![Loss by position](figures/c/c_gpu_enwik8_by_position.png)
+
+The GRU is **flat** from byte 64 to byte 1024: whatever it keeps in its state,
+the extra 900 bytes add nothing. The transformer is the only model still
+improving deep into the window (−0.093 bits from the early positions to the
+late ones), so it *is* reading the long context. But the model trained at 1024
+is worse than its 256-trained twin *at the same short positions* (1.751 against
+1.622). At a fixed 16k tokens per step, a 1024-byte context means 16 sequences
+per batch instead of 64, and 1024 learned positions to fit instead of 256, all
+from 49M tokens, which is **two tokens per parameter** for the 25M model against
+Chinchilla's ~20 (G1). The transformer is under-trained, and the longer context
+makes that worse before it helps.
+
+**Throughput.** At 64 bytes the recurrences are fastest (RNN 504k tokens/s
+against the matched transformer's 348k). At 1024 the order flips: the matched
+transformer trains at **254k tokens/s** against 182–202k for all three
+recurrences, even with cuDNN, because a recurrence must walk its sequence one
+step at a time while attention's quadratic cost is still cheap at this length.
+The 25M transformer runs at 67–83k tokens/s throughout.
+
+![Throughput against context](figures/c/c_gpu_enwik8_throughput.png)
+
+### What surprised me
+
+C3 closed on a prediction ("longer context, where the recurrent models must
+lose"), and at a realistic-looking budget it failed for the matched models. The
+GRU beat a same-size transformer at 1024 bytes of context, on the benchmark
+where transformers made their name, and the transformer's own curve went the
+wrong way. Two things turned that from a contradiction into a diagnosis: the
+per-position loss, which shows the transformer is the one model that *uses* the
+long context, and the copy task, which shows its memory is not the problem. What
+is left is budget. The 4× longer run below tests that directly.
+
+### Open threads
+
+A tokenised corpus, since byte-level modelling spends most of a small model's
+capacity on spelling. RoPE instead of learned positions, which do not have to be
+learned separately at every offset. And a learning-rate sweep for the matched
+transformer at 1024, whose seed spread says the setting is on an edge.
 
 ---
 

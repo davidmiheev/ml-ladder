@@ -1,5 +1,5 @@
 {
-  "what": "Whisper tiny.en through candle-examples/examples/whisper in the davidmiheev/candle fork (ignite-perf), on part I's own held-out speaker. NOT the ignite-catalog candle-transcription executor -- see scope_correction.",
+  "what": "Whisper through the davidmiheev/candle fork: first candle-examples/examples/whisper (2026-09-20), then ignite-catalog's candle-transcription executor itself (2026-09-24, see executor_run).",
   "date": "2026-09-20",
   "hardware": "Kaggle Tesla T4, sm_75, CUDA 12.8, torch 2.10.0+cu128",
   "kernel": "https://www.kaggle.com/code/davidmiheev/ml-ladder-whisper-candle",
@@ -40,6 +40,93 @@
     "what_was_run": "candle-examples/examples/whisper from davidmiheev/candle@ignite-perf",
     "what_was_NOT_run": "models/executors/exp/candle-transcription from ignite-catalog@perf/exp-executors",
     "why_it_matters": "They share the model (candle_transformers::models::whisper) and nothing else that decides this result. The executor carries its own Decoder (lib.rs:389) with zero references to apply_timestamp_rules -- the rewritten function this record names as the lead -- decodes each window at a single temperature with no fallback loop, and resolves a no_timestamps_token. So the empty-transcription finding most likely does NOT transfer to the executor, and an earlier version of this record said 'the fork's whisper' in a way that implied it did.",
-    "status": "the executor's behaviour on short utterances is untested"
+    "status": "RESOLVED 2026-09-24: the executor itself has now been run -- see executor_run. It does not return empty transcriptions."
+  },
+  "executor_run": {
+    "what": "models/executors/exp/candle-transcription (ignite-catalog@perf/exp-executors) run as the executor runs, one request per file through its own transcribe_blocking: symphonia decode, its linear resampler, candle's pcm_to_mel, its own Decoder. Only the ignite SDK plumbing was removed (request parsing, the async wrappers, and ignite_asset::AssetLoader, replaced by a local directory holding the same four file names). The harness source is not committed here because the catalog is private.",
+    "date": "2026-09-24",
+    "hardware": "Kaggle Tesla T4 (sm_75), CUDA 12.8; build 549 s with --features cuda against davidmiheev/candle@9aa02f1",
+    "kernels": [
+      "https://www.kaggle.com/code/davidmiheev/ml-ladder-whisper-executor",
+      "https://www.kaggle.com/code/davidmiheev/ml-ladder-whisper-prompt-control"
+    ],
+    "per_clip_transcripts": "i-whisper-executor.json",
+    "clips": "61 requests per arm: 50 isolated digits from part I's held-out speaker (the raw 8 kHz files), ten 4-digit sequences, and samples_jfk.wav",
+    "headline": "The executor never returns an empty transcription (0 of 427 requests across 7 arms), so the example's empty-output bug does not reach the production decode path. Static decode and the CUDA graph produce byte-identical text to eager decoding on every request, as does CPU. It has four real defects of its own: nonsense language reports on English-only models, a task token English-only models were never trained with, token suppression silently skipped for the model the catalog registers, and an asset named for 80 mel filters that panics if it holds 80.",
+    "scores": {
+      "note": "digit exact = the digit read correctly (numerals and homophones normalised); seq WER over ten 4-digit clips; JFK WER; median seconds per request INCLUDING model load, as the executor loads per request",
+      "tiny.en eager / static / static+graph / cpu": {
+        "digit_exact": 0.58,
+        "sequence_wer": 0.25,
+        "jfk_wer": 0.0,
+        "median_s": {
+          "cuda": 0.48,
+          "cpu": 2.98
+        }
+      },
+      "large-v3-turbo, language auto": {
+        "digit_exact": 0.6,
+        "sequence_wer": 0.025,
+        "jfk_wer": 0.0,
+        "median_s": 2.83
+      },
+      "large-v3-turbo, language=en": {
+        "digit_exact": 0.58,
+        "sequence_wer": 0.025,
+        "jfk_wer": 0.0,
+        "median_s": 1.94
+      },
+      "large-v3-turbo, auto, static+graph": {
+        "digit_exact": 0.6,
+        "sequence_wer": 0.025,
+        "jfk_wer": 0.0,
+        "median_s": 2.88
+      },
+      "transformers tiny.en generate": {
+        "digit_exact": 0.48,
+        "sequence_wer": 0.1
+      },
+      "transformers large-v3-turbo generate (en)": {
+        "digit_exact": 0.64,
+        "sequence_wer": 0.025
+      }
+    },
+    "agreement": {
+      "eager vs static vs static+graph vs cpu (tiny.en)": "61/61 identical text",
+      "eager vs static+graph (turbo)": "61/61 identical text",
+      "turbo language auto vs forced en": "48/61 identical -- omitting the language token changes 13 transcripts ('Oui.' vs 'We.', '3.' vs 'three.')",
+      "candle tiny.en vs transformers, transformers' own prompt": "32/61 (normalised text)",
+      "candle tiny.en vs transformers, the executor's prompt": "46/61 -- matching the prompt explains about half the disagreement",
+      "candle turbo vs transformers, same prompt": "37-40/61"
+    },
+    "defects": [
+      {
+        "what": "language detection on English-only checkpoints",
+        "evidence": "detect_language argmaxes over every <|xx|> token in the vocab; tiny.en has those tokens but was never trained on them. It reports 'sq' (Albanian) for JFK and ms/km/hi/ca for the digits, and the reported language changes between eager, static and CPU runs of identical text. Report-only (not injected), so the text is unaffected, but the response's language field is wrong for every .en model.",
+        "fix": "skip detection (report 'en') when the checkpoint is English-only"
+      },
+      {
+        "what": "<|transcribe|> in the prompt of English-only models",
+        "evidence": "the executor always decodes from [SOT, (lang), transcribe, notimestamps]; English-only Whisper was trained from [SOT, notimestamps]. Measured in transformers with the same greedy loop on the same bytes: tiny.en digit exact 0.48 -> 0.64, sequence WER 0.10 -> 0.175. It is a different model behaviour, not a uniformly worse one.",
+        "fix": "omit the task token when the vocab has no multilingual prompt, as transformers does"
+      },
+      {
+        "what": "suppress_tokens read from config.json",
+        "evidence": "the candle Config reads suppress_tokens from config.json; whisper-large-v3-turbo keeps them in generation_config.json, so its config.json list is empty and the executor applies no suppression to the model the catalog registers. transformers applies them.",
+        "fix": "read generation_config.json"
+      },
+      {
+        "what": "the mel asset name",
+        "evidence": "the executor loads 'melfilters80.bytes'; large-v3-turbo needs 128 mel bins. With a genuine 80-filter file the request panics: index out of bounds in candle-transformers/src/models/whisper/audio.rs:153 (len 16080, index 16080). So production either stores 128 filters under the name '80', or crashes. Which one is not observable from here.",
+        "fix": "name the asset by the checkpoint's num_mel_bins, and check its length against n_mel * (n_fft/2+1) before use"
+      },
+      {
+        "what": "auto language detection costs a second encoder pass",
+        "evidence": "detect_language runs the encoder on the first window, then decode runs it again: 2.83 s median per request with auto against 1.94 s with language=en (turbo, T4).",
+        "fix": "reuse the encoder output"
+      }
+    ],
+    "not_isolated": "With prompts matched, candle and transformers still disagree on 15/61 tiny.en and ~21-24/61 turbo transcripts, including hallucinations only on the candle side ('Thank you for watching.', 'for the next couple of months.' for a single spoken digit). Candidates are the mel front end (candle's own FFT, padding and melfilters.bytes against transformers' feature extractor) and f32 vs fp16. Not tested.",
+    "also": "the executor Cargo manifest uses the fork's static_decode path and candle_core::cuda_backend::graph ungated, so like candle-transformers it does not build without --features cuda -- the same contradiction with whisper-cpu.yaml's gpu.required: false."
   }
 }
