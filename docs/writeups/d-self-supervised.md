@@ -30,6 +30,37 @@ features a probe reads.
 out of "these two crops are the same picture" — and what does that claim depend
 on?
 
+### The idea
+
+**Self-supervised learning** trains a network without labels by inventing a
+task whose answer is already in the data. **SimCLR**'s task: take an image, make
+two randomly distorted copies of it (crop, flip, colour shift, grayscale), and
+train the network so that the two copies map to nearby feature vectors, while
+copies of *different* images map far apart. This is **contrastive learning**:
+pull matching pairs together, push everything else away.
+
+The pipeline has three parts:
+
+1. an **augmentation** step that produces the two views;
+2. an **encoder** (here B4's ResNet without its classifier) that turns an image
+   into a feature vector $h$;
+3. a small **projection head** that maps $h$ to the vector $z$ the loss is
+   computed on. It is thrown away after training, and the encoder's $h$ is what
+   gets used.
+
+Nothing tells the network what a deer is. It learns whatever features make
+"same image, different distortion" recognisable, and the hope is that these
+coincide with the features a classifier needs.
+
+![SimCLR's views, and what the loss asks of them](figures/d/d1_concept_simclr.png)
+
+*Left: real outputs of this rung's own augmentation function on three CIFAR
+images. At strength 0.5 each pair is clearly the same picture. At strength 1.0
+the crops and colour jitter are aggressive enough that a pair can share no
+visible object, yet the loss still insists they are "the same". Right: the
+NT-Xent target for a batch of 4 images. Each of the 8 views must pick out its
+partner (dark) among the other 7, and its similarity to itself is masked out.*
+
 ### The math
 
 **NT-Xent is a $(2N-1)$-way classification problem.** For a batch of $N$ images,
@@ -72,6 +103,22 @@ representation and reading the objective.
 invariance being learned*. At strength 0 the two views are identical, the task is
 solvable by any injective map, and nothing is learned about images at all — which
 makes it the control arm this rung needs.
+
+### What we measure, and why
+
+- **Linear-probe accuracy** — freeze the encoder, train only a linear classifier
+  on 4000 labelled images, and score it on 2000 test images (chance 0.10). This
+  is the standard way to grade a representation. A linear classifier can only
+  use what the features already make easy, so the score reflects the encoder
+  and not the classifier.
+- **The untrained-encoder control** — the same probe on a randomly initialised
+  network. Random convolutional features are far from useless, and without
+  this baseline all of their accuracy would be credited to SimCLR.
+- **The no-augmentation control** (strength 0) — both views identical, so the
+  contrastive task is trivial and teaches nothing about images. Whatever it
+  gains over the untrained encoder is *not* contrastive learning.
+- **Sweeps over temperature $\tau$ and augmentation strength** — the two knobs
+  the math says define the objective.
 
 ### What I built
 
@@ -176,6 +223,32 @@ Alignment and Uniformity on the Hypersphere*.
 **Question.** SimCLR needs a hand-designed augmentation pipeline to say what
 "the same image" means. MAE needs only a mask. How much should it hide?
 
+### The idea
+
+A **masked autoencoder (MAE)** learns by filling in blanks. Cut the image into
+patches (as the ViT in C4 does), hide most of them at random, feed only the
+visible patches to a transformer **encoder**, and ask a small **decoder** to
+reconstruct the hidden patches' pixels. The error is measured only on the hidden
+patches.
+
+The design has one clever asymmetry. The encoder never sees the hidden patches,
+not even as placeholders, so with 75% masked it processes only a quarter of the
+image and trains much faster. The lightweight decoder receives the encoder's
+output plus a shared "mask" token at each hidden position (with positional
+encodings so it knows *where* each gap is). After pretraining the decoder is
+discarded and the encoder is kept.
+
+The **mask ratio** is the key knob. Hide a little and the gaps can be filled by
+blurring the neighbours, which teaches nothing about objects. Hide most of the
+image and the only way to reconstruct it is to recognise what is in it.
+
+![MAE's masking, at three ratios](figures/d/d2_concept_mae.png)
+
+*Real CIFAR images masked by the rung's own `random_mask`. At 25% hidden (48
+patches visible) the gaps are small and local. At 75% only 16 patches remain,
+and at 90% only 6, and reconstruction becomes an exercise in guessing
+content.*
+
 ### The math
 
 **The objective is a denoising autoencoder with masking as the corruption.**
@@ -212,6 +285,20 @@ without a positional encoding added before the decoder there is nothing to
 distinguish "the missing patch in the corner" from "the missing patch in the
 middle" — the model would be predicting an unordered bag of patches. C3's
 permutation-equivariance argument, arriving in a second domain.
+
+### What we measure, and why
+
+- **Masked reconstruction MSE** — pixel error on hidden patches, the loss MAE
+  trains on. It is reported to show that it is *not* a measure of feature
+  quality: it rises steeply with the mask ratio because the task gets harder.
+- **Linear-probe accuracy** — the same frozen-encoder protocol as D1, so the
+  two methods are judged on identical terms. This is the number that says
+  whether the features are useful.
+- **Both, across mask ratios 0.25–0.9, over three seeds** — whether the
+  published optimum (75%) shows up at this scale, and whether the difference is
+  larger than the seed-to-seed spread.
+- **Reconstructions** (figure) — what the decoder actually produces, to see
+  what "low MSE" and "high MSE" look like.
 
 ### What I built
 
@@ -293,6 +380,34 @@ rises; at 64 tokens attention is not the bottleneck, so this rung cannot see it.
 training with plenty of labels. It is sold on the regime where labels are
 scarce. Where is the crossover?
 
+### The idea
+
+The practical promise of self-supervised pretraining is **label efficiency**:
+learn features from plentiful unlabelled images, then get a good classifier
+from only a handful of labelled ones. This rung puts four encoders through the
+same test at 5, 25, 100 and 400 labels per class: an untrained network, D1's
+SimCLR encoder, D2's MAE encoder, and one trained with labels.
+
+It reads each frozen representation two ways, because they ask different
+questions:
+
+- a **linear probe** fits a linear classifier on the features — *is there some
+  direction in feature space that separates the classes?*
+- **k-nearest neighbours (k-NN)** trains nothing. It labels a test image by a
+  vote of the $k$ most similar training images — *are images of the same class
+  actually close together?*
+
+A representation can pass the first and fail the second. That matters for
+retrieval, clustering and anything else built on similarity.
+
+![Probe and k-NN on two feature spaces](figures/d/d3_concept_probe_vs_knn.png)
+
+*Both panels contain the same class signal along the horizontal axis, and a
+linear probe scores perfectly on both. On the right, 40 extra dimensions of
+class-irrelevant variation dominate the distances, and k-NN falls to 0.77 even
+though a line still separates the classes perfectly. This rung finds MAE's
+features to be the right-hand kind.*
+
 ### The math
 
 **A linear probe measures linear separability, and nothing else.** With $\phi$
@@ -317,6 +432,20 @@ representation only fits a linear head on $n$. Pretraining's promise is a
 *leftward shift* of this curve, and its honest failure mode is that the curves
 cross: with enough labels, learning the features for the task beats reusing
 features learned for a different objective.
+
+### What we measure, and why
+
+- **Linear-probe accuracy vs labels per class** — the label-efficiency curve.
+  Pretraining's claim is that its curve sits *above and to the left* of the
+  baseline's: the same accuracy with fewer labels.
+- **k-NN accuracy on the same features and labels** — a second reading that
+  depends only on the geometry of the features, not on a trained classifier.
+  Where it disagrees with the probe, the features are separable but not
+  organised by similarity.
+- **Identical labelled subsets for every encoder** (stratified, seeded) — not
+  a metric but the condition that makes the columns comparable: every method
+  sees the *same* 50 labelled images at 5 per class, not just the same number
+  of images.
 
 ### What I built
 

@@ -3,7 +3,7 @@
 > **Status:** complete (E1–E5) · **Constraint:** MNIST subsets, short budgets; E4 gives all three families one identical budget
 > **Numbers:** seeds 0–2, reference seed 0 · raw values in [`data/e-metrics.json`](data/e-metrics.json)
 > **Reproduce:** `ladder run E1` … `E5` (needs `uv sync --extra torch`), or `uv run python tools/writeup_figures.py E`
-> **Hardware:** E1–E4 swept on a Colab T4; E5 is arithmetic
+> **Hardware:** E1–E4 swept on a Colab T4; E5 is arithmetic, and FLUX.1-schnell itself ran on a Kaggle T4 ([record](data/e-real-models.json))
 
 Every model before this part was trained to be *right*: there was a label, and
 the score counted how often the prediction matched it. A generative model is
@@ -38,6 +38,32 @@ diffusion step $t$, and fd is the Fréchet distance described above.
 **Question.** A VAE's loss sums a reconstruction and a KL. What does trading one
 against the other actually do to the model?
 
+### The idea
+
+A **generative model** learns to produce new samples that look like its
+training data: here, new handwritten digits.
+
+A **variational autoencoder (VAE)** starts from an ordinary autoencoder, which
+squeezes an image through a small **latent code** $z$ and reconstructs it. A
+plain autoencoder's codes can be scattered anywhere, so picking a random code
+and decoding it gives garbage. The VAE fixes this in two moves:
+
+1. the encoder outputs a *distribution* over codes (a mean $\mu$ and a spread
+   $\sigma$ per latent dimension) instead of a single point, and the decoder is
+   trained on a *sample* from it;
+2. a penalty (the **KL divergence**) pulls every such distribution towards a
+   standard normal $\mathcal{N}(0, I)$.
+
+After training, the codes fill the standard normal, so a new image is generated
+by drawing $z \sim \mathcal{N}(0, I)$ and decoding it.
+
+![The VAE pipeline](figures/e/e1_concept_vae.png)
+
+*The encoder produces $\mu$ and $\sigma$. The sample $z = \mu + \sigma\epsilon$ is
+drawn in a way gradients can pass through (the reparameterization trick). The
+loss balances reconstruction quality against the KL "rate", and $\beta$ sets
+the exchange rate between them.*
+
 ### The math
 
 **The bound.** The likelihood is intractable, so the VAE optimizes
@@ -64,6 +90,21 @@ $z \sim q(z \mid x)$ has no gradient with respect to $\mu$ and $\sigma$, because
 the randomness sits between them and the loss. Writing $z = \mu + \sigma\epsilon$
 with $\epsilon \sim \mathcal{N}(0, I)$ makes the sample a *deterministic*
 function of the parameters plus parameter-free noise, and the gradient flows.
+
+### What we measure, and why
+
+- **Reconstruction** (negative log-likelihood of the image given its code,
+  summed over pixels) — how much is lost passing through the latent. Lower is
+  sharper.
+- **KL, or rate** (in nats) — how much information the code carries about each
+  particular image. The trade-off between these two *is* the $\beta$ dial.
+- **Active units** — latent dimensions whose KL is meaningfully above zero. A
+  dimension with KL ≈ 0 carries nothing: the encoder has abandoned it
+  (**posterior collapse**). The loss cannot show this, so it is counted.
+- **fd (Fréchet distance) of generated samples** — how close the *generated*
+  digits are to real ones, in a classifier's feature space (defined in the
+  part introduction, and see E4). Reconstruction scores the autoencoder, fd
+  scores the generator. They are different questions.
 
 ### What I built
 
@@ -124,6 +165,29 @@ Alemi et al., *Fixing a Broken ELBO*, on rate-distortion as the right frame.
 practitioners immediately replaced. Does the replacement matter, and how would
 you see it?
 
+### The idea
+
+A **generative adversarial network (GAN)** trains two networks against each
+other. The **generator** $G$ turns random noise into an image. The
+**discriminator** $D$ looks at an image and outputs the probability that it is
+real. $D$ is trained to catch fakes, and $G$ is trained to fool $D$. If both
+improve, $G$'s images become indistinguishable from real ones.
+
+There is no reconstruction and no likelihood. $G$ never sees a real image
+directly; everything it learns arrives through $D$'s gradient. That makes GANs
+sharp (no averaging, so no blur) and notoriously unstable. The losses are moves
+in a game, not measures of quality, so a falling loss curve means little.
+
+The rung compares two versions of the generator's objective that have the same
+theoretical optimum but behave very differently early in training.
+
+![The GAN game, and the two generator objectives](figures/e/e2_concept_gan.png)
+
+*Right: gradient size for the generator as a function of how convincing its
+fake is to $D$. Early in training $D$ easily rejects fakes, the grey band on the
+left. There the original minimax loss gives almost no gradient, exactly when the
+generator most needs one, while the non-saturating loss gives a large one.*
+
 ### The math
 
 **The game.** The discriminator maximizes $\log D(x) + \log(1 - D(G(z)))$; at the
@@ -140,6 +204,17 @@ The **non-saturating** form instead maximizes $\log D(G(z))$, whose gradient is
 $1 - \sigma(s) \to 1$ in that same limit. Identical fixed point, opposite
 behaviour where it matters. Both are implemented and tested here against that
 limit directly.
+
+### What we measure, and why
+
+- **fd** — sample quality in a classifier's feature space. Lower is better.
+  Scored *during* training too, because GAN losses do not track quality.
+- **Coverage** — the fraction of the ten digit classes that appear among
+  generated samples, per a pretrained classifier.
+- **Mode entropy** — normalised entropy of the predicted-class histogram: 1
+  when all ten digits appear equally often, 0 when the generator produces one
+  digit only (**mode collapse**, the characteristic GAN failure). It is reported
+  separately because a collapsed generator can still post a respectable fd.
 
 ### What I built
 
@@ -208,6 +283,32 @@ overlap. And a discriminator-to-generator update ratio sweep.
 **Question.** Diffusion removes the adversary and the bound. What does it charge
 for that, and where is the charge set?
 
+### The idea
+
+A **diffusion model** learns to generate by learning to *denoise*. Take a
+training image and add a little Gaussian noise, then a little more, over
+hundreds of steps, until nothing but noise is left. This **forward process** is
+fixed and needs no learning. Then train a network to reverse one step at a
+time: given a noisy image and how noisy it is, predict the noise that was
+added.
+
+To generate, start from pure noise and apply the learned denoiser step by step
+until an image emerges. The training objective is a plain regression (predict
+the noise, squared error), so there is no adversary to balance and no bound to
+tune, which is why diffusion trains stably. The price is paid at sampling time:
+one network evaluation per step.
+
+The **noise schedule** decides how quickly signal is destroyed across the
+steps, and it is the main design choice left.
+
+![Forward diffusion under E3's two schedules](figures/e/e3_concept_forward_diffusion.png)
+
+*A real MNIST digit noised by the rung's own schedules. The linear schedule
+has destroyed almost all the signal by step 200 ($\bar\alpha = 0.08$) and
+spends the rest of its steps on near-pure noise. The cosine schedule keeps
+signal longer and spreads the destruction more evenly. The denoiser (a small
+U-Net) learns to undo these steps.*
+
 ### The math
 
 **The forward process** destroys an image with a fixed, *unlearned* Markov chain
@@ -239,6 +340,17 @@ destruction early and then spends most of its steps on nearly-pure noise, where
 there is little left to learn; the cosine schedule sets
 $\bar\alpha_t \propto \cos^2\!\left(\frac{t/T + s}{1 + s}\cdot\frac{\pi}{2}\right)$
 so signal survives longer.
+
+### What we measure, and why
+
+- **fd against the number of sampling steps** (10 to 400) — the quality/speed
+  trade-off, which is diffusion's defining cost. The model is trained once, with
+  400 steps, and sampled with fewer by skipping.
+- **Sampling seconds** — the other axis of that trade-off, measured directly.
+- **The "knee"** — the fewest steps within 10% of full-step quality. It
+  summarises the curve as one number: how much speed you can buy cheaply.
+- **Linear vs cosine**, over three seeds — whether the published improvement
+  holds at this scale (it does not).
 
 ### What I built
 
@@ -315,6 +427,32 @@ velocity-prediction, which is what E5's production descendants use.
 named. So: name four columns, give all three families identical data and an
 identical budget, and see how many different models win.
 
+### The idea
+
+E1–E3 each built one family. E4 trains all three (VAE, GAN, diffusion) on the
+**same data, for the same number of epochs**, and scores them on the same
+scorecard. The point is that "which generative model is best?" has no answer
+until you say best *at what*: sample quality, covering every kind of digit,
+originality, training cost and sampling cost can each crown a different winner.
+
+The models are imported from their own rungs, not rewritten, so any
+difference comes from the family and the budget, not from reimplementation.
+
+Scoring generative models is hard, because there is no label to compare with.
+The standard trick, used throughout this part, is to embed real and generated
+images with a classifier trained on the real data, fit a Gaussian to each cloud
+of feature vectors, and measure the distance between the two Gaussians (the
+**Fréchet distance**, which is how FID is built). It has a blind spot, which is
+why it never appears alone.
+
+![What Fréchet distance can and cannot see](figures/e/e4_concept_frechet.png)
+
+*Three generators against the same six-mode "real" distribution (grey). One
+that keeps only every other mode has exactly the same mean and covariance as the
+real data, so its Fréchet distance is 0.00, as good as perfect. A complete
+generator shifted by one unit scores worse. Mode entropy exposes the first
+(0.63 instead of 1.00), which is why E4 reports both.*
+
 ### The math
 
 There is no new objective here — the point is that the three losses *cannot be
@@ -337,6 +475,22 @@ wins fd and coverage dishonestly.
 **The floor.** A Fréchet distance has no absolute scale, so a held-out sample of
 real data is scored against the real reference too. That row is what makes any
 other row readable.
+
+### What we measure, and why
+
+- **fd** — distributional quality, as above. The **real-data row** (held-out
+  real images scored against the reference) gives the floor any generator could
+  hope to reach. Without it, fd has no scale.
+- **Coverage and mode entropy** — are all ten digits generated, and in
+  balanced amounts? This catches what fd misses.
+- **Nearest-neighbour distance** — mean distance from each generated image to
+  its closest *training* image. Too small means the model memorised its
+  training set, which would win the other columns dishonestly.
+- **Training seconds and seconds per 1000 samples** — the costs, which differ
+  across families by three orders of magnitude.
+- **Budget sensitivity** — the same diffusion model scored at 14 and 16
+  epochs, added after the first results looked wrong. It measures whether an
+  equal-budget comparison is comparing families or comparing how far each got.
 
 ### What I built
 
@@ -427,6 +581,28 @@ cannot.
 **Question.** Every text-to-image model shipped since 2022 is E3 with three
 things changed. What does each change cost, and what does it buy?
 
+### The idea
+
+Modern text-to-image systems such as Stable Diffusion and FLUX are E3's
+diffusion model with three parts upgraded:
+
+1. **where** diffusion happens — in the compressed latent space of a trained
+   autoencoder (E1's idea put to work) instead of on raw pixels, which cuts the
+   number of positions the denoiser processes by 64×;
+2. **what does the denoising** — a U-Net with text injected by cross-attention
+   (Stable Diffusion), or a transformer that runs joint attention over image and
+   text tokens together (FLUX's **MMDiT**);
+3. **what it predicts** — noise (E3, SD) or a *velocity* pointing along a
+   straight path from noise to image (**flow matching**, FLUX), which is why
+   FLUX-schnell needs only 4 sampling steps.
+
+This rung trains nothing. It reads the published configurations and prices
+each change in positions, attention cost and parameters. Then, in the section
+after the results, FLUX is actually run.
+
+The architecture figure below (under What I built) shows the three designs
+side by side.
+
 ### The math
 
 E3 has three components, and the production lineage replaced them one at a time.
@@ -459,6 +635,16 @@ text representation is updated by the image, not only the reverse.
 added. Flow matching instead learns a velocity field along a straight path
 between noise and data, which is why its samplers need single-digit step counts
 where E3's cosine arm was still improving at 400.
+
+### What we measure, and why
+
+- **Positions the denoiser processes at 1024 px** — the cost driver, since
+  attention is quadratic in it.
+- **Attention cost ratios** — pixel vs latent, and cross-attention vs joint
+  attention: what each design change multiplies the dominant cost by.
+- **Parameter counts**, computed from configs and checked against published
+  figures, with the error of each check reported (7.7% for FLUX, 64% for the
+  U-Net estimate). The size of the error says which counts can be trusted.
 
 ### What I built
 
@@ -510,10 +696,56 @@ attend over 1,048,576 positions against FLUX's 4,096 — **65,536× the attentio
 work**. Latent diffusion is not an optimization on top of E3; it is what makes
 the family exist at that resolution.
 
+### FLUX, actually run
+
+The E5 accounting above is read from a config. FLUX.1-schnell was also run, on
+a Kaggle T4 (raw record in
+[`data/e-real-models.json`](data/e-real-models.json)).
+
+| | |
+| --- | --- |
+| route | diffusers `FluxPipeline`, ungated mirror `unsloth/FLUX.1-schnell` |
+| how 12B fit on a 15 GB card | transformer **and** the T5-XXL text encoder quantized to 4-bit NF4 on load, fp16 compute, model-level CPU offload |
+| peak VRAM | **6.53 GB** (the fp16 weights alone would be ~24 GB) |
+| load | 381 s |
+| generate, 512×512, 4 steps, no guidance | **19.8 s** |
+
+![FLUX.1-schnell on a T4](figures/e/e5_flux_schnell_sample.png)
+
+*The prompt was "a cross-section diagram of a transformer block, technical
+illustration, clean white background". FLUX drew an electrical transformer:
+radiator fins, bushings, isometric line art. That is the dominant sense of the
+phrase in its training data, and a fair reading of an ambiguous prompt, not a
+failure. It is also a four-step sample, which is what flow matching's straight
+paths buy (E3's DDPM was still improving at 400 steps).*
+
+**The candle route did not produce an image, and the reasons are worth
+keeping.** Three attempts through the accompanying candle fork failed:
+
+- the hard-coded repo is gated, fixed by pointing at an ungated mirror;
+- the example picks bf16 on any CUDA device, and the fork's kernels, built with
+  `CUDA_COMPUTE_CAP=75`, contain no bf16 symbols, so the T4 dies with
+  `CUDA_ERROR_NOT_FOUND`. An earlier version of this record called that "bf16
+  needs sm_80". It does not. It is a build-time absence, and PyTorch runs bf16 on
+  the same card, only slowly, because the T4 has no bf16 tensor cores. Measured on
+  a 4096² matmul: **fp16 25.7 TFLOP/s, fp32 4.3, bf16 2.4**;
+- the binding constraint was session length: a from-scratch build plus ~56 GB
+  of downloads (44 GB of which is T5-XXL shipped in float32) against Colab
+  sessions of about 50 minutes.
+
+The first Kaggle attempt used *sequential* CPU offload and was killed while
+loading T5's shards, because offload still materialises every component in host
+RAM. Quantizing on load is what made the run fit, the same lesson as the
+decoders in [part C](c-sequence-attention.md#the-decoders-actually-run).
+
 ### Open threads
 
-Actually running FLUX under the candle fork's quantization to
-check the count against loaded weights rather than a config. The VAE's own
+FLUX has now run (above), but through diffusers rather than
+the candle fork, so the fork's FLUX path is still unexercised on this card; an
+f16 T5 mirror would cut the download roughly in half and probably bring it
+inside one session. Checking the parameter count against the *loaded* weights
+is also still open, and needs care: part C found that `numel` on a 4-bit
+checkpoint under-counts by exactly 2×. The VAE's own
 parameters and its reconstruction floor, which upper-bounds everything downstream.
 And SD3's MMDiT, which is the missing rung between the two columns.
 

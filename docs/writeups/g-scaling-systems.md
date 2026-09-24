@@ -444,11 +444,16 @@ learn twice.
 
 ### Open threads
 
-One block is not a model: the port has no KV cache, no
-sampling loop and no quantization, which is where the [[ignite-catalog]]
-executors actually live. Porting the *decode* path is the rung after this one,
-and the interesting number there is tokens per second rather than a relative
-error.
+One block is not a model: *this* port has no KV cache, no
+sampling loop and no quantization, which is where the ignite-catalog executors
+actually live. The fork's own complete decode paths have since been run end to
+end with tokens/s measured: Gemma-4 and Qwen3.5 in
+[part C](c-sequence-attention.md#through-the-candle-fork) (DeepSeek-V2's quantized
+wiring there compiles but has never generated a token), PaddleOCR-VL in
+[part H](h-computer-vision.md#the-same-model-through-candle-and-what-two-implementations-agreeing-buys),
+and whisper in [part I](i-speech.md). What is still open is porting *this
+rung's* block into a decode loop, which would let a from-scratch implementation
+be timed against the fork's on the same card.
 
 ### Further reading
 

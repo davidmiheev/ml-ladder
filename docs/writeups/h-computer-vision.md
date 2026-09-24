@@ -646,9 +646,10 @@ recorded beside them.
 
 ### Open threads
 
-Actually running PaddleOCR-VL on H5's pages, which would turn
-this accounting into the head-to-head the rung deliberately does not attempt.
-Measuring the vision tower's activation memory, which at 11,214 tokens for an A4
+The head-to-head this rung deliberately did not attempt has since
+been run: PaddleOCR-VL and Unlimited-OCR on H5's own pages, in
+[the models, actually run](#the-models-actually-run) below, which also corrected
+this rung's token formula. Still open: measuring the vision tower's activation memory, which at 11,214 tokens for an A4
 scan is likely the real deployment constraint rather than parameters. And
 DeepSeek-OCR's compression claims, which is the lineage Unlimited-OCR comes from.
 

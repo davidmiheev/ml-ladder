@@ -819,6 +819,334 @@ def c5_kv_cache():
 
 
 # =============================================================================
+# Part D
+
+
+def _cifar_examples(count: int = 4, seed: int = 7):
+    """A few real CIFAR-10 test images, float in [0, 1], channels first."""
+    from mlladder import vision
+
+    images, labels = vision.load("cifar10", split="test", limit=count, rng=seed)
+    return images.astype(np.float32).transpose(0, 3, 1, 2) / 255.0, labels
+
+
+@concept("d", "d1_concept_simclr")
+def d1_simclr():
+    """Real views from D1's augment() at three strengths, and the NT-Xent target matrix."""
+    import torch
+    from parts.d_self_supervised.d1_simclr_pretraining import augment
+
+    images, _ = _cifar_examples(3)
+    batch = torch.from_numpy(images)
+    plotting.use_house_style()
+    fig = plt.figure(figsize=(13, 4.4))
+    grid = fig.add_gridspec(3, 8, width_ratios=[1, 0.15, 1, 1, 0.15, 1, 1, 2.8])
+    strengths = (0.0, 0.5, 1.0)  # 0.0 returns the image itself: shown once, as "image"
+    for col, strength in enumerate(strengths):
+        generator = torch.Generator().manual_seed(3)
+        views = [augment(batch, strength=strength, generator=generator) for _ in range(2)]
+        for row in range(3):
+            if col == 0:
+                ax = fig.add_subplot(grid[row, 0])
+                ax.imshow(images[row].transpose(1, 2, 0))
+                ax.set_axis_off()
+                if row == 0:
+                    ax.set_title("image", fontsize=8)
+            for v in range(2):
+                if col == 0:
+                    continue
+                ax = fig.add_subplot(grid[row, 3 * col - 1 + v])
+                ax.imshow(views[v][row].clamp(0, 1).numpy().transpose(1, 2, 0))
+                ax.set_axis_off()
+                if row == 0:
+                    ax.set_title(f"strength {strength}\nview {v + 1}", fontsize=7.5)
+    fig.text(
+        0.3,
+        0.02,
+        "image = strength 0 (both views identical: the control arm). Each column pair is a positive pair: the loss says 'these two are the same picture'.\n"
+        "At strength 1.0 the crops can share no object at all.",
+        ha="center",
+        fontsize=8,
+    )
+    ax = fig.add_subplot(grid[:, 7])
+    N = 4
+    target = np.zeros((2 * N, 2 * N))
+    for i in range(2 * N):
+        target[i, (i + N) % (2 * N)] = 1
+    shown = np.where(np.eye(2 * N) > 0, np.nan, target)
+    ax.imshow(shown, cmap="Blues", vmin=-0.3, vmax=1.1)
+    for i in range(2 * N):
+        ax.text(i, i, "−∞", ha="center", va="center", fontsize=7, color=P[4])
+    labels = [f"{k + 1}a" for k in range(N)] + [f"{k + 1}b" for k in range(N)]
+    ax.set_xticks(range(2 * N), labels, fontsize=7)
+    ax.set_yticks(range(2 * N), labels, fontsize=7)
+    ax.grid(False)
+    ax.set_title(
+        "NT-Xent for a batch of N=4 images (8 views):\neach row is a (2N−1)-way classification —\nfind your partner (dark), self masked out",
+        fontsize=8.5,
+    )
+    return fig
+
+
+@concept("d", "d2_concept_mae")
+def d2_mae():
+    """D2's own random_mask at three ratios on real CIFAR images, with the encoder/decoder split."""
+    import torch
+    from parts.d_self_supervised.d2_masked_autoencoder import random_mask
+
+    images, _ = _cifar_examples(2, seed=11)
+    plotting.use_house_style()
+    fig, axes = plt.subplots(2, 4, figsize=(10, 5.2))
+    patch, per_side = 4, 8
+    for row in range(2):
+        axes[row, 0].imshow(images[row].transpose(1, 2, 0))
+        axes[row, 0].set_title("image (64 patches)" if row == 0 else "", fontsize=8.5)
+        for col, ratio in enumerate((0.25, 0.75, 0.9), start=1):
+            _, mask = random_mask(
+                1, per_side * per_side, ratio, device="cpu", generator=torch.Generator().manual_seed(row * 10 + col)
+            )
+            shown = images[row].transpose(1, 2, 0).copy()
+            for k in np.flatnonzero(mask[0].numpy()):
+                r, c = divmod(int(k), per_side)
+                shown[r * patch : (r + 1) * patch, c * patch : (c + 1) * patch] = 0.55
+            axes[row, col].imshow(shown)
+            if row == 0:
+                axes[row, col].set_title(
+                    f"mask ratio {ratio:.0%}: encoder sees {round(64 * (1 - ratio))}", fontsize=8.5
+                )
+    for ax in axes.flat:
+        ax.set_axis_off()
+    fig.suptitle(
+        "MAE: hide patches, encode only the visible ones, reconstruct the hidden ones (grey).\n"
+        "At 25% a blur of the neighbours fills the gaps; at 75–90% the model has to know what the object is.",
+        fontsize=9.5,
+    )
+    fig.tight_layout()
+    return fig
+
+
+@concept("d", "d3_concept_probe_vs_knn")
+def d3_probe_vs_knn():
+    """Same class signal, with and without nuisance dimensions: a probe ignores them, k-NN cannot."""
+    rng = np.random.default_rng(4)
+    n = 200
+    y = np.r_[np.zeros(n), np.ones(n)]
+    signal = np.r_[rng.normal(-0.8, 0.3, n), rng.normal(0.8, 0.3, n)]
+    clustered = np.c_[signal, rng.normal(0, 0.3, 2 * n)]
+    nuisance = np.c_[signal, rng.normal(0, 1.0, (2 * n, 40))]
+
+    def knn(features, k=15):
+        distance = ((features[:, None] - features[None]) ** 2).sum(-1)
+        np.fill_diagonal(distance, np.inf)
+        order = np.argsort(distance, axis=1)[:, :k]
+        return float(np.mean((y[order].mean(1) > 0.5) == y))
+
+    def probe(features):  # the separating direction is the first coordinate
+        return float(np.mean((features[:, 0] > 0) == y))
+
+    plotting.use_house_style()
+    fig, axes = plt.subplots(1, 2, figsize=(10, 4), sharex=True, sharey=True)
+    for ax, features, title in (
+        (axes[0], clustered, "2 dimensions: the class signal, and a little noise"),
+        (
+            axes[1],
+            nuisance,
+            "the same signal, plus 40 dimensions of variation\nunrelated to the class (one of them shown)",
+        ),
+    ):
+        ax.scatter(features[:n, 0], features[:n, 1], s=8, color=P[0], alpha=0.7, label="class A")
+        ax.scatter(features[n:, 0], features[n:, 1], s=8, color=P[1], alpha=0.7, label="class B")
+        ax.axvline(0, color=P[4], linestyle="--", linewidth=1, label="the probe's line")
+        ax.set_title(f"{title}\nlinear probe {probe(features):.2f} · 15-NN {knn(features):.2f}", fontsize=8.8)
+        ax.set_xlabel("class-relevant direction")
+    axes[0].set_ylabel("another direction")
+    axes[0].legend(fontsize=7, loc="lower left")
+    fig.suptitle(
+        "A probe asks 'is there a line?' and ignores the nuisance; k-NN distances are swamped by it.\n"
+        "D3's MAE features behave like the right panel: best probe, k-NN below an untrained encoder.",
+        fontsize=9.5,
+    )
+    fig.tight_layout()
+    return fig
+
+
+# =============================================================================
+# Part E
+
+
+@concept("e", "e1_concept_vae")
+def e1_vae():
+    """Encoder -> (mu, sigma) -> z = mu + sigma * eps -> decoder, with the KL pulling toward N(0, I)."""
+    fig, ax = canvas(12, 3.6, (-1.2, 12.6), (-1.5, 2.3))
+    blocks = [
+        (0, "image x", None, "28×28"),
+        (2.2, "encoder", P[0], "conv net"),
+        (4.5, "μ, log σ²", None, "16 + 16 numbers"),
+        (6.8, "z = μ + σ ⊙ ε", P[1], "a sample, differentiable"),
+        (9.1, "decoder", P[0], "conv net"),
+        (11.3, "x̂", None, "reconstruction"),
+    ]
+    for x, label, color, sub in blocks:
+        box(ax, x, 0.6, label, w=1.8, h=0.7, color=color, sub=sub)
+    for (x0, *_), (x1, *_) in itertools.pairwise(blocks):
+        arrow(ax, (x0 + 0.92, 0.6), (x1 - 0.92, 0.6))
+    box(ax, 6.8, 1.85, "ε ~ N(0, I)", w=1.5, h=0.45, fontsize=8)
+    arrow(ax, (6.8, 1.62), (6.8, 0.97))
+    ax.text(
+        4.5,
+        -0.55,
+        "KL term: keep q(z|x) = N(μ, σ²) close to the prior N(0, I)\n(the 'rate': how much the code says about this x)",
+        ha="center",
+        fontsize=8,
+        color=P[4],
+    )
+    ax.text(
+        10.2,
+        -0.55,
+        "reconstruction term: how well x̂ matches x\n(the 'distortion')",
+        ha="center",
+        fontsize=8,
+        color=P[4],
+    )
+    ax.text(
+        5.9,
+        2.2,
+        "VAE: an autoencoder whose code is a distribution; at generation time, draw z ~ N(0, I) and decode",
+        ha="center",
+        fontsize=9.5,
+        fontweight="bold",
+    )
+    return fig
+
+
+@concept("e", "e2_concept_gan")
+def e2_gan():
+    """The two-player loop, and the two generator losses' gradients — the whole of E2's argument."""
+    plotting.use_house_style()
+    fig = plt.figure(figsize=(12, 4))
+    grid = fig.add_gridspec(1, 2, width_ratios=[1.25, 1])
+    ax = fig.add_subplot(grid[0])
+    ax.set_axis_off()
+    ax.set_xlim(-0.6, 8.6)
+    ax.set_ylim(-0.6, 3.4)
+    box(ax, 0.4, 2.4, "noise z", w=1.3, h=0.5)
+    box(ax, 2.6, 2.4, "generator G", w=1.7, h=0.6, color=P[0])
+    box(ax, 4.9, 2.4, "fake image", w=1.5, h=0.5)
+    box(ax, 4.9, 0.6, "real image", w=1.5, h=0.5)
+    box(ax, 7.2, 1.5, "discriminator D", w=1.9, h=0.6, color=P[1], sub="P(real)")
+    arrow(ax, (1.07, 2.4), (1.73, 2.4))
+    arrow(ax, (3.47, 2.4), (4.13, 2.4))
+    arrow(ax, (5.67, 2.3), (6.4, 1.7))
+    arrow(ax, (5.67, 0.7), (6.4, 1.3))
+    ax.text(
+        4.0,
+        -0.4,
+        "D is trained to tell real from fake; G is trained to make D say 'real'.\nNeither loss is a quality score: each is a move in a game.",
+        ha="center",
+        fontsize=8.5,
+    )
+    ax.text(4.0, 3.2, "a GAN", ha="center", fontsize=10, fontweight="bold")
+    ax = fig.add_subplot(grid[1])
+    s = np.linspace(-8, 4, 400)
+    d = 1 / (1 + np.exp(-s))
+    ax.plot(d, d, color=P[4], label="minimax: minimise log(1 − D)  →  |grad| = D")
+    ax.plot(d, 1 - d, color=P[0], label="non-saturating: maximise log D  →  |grad| = 1 − D")
+    ax.axvspan(0, 0.1, color="#eeeeee")
+    ax.text(0.05, 0.5, "early training:\nD easily spots fakes", rotation=90, ha="center", va="center", fontsize=7.5)
+    ax.set_xlabel("D(G(z)): how real the discriminator finds a fake")
+    ax.set_ylabel("generator gradient size (w.r.t. D's logit)")
+    ax.set_title("Same fixed point, opposite gradients where it matters", fontsize=9.5)
+    ax.legend(fontsize=7.5, loc="center right")
+    fig.tight_layout()
+    return fig
+
+
+@concept("e", "e3_concept_forward_diffusion")
+def e3_forward_diffusion():
+    """A real MNIST digit through E3's forward process, under both of E3's schedules."""
+    from parts.e_generative.e3_ddpm import make_schedule
+
+    from mlladder import vision
+
+    images, _ = vision.load("mnist", split="test", limit=1, rng=3)
+    x0 = images[0, ..., 0].astype(np.float64) / 127.5 - 1
+    T = 400
+    steps = [0, 40, 100, 200, 300, 399]
+    rng = np.random.default_rng(0)
+    noise = rng.normal(size=x0.shape)
+    plotting.use_house_style()
+    fig = plt.figure(figsize=(12, 4.4))
+    grid = fig.add_gridspec(2, len(steps) + 1, width_ratios=[1] * len(steps) + [2.4])
+    for row, kind in enumerate(("linear", "cosine")):
+        alpha_bar = np.cumprod(1 - make_schedule(kind, T))
+        for col, step in enumerate(steps):
+            ax = fig.add_subplot(grid[row, col])
+            xt = np.sqrt(alpha_bar[step]) * x0 + np.sqrt(1 - alpha_bar[step]) * noise
+            ax.imshow(xt, cmap="gray", vmin=-2, vmax=2)
+            ax.set_xticks([])
+            ax.set_yticks([])
+            if row == 0:
+                ax.set_title(f"t = {step}", fontsize=8.5)
+            ax.set_xlabel(f"ᾱ={alpha_bar[step]:.2f}", fontsize=7)
+            if col == 0:
+                ax.set_ylabel(kind, fontsize=9)
+    ax = fig.add_subplot(grid[:, -1])
+    for index, kind in enumerate(("linear", "cosine")):
+        ax.plot(np.cumprod(1 - make_schedule(kind, T)), label=kind, color=P[index])
+    ax.set_xlabel("step t")
+    ax.set_ylabel("ᾱ_t  (fraction of signal variance left)")
+    ax.set_title("E3's two schedules", fontsize=9)
+    ax.legend(fontsize=8)
+    fig.suptitle(
+        "Forward diffusion: add Gaussian noise until nothing is left; the model learns to undo one step at a time",
+        fontsize=10,
+    )
+    fig.tight_layout()
+    return fig
+
+
+@concept("e", "e4_concept_frechet")
+def e4_frechet():
+    """Why fd alone is not enough: a mode-dropping generator can match mean and spread."""
+    from mlladder.generative import frechet_distance
+
+    rng = np.random.default_rng(0)
+    centres = np.array([[np.cos(a), np.sin(a)] for a in np.linspace(0, 2 * np.pi, 6, endpoint=False)]) * 3
+    real = np.concatenate([c + rng.normal(0, 0.5, (300, 2)) for c in centres])
+    good = np.concatenate([c + rng.normal(0, 0.6, (300, 2)) for c in centres])
+    # Every other mode of the hexagon: three points at 120 degrees have exactly the
+    # mean and covariance of all six, so fd cannot see that half are missing.
+    dropped = np.concatenate([c + rng.normal(0, 0.5, (600, 2)) for c in centres[::2]])
+    shifted = good + np.array([1.0, 0.0])
+
+    def coverage(fake):
+        nearest = np.argmin(((fake[:, None] - centres[None]) ** 2).sum(-1), axis=1)
+        counts = np.bincount(nearest, minlength=len(centres)) / len(fake)
+        counts = counts[counts > 0]
+        return float(-(counts * np.log(counts)).sum() / np.log(len(centres)))
+
+    plotting.use_house_style()
+    fig, axes = plt.subplots(1, 3, figsize=(13, 4.4), sharex=True, sharey=True)
+    for ax, fake, name in (
+        (axes[0], good, "covers all six modes"),
+        (axes[1], dropped, "drops every other mode"),
+        (axes[2], shifted, "all six modes, shifted by 1"),
+    ):
+        ax.scatter(real[:, 0], real[:, 1], s=3, color=GREY, alpha=0.35, label="real")
+        ax.scatter(fake[:, 0], fake[:, 1], s=3, color=P[0], alpha=0.35, label="generated")
+        ax.set_title(f"{name}\nfd {frechet_distance(real, fake):.2f} · mode entropy {coverage(fake):.2f}", fontsize=9)
+        ax.set_aspect("equal")
+    axes[0].legend(fontsize=7.5, markerscale=4, loc="lower left")
+    fig.suptitle(
+        "fd compares only the mean and covariance of the features: the generator that lost half the modes scores as well as\n"
+        "the perfect one, and better than a complete but slightly offset one. Mode entropy (1 = all modes used equally) tells them apart.",
+        fontsize=9.5,
+    )
+    fig.tight_layout(rect=(0, 0, 1, 0.9))
+    return fig
+
+
+# =============================================================================
 
 
 def main() -> None:

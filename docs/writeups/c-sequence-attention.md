@@ -717,9 +717,10 @@ these tables worth reading.
 
 Gemma 4's ring-buffered sliding KV, which sizes the buffer at
 window + prefill chunk rather than the full context and is implemented in the
-accompanying fork — the natural next arm. Actually *measuring* decode throughput
-against these predictions, since memory-bound is a claim about bandwidth that a
-byte count only implies. And quality: none of this says whether a 512 MiB
+accompanying fork — the natural next arm. Decode throughput *has* been measured for four
+real decoders (below), but not against these predictions: that needs cache bytes
+divided by the card's bandwidth, compared with tokens/s at several context
+lengths, and the runs below used one short prompt each. And quality: none of this says whether a 512 MiB
 windowed cache answers questions as well as a 9 GiB full one, which is the
 question that decides anything.
 
