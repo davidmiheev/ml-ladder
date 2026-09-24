@@ -42,6 +42,35 @@ and buys the thing this ladder is for.
 same property. Is the difference between them worth parameters — and what,
 exactly, is the difference?
 
+### The idea
+
+A **symmetry** of a task is a transformation of the input that should not
+change the answer. A digit is still the same digit when it moves, and for many
+tasks also when it is turned. A network can be taught a symmetry in two ways:
+
+- **augmentation** — show it rotated copies during training and hope it learns
+  to cope. The network is still free to treat each angle differently, so the
+  result is approximate, and only covers what it was shown.
+- **equivariance by construction** — build layers that *cannot* distinguish a
+  rotated input except by rotating their output. A normal convolution already
+  does this for shifts: shift the image and the feature map shifts with it,
+  because the same filter is applied everywhere.
+
+A **group-equivariant CNN** extends the convolution trick from shifts to
+quarter-turn rotations (the group $p4$). The first layer applies each filter
+in all four orientations and keeps the four responses as a new "orientation"
+axis. Later layers convolve over position *and* orientation. At the end, taking
+the maximum over the four orientations gives a feature that does not change at
+all when the input turns by a multiple of 90°. No training is involved: it is a
+property of the wiring.
+
+![Equivariance, measured on F1's own layer](figures/f/f1_concept_equivariance.png)
+
+*Top: a digit and the four orientation maps of one lifting filter. Bottom: the
+same digit turned 90°. Every map is turned 90° and the four maps have moved
+one slot along, exactly, to $4\times10^{-7}$, with random weights. That
+bookkeeping is the whole of "equivariance".*
+
 ### The math
 
 **Equivariance, and why convolution already has it.** A map $\Phi$ is
@@ -113,6 +142,18 @@ For $45°$ there is no guarantee at all, because $45° \notin C_4$ — and the
 measured error there should be no better than a plain CNN's. The cost is
 parameters: the group-convolution layers gain a factor of $|C_4|$ on their input
 axis, so the network is roughly $1.5\times$ the plain one at equal feature width.
+
+### What we measure, and why
+
+- **Accuracy on rotated test digits**, split into *on-group* angles (0°, 90°,
+  180°, 270°, which the architecture is built for) and *off-group* angles (45°,
+  135°, ..., which it is not). Every arm trains on upright digits only, so
+  on-group accuracy measures how much of the symmetry the network gets for free.
+- **Equivariance error** — how far the rotated input's feature map is from the
+  rotated feature map of the original input, relative to its size. Zero means
+  exact symmetry. It is measured directly on feature maps because accuracy can
+  look fine while the underlying invariance is only approximate.
+- **Parameters** — the price of the extra orientation axis (1.46× here).
 
 ### What I built
 
@@ -219,6 +260,35 @@ is one instance of.
 label. Where does that assumption stop paying — and can the crossover be derived
 rather than discovered?
 
+### The idea
+
+Much data is a **graph**: papers citing papers, users following users, atoms
+bonded to atoms. **Node classification** asks for a label per node (a paper's
+topic) given each node's own features (its words) and the edges.
+
+A **graph neural network (GNN)** uses **message passing**: each layer replaces
+a node's representation with a combination of its own and its neighbours'.
+After $k$ layers a node has "heard" from everything within $k$ hops. The only
+hard constraint is that a graph's nodes have no natural order, so the
+combination must not depend on how neighbours are listed. Averaging satisfies
+that, which is why almost every GNN averages.
+
+- **GCN** averages a node together with its neighbours (degree-normalised) and
+  applies one shared weight matrix.
+- **GraphSAGE** keeps *two* weight matrices, one for the node itself and one
+  for the average of its neighbours, so it can learn how much to trust each.
+
+The whole approach rests on **homophily**: the assumption that connected nodes
+tend to share labels. When it holds, averaging over neighbours pools
+evidence. When it fails, averaging mixes in the wrong classes.
+
+![Message passing at high and low homophily](figures/f/f2_concept_message_passing.png)
+
+*Two graphs from the rung's own stochastic block model. Colours are classes.
+Grey edges join same-class nodes and pink edges join different classes. Left:
+most of the circled node's neighbours share its class, so averaging over them
+reinforces the right answer. Right: almost none do, and averaging dilutes it.*
+
 ### The math
 
 **The symmetry.** A graph has no canonical node order, so the only admissible
@@ -305,6 +375,23 @@ can weigh the two — lower still. The sweep is a test of that ordering.
 iterate $Y^{(t+1)} = \alpha\hat{A}Y^{(t)} + (1-\alpha)Y^{(0)}$. No features, no
 parameters, no training: the graph's own answer to the task, and the number that
 says how much of a GNN benchmark is the graph rather than the network.
+
+### What we measure, and why
+
+- **Test accuracy on Cora**, the standard citation benchmark (7 topics, 140
+  labelled nodes, 1000 test nodes), for a graph-blind MLP, a GCN and GraphSAGE.
+  The MLP sees the same features and no edges, so *GCN − MLP* is the value
+  of the graph.
+- **Label propagation** — spread the 140 known labels along edges, with no
+  features and no parameters. It measures how much of the task the graph solves
+  on its own, which puts the GNN's gain in context.
+- **Crossover homophily** — on a synthetic graph whose homophily is a dial,
+  the homophily at which each GNN stops beating the MLP. It is derived in
+  advance (below) and then measured, so the theory is tested rather than fitted.
+- **Mean pairwise cosine similarity of final representations vs depth** —
+  **oversmoothing** means all nodes' representations converge to the same
+  vector as layers stack. This metric detects that directly, which accuracy
+  alone cannot distinguish from other reasons deeper models do worse.
 
 ### What I built
 

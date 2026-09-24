@@ -1147,6 +1147,246 @@ def e4_frechet():
 
 
 # =============================================================================
+# Part F
+
+
+@concept("f", "f1_concept_equivariance")
+def f1_equivariance():
+    """F1's own (untrained) lifting layer on a digit and on the digit turned 90 degrees."""
+    import torch
+    from parts.f_geometric.f1_equivariant_cnn import make_lifting_conv
+
+    from mlladder import vision
+
+    images, _ = vision.load("mnist", split="test", limit=1, rng=5)
+    x = torch.from_numpy(images[:1, ..., 0].astype(np.float32) / 255.0)[:, None]
+    torch.manual_seed(0)
+    lift = make_lifting_conv(1, 1, 5)()
+    with torch.no_grad():
+        upright = lift(x)[0, 0]  # [4, H, W]: one map per orientation
+        turned = lift(torch.rot90(x, 1, dims=(2, 3)))[0, 0]
+        predicted = torch.stack([torch.rot90(upright[(r - 1) % 4], 1, dims=(0, 1)) for r in range(4)])
+    error = float((turned - predicted).abs().max() / upright.abs().max())
+    plotting.use_house_style()
+    fig, axes = plt.subplots(2, 5, figsize=(11, 5.2), gridspec_kw={"hspace": 0.35})
+    for row, (image, maps, name) in enumerate(
+        ((x[0, 0], upright, "input"), (torch.rot90(x[0, 0], 1), turned, "input turned 90°"))
+    ):
+        axes[row, 0].imshow(image, cmap="gray")
+        axes[row, 0].set_title(name, fontsize=9)
+        for r in range(4):
+            axes[row, r + 1].imshow(maps[r], cmap="RdBu_r")
+            axes[row, r + 1].set_title(f"orientation r{r}", fontsize=8.5)
+    for ax in axes.flat:
+        ax.set_axis_off()
+    fig.suptitle(
+        "A p4 lifting layer (F1's own code, untrained): turning the input 90° turns every map AND shifts them one orientation\n"
+        f"along (bottom r1 = top r0 turned, r2 = r1 turned, ...). Measured mismatch: {error:.1e} of the map scale — exact, before any training.",
+        fontsize=9.5,
+    )
+    fig.tight_layout(rect=(0, 0, 1, 0.9))
+    return fig
+
+
+@concept("f", "f2_concept_message_passing")
+def f2_message_passing():
+    """Two stochastic block models from graphs.make_sbm: neighbours that agree, and neighbours that do not."""
+    import networkx as nx
+
+    from mlladder import graphs
+
+    plotting.use_house_style()
+    fig, axes = plt.subplots(1, 2, figsize=(11, 5))
+    for ax, homophily in zip(axes, (0.9, 0.25), strict=True):
+        graph = graphs.make_sbm(num_nodes=60, num_classes=3, homophily=homophily, average_degree=4.0, rng=1)
+        g = nx.Graph()
+        g.add_nodes_from(range(60))
+        g.add_edges_from(graph.edges.T.tolist())
+        layout = nx.spring_layout(g, seed=2, k=0.35)
+        centre = int(np.argmax(np.bincount(graph.edges[0], minlength=60)))
+        for a, b in graph.edges.T:
+            if a < b:
+                same = graph.labels[a] == graph.labels[b]
+                touches = centre in (a, b)
+                ax.plot(
+                    *zip(layout[a], layout[b], strict=True),
+                    color=P[4] if touches else ("#c8c8c8" if same else "#e8b0a0"),
+                    linewidth=1.6 if touches else 0.7,
+                    zorder=1,
+                )
+        colours = [P[int(c)] for c in graph.labels]
+        ax.scatter(*np.array([layout[i] for i in range(60)]).T, c=colours, s=45, edgecolor="white", zorder=2)
+        ax.scatter(*layout[centre], s=200, facecolor="none", edgecolor="black", linewidth=1.5, zorder=3)
+        neighbours = graph.edges[1][graph.edges[0] == centre]
+        agree = float(np.mean(graph.labels[neighbours] == graph.labels[centre]))
+        measured = float(np.mean(graph.labels[graph.edges[0]] == graph.labels[graph.edges[1]]))
+        ax.set_title(
+            f"homophily {measured:.2f}: {'neighbours share the class' if homophily > 0.5 else 'neighbours mostly do not'}\n"
+            f"circled node: {len(neighbours)} neighbours, {agree:.0%} of its own class",
+            fontsize=9.5,
+        )
+        ax.set_axis_off()
+    fig.suptitle(
+        "One message-passing layer replaces each node's features by a (weighted) average over its neighbours (red edges).\n"
+        "That helps when neighbours agree (left) and blurs the evidence when they do not (right).",
+        fontsize=9.5,
+    )
+    fig.tight_layout(rect=(0, 0, 1, 0.9))
+    return fig
+
+
+# =============================================================================
+# Part G
+
+
+@concept("g", "g1_concept_scaling")
+def g1_scaling():
+    """A power law with a floor, and IsoFLOP curves from the published Chinchilla fit."""
+    # Hoffmann et al. 2022, approach 3: L(N, D) = E + A / N^alpha + B / D^beta.
+    E, A, B, alpha, beta = 1.69, 406.4, 410.7, 0.34, 0.28
+    plotting.use_house_style()
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4.3))
+    ax = axes[0]
+    n = np.logspace(6, 12, 200)
+    ax.plot(n, E + A / n**alpha, color=P[0], label="L(N) = E + A / N$^α$ (data unlimited)")
+    ax.plot(n, A / n**alpha, color=P[0], linestyle=":", label="the reducible part alone: a straight line")
+    ax.axhline(E, color=P[4], linestyle="--", label=f"irreducible loss E = {E}")
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.set_xlabel("parameters N")
+    ax.set_ylabel("loss")
+    ax.set_title("A power law with a floor: straight on log–log\nuntil it meets the data's own entropy", fontsize=9.5)
+    ax.legend(fontsize=7.5)
+    ax = axes[1]
+    for index, compute in enumerate((1e19, 1e20, 1e21, 1e22)):
+        n = np.logspace(7, 11.5, 300)
+        d = compute / (6 * n)
+        loss = E + A / n**alpha + B / d**beta
+        ax.plot(n, loss, color=P[index], label=f"C = {compute:.0e} FLOPs")
+        best = np.argmin(loss)
+        ax.plot(n[best], loss[best], marker="o", color=P[index])
+        ax.annotate(
+            f"{d[best] / n[best]:.0f} tok/param",
+            (n[best], loss[best]),
+            textcoords="offset points",
+            xytext=(0, -14),
+            ha="center",
+            fontsize=7,
+            color=P[index],
+        )
+    ax.set_xscale("log")
+    ax.set_xlabel("parameters N (tokens D = C / 6N)")
+    ax.set_ylabel("loss")
+    ax.set_ylim(1.9, 3.6)
+    ax.set_title(
+        "IsoFLOP curves: at a fixed budget, too small a model underfits\nand too large a one sees too few tokens",
+        fontsize=9.5,
+    )
+    ax.legend(fontsize=7.5)
+    fig.suptitle("Scaling laws, drawn from the published Chinchilla fit (not this rung's data)", fontsize=10)
+    fig.tight_layout()
+    return fig
+
+
+@concept("g", "g2_concept_float_formats")
+def g2_float_formats():
+    """fp32, fp16 and bf16: the bit layout, and the range each can represent (from torch.finfo)."""
+    import torch
+
+    formats = [
+        ("fp32", torch.float32, (1, 8, 23)),
+        ("fp16", torch.float16, (1, 5, 10)),
+        ("bf16", torch.bfloat16, (1, 8, 7)),
+    ]
+    plotting.use_house_style()
+    fig, axes = plt.subplots(1, 2, figsize=(12.5, 3.6), gridspec_kw={"width_ratios": [1.1, 1]})
+    ax = axes[0]
+    ax.set_axis_off()
+    ax.set_xlim(-6, 33)
+    ax.set_ylim(-0.6, 3.2)
+    for row, (name, _, (s, e, m)) in enumerate(formats):
+        y = 2.4 - row
+        ax.text(-1, y, name, ha="right", va="center", fontsize=10, fontweight="bold")
+        x = 0
+        for count, colour, label in ((s, "#cccccc", "sign"), (e, P[1], "exponent"), (m, P[0], "mantissa")):
+            ax.add_patch(
+                Rectangle(
+                    (x, y - 0.3),
+                    count,
+                    0.6,
+                    facecolor=colour + ("" if colour.startswith("#c") else "88"),
+                    edgecolor="white",
+                )
+            )
+            if count >= 3:
+                ax.text(x + count / 2, y, f"{label} {count}", ha="center", va="center", fontsize=7.5)
+            x += count
+    ax.set_title("bits: exponent = range, mantissa = precision", fontsize=9.5)
+    ax = axes[1]
+    for row, (name, dtype, _) in enumerate(formats):
+        info = torch.finfo(dtype)
+        y = 2 - row  # same top-to-bottom order as the bit layouts
+        ax.plot([info.tiny, info.max], [y, y], linewidth=10, color=P[row], solid_capstyle="butt")
+        ax.text(
+            info.max * 3, y, f"{name}: {info.tiny:.1e} … {info.max:.1e}, step {info.eps:.0e}", va="center", fontsize=7.5
+        )
+    ax.axvspan(1e-9, 1e-4, color=P[4], alpha=0.12)
+    ax.text(1e-6, 2.45, "typical small gradients", ha="center", fontsize=7.5, color=P[4])
+    ax.set_xscale("log")
+    ax.set_xlim(1e-40, 1e60)
+    ax.set_yticks([])
+    ax.set_ylim(-0.6, 2.7)
+    ax.set_xlabel("representable magnitudes (normal range)")
+    ax.set_title("fp16 underflows where gradients live; bf16 keeps fp32's range", fontsize=9.5)
+    fig.tight_layout()
+    return fig
+
+
+@concept("g", "g3_concept_port")
+def g3_port():
+    """What 'porting a forward pass' consists of, and the three places Candle makes you choose."""
+    fig, ax = canvas(12, 3.2, (-0.8, 12.6), (-1.4, 2.2))
+    steps = [
+        (0.4, "C3 block\n(PyTorch)", P[0]),
+        (3.0, "weights → .npz", None),
+        (5.6, "same block\nin Rust / Candle", P[1]),
+        (8.2, "same input x", None),
+        (10.9, "‖Δ‖ / ‖F(x)‖", P[4]),
+    ]
+    for x, label, color in steps:
+        box(ax, x, 0.8, label, w=2.0, h=0.8, color=color, fontsize=8.5)
+    for (x0, *_), (x1, *_) in itertools.pairwise(steps):
+        arrow(ax, (x0 + 1.02, 0.8), (x1 - 1.02, 0.8))
+    ax.text(
+        4.3,
+        -0.6,
+        "choices PyTorch makes silently and Candle makes you state:\n"
+        "LayerNorm ε = 1e-5  ·  .contiguous() after a transpose (fails only at batch > 1)\n"
+        "gelu() is the tanh approximation, gelu_erf() is PyTorch's exact GELU",
+        ha="center",
+        fontsize=8,
+        color="#444",
+    )
+    ax.text(
+        10.9,
+        -0.35,
+        "~1e-7: same function\n~1e-5–1e-3: different function\nlarger: a shape bug",
+        ha="center",
+        fontsize=7.5,
+        color=P[4],
+    )
+    ax.text(
+        5.9,
+        1.9,
+        "G3: a port is correct when its output differs from the reference only by rounding",
+        ha="center",
+        fontsize=10,
+        fontweight="bold",
+    )
+    return fig
+
+
+# =============================================================================
 
 
 def main() -> None:

@@ -35,6 +35,35 @@ these numbers get repeated.
 that can be fitted and extrapolated — and what has to be held still for the fit
 to mean anything?
 
+### The idea
+
+**Scaling laws** are the empirical finding that a language model's loss falls
+*predictably* as you add parameters, data or compute: plotted on log–log axes,
+the improvement is close to a straight line (a **power law**) until it
+approaches a floor set by the data's inherent unpredictability. The practical
+value is extrapolation. Fit the line on small, cheap models and you can predict
+what a model 100× bigger will reach before paying for it.
+
+The second question is how to *spend* a fixed compute budget. Training cost is
+roughly $6 \times$ parameters $\times$ tokens, so a bigger model sees fewer tokens.
+Sweep model size at fixed compute (an **IsoFLOP curve**) and the loss is
+U-shaped: too small a model underfits, too large a one is starved of data. The
+**Chinchilla** result is that the optimum grows model size and data roughly
+together, around 20 tokens per parameter in their headline analysis.
+
+This rung fits these laws itself, on character-level transformers small enough
+for a CPU, and pays attention to the conditions under which the fit can be
+trusted.
+
+![Power laws and IsoFLOP curves](figures/g/g1_concept_scaling.png)
+
+*Drawn from the published Chinchilla fit ($E = 1.69$, $\alpha = 0.34$,
+$\beta = 0.28$), not from this rung's measurements, to show the shapes being
+fitted. Left: the loss approaches its floor along a power law. Right: at each
+compute budget there is a best model size. The tokens-per-parameter figures are
+what this particular fitted formula implies; Chinchilla's own headline of ~20
+comes from their other two estimation methods.*
+
 ### The math
 
 **The shape.** Empirically, loss against any one of parameters, data or compute
@@ -69,7 +98,7 @@ $$C \approx \underbrace{6ND}_{\text{the rule}} + \underbrace{12\,n_{\text{layer}
 
 The dropped term is $\propto L/d$ relative to the kept one, so it vanishes for
 wide models on short contexts and does not vanish here. At this rung's shape it
-is ****14.3%** of forward FLOPs**.
+is **14.3%** of forward FLOPs.
 
 **What must be held still.** Three things, each of which is a way to accidentally
 measure something else:
@@ -92,6 +121,20 @@ Chinchilla found $N^{*} \propto C^{0.5}$ and $D^{*} \propto C^{0.5}$ — roughly
 20 tokens per parameter. The two exponents sum to 1 exactly when FLOPs per token
 are proportional to $N$; the attention term above breaks that, so the sum is a
 measurement rather than an identity.
+
+### What we measure, and why
+
+- **Validation bits per character** for every model size and data size, each
+  run with its *own* learning-rate schedule fitted to its budget (see "what must
+  be held still" below).
+- **The fitted exponent $\alpha$, floor $E$, and their uncertainty ranges** — the
+  range is the set of values that fit nearly as well as the best one. A wide
+  range means the data does not pin the parameter down, and then it should not
+  be quoted as a finding.
+- **The IsoFLOP minimum**, and whether it is an *interior* minimum. A minimum at
+  the edge of the swept range only says the true optimum lies further out.
+- **FLOPs per step, counted exactly and against $6ND$** — how much the standard
+  rule of thumb misses at this model shape.
 
 ### What I built
 
@@ -211,6 +254,33 @@ Hoffmann et al., *Training Compute-Optimal Large Language Models* (2022).
 **Question.** Two things everybody turns on. What do they actually buy, what do
 they cost, and how would you know if one of them had silently broken your run?
 
+### The idea
+
+Two standard tricks make training cheaper:
+
+- **Mixed precision (AMP)**: do most arithmetic in a 16-bit float format
+  instead of 32-bit. That halves memory traffic and, on GPUs with **tensor
+  cores**, runs matrix multiplies several times faster. There are two 16-bit
+  formats. **fp16** has more precision but a much narrower range, so small
+  gradients underflow to zero; a **gradient scaler** multiplies the loss by a
+  large factor so they stay representable. **bf16** keeps fp32's range and
+  gives up precision, so it needs no scaler, but older GPUs such as the T4 have
+  no fast hardware for it.
+- **Gradient accumulation**: when a batch does not fit in memory, run several
+  smaller "micro-batches", add up their gradients, and take one optimizer step.
+  The update is mathematically the same as the big batch (if the gradients are
+  averaged correctly), at the cost of some speed.
+
+This rung measures both on a real GPU, and asks what each buys, what it costs,
+and how you would notice if one silently broke your run.
+
+![Three float formats](figures/g/g2_concept_float_formats.png)
+
+*Left: how each format splits its bits. Right: the range each can represent,
+from `torch.finfo`. fp16's smallest normal number is $6\times10^{-5}$, above
+where many gradients live, which is what the scaler is for. bf16 has
+exactly fp32's range, with a step size a thousand times coarser than fp16's.*
+
 ### The math
 
 **Two 16-bit formats, and the entire difference is the exponent field.**
@@ -239,6 +309,21 @@ since each $L_{B_j}$ is already a mean over its own micro-batch. The $1/k$ is
 not optional. Omit it and the summed gradient is $k$ times the large-batch one,
 so the run trains at $k$ times the configured learning rate — a bug that
 produces plausible-looking divergence rather than an error.
+
+### What we measure, and why
+
+- **Throughput** (tokens per second), after warmup and with explicit GPU
+  synchronisation, so it measures the GPU rather than how fast Python queues
+  work.
+- **Peak memory** — what lets a bigger batch or model fit.
+- **Final loss** — the check that the cheaper arm still trains the same model.
+- **fp16 speedup across model widths** (64 to 512) — tensor cores only engage
+  on large enough matrices, so the speedup is a function of shape. Quoting one
+  number would hide that.
+- **Accumulation: throughput and memory at a fixed effective batch** — the
+  memory saved, and the speed paid for it.
+- **Gradient-scaler statistics** — whether the scaler ever had to act, which
+  says whether fp16's range was actually a problem for this model.
 
 ### What I built
 
@@ -349,6 +434,26 @@ AMP examples in this part's lab reference.
 anything the original did not — and can "the port is correct" be made into a
 number?
 
+### The idea
+
+**Porting** a model means reimplementing the same computation in another
+framework: here C3's transformer block, from PyTorch to **Candle**, a Rust ML
+framework used by the ignite-catalog executors. Production inference often runs
+on a different stack from training, and every such move is a chance to compute
+a slightly different function without noticing.
+
+The method is simple: export the trained weights, feed the same input to both
+implementations, and measure how far apart the outputs are. The size of the
+gap diagnoses the cause, because different mistakes leave differently sized
+fingerprints.
+
+![How the port is checked](figures/g/g3_concept_port.png)
+
+*The weights travel from PyTorch to Candle via a `.npz` file, both run on the
+same input, and the relative difference is the verdict. Candle makes three
+decisions explicit that PyTorch makes silently, and one of them (which GELU)
+changes the function without raising any error.*
+
 ### The math
 
 There is no new mathematics in a port, which is the point: the function is
@@ -371,6 +476,17 @@ $$\text{exact: } x\,\Phi(x), \qquad
 PyTorch's `nn.GELU()` is the first; Candle's `gelu()` is the second and
 `gelu_erf()` is the first. They agree to about $10^{-3}$ on ordinary
 activations — far above float32 noise, far below anything that looks like a bug.
+
+### What we measure, and why
+
+- **Relative error** $\lVert F_{\text{torch}}(x) - F_{\text{candle}}(x)\rVert / \lVert F_{\text{torch}}(x)\rVert$
+  and **max absolute difference**, at batch 1 *and* batch 4. Batch 4 is there
+  because one class of bug (a non-contiguous tensor after a transpose) only
+  appears above batch 1.
+- **Both GELU variants** — to measure what picking the wrong one costs, instead
+  of only warning about it.
+- **Latency by thread count, on an idle and a loaded machine** — how much of a
+  speed number is the code and how much is what else the CPU was doing.
 
 ### What I built
 
