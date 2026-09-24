@@ -1387,6 +1387,279 @@ def g3_port():
 
 
 # =============================================================================
+# Part H
+
+
+def _draw_box(ax, box, color, *, lw=1.5, ls="-", label=None):
+    x1, y1, x2, y2 = box
+    ax.add_patch(Rectangle((x1, y1), x2 - x1, y2 - y1, fill=False, edgecolor=color, linewidth=lw, linestyle=ls))
+    if label:
+        ax.text(x1 + 1, y1 - 1.5, label, fontsize=7, color=color)
+
+
+@concept("h", "h1_concept_iou_nms")
+def h1_iou_nms():
+    """IoU of two boxes, NMS on a cluster of candidates, and AP as the area under a PR envelope — with H1's own functions."""
+    from parts.h_computer_vision.h1_detection_from_scratch import iou_matrix, nms
+
+    from mlladder import synth
+
+    scene = synth.shapes(1, rng=np.random.default_rng(5))[0]
+    truth = scene.boxes
+    rng = np.random.default_rng(1)
+    candidates, scores = [], []
+    for box in truth:
+        for _ in range(5):
+            candidates.append(box + rng.normal(0, 2.5, 4))
+            scores.append(rng.uniform(0.4, 0.95))
+    candidates = np.array(candidates, dtype=np.float32)
+    scores = np.array(scores, dtype=np.float32)
+    keep = nms(candidates, scores, 0.5)
+    plotting.use_house_style()
+    fig, axes = plt.subplots(1, 3, figsize=(13, 4.2), gridspec_kw={"width_ratios": [1, 1, 1.1]})
+    ax = axes[0]
+    ax.imshow(scene.image, cmap="gray")
+    a = truth[0]
+    b = a + np.array([5, 4, 5, 4], dtype=np.float32)
+    _draw_box(ax, a, P[3], label="truth")
+    _draw_box(ax, b, P[4], ls="--", label="prediction")
+    ax.set_title(
+        f"IoU = overlap / union = {iou_matrix(a[None], b[None])[0, 0]:.2f}: a miss at both\nthresholds (a match needs ≥ 0.5, or ≥ 0.75 for the strict score)",
+        fontsize=9,
+    )
+    ax = axes[1]
+    ax.imshow(scene.image, cmap="gray")
+    for i, box in enumerate(candidates):
+        _draw_box(ax, box, P[0] if i in keep else "#d98b73", lw=1.6 if i in keep else 0.7, ls="-" if i in keep else ":")
+    ax.set_title(
+        f"NMS at 0.5: {len(candidates)} candidate boxes → {len(keep)} kept\n(dotted: suppressed as duplicates of a higher score)",
+        fontsize=9,
+    )
+    for ax in axes[:2]:
+        ax.set_axis_off()
+    ax = axes[2]
+    hits = np.array([1, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0], dtype=float)
+    precision = np.cumsum(hits) / np.arange(1, len(hits) + 1)
+    recall = np.cumsum(hits) / 7
+    envelope = np.maximum.accumulate(precision[::-1])[::-1]
+    ax.plot(recall, precision, marker="o", color=GREY, linewidth=0.8, label="precision at each score cut-off")
+    ax.fill_between(
+        np.r_[0, recall],
+        np.r_[envelope[0], envelope],
+        step="pre",
+        alpha=0.25,
+        color=P[0],
+        label="AP = area under the envelope",
+    )
+    ax.step(np.r_[0, recall], np.r_[envelope[0], envelope], where="pre", color=P[0])
+    ax.set_xlabel("recall (share of true objects found)")
+    ax.set_ylabel("precision (share of boxes that are right)")
+    ax.set_ylim(0, 1.05)
+    ax.set_title("walk the boxes from most to least confident", fontsize=9)
+    ax.legend(fontsize=7.5, loc="lower left")
+    fig.suptitle(
+        "Detection's metric is built from three choices: an overlap threshold, a duplicate rule, and a summary of the PR curve",
+        fontsize=10,
+    )
+    fig.tight_layout()
+    return fig
+
+
+@concept("h", "h2_concept_unet")
+def h2_unet():
+    """The U-Net shape, and the boundary band H2 had to invent to see what skips do."""
+    from mlladder import synth
+
+    plotting.use_house_style()
+    fig = plt.figure(figsize=(12.5, 4.3))
+    grid = fig.add_gridspec(1, 3, width_ratios=[1.6, 0.8, 0.8])
+    ax = fig.add_subplot(grid[0])
+    ax.set_axis_off()
+    ax.set_xlim(-0.5, 9.5)
+    ax.set_ylim(-0.7, 4.4)
+    levels = [(0.6, 3.4, "64×64"), (2.0, 2.2, "32×32"), (4.5, 1.0, "16×16")]
+    for x, y, size in levels[:2]:
+        box(ax, x, y, "conv ×2", w=1.2, h=0.55, sub=size, color=P[0])
+        box(ax, 9.0 - x, y, "conv ×2", w=1.2, h=0.55, sub=size, color=P[1])
+        arrow(
+            ax,
+            (x + 0.62, y),
+            (9.0 - x - 0.62, y),
+            color=P[3],
+            lw=1.5,
+            ls="--",
+            text="skip: concatenate fine detail",
+            fontsize=7,
+        )
+    box(ax, 4.5, 1.0, "bottleneck", w=1.5, h=0.55, sub="16×16")
+    arrow(ax, (0.6, 3.1), (2.0, 2.5), text="pool", text_offset=(-0.3, 0))
+    arrow(ax, (2.0, 1.9), (3.75, 1.1), text="pool", text_offset=(-0.35, -0.05))
+    arrow(ax, (5.25, 1.1), (7.0, 1.9), text="upsample", text_offset=(0.45, -0.05))
+    arrow(ax, (7.0, 2.5), (8.4, 3.1), text="upsample", text_offset=(0.45, 0))
+    ax.text(0.6, 4.1, "image in", ha="center", fontsize=8)
+    ax.text(8.4, 4.1, "class per pixel out", ha="center", fontsize=8)
+    ax.text(
+        4.5,
+        -0.45,
+        "encoder (blue) loses resolution to gain context; decoder (gold) restores it, helped by the skips",
+        ha="center",
+        fontsize=8,
+    )
+    scene = synth.shapes(1, rng=np.random.default_rng(9))[0]
+    mask = scene.mask
+    changes = np.zeros_like(mask, dtype=bool)
+    changes[:, 1:] |= mask[:, 1:] != mask[:, :-1]
+    changes[1:, :] |= mask[1:, :] != mask[:-1, :]
+    band = changes.copy()
+    for _ in range(2):
+        grown = band.copy()
+        grown[1:] |= band[:-1]
+        grown[:-1] |= band[1:]
+        grown[:, 1:] |= band[:, :-1]
+        grown[:, :-1] |= band[:, 1:]
+        band = grown
+    ax = fig.add_subplot(grid[1])
+    ax.imshow(mask, cmap="tab10", vmin=0, vmax=9, interpolation="nearest")
+    ax.set_title("ground-truth mask", fontsize=9)
+    ax.set_axis_off()
+    ax = fig.add_subplot(grid[2])
+    ax.imshow(np.where(band, mask, -1), cmap="tab10", vmin=-1, vmax=9, interpolation="nearest")
+    ax.set_title(
+        f"boundary band (±2 px): {band.mean():.0%} of pixels,\nwhere skip connections are supposed to help", fontsize=9
+    )
+    ax.set_axis_off()
+    fig.tight_layout()
+    return fig
+
+
+@concept("h", "h3_concept_ctc")
+def h3_ctc():
+    """A rendered line, one CRNN prediction per column, and CTC's collapse rule."""
+    from mlladder import synth
+
+    line = synth.render_text("hello", font="DejaVuSans.ttf", rng=np.random.default_rng(0))
+    columns = 32
+    # Aligned to where the glyphs actually are (ink at px 4-14, 17-28, 31-33, 38-40, 43-54).
+    path = "-hh-ee-l-looo" + "-" * 19
+    path = path[:columns]
+    collapsed = []
+    previous = None
+    for ch in path:
+        if ch != previous and ch != "-":
+            collapsed.append(ch)
+        previous = ch
+    plotting.use_house_style()
+    fig, ax = plt.subplots(figsize=(11, 3.3))
+    ax.imshow(line, cmap="gray", extent=(0, 128, 32, 0))
+    for c in range(1, columns):
+        ax.axvline(c * 4, color=P[0], linewidth=0.3, alpha=0.5)
+    for c, ch in enumerate(path):
+        ax.text(c * 4 + 2, 40, "∅" if ch == "-" else ch, ha="center", fontsize=8, color=GREY if ch == "-" else P[4])
+    ax.set_xlim(0, 128)
+    ax.set_ylim(48, -6)
+    ax.set_axis_off()
+    ax.text(
+        64,
+        -3,
+        "the CRNN reads the 128-px line as 32 columns and predicts a character or a blank (∅) for each",
+        ha="center",
+        fontsize=8.5,
+    )
+    ax.text(
+        64,
+        46.5,
+        f'CTC collapse: merge repeats, then drop blanks  →  "{"".join(collapsed)}"   (the blank between l and l keeps the double letter)',
+        ha="center",
+        fontsize=8.5,
+        color=P[4],
+    )
+    return fig
+
+
+@concept("h", "h4_concept_decoders")
+def h4_decoders():
+    """CTC's per-column labelling against an attention decoder that writes one character at a time."""
+    fig, axes = plt.subplots(1, 2, figsize=(12.5, 3.8))
+    for ax in axes:
+        ax.set_axis_off()
+        ax.set_xlim(-0.6, 8.6)
+        ax.set_ylim(-0.9, 3.3)
+    ax = axes[0]
+    for c in range(8):
+        box(ax, c * 1.1, 0.4, f"col {c + 1}", w=0.85, h=0.45, fontsize=7, color=P[0])
+        box(ax, c * 1.1, 1.8, "ch|∅", w=0.85, h=0.45, fontsize=7)
+        arrow(ax, (c * 1.1, 0.64), (c * 1.1, 1.56))
+    ax.set_title("CTC: one independent guess per column, then collapse", fontsize=9.5)
+    ax.text(
+        3.85,
+        -0.6,
+        "monotonic (left to right) and no memory of what it already wrote:\nfast, never loses its place, cannot use spelling",
+        ha="center",
+        fontsize=8,
+    )
+    ax = axes[1]
+    for c in range(8):
+        box(ax, c * 1.1, 0.4, f"col {c + 1}", w=0.85, h=0.45, fontsize=7, color=P[0])
+    for j, ch in enumerate(["<s>", "c", "a", "t"]):
+        box(ax, 1.2 + j * 1.8, 2.6, ch, w=0.8, h=0.45, fontsize=8, color=P[1])
+        if j:
+            arrow(ax, (1.2 + (j - 1) * 1.8 + 0.42, 2.6), (1.2 + j * 1.8 - 0.42, 2.6))
+    weights = [0.05, 0.1, 0.6, 0.15, 0.05, 0.03, 0.01, 0.01]
+    for c, w in enumerate(weights):
+        ax.plot([c * 1.1, 4.8], [0.64, 2.36], color=P[3], alpha=min(1, 0.1 + w), linewidth=0.5 + 4 * w)
+    ax.set_title("attention: write a character, look back at the columns, repeat", fontsize=9.5)
+    ax.text(
+        3.85,
+        -0.6,
+        "free to look anywhere and conditioned on its own output (an implicit language model):\nspells better, but can lose its place, stop early or repeat",
+        ha="center",
+        fontsize=8,
+    )
+    fig.tight_layout()
+    return fig
+
+
+@concept("h", "h5_concept_pipeline")
+def h5_pipeline():
+    """A real synthetic page, detector boxes, crops, recognizer — and where the error enters."""
+    from mlladder import synth
+
+    doc = synth.documents(1, rng=np.random.default_rng(2))[0]
+    plotting.use_house_style()
+    fig = plt.figure(figsize=(12.5, 4))
+    grid = fig.add_gridspec(len(doc.boxes), 3, width_ratios=[1.3, 0.9, 1.0])
+    ax = fig.add_subplot(grid[:, 0])
+    ax.imshow(doc.image, cmap="gray")
+    rng = np.random.default_rng(3)
+    shifted = []
+    for box_ in doc.boxes:
+        predicted = box_ + np.r_[rng.normal(0, 3, 2), rng.normal(0, 3, 2)].astype(np.float32)
+        shifted.append(predicted)
+        _draw_box(ax, box_, P[3], lw=1.0)
+        _draw_box(ax, predicted, P[4], lw=1.2, ls="--")
+    ax.set_title("stage 1, detect: green = true line, red = a detector's box", fontsize=9)
+    ax.set_axis_off()
+    for row, (predicted, text) in enumerate(zip(shifted, doc.texts, strict=True)):
+        x1, y1, x2, y2 = np.clip(np.round(predicted), 0, [doc.image.shape[1], doc.image.shape[0]] * 2).astype(int)
+        crop = doc.image[y1:y2, x1:x2]
+        ax = fig.add_subplot(grid[row, 1])
+        ax.imshow(crop, cmap="gray", aspect="auto")
+        ax.set_axis_off()
+        if row == 0:
+            ax.set_title("crops the recognizer receives", fontsize=9)
+        ax = fig.add_subplot(grid[row, 2])
+        ax.set_axis_off()
+        ax.text(0.02, 0.5, f'→ stage 2 reads it; truth: "{text}"', va="center", fontsize=8)
+    fig.suptitle(
+        "Two-stage OCR: a box that clips one character costs the recognizer that character, however good the recognizer is.\n"
+        "H5 measures this by scoring the same recognizer on true crops and on detected crops.",
+        fontsize=9.5,
+    )
+    fig.tight_layout(rect=(0, 0, 1, 0.88))
+    return fig
+
+
+# =============================================================================
 
 
 def main() -> None:

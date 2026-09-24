@@ -44,6 +44,33 @@ with the detector: what overlap counts as a match, how duplicates are removed,
 and how a precision-recall curve becomes one number. How much do those choices
 move the answer?
 
+### The idea
+
+**Object detection** means finding every object in an image and drawing a box
+around each, with a class label and a confidence score. Unlike classification,
+the number of answers varies per image.
+
+This rung builds a **YOLO-style** detector ("you only look once"): split the
+image into an 8×8 grid, and have every cell predict, in a single forward pass,
+(1) whether an object's centre lies in it, (2) the box, as an offset within the
+cell plus a width and height, and (3) the object's class. One convolutional
+network produces all 64 predictions at once. Neighbouring cells often fire for
+the same object, so **non-maximum suppression (NMS)** removes duplicates: keep
+the most confident box, delete any other box that overlaps it too much, repeat.
+
+The harder problem is *scoring* it, because no single rule says which
+prediction belongs to which object. The standard score, **mean average
+precision (mAP)**, is built from three choices, and this rung measures how much
+each one moves the answer.
+
+![IoU, NMS and average precision](figures/h/h1_concept_iou_nms.png)
+
+*Left: IoU, the overlap measure every detection metric is built on (this pair
+overlaps too little to count). Middle: a cluster of candidate boxes before and
+after NMS, using the rung's own functions. Right: ranking predictions by
+confidence traces a precision-recall curve, and AP is the area under its
+upper envelope.*
+
 ### The math
 
 **IoU** is the whole foundation, and it is one ratio:
@@ -77,6 +104,23 @@ duplicates outrank genuine detections elsewhere.
 **mAP** averages AP over classes — over the classes that are *present*. Scoring
 an absent class 0 rather than skipping it is a silent way to make a detector
 look bad on a dataset that never showed it that class.
+
+### What we measure, and why
+
+- **IoU (intersection over union)** of a predicted and a true box: the area
+  they share divided by the area they cover together. 1 is a perfect box, 0 no
+  overlap. A prediction *counts* as correct only above a threshold.
+- **Precision** — the fraction of predicted boxes that are correct. **Recall** —
+  the fraction of true objects that were found. Lowering the confidence cut-off
+  trades precision for recall.
+- **AP (average precision)** — the area under the precision-recall curve for one
+  class. **mAP** — its mean over classes. **mAP@0.5** accepts a box at IoU ≥ 0.5
+  (a loose fit). **mAP@0.75** demands a tight one. Reporting both shows whether
+  errors come from *finding* objects or from *placing* the box.
+- **Boxes per image vs NMS threshold** — against the true 2.0 objects per image,
+  this shows whether NMS is removing duplicates or real objects.
+- **Matched IoU distribution** — how tight the boxes are, which explains the
+  gap between the two mAP numbers.
 
 ### What I built
 
@@ -160,6 +204,29 @@ tuning it — the same move H6 makes one level up.
 **Question.** Skip connections are supposed to restore the fine detail that
 pooling destroys. How much are they worth, and where?
 
+### The idea
+
+**Semantic segmentation** labels every pixel: this pixel is background, that one
+is part of a triangle. The output is an image-sized map of classes.
+
+The standard architecture is the **U-Net**. An *encoder* repeatedly convolves
+and pools, shrinking the image while building up context: by the bottom it
+knows *what* is in the image, but at coarse resolution. A *decoder* upsamples
+back to full size. The trouble is that pooling threw away exactly the
+fine spatial detail needed to place edges precisely. U-Net's fix is **skip
+connections**: at each resolution the decoder concatenates the encoder's
+feature map from the same level, handing the fine detail straight across.
+
+The rung ablates the skips and asks what they are worth, and discovers the
+answer depends on *which pixels* are averaged over.
+
+![U-Net and the boundary band](figures/h/h2_concept_unet.png)
+
+*Left: the U shape, with the skips (green) crossing from encoder to decoder at
+matching resolutions. Right: a ground-truth mask, and its boundary band, the
+pixels within 2 px of an edge. Skips are supposed to matter there, and almost
+nowhere else.*
+
 ### The math
 
 **The U-Net's claim** is architectural. An encoder that pools discards high
@@ -183,6 +250,22 @@ about what "good" means on a background that owns 86% of the pixels.
 **IoU from the confusion matrix** is the diagonal over the row plus column minus
 the double-counted diagonal, and Dice and IoU are monotone in each other,
 $D = 2I/(1+I)$ — which the tests use to check one against the other.
+
+### What we measure, and why
+
+- **Per-class IoU** — for each class, the overlap between predicted and true
+  pixel sets divided by their union. **mIoU** averages it over classes.
+  Accuracy would be misleading here: 86% of pixels are background, so predicting
+  "background" everywhere scores 0.86.
+- **Foreground mIoU** — mIoU over the three shape classes only, so the easy
+  background class cannot inflate it.
+- **Boundary mIoU** — the same score restricted to the 2-px band around true
+  edges. This is where skip connections should act, and averaging over the whole
+  image dilutes the effect with interior pixels a coarse model already gets
+  right.
+- **Loss arms** (cross-entropy, Dice, both) — Dice directly optimises overlap
+  and is the standard remedy for class imbalance. It is tested rather than
+  assumed.
 
 ### What I built
 
@@ -252,6 +335,30 @@ optimize directly for the band this rung had to invent to see the effect.
 an unknown number of characters at unknown positions. How much does removing
 that requirement cost, and where does the remaining error live?
 
+### The idea
+
+**Text recognition (OCR)** turns an image of a line of text into a string. The
+difficulty is **alignment**: nobody says which pixel columns belong to which
+character, and the number of characters varies.
+
+A **CRNN** (convolutional recurrent network) reads the line as a sequence of
+vertical strips: convolutions squash the image's height to 1 and keep 32
+columns across its width, and a bidirectional LSTM (C1) passes context along the
+row. Every column then predicts a character *or a special blank symbol*.
+
+**CTC (connectionist temporal classification)** turns those per-column guesses
+into a string and makes training possible without alignments. Decoding merges
+repeated characters and then deletes blanks. Training sums the probability of
+*every* column labelling that would collapse to the correct string, so the
+network is free to place characters wherever it likes.
+
+![CTC on a rendered line](figures/h/h3_concept_ctc.png)
+
+*A 128-pixel line read as 32 columns, with one plausible labelling. Merging
+repeats and dropping blanks gives "hello". The blank between the two l's is what
+stops them merging into one. Real output would put blanks and characters
+wherever the network found the evidence.*
+
 ### The math
 
 **CTC marginalizes the alignment away.** The network predicts a distribution
@@ -279,6 +386,23 @@ returns `"A"`.
 drops one character would otherwise score as if everything after it were wrong
 too. It is pooled over the corpus rather than averaged per line, and it is not
 bounded by 1 — a hallucinating model can insert more than the reference holds.
+
+### What we measure, and why
+
+- **CER (character error rate)** — the minimum number of character insertions,
+  deletions and substitutions needed to turn the prediction into the truth
+  (the **edit distance**), divided by the truth's length and pooled over the test
+  set. It is used instead of per-position matching because one dropped
+  character would otherwise make every later position "wrong". It can exceed 1
+  if the model hallucinates.
+- **WER (word error rate)** — the same edit distance counted in whole words.
+  One wrong letter spoils a word, so WER is always the harsher of the two, and
+  the gap between them shows whether errors are scattered or concentrated.
+- **CER on held-out fonts** — typefaces never seen in training, which tests
+  generalisation rather than memorised glyph shapes. The rung found that its
+  "held-out" split did not hold out what it claimed.
+- **Greedy vs beam-search decoding** — whether picking the best column labelling
+  and picking the best string disagree in practice.
 
 ### What I built
 
@@ -354,6 +478,29 @@ real OCR error comes from and which this data has none of.
 independent given the columns. An attention decoder assumes neither and gains a
 language model over its own output. What does each assumption buy and cost?
 
+### The idea
+
+There are two standard ways to connect an image to a string:
+
+- **CTC** (H3): one prediction per image column, collapsed afterwards. It
+  assumes the text runs left to right, one column after another (*monotonic*),
+  and it predicts each column independently, so it cannot use knowledge of
+  spelling.
+- **Attention decoder**: generate the string one character at a time, like the
+  C2 decoder. At each step, look back over all image columns with attention and
+  decide the next character *given the characters already written*. That gives
+  it an implicit language model, but nothing forces it to move steadily left to
+  right, so it can lose its place, repeat itself or stop early.
+
+A third arm, **TrOCR**, is a large pretrained transformer OCR model used
+zero-shot, for scale.
+
+![CTC and attention decoding](figures/h/h4_concept_decoders.png)
+
+*Left: CTC labels every column independently. Right: the attention decoder
+writes "a" by attending mostly to column 3, then moves on conditioned on "c",
+"a". Same encoder in both arms here, so the comparison isolates the decoder.*
+
 ### The math
 
 **The independence assumption** is the real difference, and it is visible in
@@ -377,6 +524,22 @@ consequence.
 **Attention** is C2's, pointed at image columns rather than source tokens:
 $\alpha = \mathrm{softmax}(h_t^\top H / \sqrt{d})$ with context $\sum_i
 \alpha_i H_i$, plus input feeding so the decoder knows where it just looked.
+
+### What we measure, and why
+
+- **CER** on lines of the lengths seen in training (one and two words).
+- **CER on longer lines (three words) than any seen in training** — a direct
+  test of the monotonicity assumption: CTC has no notion of "how far along am
+  I", while the attention decoder must learn when to stop.
+- **The two-words-on-a-wider-canvas control** — a third word on the same
+  128-px canvas also shrinks the characters, so a failure could come from
+  resolution rather than length. This control separates the two.
+- **Held-out WER and exact-line accuracy** — alongside CER, because an
+  attention decoder with a language model can be worse per character and
+  better per word, and it is here.
+- **Font gap, length gap and width gap** — held-out CER minus seen CER along each
+  axis of generalisation, so a single number says *which* kind of novelty
+  hurts which decoder.
 
 ### What I built
 
@@ -456,6 +619,27 @@ TrOCR on this data rather than only reading it zero-shot.
 it introduces a failure neither stage can exhibit alone: the second consumes the
 first's mistakes. Whose fault is the error?
 
+### The idea
+
+A classical OCR system is a **pipeline** of two models: a **detector** (H1)
+finds the text lines on a page, the lines are cropped out, and a
+**recognizer** (H3) reads each crop. Each stage can be trained and tested on its
+own, but the pipeline has a failure mode neither stage shows alone: a box a few
+pixels too narrow clips a character, and the recognizer, however good, cannot
+read what it was not given.
+
+This rung builds that pipeline on synthetic pages whose ground truth is exact,
+and then *attributes* the pipeline's error to its stages: it scores the same
+recognizer on the true crops and on the detector's crops, and the difference is
+the detector's fault.
+
+![A two-stage OCR pipeline](figures/h/h5_concept_pipeline.png)
+
+*A real page from the rung's generator. Green boxes are the true lines, red
+dashed boxes an imperfect detector's output (jittered here for illustration).
+The crops on the right are what the recognizer actually receives, and one of
+them has already lost the end of "BETA".*
+
 ### The math
 
 **A single end-to-end number cannot answer that**, so the same recognizer is
@@ -481,6 +665,20 @@ prediction is a concatenation over *detected* lines and the reference over
 insertions, and a wrong $\sigma$ costs the edit distance between two orderings.
 A per-line average would score only the lines that were found — exactly the
 population a broken detector biases.
+
+### What we measure, and why
+
+- **End-to-end page CER** — edit distance between everything the pipeline read
+  on a page and the page's true text. This is what a user of the system
+  experiences.
+- **Recognizer CER on ground-truth crops** — the recognizer's own error with a
+  perfect detector.
+- **Error attribution** — the share of end-to-end error that disappears when
+  detected crops are replaced by true ones. It is the rung's key number, and it
+  turns "the pipeline is bad" into "this stage is responsible".
+- **Detector recall and IoU of matched boxes** — the detector's own report card.
+- **The jitter-augmented recognizer** — trained on deliberately misaligned
+  crops, to measure whether the diagnosed problem has a cheap cure.
 
 ### What I built
 
@@ -566,6 +764,27 @@ you can do before giving up on stages entirely.
 vision-language OCR model removes the boundary rather than improving either
 stage. What does that cost?
 
+### The idea
+
+Modern OCR increasingly removes the pipeline entirely. A **vision-language
+model (VLM)** reads the whole page image and *writes out* the text as a
+language model would, with no detector, no crops and no hand-built interface
+between stages. The architecture has three parts:
+
+1. a **vision encoder** (a ViT, C4) turns the page into a sequence of patch
+   tokens;
+2. a **projector** merges neighbouring patches and maps them into the language
+   model's embedding space;
+3. a **language-model decoder** (C3/C5) generates the transcription token by
+   token, attending to the image tokens.
+
+The price is size and compute. This rung prices it exactly for two real models,
+**PaddleOCR-VL** (0.9B parameters) and **Unlimited-OCR** (3.3B, a
+mixture-of-experts decoder), by parsing their published configurations. The
+section after this rung then runs them on H5's pages.
+
+The architecture diagrams further down show both models' component stacks.
+
 ### The math
 
 **There is no box, so there is no box error.** A page becomes visual tokens and
@@ -588,6 +807,18 @@ makes the cache 8× smaller at unchanged query capacity.
 **Mixture-of-experts decouples parameters held from parameters run.** With $E$
 routed experts of width $d_{\text{moe}}$ and top-$k$ routing plus $s$ shared
 experts, a layer holds $(E + s)$ experts' worth and runs $(k + s)$.
+
+### What we measure, and why
+
+- **Parameters per component** (vision, projector, text), validated first on a
+  model the rung can load and count (TrOCR, 1.3% error), so the arithmetic is
+  checked before it is trusted.
+- **Held vs active parameters** for the mixture-of-experts decoder — what must
+  sit in memory against what each token actually uses.
+- **Image tokens and attention FLOPs by page size** — the cost driver. A
+  full A4 page at 300 dpi becomes 11,214 tokens, so page resolution, not
+  parameters, often decides whether a model is practical.
+- **KV cache per token** — the decode-time memory cost (C5).
 
 ### What I built
 
@@ -759,10 +990,10 @@ same T4, on the same pages, scored by the same function:
 
 | runtime | 4x CER | native CER | native WER | s/page (4x) |
 | --- | --- | --- | --- | --- |
-| transformers, fp16 | 0.0000 | 0.0392156862745098 | 0.03225806451612903 | 3.33 |
-| candle fork, f16 | 0.0000 | 0.0392156862745098 | 0.03225806451612903 | 4.68 |
+| transformers, fp16 | 0.0000 | 2/51 = 0.0392 | 1/31 = 0.0323 | 3.33 |
+| candle fork, f16 | 0.0000 | 2/51 = 0.0392 | 1/31 = 0.0323 | 4.68 |
 
-**Identical to sixteen digits**, and they fail on the same page for the same
+**Identical to sixteen digits** (both runtimes produce the same exact fractions, 2/51 and 1/31), and they fail on the same page for the same
 reason: page 5's two lines are both `SIGMA`, and both runtimes emit one. So the
 native-resolution error is not a misreading at all — it is a **repeated-line
 collapse**, which I would not have diagnosed from one implementation, because
