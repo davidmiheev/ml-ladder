@@ -114,7 +114,9 @@ measured error there should be no better than a plain CNN's. The cost is
 parameters: the group-convolution layers gain a factor of $|C_4|$ on their input
 axis, so the network is roughly $1.5\times$ the plain one at equal feature width.
 
-**What I built.** Four arms at matched feature width: a plain CNN, the same CNN
+### What I built
+
+Four arms at matched feature width: a plain CNN, the same CNN
 trained with continuous rotation augmentation, a $p4$ CNN, and a $p4$ CNN with
 augmentation. All four train on **upright** MNIST; the test set is rotated at
 evaluation. The angles $\{0, 90, 180, 270\}$ are the group and
@@ -122,7 +124,9 @@ $\{45, 135, 225, 315\}$ are deliberately off it. Rotation uses `affine_grid` +
 `grid_sample` rather than `rot90`, because the off-group angles need it — which
 puts a bilinear resampling error into every number and sets the floor.
 
-**Results.** Medians over seeds 0–2, with the seed range where it
+### Results
+
+Medians over seeds 0–2, with the seed range where it
 matters. `equiv` is the feature-map equivariance error defined above; *on-group*
 averages $\{0, 90, 180, 270\}$ and *off-group* averages $\{45, 135, 225, 315\}$.
 
@@ -160,7 +164,9 @@ convolutions.
 ![F1 equivariance](figures/f/f1_equivariance.png)
 ![F1 accuracy by angle](figures/f/f1_accuracy_by_angle.png)
 
-**What surprised me.** **Augmentation did not merely fail to match equivariance — it
+### What surprised me
+
+**Augmentation did not merely fail to match equivariance — it
 destabilized training.** `plain_augmented`'s upright accuracy ranges 0.22 to
 0.676 across three seeds, and at seed 0 it was *worse than the unaugmented plain
 CNN at every single angle*. At 19k parameters, asking one filter bank to cover
@@ -191,13 +197,17 @@ Neither of these is a bug in the model. Both are bugs in the measurement that
 would have been invisible in the results, which is the reason they are written
 down here rather than quietly fixed.
 
-**Open threads.** The $p4$ construction generalizes to $p4m$ (adding
+### Open threads
+
+The $p4$ construction generalizes to $p4m$ (adding
 reflections) and, through steerable filters, to the continuous $SO(2)$ — which
 is the version that would actually close the off-group gap rather than
 documenting it. That is what `escnn` implements, and comparing this hand-rolled
 $p4$ against it is the obvious next rung.
 
-**Reading:** Cohen & Welling, *Group Equivariant Convolutional Networks* (2016);
+### Further reading
+
+Cohen & Welling, *Group Equivariant Convolutional Networks* (2016);
 Bronstein et al., *Geometric Deep Learning* (2021) for the blueprint this rung
 is one instance of.
 
@@ -296,7 +306,9 @@ iterate $Y^{(t+1)} = \alpha\hat{A}Y^{(t)} + (1-\alpha)Y^{(0)}$. No features, no
 parameters, no training: the graph's own answer to the task, and the number that
 says how much of a GNN benchmark is the graph rather than the network.
 
-**What I built.** Three arms on identical features — a graph-blind MLP, a GCN,
+### What I built
+
+Three arms on identical features — a graph-blind MLP, a GCN,
 and GraphSAGE — plus label propagation as a parameter-free control. Cora with
 the standard Planetoid protocol (20 labels per class, 1000 test nodes) carries
 the real-data half; an SBM with a calibrated homophily dial carries the
@@ -313,7 +325,9 @@ call; the sparsity argument is real but does not start here. And the depth sweep
 gets a **larger epoch budget than the headline runs**, for a reason given under
 *What surprised me*.
 
-**Results.** Medians over seeds 0–2.
+### Results
+
+Medians over seeds 0–2.
 
 **Cora**, 2,708 nodes, 5,278 undirected edges, 7 classes, homophily 0.810 against
 a random floor of 0.143, mean degree 3.9, 140 labelled nodes:
@@ -382,7 +396,9 @@ about why.
 ![F2 homophily](figures/f/f2_homophily.png)
 ![F2 homophily gap](figures/f/f2_homophily_gap.png)
 
-**What surprised me.** **The oversmoothing story did not reproduce, and the control is
+### What surprised me
+
+**The oversmoothing story did not reproduce, and the control is
 what killed it.** The arm whose representations collapse is the **graph-blind
 MLP** — mean pairwise cosine similarity 1.000 at eight layers, accuracy 0.304 —
 and it is also the arm that loses the most accuracy to depth
@@ -425,7 +441,9 @@ therefore a mixture of depth and budget, and the honest version of "deeper is
 worse" here is "deeper is worse *and* slower to train, and this sweep does not
 fully separate them".
 
-**Open threads.** The heterophilous regime is where current work lives — GAT's
+### Open threads
+
+The heterophilous regime is where current work lives — GAT's
 learned attention, GPR-GNN's learned polynomial of $\hat{A}$, and the
 "just concatenate the hops" baselines that often beat both. The SBM dial built
 here is the right harness for that comparison and none of it is run yet.
@@ -434,7 +452,9 @@ sparse rewrite that unlocks it is the same one the measurement above says is not
 worth it at Cora's size, which is a nice illustration that "the right data
 structure" is a function of $n$.
 
-**Reading:** Kipf & Welling, *Semi-Supervised Classification with Graph
+### Further reading
+
+Kipf & Welling, *Semi-Supervised Classification with Graph
 Convolutional Networks* (2017); Hamilton, Ying & Leskovec, *Inductive
 Representation Learning on Large Graphs* (2017); Li, Han & Wu, *Deeper Insights
 into Graph Convolutional Networks* (2018) for the oversmoothing analysis.

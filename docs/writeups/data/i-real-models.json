@@ -23,7 +23,7 @@
     "features": "cuda symphonia",
     "fixes_required": [
       "candle-transformers does not build without CUDA: candle_nn::fused::static_decode is #[cfg(feature = \"cuda\")] but called from ungated sites. 52 errors with --features mkl. This contradicts ignite-catalog's whisper-cpu.yaml, which declares gpu.required: false.",
-      "candle-examples declares symphonia 0.6.0 (Cargo.lock pins 0.6.1) while its audio code uses the 0.5 API -- AudioBufferRef, codecs::DecoderOptions, core::conv, core::probe. 6 errors, breaking every symphonia example: whisper, encodec, mimi, snac. Pinned to 0.5.4 to build.",
+      "candle-examples declares symphonia 0.6.0 (which resolves to 0.6.1; the fork gitignores Cargo.lock, so nothing pins it) while its audio code uses the 0.5 API -- AudioBufferRef, codecs::DecoderOptions, core::conv, core::probe. 6 errors, breaking every symphonia example: whisper, encodec, mimi, snac. Pinned to 0.5.4 to build.",
       "the whisper target additionally requires --features symphonia alongside cuda",
       "CUDA 12.8 needs the compatibility.cuh __hmax_nan guard extended with CURART_VERSION < 12000",
       "the Kaggle image ships no Rust and no libcuda.so on the usual paths; the driver is at /usr/local/nvidia/lib64"

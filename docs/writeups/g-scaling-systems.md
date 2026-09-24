@@ -93,7 +93,9 @@ Chinchilla found $N^{*} \propto C^{0.5}$ and $D^{*} \propto C^{0.5}$ — roughly
 are proportional to $N$; the attention term above breaks that, so the sum is a
 measurement rather than an identity.
 
-**What I built.** The char transformer from rung C3, swept three ways: five
+### What I built
+
+The char transformer from rung C3, swept three ways: five
 widths at a fixed 1M-token budget, four token budgets at a fixed width, and
 three IsoFLOP contours over six widths. A fourth arm tests Kaplan's claim that
 loss depends on parameter *count* and barely on their arrangement, by comparing
@@ -102,7 +104,9 @@ the depth at half the width. The power-law fit is written out rather than
 imported, profiling over the floor $E$ on a grid because for a fixed $E$ the
 problem is an ordinary log-log regression.
 
-**Results.** Medians over seeds 0–2.
+### Results
+
+Medians over seeds 0–2.
 
 **$L(N)$** at a fixed 1M-token budget, and **$L(D)$** at width 64:
 
@@ -153,7 +157,9 @@ that spans a 15× parameter range.
 ![G1 attention share](figures/g/g1_attention_share.png)
 ![G1 FLOP accounting](figures/g/g1_flop_accounting.png)
 
-**What surprised me.** **"Only $N$ matters" failed, and failed by more than the
+### What surprised me
+
+**"Only $N$ matters" failed, and failed by more than the
 axis it was competing with.** Rearranging 224k parameters from two wide layers
 into eight narrow ones costs 0.126 of loss — more than the average gap between
 adjacent points of a width sweep covering 25k to 397k parameters. Kaplan's claim
@@ -185,13 +191,17 @@ a systematic tilt applied precisely to the points that set the slope — the kin
 of error that does not look like an error, because every individual number stays
 plausible.
 
-**Open threads.** Every limitation here is the corpus. A scaling law wants at
+### Open threads
+
+Every limitation here is the corpus. A scaling law wants at
 least two decades of $x$ and data it never has to repeat; 1.1M characters gives
 about one decade and runs out. The obvious next step is a tokenized corpus large
 enough that $D^{*}$ is free to move, at which point the Chinchilla exponent
 becomes measurable rather than merely bounded.
 
-**Reading:** Kaplan et al., *Scaling Laws for Neural Language Models* (2020);
+### Further reading
+
+Kaplan et al., *Scaling Laws for Neural Language Models* (2020);
 Hoffmann et al., *Training Compute-Optimal Large Language Models* (2022).
 
 ---
@@ -230,14 +240,18 @@ not optional. Omit it and the summed gradient is $k$ times the large-batch one,
 so the run trains at $k$ times the configured learning rate — a bug that
 produces plausible-looking divergence rather than an error.
 
-**What I built.** Five arms on a 384-wide, 4-layer transformer: fp32, fp16 with
+### What I built
+
+Five arms on a 384-wide, 4-layer transformer: fp32, fp16 with
 a scaler, bf16, fp16 *without* a scaler, and a sweep of accumulation counts at a
 fixed effective batch. Throughput is measured after a warmup with an explicit
 device synchronize, because CUDA's asynchrony otherwise makes the loop measure
 how fast Python can enqueue work. A separate sweep varies model width, because
 AMP's speedup comes from tensor cores and therefore from matrix shapes.
 
-**Results.** On a Kaggle Tesla T4 (sm_75), single run, seed 0 —
+### Results
+
+On a Kaggle Tesla T4 (sm_75), single run, seed 0 —
 [`data/g-gpu.json`](data/g-gpu.json). The CPU sweep in
 [`data/g-metrics.json`](data/g-metrics.json) covers only the arms that need no
 GPU, and says so.
@@ -274,7 +288,9 @@ And summing micro-batch gradients instead of averaging them gives a norm exactly
 ![G2 accumulation memory](figures/g/g2_accumulation.png)
 ![G2 accumulation throughput](figures/g/g2_accumulation_throughput.png)
 
-**What surprised me.** **bf16 ran, and ran slower than the format it replaces.**
+### What surprised me
+
+**bf16 ran, and ran slower than the format it replaces.**
 I had written that bf16 "needs sm_80, so on a Turing T4 there is no bf16 path at
 all, and the arm is skipped". Wrong: `torch.cuda.is_bf16_supported()` returns
 `True` on a T4, the arm runs fine, and it lands at **0.77× fp32**. A raw
@@ -312,13 +328,17 @@ a pure memory-for-time trade with the optimization untouched, and at that gap it
 demonstrably is. The metric worth having is the one that could have caught the
 $1/k$ bug, and it does: 4.00× exactly, on both devices.
 
-**Open threads.** Everything here is one card. The bf16 result would invert on
+### Open threads
+
+Everything here is one card. The bf16 result would invert on
 an A100 and the accumulation trade would shift with activation checkpointing,
 which is the other half of the memory story and is not implemented. The obvious
 next measurement is `torch.compile`, which changes the shape-dependence of the
 AMP result by fusing away the small-kernel overhead that dominates at width 64.
 
-**Reading:** Micikevicius et al., *Mixed Precision Training* (2018); the PyTorch
+### Further reading
+
+Micikevicius et al., *Mixed Precision Training* (2018); the PyTorch
 AMP examples in this part's lab reference.
 
 ---
@@ -352,12 +372,16 @@ PyTorch's `nn.GELU()` is the first; Candle's `gelu()` is the second and
 `gelu_erf()` is the first. They agree to about $10^{-3}$ on ordinary
 activations — far above float32 noise, far below anything that looks like a bug.
 
-**What I built.** The pre-LN block from C3, rewritten against Candle 0.11 in
+### What I built
+
+The pre-LN block from C3, rewritten against Candle 0.11 in
 `rust/crates/ignite-port`, with a driver that exports the weights to `.npz`,
 runs both sides and diffs them at batch 1 and batch 4. Both GELU variants are
 run, so the cost of the wrong choice is a measurement rather than a warning.
 
-**Results.** Medians over seeds 0–2.
+### Results
+
+Medians over seeds 0–2.
 
 | | relative error | max \|diff\| |
 | --- | --- | --- |
@@ -386,7 +410,9 @@ thread **2.06×**.
 ![G3 agreement](figures/g/g3_agreement.png)
 ![G3 threads](figures/g/g3_threads.png)
 
-**What surprised me.** **The port was right the first time, which was not the
+### What surprised me
+
+**The port was right the first time, which was not the
 plan.** It compiled and matched to $10^{-7}$ on the first run, and the value of
 the exercise turned out to be in the three lines where Candle refuses to decide
 for you: `LayerNorm::new(w, b, 1e-5)` makes the epsilon explicit, `transpose`
@@ -416,13 +442,17 @@ contention itself, so the number is a measurement rather than an accident of
 what else was running — which is the general lesson, and one this part had to
 learn twice.
 
-**Open threads.** One block is not a model: the port has no KV cache, no
+### Open threads
+
+One block is not a model: the port has no KV cache, no
 sampling loop and no quantization, which is where the [[ignite-catalog]]
 executors actually live. Porting the *decode* path is the rung after this one,
 and the interesting number there is tokens per second rather than a relative
 error.
 
-**Reading:** the Candle source for `candle-nn`'s `LayerNorm` and `ops::softmax`;
+### Further reading
+
+the Candle source for `candle-nn`'s `LayerNorm` and `ops::softmax`;
 Hendrycks & Gimpel, *Gaussian Error Linear Units* (2016) for the two forms.
 
 ---

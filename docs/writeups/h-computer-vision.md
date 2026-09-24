@@ -78,7 +78,9 @@ duplicates outrank genuine detections elsewhere.
 an absent class 0 rather than skipping it is a silent way to make a detector
 look bad on a dataset that never showed it that class.
 
-**What I built.** A YOLO-style detector with one prediction per cell of an 8×8
+### What I built
+
+A YOLO-style detector with one prediction per cell of an 8×8
 grid on 64×64 scenes: objectness, a box, and a class distribution per cell. The
 box is parameterised relative to its cell — centre as a sigmoid offset inside
 it, size as a log-ratio of the image — because predicting absolute coordinates
@@ -87,7 +89,9 @@ work everywhere. Ground-truth boxes are assigned to the cell holding their
 centre, which caps recall when two centres share a cell; that happens to 0.17%
 of objects here and is reported rather than left implicit.
 
-**Results** (3000 train / 600 test scenes, 12 epochs; medians over seeds 0–2):
+### Results
+
+*Setup: 3000 train / 600 test scenes, 12 epochs; medians over seeds 0–2.*
 
 | NMS threshold | boxes/image | mAP@0.5 | mAP@0.75 |
 | --- | --- | --- | --- |
@@ -106,7 +110,9 @@ exactly (1.99). `best/nms_threshold` is 0.5 on every seed.
 ![Matched IoU](figures/h/h1_matched_iou.png)
 ![Detections](figures/h/h1_detections.png)
 
-**What surprised me.** The two IoU thresholds disagree about what the NMS dial
+### What surprised me
+
+The two IoU thresholds disagree about what the NMS dial
 is *for*. Across the sweep, mAP@0.5 moves by **0.109** and mAP@0.75 by only
 **0.032** — and at 0.75 the best threshold is 0.7, not 0.5. At the strict
 threshold, duplicate removal stops mattering because localization has become the
@@ -133,12 +139,16 @@ triangle is worst, but a rectangle *is* its box and still loses to an ellipse.
 I do not have an explanation I believe, and one sentence of honest ignorance
 beats a plausible story.
 
-**Open threads.** Anchors with aspect priors, which is the standard answer to a
+### Open threads
+
+Anchors with aspect priors, which is the standard answer to a
 size regression this noisy. Focal loss for the 30:1 negative imbalance. And
 DETR's set prediction, which removes NMS from the problem entirely rather than
 tuning it — the same move H6 makes one level up.
 
-**Reading:** [YOLO](https://arxiv.org/abs/1506.02640);
+### Further reading
+
+[YOLO](https://arxiv.org/abs/1506.02640);
 [Faster R-CNN](https://arxiv.org/abs/1506.01497);
 [Focal Loss](https://arxiv.org/abs/1708.02002);
 [DETR](https://arxiv.org/abs/2005.12872).
@@ -174,14 +184,18 @@ about what "good" means on a background that owns 86% of the pixels.
 the double-counted diagonal, and Dice and IoU are monotone in each other,
 $D = 2I/(1+I)$ — which the tests use to check one against the other.
 
-**What I built.** A two-level U-Net on the same scenes H1 detects in. The
+### What I built
+
+A two-level U-Net on the same scenes H1 detects in. The
 no-skip arm keeps its entire decoder and loses only the concatenated channels,
 so the comparison is not confounded by capacity: 66,292 parameters against
 59,812. Plus a boundary band — pixels within 2px of a label change, computed
 without scipy by disagreeing with a shifted copy and dilating — covering 11.7%
 of pixels.
 
-**Results** (2000 train / 500 test, 10 epochs; medians over seeds 0–2). Pixel
+### Results
+
+(2000 train / 500 test, 10 epochs; medians over seeds 0–2). Pixel
 shares: background 0.856, rectangle 0.063, ellipse 0.048, triangle 0.032.
 
 | arm | foreground mIoU | boundary mIoU |
@@ -198,7 +212,9 @@ shares: background 0.856, rectangle 0.063, ellipse 0.048, triangle 0.032.
 ![Arms](figures/h/h2_arms.png)
 ![Masks](figures/h/h2_masks.png)
 
-**What surprised me.** The first pass made the ablation look boring: +0.013
+### What surprised me
+
+The first pass made the ablation look boring: +0.013
 foreground mIoU for skips, everything above 0.94, a ceiling rather than a
 result. Then I scored the mechanism instead of the average. The argument for
 skip connections is about high frequencies — edges — and whole-image mIoU is
@@ -215,12 +231,16 @@ loses once — over a loss spread of 0.012. Dice and CE+Dice are statistically
 indistinguishable here (0.9573 against 0.9572). I had reported the single-seed
 version as a finding before the sweep, and it was noise.
 
-**Open threads.** A deeper U-Net, where more pooling should widen the skip gap.
+### Open threads
+
+A deeper U-Net, where more pooling should widen the skip gap.
 Thin structures rather than solid shapes, which is the regime the boundary
 result predicts skips matter most in. And boundary-weighted losses, which
 optimize directly for the band this rung had to invent to see the effect.
 
-**Reading:** [U-Net](https://arxiv.org/abs/1505.04597);
+### Further reading
+
+[U-Net](https://arxiv.org/abs/1505.04597);
 [Mask R-CNN](https://arxiv.org/abs/1703.06870);
 [Segment Anything](https://arxiv.org/abs/2304.02643).
 
@@ -260,14 +280,18 @@ drops one character would otherwise score as if everything after it were wrong
 too. It is pooled over the corpus rather than averaged per line, and it is not
 bounded by 1 — a hallucinating model can insert more than the reference holds.
 
-**What I built.** A CRNN: convolutions pooling height to 1 while pooling width
+### What I built
+
+A CRNN: convolutions pooling height to 1 while pooling width
 only twice, so a 32×128 image becomes 32 columns, then a two-layer BiLSTM and a
 per-column head. The width ratio carries a hard constraint — CTC cannot emit
 more characters than it has columns, and needs a spare column between repeats —
 so the rung checks it and exits loudly rather than discovering it as a silent
 `inf`.
 
-**Results** (6000 train lines, 12 epochs; medians over seeds 0–2):
+### Results
+
+*Setup: 6000 train lines, 12 epochs; medians over seeds 0–2.*
 
 | split | greedy CER | beam-15 CER | WER |
 | --- | --- | --- | --- |
@@ -278,7 +302,9 @@ so the rung checks it and exits loudly rather than discovering it as a silent
 ![CTC posteriors](figures/h/h3_ctc_posteriors.png)
 ![Error by font](figures/h/h3_error_by_font.png)
 
-**What surprised me.** Beam search buys **nothing**: 0.0000 CER at median
+### What surprised me
+
+Beam search buys **nothing**: 0.0000 CER at median
 against greedy, while held-out fonts cost 0.164. The textbook decoder upgrade,
 implemented properly with separate blank and symbol mass, is worth zero here,
 and the entire error budget is generalization. Decoding was never the
@@ -307,12 +333,16 @@ were near-duplicates of training faces, and the aggregate number hid that until
 the per-font breakdown went in. Every statement I made about this gap before the
 breakdown existed was an average over two easy cases and one hard one.
 
-**Open threads.** A held-out set chosen by typeface family rather than by file,
+### Open threads
+
+A held-out set chosen by typeface family rather than by file,
 which is what would make the gap measure what I claimed. Font augmentation
 during training. And synthetic degradation — blur, skew, JPEG — which is where
 real OCR error comes from and which this data has none of.
 
-**Reading:** [CTC](https://www.cs.toronto.edu/~graves/icml_2006.pdf);
+### Further reading
+
+[CTC](https://www.cs.toronto.edu/~graves/icml_2006.pdf);
 [CRNN](https://arxiv.org/abs/1507.05717);
 [What Is Wrong With Scene Text Recognition Model Comparisons?](https://arxiv.org/abs/1904.01906).
 
@@ -348,7 +378,9 @@ consequence.
 $\alpha = \mathrm{softmax}(h_t^\top H / \sqrt{d})$ with context $\sum_i
 \alpha_i H_i$, plus input feeding so the decoder knows where it just looked.
 
-**What I built.** Three arms on byte-identical data. CTC is H3's CRNN, imported
+### What I built
+
+Three arms on byte-identical data. CTC is H3's CRNN, imported
 rather than reimplemented. The attention arm uses the *same* convolutional
 encoder and the *same* dot-product attention, so the comparison isolates the
 decoder. TrOCR is zero-shot, never trained here.
@@ -358,7 +390,9 @@ are tested on three. Critically there is a **two-words-on-the-wider-canvas
 control**, because at a fixed 128px a third word also shrinks the glyphs — and
 without separating those, a resolution failure reads as a length failure.
 
-**Results** (medians over seeds 0–2; 0.4M / 0.9M / 62M parameters):
+### Results
+
+*Setup: medians over seeds 0–2; 0.4M / 0.9M / 62M parameters.*
 
 | | CTC | attention | TrOCR |
 | --- | --- | --- | --- |
@@ -374,7 +408,9 @@ without separating those, a resolution failure reads as a length failure.
 ![Length generalization](figures/h/h4_length_generalization.png)
 ![Attention map](figures/h/h4_attention_map.png)
 
-**What surprised me.** Three things.
+### What surprised me
+
+Three things.
 
 *CER and WER disagree about which decoder is better, on the same run.* CTC wins
 on CER (0.176 vs 0.196); attention wins decisively on WER (0.260 vs 0.409) and
@@ -399,12 +435,16 @@ settles the question — Computer Modern is not intrinsically hard, it was
 unfamiliar to a model trained on six faces. A model trained on real printed text
 has never heard of the problem.
 
-**Open threads.** Beam search or a language model on the attention arm, which is
+### Open threads
+
+Beam search or a language model on the attention arm, which is
 where its implicit LM could be made explicit. Scheduled sampling for the
 exposure bias behind the truncation. And the obvious missing arm: fine-tuning
 TrOCR on this data rather than only reading it zero-shot.
 
-**Reading:** [TrOCR](https://arxiv.org/abs/2109.10282);
+### Further reading
+
+[TrOCR](https://arxiv.org/abs/2109.10282);
 [Attention Is All You Need](https://arxiv.org/abs/1706.03762);
 [Baek et al.](https://arxiv.org/abs/1904.01906) on comparing recognizers honestly.
 
@@ -442,7 +482,9 @@ insertions, and a wrong $\sigma$ costs the edit distance between two orderings.
 A per-line average would score only the lines that were found — exactly the
 population a broken detector biases.
 
-**What I built.** H1's detector — its grid arithmetic generalized from square
+### What I built
+
+H1's detector — its grid arithmetic generalized from square
 scenes to 160×256 pages, so H5 inherits H1's round-trip test rather than growing
 a private copy — feeding H3's CRNN, trained on ground-truth crops. Training the
 recognizer on clean crops and testing it on detected ones is the point: that
@@ -450,7 +492,9 @@ distribution shift *is* the detector's error. Plus a second recognizer trained
 with ±4px jittered copies, because a diagnosis implies a remedy and the remedy
 should be measured.
 
-**Results** (2500 train / 500 test pages, medians over seeds 0–2):
+### Results
+
+*Setup: 2500 train / 500 test pages, medians over seeds 0–2.*
 
 detector: recall 0.854 [0.611, 0.929] · mAP@0.5 0.730 [0.359, 0.807] · matched
 IoU 0.671 [0.523, 0.731] · 1.18 spurious boxes per page
@@ -472,7 +516,9 @@ Jitter curves (line CER at 0/2/4/8/16 px) — clean: 0.0001, 0.305, 0.505, 0.709
 ![Jitter](figures/h/h5_jitter.png)
 ![Pages](figures/h/h5_pages.png)
 
-**What surprised me.** **Detection is 99.98% of the error on every seed.** The
+### What surprised me
+
+**Detection is 99.98% of the error on every seed.** The
 recognizer on ground-truth crops is essentially perfect (0.0001 page CER) and
 the entire 0.512 appears the moment it is handed real boxes. A pipeline's
 quality is its weakest interface, not its weakest model.
@@ -497,14 +543,18 @@ Across three seeds they are [0.611, 0.929] and [0.359, 0.807]: I had quoted the
 *worst* seed as typical. The attribution conclusion is unaffected — 99.98% on
 all three — but the magnitude of the detector's failure is a range, not a point.
 
-**Open threads.** Anchors with aspect priors: text lines are 54–189px wide and
+### Open threads
+
+Anchors with aspect priors: text lines are 54–189px wide and
 32px tall, extreme ratios sharing one log-size regression, on a 20×32 grid that
 is 99.6% negative cells. Recall is the term that matters, so a lower score
 threshold and a recall-oriented detector would move the pipeline more than any
 recognizer change. And joint training through the crop, which is the last thing
 you can do before giving up on stages entirely.
 
-**Reading:** [EAST](https://arxiv.org/abs/1704.03155);
+### Further reading
+
+[EAST](https://arxiv.org/abs/1704.03155);
 [CRAFT](https://arxiv.org/abs/1904.01941);
 [PP-OCR](https://arxiv.org/abs/2009.09941) on what a practical pipeline contains.
 
@@ -539,7 +589,9 @@ makes the cache 8× smaller at unchanged query capacity.
 routed experts of width $d_{\text{moe}}$ and top-$k$ routing plus $s$ shared
 experts, a layer holds $(E + s)$ experts' worth and runs $(k + s)$.
 
-**What I built.** An accounting rung, not a benchmark. PaddleOCR-VL's
+### What I built
+
+An accounting rung, not a benchmark. PaddleOCR-VL's
 architecture is **parsed out of candle's `config.rs` at run time** rather than
 quoted, so a fork that moves is detected instead of silently misdescribed; the
 17 parsed defaults independently match the published `config.json`. The
@@ -572,7 +624,9 @@ KV cache 18.0 KiB/token, 8× less than multi-head would need.
 ![Token cost](figures/h/h6_token_cost.png)
 ![Attention cost](figures/h/h6_attention_cost.png)
 
-**What surprised me.** The vision tower is **45.5%** of PaddleOCR-VL — nearly as
+### What surprised me
+
+The vision tower is **45.5%** of PaddleOCR-VL — nearly as
 large as the language model it feeds. I had assumed the encoder would be a thin
 front-end on a big decoder, the way TrOCR's DeiT-small is. For document
 understanding the reading *is* the hard part, and the parameter split says so.
@@ -590,13 +644,17 @@ which is worse than being wrong, because it would have shipped ungrounded and
 looked correct. Both are now read from the published config with provenance
 recorded beside them.
 
-**Open threads.** Actually running PaddleOCR-VL on H5's pages, which would turn
+### Open threads
+
+Actually running PaddleOCR-VL on H5's pages, which would turn
 this accounting into the head-to-head the rung deliberately does not attempt.
 Measuring the vision tower's activation memory, which at 11,214 tokens for an A4
 scan is likely the real deployment constraint rather than parameters. And
 DeepSeek-OCR's compression claims, which is the lineage Unlimited-OCR comes from.
 
-**Reading:** [PaddleOCR-VL](https://arxiv.org/abs/2510.14528);
+### Further reading
+
+[PaddleOCR-VL](https://arxiv.org/abs/2510.14528);
 [NaViT](https://arxiv.org/abs/2307.06304);
 [Donut](https://arxiv.org/abs/2111.15664);
 [GQA](https://arxiv.org/abs/2305.13245).
@@ -618,7 +676,9 @@ so the ground truth is untouched; it exists only to remove the excuse that the
 page is smaller than the model's patch grid, and it turns out to be the variable
 that matters.
 
-**Results** (10 pages, 26 lines; raw values in [`data/h-real-models.json`](data/h-real-models.json)):
+### Results
+
+*Setup: 10 pages, 26 lines; raw values in [`data/h-real-models.json`](data/h-real-models.json).*
 
 | model | params | page | CER | WER | s/page |
 | --- | --- | --- | --- | --- | --- |
@@ -640,7 +700,8 @@ deleting. Here is that argument as a measurement rather than an argument:
 deleting the interface costs **2,000x the parameters** — 0.96B against 0.49M —
 and takes the page CER from 0.512 to 0.000.
 
-**What surprised me.**
+### What surprised me
+
 
 *Resolution is the whole story for the smaller model, and a cliff for the larger
 one.* PaddleOCR-VL degrades gracefully — 0.000 to 0.039 CER as the page shrinks
@@ -758,7 +819,9 @@ runs — its comment says so: *"V1 scope: single 1024x1024 global view."* Code t
 is only ever called one way is only ever tested one way, and the untested way
 was two lines from working.
 
-**Results** (10 pages, f16, T4):
+### Results
+
+*Setup: 10 pages, f16, T4.*
 
 | preprocessing | image tokens | CER | WER | empty | s/page |
 | --- | --- | --- | --- | --- | --- |

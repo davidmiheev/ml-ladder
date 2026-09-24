@@ -73,7 +73,9 @@ invariance being learned*. At strength 0 the two views are identical, the task i
 solvable by any injective map, and nothing is learned about images at all — which
 makes it the control arm this rung needs.
 
-**What I built.** A ResNet encoder (B4's `build_network` with the classifier
+### What I built
+
+A ResNet encoder (B4's `build_network` with the classifier
 removed), a two-layer projection head, and an augmentation pipeline written as
 tensor ops rather than torchvision transforms so that the whole batch is
 augmented on the GPU in one go — random resized crop, horizontal flip, colour
@@ -84,8 +86,9 @@ are `(arange(2N) + N) % 2N`, which pairs view $i$ with view $i+N$ in both
 directions. Every arm is probed the same way: encoder frozen, a linear head
 trained on 4000 labelled images, scored on 2000 test images.
 
-**Results** (CIFAR-10, 8000 unlabelled images, 600 steps, batch 128; medians
-over seeds 0–2, ranges in brackets):
+### Results
+
+*Setup: CIFAR-10, 8000 unlabelled images, 600 steps, batch 128; medians over seeds 0–2, ranges in brackets.*
 
 | arm | probe accuracy |
 | --- | --- |
@@ -109,7 +112,9 @@ swept, hard negatives helping. Augmentation does not.
 ![Contrastive loss](figures/d/d1_contrastive_loss.png)
 ![Feature space](figures/d/d1_feature_space.png)
 
-**What surprised me.** Three things, and the last is a lesson about metrics
+### What surprised me
+
+Three things, and the last is a lesson about metrics
 rather than about SimCLR.
 
 *The augmentation curve is not monotonic.* The story everyone tells — stronger
@@ -149,13 +154,17 @@ curve is not monotonic. A difference between two endpoints is only a measure of
 an effect if the effect is monotone, and the interesting result here is exactly
 that it is not. Both are fixed; the numbers above are from the corrected run.
 
-**Open threads.** Batch size, which the InfoNCE bound says is a property of the
+### Open threads
+
+Batch size, which the InfoNCE bound says is a property of the
 objective — $\log K$ at $N=128$ is 5.5 nats, and the SimCLR paper used 4096.
 A finer strength grid to locate the optimum rather than bracket it. And the
 obvious follow-up to the false-positive story: MoCo's queue, or BYOL, which drops
 negatives altogether and so cannot be broken this way.
 
-**Reading:** [SimCLR](https://arxiv.org/abs/2002.05709);
+### Further reading
+
+[SimCLR](https://arxiv.org/abs/2002.05709);
 [MoCo](https://arxiv.org/abs/1911.05722);
 Wang & Isola, *Understanding Contrastive Representation Learning through
 Alignment and Uniformity on the Hypersphere*.
@@ -204,7 +213,9 @@ distinguish "the missing patch in the corner" from "the missing patch in the
 middle" — the model would be predicting an unordered bag of patches. C3's
 permutation-equivariance argument, arriving in a second domain.
 
-**What I built.** `patchify`/`unpatchify` as pure reshapes, and a ViT encoder
+### What I built
+
+`patchify`/`unpatchify` as pure reshapes, and a ViT encoder
 that is literally C3's transformer block — obtained with
 `type(CharTransformer(...).blocks[0])` rather than a copy-paste, so the two
 rungs cannot drift apart. The encoder sees only the visible patches: masking is
@@ -220,8 +231,9 @@ patches would otherwise divide by zero rather than fail loudly. `represent()`
 runs the encoder on *all* patches (no masking) and mean-pools, which is what the
 probe and D3 consume.
 
-**Results** (CIFAR-10, 8000 images, 4×4 patches → 64 tokens, 600 steps;
-medians over seeds 0–2):
+### Results
+
+*Setup: CIFAR-10, 8000 images, 4×4 patches → 64 tokens, 600 steps; medians over seeds 0–2.*
 
 | mask ratio | final masked MSE | probe accuracy |
 | --- | --- | --- |
@@ -234,7 +246,9 @@ medians over seeds 0–2):
 ![Reconstruction loss](figures/d/d2_reconstruction_loss.png)
 ![Reconstructions](figures/d/d2_reconstructions.png)
 
-**What surprised me.** How little the mask ratio mattered, and how easy it would
+### What surprised me
+
+How little the mask ratio mattered, and how easy it would
 have been to claim otherwise. The median ranking reproduces the MAE paper's
 answer exactly — 75% on top — but the whole sweep spans **0.7 percentage
 points**, and the per-seed spread of a *single* arm is twice that. Run
@@ -256,14 +270,18 @@ The reconstruction figure makes the same point visually: at 75% the outputs are
 blurry, low-frequency, plainly wrong in detail — and that model's features probe
 best.
 
-**Open threads.** The published result needs scale to appear — ViT-Large, 800
+### Open threads
+
+The published result needs scale to appear — ViT-Large, 800
 epochs, full ImageNet — so the real thread is whether the flatness here is a
 budget artefact or a small-data one, which a longer schedule at fixed data would
 separate. Normalized-pixel targets (the paper's variant) are a two-line change.
 And the asymmetry argument predicts wall-clock should *fall* as the mask ratio
 rises; at 64 tokens attention is not the bottleneck, so this rung cannot see it.
 
-**Reading:** [Masked Autoencoders Are Scalable Vision Learners](https://arxiv.org/abs/2111.06377);
+### Further reading
+
+[Masked Autoencoders Are Scalable Vision Learners](https://arxiv.org/abs/2111.06377);
 [BERT](https://arxiv.org/abs/1810.04805) (the 15% that MAE argues against);
 [ViT](https://arxiv.org/abs/2010.11929) for the patch embedding.
 
@@ -300,7 +318,9 @@ representation only fits a linear head on $n$. Pretraining's promise is a
 cross: with enough labels, learning the features for the task beats reusing
 features learned for a different objective.
 
-**What I built.** Four encoders — untrained, SimCLR (D1's `pretrain`), MAE
+### What I built
+
+Four encoders — untrained, SimCLR (D1's `pretrain`), MAE
 (D2's), and the same architecture trained with labels — all built from the same
 seed, all fed the same 8000 unlabelled images, all read on the same 2000 test
 images. Labelled subsets are stratified (exactly $n$ per class) and drawn from
@@ -309,7 +329,9 @@ merely equal numbers of them. Features for the k-NN read are computed once per
 encoder and cached, because otherwise this rung is sixteen forward passes over
 the pool.
 
-**Results.** Linear probe accuracy, medians over seeds 0–2:
+### Results
+
+Linear probe accuracy, medians over seeds 0–2:
 
 | labels/class | random | SimCLR | MAE | supervised* |
 | --- | --- | --- | --- | --- |
@@ -334,7 +356,9 @@ mistake this rung taught me** — see below.
 ![k-NN efficiency](figures/d/d3_knn_efficiency.png)
 ![Low-label regime](figures/d/d3_low_label_regime.png)
 
-**What surprised me.** Three things, in increasing order of how much they cost
+### What surprised me
+
+Three things, in increasing order of how much they cost
 me.
 
 *The probe and the k-NN disagree, exactly where the objectives say they should.*
@@ -373,7 +397,9 @@ at all**, and I only noticed because the flatness of the column looked wrong.
 The derived `simclr_minus_supervised@min_labels = -0.328` is therefore a number
 about my experimental design, not about SimCLR.
 
-**Open threads.** The obvious one is the baseline the last paragraph is missing:
+### Open threads
+
+The obvious one is the baseline the last paragraph is missing:
 train the same encoder from scratch on exactly the $n$ labelled images, per
 budget, and re-plot. Then fine-tuning instead of freezing, which is how these
 representations get used in practice and which C4 already showed is worth
@@ -381,7 +407,9 @@ another several points. And a pool much larger than the label set — 8000
 unlabelled images against 5000 labelled ones is not the regime where
 self-supervision is supposed to win, and the ratio is the whole argument.
 
-**Reading:** [SimCLR](https://arxiv.org/abs/2002.05709) §B for the probe
+### Further reading
+
+[SimCLR](https://arxiv.org/abs/2002.05709) §B for the probe
 protocol; [MAE](https://arxiv.org/abs/2111.06377) §4 on probe vs. fine-tune;
 [MoCo](https://arxiv.org/abs/1911.05722) for the k-NN monitor this rung's second
 table imitates.

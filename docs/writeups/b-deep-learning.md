@@ -29,6 +29,33 @@ and $g_t = \nabla_\theta L$ the gradient at step $t$.
 **Question.** Backpropagation is the chain rule plus bookkeeping. What exactly
 is the bookkeeping, and what does doing it one number at a time cost?
 
+### The idea
+
+Training a neural network means adjusting thousands (or billions) of numbers
+to make a loss smaller, and for that you need the **gradient**: for every
+parameter, how much the loss would change if you nudged it. Writing those
+derivatives by hand is hopeless for anything big. **Automatic differentiation**
+gets them mechanically.
+
+The trick is to record every arithmetic operation as it happens, building a
+graph whose nodes are intermediate values. Each operation only needs to know
+its own *local* derivative (the derivative of $a \cdot b$ with respect to $a$ is
+$b$, of $\tanh z$ is $1 - \tanh^2 z$, and so on). The chain rule then assembles
+the global gradient by walking the graph **backwards** from the loss, which is
+where the name *backpropagation* comes from.
+
+This rung builds that engine one scalar at a time: every number in the
+network is its own graph node. That is the clearest possible version, and
+also the slowest, which is the other thing it measures.
+
+![A computation graph, forward and backward](figures/b/b1_concept_graph.png)
+
+*Every box is one `Value`. The forward pass fills in each value from left to
+right. The backward pass starts from $\partial L/\partial L = 1$ and moves right to
+left. Each node's gradient is the sum, over the nodes that consumed it, of that
+consumer's gradient times the local derivative. $w$ and $b$ are the parameters
+we would update. The numbers were produced by the rung's own engine.*
+
 ### The math
 
 **Reverse mode is the chain rule in reverse topological order.** Take a DAG
@@ -63,14 +90,32 @@ $\varepsilon/h$. Balancing them puts the optimum at $h \approx \varepsilon^{1/3}
 $\varepsilon^{2/3} \approx 4\times10^{-11}$. Agreement much tighter than that would
 mean the check is not actually independent; agreement much looser means a bug.
 
-**What I built.** A `Value` node holding data, an accumulated gradient, and a
+### What we measure, and why
+
+- **Maximum relative gradient error against finite differences.** A finite
+  difference estimates a derivative by actually nudging a parameter and
+  re-evaluating the loss. It needs no chain rule at all, so it is an
+  independent check. Agreement to about $10^{-8}$ means the engine is right; a
+  bug (a wrong sign, a missed accumulation) shows up at $10^{-1}$.
+- **Graph nodes per forward pass** — how much bookkeeping one evaluation
+  creates, which is the memory cost of reverse mode.
+- **Training time against the same network in numpy**, where the "graph" is a
+  handful of matrix multiplies. The ratio is the price of doing the chain rule
+  one number at a time, and the reason real frameworks work on whole tensors.
+- **Test accuracy** — only to confirm both versions learned the same thing.
+
+### What I built
+
+A `Value` node holding data, an accumulated gradient, and a
 closure that pushes gradient to its inputs; `backward()` does an **iterative**
 DFS for the topological order — a recursive one dies on a chain of a few
 thousand nodes, which a test pins by building exactly that. On top: `Neuron`,
 `Layer`, `MLP`, a numerically sane BCE, and `NumpyMLP` — the same architecture
 vectorized — as the control for the cost measurement.
 
-**Results** (moons, 120 samples, MLP [2, 8, 8, 1] = 105 parameters):
+### Results
+
+*Setup: moons, 120 samples, MLP [2, 8, 8, 1] = 105 parameters.*
 
 | quantity | seed 0 | median (seeds 0–2) | range |
 | --- | --- | --- | --- |
@@ -84,7 +129,9 @@ Both implementations reach the same test accuracy, which is the point: the
 scalar engine is *correct* and useless, and the vectorized one is the same
 mathematics with the loops pushed into BLAS.
 
-**What surprised me.** The gradient error — 1.9e-08 median, and as high as
+### What surprised me
+
+The gradient error — 1.9e-08 median, and as high as
 1.4e-07 on one seed — sits three to four orders of magnitude above the
 $\varepsilon^{2/3}$ floor, and it *moves with the seed*. That is the summation:
 the loss is a sum over 90 samples, so the finite difference measures a quantity
@@ -98,13 +145,17 @@ set by the *problem*, not by the arithmetic, and quoting one seed's 9.4e-09 as
 ![Test accuracy](figures/b/b1_test_accuracy.png)
 ![Decision boundary](figures/b/b1_decision_boundary.png)
 
-**Open threads.** Checkpointing — recomputing activations instead of storing
+### Open threads
+
+Checkpointing — recomputing activations instead of storing
 them — is the memory/compute trade the O(N) memory cost invites. Forward-mode
 for Jacobian-vector products, which is what you want for Hessian-vector products
 and hence second-order methods. And a tape-based (rather than closure-based)
 engine, which is closer to what real frameworks do.
 
-**Reading:** [micrograd](https://github.com/karpathy/micrograd);
+### Further reading
+
+[micrograd](https://github.com/karpathy/micrograd);
 Goodfellow et al. ch. 6.5; Baydin et al., *Automatic Differentiation in Machine
 Learning: a Survey*.
 
@@ -114,6 +165,31 @@ Learning: a Survey*.
 
 **Question.** Does the hand-derived gradient equal what a framework computes —
 not approximately, but to floating-point?
+
+### The idea
+
+A **multilayer perceptron (MLP)** is a stack of layers, each doing the same two
+things: multiply its input by a weight matrix (plus a bias), then apply a simple
+nonlinearity, here ReLU, $\max(0, z)$. Without the nonlinearity the whole stack
+would collapse into one matrix. With it, the network can bend the input space
+into shapes a linear model cannot.
+
+For MNIST digits the input is 784 pixel intensities and the output is 10
+scores, one per digit, turned into probabilities by **softmax**. The loss is
+**cross-entropy**: minus the log of the probability given to the correct digit.
+
+Backpropagation for this network is three matrix equations (derived below),
+and this rung implements them by hand in numpy. It then asks whether PyTorch,
+started from the same weights and fed the same batches, computes the same
+gradients.
+
+![Forward and backward through the MLP](figures/b/b2_concept_backprop.png)
+
+*Forward (blue): the image passes through three matrix multiplies to become ten
+class scores. Backward (red): the error signal $\delta$ starts as "predicted
+probabilities minus the one-hot truth" and flows back through the transposes of
+the same matrices. Each layer's weight gradient is its input transposed times
+the $\delta$ arriving from above.*
 
 ### The math
 
@@ -146,13 +222,32 @@ forward signal decays or explodes geometrically in the number of layers.
 **Stability.** Softmax is computed on $z - \max_k z_k$: the shift leaves the
 result unchanged and bounds $\exp$ from above by 1.
 
-**What I built.** `ManualMLP` with the three equations above, and a torch
+### What we measure, and why
+
+- **Worst gradient difference, any tensor**, manual against PyTorch. This
+  is the whole test: two implementations of the same math should agree to
+  floating-point rounding (about $10^{-7}$ in float32), and a transposed matrix
+  or a missing term would show up as a difference of order 1.
+- **Relative to the gradient scale** — the same difference divided by the
+  gradient's typical size, so it can be compared with float32's precision.
+- **Test accuracy**, manual and PyTorch — should be identical to the fourth
+  decimal place if the gradients are.
+- **Training time** — whether the framework's generality costs anything at this
+  size (it does).
+- **First-layer filters** (figure) — each hidden unit's 784 weights drawn as
+  a 28×28 image, which shows what pixel patterns the network learned to detect.
+
+### What I built
+
+`ManualMLP` with the three equations above, and a torch
 `Sequential` **initialized from the same weights** — torch stores `Linear`
 weights transposed, which is the one place the comparison could quietly fail.
 Both then train on identical batch orders, so any divergence is arithmetic
 rather than luck.
 
-**Results** (MNIST subset, 20k train / 5k test, 784-256-64-10):
+### Results
+
+*Setup: MNIST subset, 20k train / 5k test, 784-256-64-10.*
 
 | quantity | seed 0 | median (seeds 0–2) |
 | --- | --- | --- |
@@ -166,7 +261,9 @@ Float32 has $\varepsilon \approx 1.2\times10^{-7}$, and the batch sums 512 terms
 a relative difference of $10^{-6}$ is exactly the expected accumulation — the
 two implementations are performing the same arithmetic in a different order.
 
-**What surprised me.** The manual numpy implementation is *faster* than torch
+### What surprised me
+
+The manual numpy implementation is *faster* than torch
 at this size. Framework overhead — dispatch, autograd bookkeeping, tensor
 allocation — is per-operation, and these operations are small enough that it
 dominates the FLOPs. Torch wins as soon as the matrices are big enough, or the
@@ -178,12 +275,16 @@ with the abstraction.
 ![Gradient difference](figures/b/b2_gradient_diff.png)
 ![First-layer filters](figures/b/b2_first_layer_filters.png)
 
-**Open threads.** The same diff for convolution and batchnorm, where the
+### Open threads
+
+The same diff for convolution and batchnorm, where the
 backward pass is genuinely hard to derive and correspondingly easy to get
 wrong. And a `torch.autograd.gradcheck` pass, which does the finite-difference
 check B1 does but in double precision.
 
-**Reading:** [Efficient BackProp](http://yann.lecun.com/exdb/publis/pdf/lecun-98b.pdf)
+### Further reading
+
+[Efficient BackProp](http://yann.lecun.com/exdb/publis/pdf/lecun-98b.pdf)
 (LeCun et al.); He et al., *Delving Deep into Rectifiers* (He initialization).
 
 ---
@@ -191,6 +292,33 @@ check B1 does but in double precision.
 ## B3 — What batchnorm and dropout each do
 
 **Question.** Both are called regularizers. Are they?
+
+### The idea
+
+This rung adds two layers to a small **convolutional network (CNN)**. A
+convolution slides a small filter (3×3 pixels here) over the image, so the same
+few weights detect the same pattern wherever it appears. Stacking convolutions
+and pooling builds up from edges to textures to object parts.
+
+- **Batch normalization (BN)** takes each channel's activations across the
+  current mini-batch, subtracts their mean and divides by their standard
+  deviation, then lets the network re-learn a scale $\gamma$ and shift $\beta$.
+  Every layer then sees inputs on a stable scale however the weights below
+  have drifted.
+- **Dropout** randomly switches off a fraction $p$ of units at every training
+  step and scales up the survivors. The network cannot rely on any single unit,
+  which pushes it towards redundant, more general features. At test time
+  nothing is dropped.
+
+Both are routinely called "regularizers" (things that reduce overfitting). The
+rung's question is whether that is true of both, or whether one of them is
+really doing something else.
+
+![What BatchNorm and dropout do to activations](figures/b/b3_concept_bn_dropout.png)
+
+*Left: BN moves a channel's activation distribution to mean 0, standard deviation
+1, whatever it was before. Right: dropout silences a random half of the hidden
+units for one training step. The next step silences a different half.*
 
 ### The math
 
@@ -235,11 +363,28 @@ and BN's is not.
 subtracts the batch mean and any constant cancels. The rung drops it, and a test
 checks it stays dropped.
 
-**What I built.** A four-conv network in two `conv-conv-pool` blocks, with BN
+### What we measure, and why
+
+- **Test accuracy** — the headline, on held-out CIFAR-10 images (chance is 0.10).
+- **Generalization gap** = train accuracy − test accuracy. This is the metric
+  that separates the two mechanisms. A *regularizer* should shrink the gap
+  (less memorisation). An *optimization aid* raises train and test accuracy
+  together and can even widen the gap. Looking at test accuracy alone could not
+  tell them apart.
+- **Accuracy at 10× the learning rate** — a stress test. The math predicts BN
+  makes training tolerant of large steps, so push the step size until the plain
+  network breaks and see whether BN survives.
+- **Time per epoch** — what each layer costs.
+
+### What I built
+
+A four-conv network in two `conv-conv-pool` blocks, with BN
 and dropout as flags, run as a 2x2 ablation with shared data, schedule and
 seed — plus a learning-rate probe at 10x the base rate.
 
-**Results** (CIFAR-10 subset, 5k train / 2k test, 8 epochs):
+### Results
+
+*Setup: CIFAR-10 subset, 5k train / 2k test, 8 epochs.*
 
 | arm | test accuracy (seed 0) | median | generalization gap (median) |
 | --- | --- | --- | --- |
@@ -255,7 +400,9 @@ narrowest of the four, but only just). So in this regime BN is unambiguously an
 optimizer aid rather than a regularizer; dropout is a mild regularizer whose
 effect is smaller than the seed spread on plain (0.405–0.447).
 
-**What surprised me.** The learning-rate probe was sharper than the ablation,
+### What surprised me
+
+The learning-rate probe was sharper than the ablation,
 but less reliable than one seed suggested. At $\eta = 0.5$ the plain network
 collapses to chance on **all three seeds** (0.094–0.098 — it learns nothing at
 all). The batchnorm network reaches 0.187 on seed 0 and 0.147 at the median, but
@@ -273,13 +420,17 @@ noise to pay for the slower fitting it causes.
 ![Learning-rate probe](figures/b/b3_lr_probe.png)
 ![Cost per epoch](figures/b/b3_cost_per_epoch.png)
 
-**Open threads.** GroupNorm and LayerNorm, which drop the batch dependence that
+### Open threads
+
+GroupNorm and LayerNorm, which drop the batch dependence that
 makes BN awkward at small batch sizes and in sequence models — and which is why
 part C's transformers use LayerNorm instead. BN's train/eval discrepancy
 (running statistics) as a source of real bugs. And the same ablation at a budget
 large enough to overfit properly, where dropout should overtake.
 
-**Reading:** [Batch Normalization](https://arxiv.org/abs/1502.03167);
+### Further reading
+
+[Batch Normalization](https://arxiv.org/abs/1502.03167);
 [Dropout](https://jmlr.org/papers/v15/srivastava14a.html);
 Santurkar et al., *How Does Batch Normalization Help Optimization?*
 
@@ -289,6 +440,29 @@ Santurkar et al., *How Does Batch Normalization Help Optimization?*
 
 **Question.** Deeper networks can represent strictly more. Why do they train
 worse?
+
+### The idea
+
+Deeper networks can represent everything a shallower one can and more, since
+the extra layers could simply learn to pass their input through unchanged. In
+practice, making a plain CNN deeper eventually makes it *worse*, and worse on
+the training data too, so it is not overfitting. This is the **degradation
+problem**.
+
+A **residual block** changes one thing: instead of a layer computing a new
+representation $F(x)$ from scratch, it computes a *correction* and adds it to
+its input, $x + F(x)$. The input travels along a **skip connection** (the
+"identity path") that has no weights on it. Two consequences:
+
+1. Doing nothing is now easy: $F = 0$ passes the input through, so an extra
+   block starts out harmless instead of having to learn the identity.
+2. During backpropagation the gradient can flow straight down the skip path to
+   early layers without being multiplied by every weight matrix on the way.
+
+![A plain block and a residual block](figures/b/b4_concept_residual.png)
+
+*The two blocks have identical layers and parameters; the residual one adds its
+input back before the final ReLU. That one addition is the entire ResNet idea.*
 
 ### The math
 
@@ -316,14 +490,32 @@ matrix at all**. And "do nothing" is now the default: $F = 0$ gives the
 identity, so adding depth starts from the shallower solution rather than having
 to rediscover it.
 
-**What I built.** A block of two 3x3 convolutions with BN, a ReLU after the
+### What we measure, and why
+
+- **Training accuracy across depth** (2, 4 and 8 blocks) — the metric where
+  degradation shows. If a deeper network fits its own training data *worse*,
+  the optimizer failed, because a solution at least as good exists. Test
+  accuracy mixes that with generalisation, which is why it is the secondary
+  number here.
+- **Residual − plain test accuracy** at each depth, over three seeds — the
+  practical payoff, with its seed spread reported because it turned out to be
+  large.
+- **Gradient norm per layer, and the first/last ratio** — the standard story
+  says gradients vanish in deep plain nets. Measuring the norm at every layer
+  tests that story directly. The ratio of first-layer to last-layer gradient
+  norm measures how *unevenly* learning signal is spread across depth.
+
+### What I built
+
+A block of two 3x3 convolutions with BN, a ReLU after the
 addition, and an identity shortcut wherever the shape allows (a 1x1 projection
 only where stride or channel count changes). The same stack with `residual=False`
 is the plain baseline. Networks of 2, 4 and 8 blocks, each trained both ways;
 plus a per-tensor gradient-norm measurement and a CIFAR-100 run.
 
-**Results** (CIFAR-10 subset, 6k train / 2k test, 8 epochs, identical parameter
-counts within each depth):
+### Results
+
+*Setup: CIFAR-10 subset, 6k train / 2k test, 8 epochs, identical parameter counts within each depth.*
 
 Train accuracy, medians over seeds 0–2 (the column where degradation shows):
 
@@ -345,7 +537,9 @@ three the plain network finished ahead. The training-accuracy gap is the robust
 signal; the test gap at this budget is not, and a single-seed writeup claiming
 "+9 points" would have been overselling by a factor of the seed spread.
 
-**What surprised me — and the textbook story that did not reproduce.** I
+### What surprised me — and the textbook story that did not reproduce
+
+I
 expected to show vanishing gradients: small gradient norms at the early layers
 of the plain net, healthy ones with skips. The measurement says otherwise. With
 BatchNorm in every block, the plain network's first-tensor gradient norm is
@@ -367,13 +561,17 @@ supports.
 ![Gradient flow](figures/b/b4_gradient_flow.png)
 ![CIFAR-100](figures/b/b4_cifar100.png)
 
-**Open threads.** Pre-activation ordering (BN-ReLU-conv rather than
+### Open threads
+
+Pre-activation ordering (BN-ReLU-conv rather than
 conv-BN-ReLU), which makes the identity path literally unobstructed. Measuring
 gradient *correlation* across depth rather than norm, to test the shattered-
 gradients account directly. And a plain net without BN, where the vanishing-
 gradient story presumably does reproduce.
 
-**Reading:** [Deep Residual Learning](https://arxiv.org/abs/1512.03385);
+### Further reading
+
+[Deep Residual Learning](https://arxiv.org/abs/1512.03385);
 He et al., *Identity Mappings in Deep Residual Networks*; Balduzzi et al.,
 *The Shattered Gradients Problem*.
 
@@ -383,6 +581,36 @@ He et al., *Identity Mappings in Deep Residual Networks*; Balduzzi et al.,
 
 **Question.** Which optimizer actually wins — and is "wins" even the right
 question?
+
+### The idea
+
+An **optimizer** decides how to turn a gradient into a parameter update. The
+choices compared here differ in what they remember:
+
+- **SGD** steps straight down the current gradient: $\theta \leftarrow \theta - \eta g$.
+  Simple, but along a narrow valley the gradient points mostly across it, so SGD
+  zig-zags between the walls while inching along the floor.
+- **Momentum** keeps a running sum of past gradients (a "velocity"). Components
+  that keep flipping sign (across the valley) cancel out, and components that
+  agree (along the valley) build up speed.
+- **Adam** also tracks the running average of each parameter's *squared*
+  gradient and divides by its square root. Every parameter gets its own step
+  size, so steep and flat directions both take sensibly sized steps and the
+  overall scale of the loss stops mattering.
+- **AdamW** is Adam with weight decay (shrinking weights towards zero) applied
+  *separately* from the gradient scaling instead of mixed into it. That sounds
+  like a refactor, and the math below shows it is not.
+
+A **learning-rate schedule** (cosine here) shrinks the step over training, which
+A1 showed is what removes the final jitter around the optimum.
+
+![Three optimizers on one valley](figures/b/b5_concept_optimizers.png)
+
+*A loss 25× steeper in one direction than the other. SGD (red) bounces across
+the steep direction. Momentum (blue) takes a sweeping path that overshoots and
+comes back. Adam (green) rescales both directions and heads almost straight in.
+Real loss surfaces have millions of directions with wildly different
+curvatures, which is why the difference matters.*
 
 ### The math
 
@@ -429,13 +657,30 @@ years.
 a decaying step that, in the language of A1, collapses the stochastic variance
 floor to a point.
 
-**What I built.** Four optimizers, each at its own tuned learning rate (so the
+### What we measure, and why
+
+- **Test accuracy after a fixed budget**, each optimizer at its *own* tuned
+  learning rate — the fair bake-off. Comparing at one shared rate would just
+  measure whose default happens to match.
+- **Accuracy across a learning-rate sweep** spanning five orders of magnitude.
+  This measures **robustness**: how much you need to know in advance to get a
+  good result. In practice that often matters more than the best-case number.
+- **Final weight norm** $\lVert w\rVert$ — the direct evidence for the Adam-vs-AdamW
+  argument, since the two differ precisely in how hard they shrink the weights.
+- **Constant vs cosine schedule** — whether decaying the step recovers the
+  accuracy lost to end-of-training jitter.
+
+### What I built
+
+Four optimizers, each at its own tuned learning rate (so the
 bake-off is not rigged by a shared $\eta$), crossed with constant and cosine
 schedules; then a learning-rate sweep across five orders of magnitude at a
 shorter budget; then Adam against AdamW at the same $\lambda$, tracking the final
 weight norm.
 
-**Results** (FashionMNIST, 15k train / 5k test, MLP 784-256-128-10, 10 epochs):
+### Results
+
+*Setup: FashionMNIST, 15k train / 5k test, MLP 784-256-128-10, 10 epochs.*
 
 | optimizer | lr | constant (seed 0) | cosine (seed 0) | cosine median | final ‖w‖ |
 | --- | --- | --- | --- | --- | --- |
@@ -453,7 +698,9 @@ Learning-rate sweep (3 epochs each), test accuracy:
 | Adam | 0.775 | 0.765 | 0.652 | 0.147 | 0.083 |
 | AdamW | 0.808 | **0.843** | 0.829 | 0.721 | 0.170 |
 
-**What surprised me.** Three things, in increasing order of how much they
+### What surprised me
+
+Three things, in increasing order of how much they
 changed my mental model.
 
 *SGD with momentum wins the bake-off.* Tuned, it beats AdamW — the folklore that
@@ -489,12 +736,16 @@ when the optimizer already normalizes its own step.
 ![Final accuracy](figures/b/b5_final_accuracy.png)
 ![Weight norms](figures/b/b5_weight_norms.png)
 
-**Open threads.** Warmup, which is what makes Adam work for transformers and
+### Open threads
+
+Warmup, which is what makes Adam work for transformers and
 which part C will need. Lion and Shampoo, as the current arguments about whether
 second-moment scaling is the right primitive at all. And the learning-rate/batch-
 size scaling rule, which is a scaling-law question and therefore part G's.
 
-**Reading:** [Adam](https://arxiv.org/abs/1412.6980);
+### Further reading
+
+[Adam](https://arxiv.org/abs/1412.6980);
 [Decoupled Weight Decay Regularization](https://arxiv.org/abs/1711.05101) (AdamW);
 [SGDR](https://arxiv.org/abs/1608.03983) (cosine schedules).
 

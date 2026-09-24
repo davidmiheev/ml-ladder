@@ -71,13 +71,17 @@ diagonal-covariance Gaussian model could not cope with that. It is an
 orthonormal DCT-II, so truncating to 13 coefficients is a projection whose
 residual can be measured rather than an arbitrary crop.
 
-**What I built.** Framing, windowing, the power spectrum, the mel warping, the
+### What I built
+
+Framing, windowing, the power spectrum, the mel warping, the
 filterbank, the log and the DCT, in numpy. Not the FFT — that is a
 numerical-methods exercise, not a speech one. Each stage is diffed against
 torchaudio *separately*, so a disagreement lands on the stage that caused it
 instead of on the end of the pipeline.
 
-**Results.** Medians over seeds 0–2 (the front end is deterministic; only the
+### Results
+
+Medians over seeds 0–2 (the front end is deterministic; only the
 clip sample varies).
 
 | stage | relative error vs torchaudio |
@@ -112,7 +116,9 @@ The DCT drops mean off-diagonal correlation from **0.695 to 0.177**, a factor of
 ![I1 resolution](figures/i/i1_resolution.png)
 ![I1 decorrelation](figures/i/i1_decorrelation.png)
 
-**What surprised me.** **The MFCCs disagreed by four orders of magnitude more
+### What surprised me
+
+**The MFCCs disagreed by four orders of magnitude more
 than every other stage, and the cause is a line nobody documents.** $\log 0$ is
 undefined, so every implementation picks a guard, and there are two:
 torchaudio's is an **offset**, $\log(x + 10^{-6})$; the obvious reading is a
@@ -128,12 +134,16 @@ approximately. I expected a trend with noise and got an identity, because the
 two quantities I measured are both counted in units of the same window. That is
 a good outcome for a claim that is usually stated as a vague trade-off.
 
-**Open threads.** The Slaney mel convention is not implemented, so "which mel"
+### Open threads
+
+The Slaney mel convention is not implemented, so "which mel"
 is documented rather than measured. And the filterbank here is fixed; learned
 filterbanks (SincNet, LEAF) are the obvious comparison and would test whether
 1980s perceptual modelling still earns its place.
 
-**Reading:** Davis & Mermelstein (1980) for MFCCs; Gabor (1946) for the limit
+### Further reading
+
+Davis & Mermelstein (1980) for MFCCs; Gabor (1946) for the limit
 the window sweep traces out.
 
 ---
@@ -169,12 +179,16 @@ approximately constant across an utterance, so subtracting the utterance's own
 mean removes them and leaves the third. That is the argument, and it is old;
 the rung makes it an arm because I wrote the opposite into the code first.
 
-**What I built.** A conv-over-frequency + BiGRU CRNN trained with CTC on 800
+### What I built
+
+A conv-over-frequency + BiGRU CRNN trained with CTC on 800
 clips from four speakers, validated on a fifth and tested on a sixth. Greedy and
 beam decoding from H3. Whisper-tiny on the same test clips, resampled 8→16 kHz.
 Two normalisation arms, and a shuffled-split control.
 
-**Results.** Medians over seeds 0–2.
+### Results
+
+Medians over seeds 0–2.
 
 | arm | val CER | test CER |
 | --- | --- | --- |
@@ -203,7 +217,9 @@ Against the pretrained baseline, on the same 40 clips:
 ![I2 alignment](figures/i/i2_alignment.png)
 ![I2 training](figures/i/i2_training.png)
 
-**What surprised me.** **I argued myself into the wrong default and the loss
+### What surprised me
+
+**I argued myself into the wrong default and the loss
 curve caught it.** The rung normalised by corpus statistics, with this in the
 docstring: per-utterance normalisation "would quietly remove exactly the speaker
 differences this rung is trying to measure generalisation across". That is
@@ -236,11 +252,15 @@ words. In the candle comparison below, which uses `tiny.en`, the same fix moved
 the score from 0.25 to 0.75. Same bug, one place it mattered and one place it
 did not, and no way to know which without checking both.
 
-**Open threads.** Four training speakers is very few for speaker independence,
+### Open threads
+
+Four training speakers is very few for speaker independence,
 and the gap between 0.063 shuffled and 0.315 held-out is mostly that. SpecAugment
 and speed perturbation are the cheap next controls.
 
-**Reading:** Graves et al. (2006) for CTC; Radford et al. (2022) for Whisper.
+### Further reading
+
+Graves et al. (2006) for CTC; Radford et al. (2022) for Whisper.
 
 ---
 
@@ -271,13 +291,17 @@ recoverable*, and is blind to everything ASR is invariant to, which is most of
 what makes speech sound human. A duration and speaker-envelope check catches the
 failure the first two miss: collapsing every voice into one.
 
-**What I built.** An embedding-plus-GRU acoustic model mapping a digit to a
+### What I built
+
+An embedding-plus-GRU acoustic model mapping a digit to a
 fixed 48-frame mel, Griffin-Lim as the vocoder, and three metrics each with the
 controls that make them readable — a constant-spectrogram baseline above and the
 spread between two real recordings below, plus a clean→vocoded→synthesised chain
 run on one voice.
 
-**Results.** Medians over seeds 0–2.
+### Results
+
+Medians over seeds 0–2.
 
 | mel distance | |
 | --- | --- |
@@ -305,7 +329,9 @@ the model never trained on, margin −0.90.
 ![I3 round trip](figures/i/i3_roundtrip.png)
 ![I3 training](figures/i/i3_training.png)
 
-**What surprised me.** **The vocoder costs everything on one metric and almost
+### What surprised me
+
+**The vocoder costs everything on one metric and almost
 nothing on the other.** Griffin-Lim costs **2.761 mel distance** — four times the
 acoustic model's own 0.636 — and **0.025 CER**. It destroys a great deal of
 spectral detail and almost none of the intelligibility. I had written into the
@@ -333,12 +359,16 @@ voice, the synthesised envelope is closer to a speaker the model never saw. Mel
 distance says the model learned the words; the speaker metric says it did not
 learn the voice, and only having the third metric makes that visible.
 
-**Open threads.** A neural vocoder (HiFi-GAN) would separate "Griffin-Lim is
+### Open threads
+
+A neural vocoder (HiFi-GAN) would separate "Griffin-Lim is
 lossy" from "the acoustic model is blurry" properly, and duration prediction —
 fixed at 48 frames here — is the obvious next piece. No listening test was run
 and nothing here should be read as a claim about naturalness.
 
-**Reading:** Griffin & Lim (1984); Shen et al. (2018) for the two-stage split.
+### Further reading
+
+Griffin & Lim (1984); Shen et al. (2018) for the two-stage split.
 
 ---
 
@@ -378,10 +408,14 @@ Algorithmic latency and wall-clock are reported separately, because the first is
 a property of the architecture and reproduces anywhere while the second is a
 property of this CPU today.
 
-**What I built.** I2's recogniser, chunked at 4–32 frames with 0–16 frames of
+### What I built
+
+I2's recogniser, chunked at 4–32 frames with 0–16 frames of
 lookahead, against a unidirectional model of the same shape trained the same way.
 
-**Results.** Medians over seeds 0–2. Full utterance: **0.429 CER**.
+### Results
+
+Medians over seeds 0–2. Full utterance: **0.429 CER**.
 
 | design | CER | latency |
 | --- | --- | --- |
@@ -404,7 +438,9 @@ for the same audio, because each window re-reads the utterance from its start.
 ![I4 lookahead](figures/i/i4_lookahead.png)
 ![I4 designs](figures/i/i4_designs.png)
 
-**What surprised me.** **Designing for the constraint beat retrofitting it, by
+### What surprised me
+
+**Designing for the constraint beat retrofitting it, by
 more than the parameter count explains.** The causal model at 0.673 beats the
 chunked bidirectional model at 0.721 while having *zero* lookahead latency — it
 is as good as roughly four frames of delay, for free. The bidirectional model
@@ -425,11 +461,15 @@ carries the recurrent state forward instead; that this one does not is the
 honest limitation, and it is why the wall-clock number is kept separate from the
 algorithmic latency that does transfer.
 
-**Open threads.** Truncating left context as well as right would make this a
+### Open threads
+
+Truncating left context as well as right would make this a
 real streaming model rather than an upper bound on one, and carrying the GRU
 state across chunks would remove the 4.9×. Neither is implemented.
 
-**Reading:** the torchaudio streaming tutorials in this part's lab reference.
+### Further reading
+
+the torchaudio streaming tutorials in this part's lab reference.
 
 ---
 

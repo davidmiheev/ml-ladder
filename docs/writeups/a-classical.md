@@ -27,6 +27,38 @@ design, and $\lVert\cdot\rVert$ the Euclidean norm.
 descent actually cost you, and how does the *batch schedule* — full batch,
 mini-batch, single sample — change the answer?
 
+### The idea
+
+**Linear regression** predicts a number as a weighted sum of the inputs,
+$\hat{y} = w^\top x + b$: one weight per feature saying how much that feature
+pushes the prediction up or down, plus an intercept. **Logistic regression**
+keeps exactly the same weighted sum but squashes it through the sigmoid
+$\sigma(z) = 1/(1+e^{-z})$, so the output is a probability between 0 and 1 and
+the model becomes a classifier whose decision boundary is the straight line
+(hyperplane) $w^\top x + b = 0$.
+
+Both are fitted the same way: define a loss that says how wrong the current
+weights are, then repeatedly nudge the weights *downhill* along the gradient of
+that loss. The nudge size is the **learning rate** $\eta$. The only design
+choice left is how much data to look at before each nudge:
+
+- **full batch** — average the gradient over every training example. Each step
+  is exact, but expensive.
+- **mini-batch** — average over a random handful (32 here). Cheap, slightly noisy.
+- **SGD** — one example per step. Cheapest, noisiest.
+
+Linear regression also has a closed-form answer (the *normal equation*), which
+makes it the perfect test bed: the optimum is known exactly, so we can measure
+how far each schedule actually gets from it.
+
+![Gradient descent, three schedules, on one 2-D loss](figures/a/a1_concept_sgd_paths.png)
+
+*The picture the math below proves. All three start at the same point on the
+same bowl-shaped loss. Full-batch descent (blue) glides to the optimum. Constant-
+step SGD (red) arrives fast, then keeps jittering inside a ball around it,
+because every single-example gradient is a noisy estimate of the true one. Shrink
+the step over time (green) and the jitter dies out.*
+
 ### The math
 
 **Least squares.** With $f(x) = w^\top x + b$ and an L2 penalty on the weights
@@ -86,7 +118,24 @@ convex, and strictly so when $X$ has full rank and no $\sigma_i \in \{0,1\}$.
 (On perfectly separable data no minimizer exists — $\lVert w\rVert \to \infty$
 drives the loss to zero — which is what the L2 term quietly prevents.)
 
-**What I built.** One optimizer, two losses. Three details worth keeping:
+### What we measure, and why
+
+- **Test RMSE** (root-mean-square error on held-out data) — the typical size of
+  a prediction error, in the units of $y$. It is the number a user of the model
+  would care about. Here the noise in the data sets a floor of about 0.30: no
+  model can beat the noise it was generated with.
+- **$\lVert w - w^\star\rVert$** — the distance between the learned weights and the
+  exact least-squares solution. This is the more sensitive probe: two weight
+  vectors can have nearly identical RMSE while one is still wandering, and the
+  wandering is exactly what the variance-floor argument predicts. It is the
+  measurement that tests the theory.
+- **Slope of $\log\lVert w - w^\star\rVert$ against $\log|B|$** — how the
+  wandering shrinks as the batch grows. Theory says $-\tfrac12$; measuring the
+  slope rather than eyeballing curves turns that into a pass/fail check.
+
+### What I built
+
+One optimizer, two losses. Three details worth keeping:
 
 - **The bias is a separate parameter**, not a column of ones, for the reason
   derived above. The test asserts it: ridge halves $\lVert w\rVert$ while the
@@ -97,7 +146,9 @@ drives the loss to zero — which is what the L2 term quietly prevents.)
 - **The closed form is solved, not inverted**: `np.linalg.solve` on the centred
   normal equations.
 
-**Results** (test RMSE and distance to the true weights, seeds 0–2):
+### Results
+
+*Setup: test RMSE and distance to the true weights, seeds 0–2.*
 
 | schedule | test RMSE (seed 0) | $\lVert w - w^\star\rVert$ median | with constant step |
 | --- | --- | --- | --- |
@@ -110,7 +161,9 @@ Full-batch descent reproduces the closed-form solution to four decimals
 (`weight_error` 0.01794 against the normal equation's 0.01794 on seed 0 — the
 same number, not a coincidence: same objective, one is just slower about it).
 
-**What surprised me.** The noisy schedules *do not converge at all* with a
+### What surprised me
+
+The noisy schedules *do not converge at all* with a
 constant step size — and the theory above says exactly how badly. Measuring
 $\lVert w - w^\star\rVert$ against batch size at fixed $\eta$, over
 $|B| \in \{1, 2, \dots, 128\}$ and three seeds, the fitted slope is
@@ -126,14 +179,18 @@ setup. Decay it, and all three schedules land on the closed form together.
 ![Logistic convergence by schedule](figures/a/a1_logistic_convergence.png)
 ![Logistic decision boundary](figures/a/a1_logistic_boundary.png)
 
-**Open threads.** Momentum and adaptive steps are exactly the B5 bake-off.
+### Open threads
+
+Momentum and adaptive steps are exactly the B5 bake-off.
 Logistic regression has a Newton step — IRLS, $w \leftarrow w - H^{-1}\nabla$
 with the $X^\top S X$ above — that converges in a handful of iterations; worth
 implementing to watch second-order information pay off before it reappears as
 XGBoost's Newton leaf values in A4. Multiclass softmax is a small extension of
 the same loop.
 
-**Reading:** ESL ch. 3–4; CS229 notes 1 (supervised learning, GLMs).
+### Further reading
+
+ESL ch. 3–4; CS229 notes 1 (supervised learning, GLMs).
 
 ---
 
@@ -142,6 +199,33 @@ the same loop.
 **Question.** Trees are the one model here with no continuous parameters at
 all — how much does the split *criterion* matter, and how much is really about
 depth? And does bagging buy back what depth costs?
+
+### The idea
+
+A **decision tree** predicts by asking a sequence of yes/no questions about the
+input — *is $x_3 \le 0.7$? then is $x_1 \le -1.2$?* — until it reaches a leaf,
+which holds the answer (the majority class, or the mean target). Training picks,
+at every node, the single question that best separates the data below it, and
+recurses. The result carves the input space into axis-aligned rectangles. Trees
+are easy to read and need no feature scaling, but a deep tree keeps splitting
+until every leaf is nearly pure — which means it memorises the noise too.
+
+A **random forest** fixes that by growing many deep trees, each on a different
+*bootstrap* resample of the data (drawn with replacement) and each allowed to
+consider only a random subset of features at every split, then averaging their
+votes. Every individual tree is still overfit, but they overfit *differently*,
+and averaging cancels the parts they disagree on. That is **bagging**
+(bootstrap aggregating).
+
+![One deep tree against the average of many](figures/a/a2_concept_tree_vs_forest.png)
+
+*Left: one depth-10 regression tree on 80 noisy points — a staircase through
+every point. Right: 60 such trees on bootstrap resamples (faint) and their
+average (bold), which is closer to the truth. It is still not smooth, and that
+is the second lesson: with a single input feature there is nothing for
+feature-subsampling to decorrelate, so the trees stay similar and the average
+hits the $\rho\sigma^2$ floor derived below. On the 2-D spirals the forest has
+features to subsample and does better.*
 
 ### The math
 
@@ -193,7 +277,23 @@ above, an ensemble of $0.368B$ trees is strictly worse than one of $B$ — the O
 score measures a forest roughly a third the size of the one you ship. The bias
 is downward and consistent, which is what makes it usable for model selection.
 
-**What I built.** One `DecisionTree` covering both tasks — Gini and entropy for
+### What we measure, and why
+
+- **Test accuracy** — fraction of held-out points classified correctly. The
+  spirals are deliberately noisy, so the ceiling is well below 1.
+- **Train vs test accuracy across depth** — the *gap* between them is the
+  overfitting made visible. A model that fits the training set better and the
+  test set worse is fitting noise.
+- **Out-of-bag (OOB) accuracy** — each tree never saw about 37% of the data, so
+  those points are a free validation set. It is worth measuring because it is
+  how forests are tuned in practice without a separate split, and because the
+  math predicts it is *biased low*, which is checkable.
+- **forest − tree** — the gain from bagging alone, measured over three seeds
+  because its size turned out to be seed-dependent.
+
+### What I built
+
+One `DecisionTree` covering both tasks — Gini and entropy for
 classification, variance reduction for regression — because the search is
 identical once a partition can be scored. That is what lets A4 embed this class
 as its weak learner instead of reimplementing one. Candidates are restricted to
@@ -201,7 +301,9 @@ positions where the sorted feature value changes and both sides clear
 `min_samples_leaf`. The forest adds bootstrap resampling plus a $\sqrt{d}$
 feature subset per split, and scores itself out-of-bag.
 
-**Results** (spirals, 3 classes, `noise=0.7` — deliberately hard):
+### Results
+
+*Setup: spirals, 3 classes, `noise=0.7` — deliberately hard.*
 
 | model | test accuracy (seed 0) | median (seeds 0–2) |
 | --- | --- | --- |
@@ -214,7 +316,9 @@ feature subset per split, and scores itself out-of-bag.
 `forest - tree` is **+0.073 median (+0.007 to +0.107)**. Bagging reliably helps;
 *how much* is itself seed-dependent, which is the honest version of the claim.
 
-**What surprised me.** Two things. First, Gini versus entropy is a coin flip
+### What surprised me
+
+Two things. First, Gini versus entropy is a coin flip
 (0.76 vs 0.78 on seed 0, and they swap on other seeds) — consistent with the
 concavity argument, which says both are valid concave impurities and neither has
 a claim to the *right* partition; depth swings accuracy by 8 points and the
@@ -238,14 +342,18 @@ tree carves the plane into confident rectangles that chase individual noisy
 points; the forest's averaged boundary is visibly smoother and follows the
 spiral arms.
 
-**Open threads.** Cost-complexity pruning — minimizing
+### Open threads
+
+Cost-complexity pruning — minimizing
 $\sum_{\text{leaves}} n_m I_m + \alpha|T|$ — as the principled alternative to a
 depth cap. Extremely randomized trees (random thresholds rather than best ones)
 to test how much of the forest's gain is the $\rho$ term rather than the fit.
 And the known bias of impurity-gain importances toward high-cardinality
 features, which A4's importance plot quietly depends on.
 
-**Reading:** [Random Forests](https://link.springer.com/article/10.1023/A:1010933404324)
+### Further reading
+
+[Random Forests](https://link.springer.com/article/10.1023/A:1010933404324)
 (Breiman 2001); ESL ch. 9, 15.
 
 ---
@@ -255,6 +363,34 @@ features, which A4's importance plot quietly depends on.
 **Question.** Both are unsupervised, both minimize squared reconstruction
 error, and both are usually taught apart. Run them on the same cloud: what does
 each actually recover?
+
+### The idea
+
+Both algorithms here look at data **without labels** and try to summarise it.
+
+**k-means** summarises a cloud of points by $k$ representative points
+(centroids). It alternates two steps until nothing changes: assign every point
+to its nearest centroid, then move each centroid to the mean of the points
+assigned to it. The result is a partition of the data into $k$ clusters.
+
+**PCA** (principal component analysis) summarises the cloud by the few
+*directions* along which it varies most. The first principal component is the
+line that the points spread along the most; the second is the best direction
+perpendicular to it; and so on. Keeping the top $k$ components compresses each
+point to $k$ numbers — its coordinates along those directions — with as little
+information lost as a linear method can manage.
+
+They answer different questions ("which group?" versus "which directions
+matter?") but they are graded by the **same** yardstick: replace every point by
+its summary and measure how far it moved.
+
+![PCA and k-means, the same points compressed two ways](figures/a/a3_concept_kmeans_vs_pca.png)
+
+*PCA may replace a point by any point on a line (left: short perpendicular
+drops). k-means may only replace it by one of $k$ centres (right: every point
+snaps to a cross). The discrete choice is the reason k-means always
+reconstructs worse than PCA with $k-1$ components, which the sandwich
+inequality below makes exact.*
 
 ### The math
 
@@ -313,12 +449,31 @@ random partition scores 0 in expectation and splitting a correct cluster is
 and is non-decreasing under refinement — it is maximized by the singleton
 clustering.
 
-**What I built.** k-means with k-means++ seeding, Lloyd iterations to a relative
+### What we measure, and why
+
+- **Reconstruction error** — the mean squared distance from each point to its
+  replacement (its centroid, or its PCA projection). It is the objective both
+  methods minimise, so comparing it is comparing them on their own terms.
+- **Explained variance** — the share of the data's total spread captured by
+  each principal component. It is how one decides how many components to keep.
+- **Adjusted Rand index (ARI)** — agreement between the clusters and the true
+  labels (which the algorithms never saw), corrected so that random grouping
+  scores 0 and a perfect match scores 1. The correction matters: without it the
+  score can be gamed by splitting data into many tiny clusters.
+- **Purity** — the fraction of points belonging to their cluster's majority
+  class. It is reported *because* it is misleading: it never decreases as $k$
+  grows, and seeing it reward the wrong answer is the lesson.
+
+### What I built
+
+k-means with k-means++ seeding, Lloyd iterations to a relative
 tolerance, and `n_init` restarts keeping the lowest inertia; an emptied cluster
 is re-seeded at the worst-fit point. PCA via SVD with a sign convention so
 components are reproducible across runs.
 
-**Results** (4 gaussian blobs in 8-D, standardized):
+### Results
+
+*Setup: 4 gaussian blobs in 8-D, standardized.*
 
 | k | k-means reconstruction | PCA(k) reconstruction | PCA(k-1) | ARI vs true labels |
 | --- | --- | --- | --- | --- |
@@ -332,7 +487,9 @@ partition. Clustering the 2-D PCA projection instead of the raw 8-D features
 costs almost nothing (ARI 0.960 on seed 0, 0.991 median) for a 4× dimension
 reduction.
 
-**What surprised me.** Purity climbs monotonically with k — 1.000 at k=4, still
+### What surprised me
+
+Purity climbs monotonically with k — 1.000 at k=4, still
 1.000 at k=8 — while ARI falls away from the true k. The formula above says it
 must; watching it confidently reward the wrong answer is what makes it stick,
 and the unit test now pins the pathological case (purity 1.0, ARI 0.0 for
@@ -347,13 +504,17 @@ inequality says the direction was never in doubt; only the size was.
 ![PCA projection, true labels](figures/a/a3_pca_true_labels.png)
 ![PCA projection, k-means labels](figures/a/a3_pca_kmeans_labels.png)
 
-**Open threads.** Gaussian mixtures by EM — the soft-assignment version, where a
+### Open threads
+
+Gaussian mixtures by EM — the soft-assignment version, where a
 responsibility $\gamma_{ik}$ replaces the hard indicator and Lloyd becomes a
 special case at zero covariance. Kernel PCA, which is the bridge to part D's
 representation learning. And choosing k honestly (silhouette, gap statistic)
 rather than by peeking at the labels as I do here.
 
-**Reading:** ESL ch. 14; MML book ch. 10 (PCA derived three ways).
+### Further reading
+
+ESL ch. 14; MML book ch. 10 (PCA derived three ways).
 
 ---
 
@@ -362,6 +523,32 @@ rather than by peeking at the labels as I do here.
 **Question.** How close does a from-scratch booster get to the library everyone
 actually uses, given the same hyper-parameters — and where exactly does the
 difference come from?
+
+### The idea
+
+**Gradient boosting** builds a strong model out of many weak ones, added one at
+a time. Start with a constant prediction (the mean of $y$). Look at what is
+still wrong — the **residuals**, $y - \text{prediction}$. Fit a small tree (depth
+3 here) to those residuals, add a *fraction* $\nu$ of it to the model, and
+repeat. Each new tree only has to correct the mistakes the ensemble still makes,
+so the model improves steadily where it is worst.
+
+The word *gradient* is there because the residual is exactly the negative
+gradient of squared error with respect to the prediction. Boosting is gradient
+descent, but the thing being optimised is the prediction function itself, and
+each "step" is a tree. The fraction $\nu$ is the **learning rate** (or
+shrinkage): small steps generalise better but need more rounds.
+
+**XGBoost** is the industrial version of the same idea. It adds a second-order
+(Newton) correction, regularisation on leaf values, and a great deal of
+engineering — histogram binning, parallel split search, C++. This rung asks
+which of those differences matter for accuracy.
+
+![Boosting, round by round](figures/a/a4_concept_boosting_stages.png)
+
+*One round is a single depth-2 tree: a crude staircase. By round 10 the
+ensemble follows the shape, and by round 100 the residual is near the noise
+level. Every round fits the error left by the ones before it.*
 
 ### The math
 
@@ -419,14 +606,34 @@ its minimum is a function of $\nu$ — which is what the sweep below shows.
 
 $$y = 10\sin(\pi x_0 x_1) + 20\left(x_2 - \tfrac{1}{2}\right)^2 + 10x_3 + 5x_4 + \varepsilon, \qquad x \sim \mathcal{U}[0,1]^{10} .$$
 
-**What I built.** Squared-loss gradient boosting over A2's regression tree, with
+### What we measure, and why
+
+- **Test RMSE** — typical prediction error on held-out data, in the target's
+  units. Friedman #1 has noise standard deviation 1, which floors it.
+- **Staged test error** — RMSE after each boosting round. It shows the
+  characteristic U-shape: error falls as rounds correct real structure, then
+  rises once they start correcting noise. Where the minimum sits depends on the
+  learning rate, which is the measurable content of "shrinkage".
+- **Our prediction minus XGBoost's**, per test point — the direct test of the
+  claim that the two are the same algorithm. Accuracy alone could agree by
+  coincidence; point-by-point agreement to $10^{-6}$ cannot.
+- **Fit time** — what the library buys, once accuracy is shown to be equal.
+- **Split-gain importance** — how much total loss reduction each feature
+  contributed. Friedman #1 puts signal in exactly five of ten features, so this
+  is an end-to-end check with a known answer.
+
+### What I built
+
+Squared-loss gradient boosting over A2's regression tree, with
 `subsample < 1` for the stochastic variant, and `staged_rmse` to replay the
 ensemble round by round. The benchmark goes through XGBoost's **native Booster
 API**, not `XGBRegressor` — the sklearn wrapper imports sklearn, and this part
 bans it. (That was not a guess; `XGBRegressor` raised
 `ImportError: sklearn needs to be installed`.)
 
-**Results** (Friedman #1, 800 samples, 10 features of which 5 carry signal):
+### Results
+
+*Setup: Friedman #1, 800 samples, 10 features of which 5 carry signal.*
 
 | model | test RMSE (seed 0) | median (seeds 0–2) |
 | --- | --- | --- |
@@ -437,7 +644,9 @@ bans it. (That was not a guess; `XGBRegressor` raised
 | ours + subsample 0.8 | 1.461 | 1.492 |
 | **XGBoost, 150 rounds** | **1.452** | **1.595** |
 
-**What surprised me — and a claim I had to retract.** On seed 0, XGBoost wins by
+### What surprised me — and a claim I had to retract
+
+On seed 0, XGBoost wins by
 2% and it is tempting to write "we land within 2% of the library". Across seeds
 0–2 the gap is **$-0.008$ median, range $-0.031$ to $+0.030$**: our implementation is
 ahead on two of three seeds. There is no measurable accuracy difference — and
@@ -463,13 +672,17 @@ tree, the boosting loop and the importance accounting all agree.
 ![Model comparison](figures/a/a4_model_comparison.png)
 ![Feature importance](figures/a/a4_feature_importance.png)
 
-**Open threads.** Implement the Newton step properly — $w^\star = -\sum g/(\sum h + \lambda)$
+### Open threads
+
+Implement the Newton step properly — $w^\star = -\sum g/(\sum h + \lambda)$
 for a loss where $h \not\equiv 1$, e.g. log-loss where $h_i = p_i(1-p_i)$ — since
 that is the point at which the second-order version stops being equivalent and
 starts being better. Early stopping on a validation fold instead of a fixed round
 count. And histogram binning, to find out where the 10× actually goes.
 
-**Reading:** [XGBoost](https://arxiv.org/abs/1603.02754) (Chen & Guestrin);
+### Further reading
+
+[XGBoost](https://arxiv.org/abs/1603.02754) (Chen & Guestrin);
 ESL ch. 10 (boosting as forward stagewise additive modelling).
 
 ---

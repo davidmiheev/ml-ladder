@@ -28,6 +28,35 @@ per-head width.
 **Question.** The LSTM is supposed to remember further than a vanilla RNN. How
 much further, and does the extra memory show up as a better language model?
 
+### The idea
+
+A **language model** predicts the next symbol from the ones before it. Trained
+on characters of Shakespeare, it learns spelling, then words, then some
+grammar, all from the single task "guess the next character".
+
+A **recurrent neural network (RNN)** does this by reading one character at a
+time and keeping a **hidden state** $h_t$, a vector that is supposed to
+summarise everything read so far. Each step mixes the new character into the
+state, $h_t = \tanh(W_x x_t + W_h h_{t-1} + b)$, and predicts the next character
+from $h_t$. The same weights are reused at every step, so the model handles any
+length of text.
+
+The weakness is in that recurrence. Information from 50 characters ago has
+been pushed through $W_h$ and $\tanh$ 50 times, and so has the gradient on its
+way back, so long-range signals fade. The **LSTM** (long short-term memory)
+adds a second state, the **cell** $c_t$, which is updated by *addition*:
+**gates** (small learned valves with outputs between 0 and 1) decide how much
+of the old cell to keep (forget gate), how much new content to write (input
+gate), and how much to expose as output (output gate).
+
+![Unrolled RNN and one LSTM step](figures/c/c1_concept_rnn_lstm.png)
+
+*Left: in a vanilla RNN, the only path from an early character to a late
+prediction runs through the same matrix at every step. Right: the LSTM's cell
+state (gold line) runs straight through each step and is only multiplied by
+the forget gate and added to. When the forget gate is near 1, information and
+gradient both pass through almost unchanged.*
+
 ### The math
 
 **Why the vanilla gradient dies.** With $h_t = \tanh(W_x x_t + W_h h_{t-1} + b)$,
@@ -57,8 +86,26 @@ state and reports $\lVert\partial L_T/\partial x_t\rVert$ against distance, then
 defines the **effective horizon** as the largest distance at which that norm is
 still above $10^{-6}$ of its value at the final position.
 
-**Results** (tiny Shakespeare, 250k characters, 64-character context, 500 steps;
-medians over seeds 0–2):
+### What we measure, and why
+
+- **Bits per character** on held-out text — the average number of bits the
+  model would need to encode each next character, i.e. cross-entropy in base 2.
+  Lower is better. A model that knew nothing would need $\log_2 65 \approx 6$
+  bits (65 distinct characters). Good small models get near 2. It is the
+  standard metric because it rewards being confidently right and punishes being
+  confidently wrong.
+- **Gradient reach**: the size of $\partial L/\partial x_t$ as a function of how
+  far back $x_t$ is, and the **effective horizon**, the furthest distance at
+  which the gradient is still above a millionth of its final value. This
+  measures the thing the LSTM was designed to fix directly, whatever the loss
+  says.
+- **Recall-probe accuracy** — a synthetic task (predict the *first* symbol after
+  reading $n$ filler symbols) where only long-range memory helps. It isolates
+  memory from everything else a language model uses. Chance is 1/8.
+
+### Results
+
+*Setup: tiny Shakespeare, 250k characters, 64-character context, 500 steps; medians over seeds 0–2.*
 
 | model | parameters | bits/char | horizon | gradient at 63 steps back |
 | --- | --- | --- | --- | --- |
@@ -69,7 +116,9 @@ medians over seeds 0–2):
 The horizon gap is the cleanest measurement in the part: 63 against 27 on every
 seed, and about **$10^{9}$ times more gradient** at 63 steps back.
 
-**What surprised me.** *The LSTM loses the language-modelling comparison.* At a
+### What surprised me
+
+*The LSTM loses the language-modelling comparison.* At a
 matched parameter budget the width-matched vanilla RNN is 0.07 bits/char better,
 consistently across seeds (2.261–2.274 against 2.319–2.336, non-overlapping). The
 memory is real and does not pay, because next-character prediction in Shakespeare
@@ -101,12 +150,16 @@ LSTM still wins.
 ![Recall accuracy](figures/c/c1_recall_accuracy.png)
 ![Bits per character](figures/c/c1_bits_per_char.png)
 
-**Open threads.** GRUs, to see how much of the LSTM's benefit survives with one
+### Open threads
+
+GRUs, to see how much of the LSTM's benefit survives with one
 gate fewer. Truncated BPTT over a longer context, which is how these models were
 actually trained. And the recall probe with a proper budget sweep, to find where
 the LSTM's 63-step gradient becomes 63-step learning.
 
-**Reading:** [Long Short-Term Memory](https://www.bioinf.jku.at/publications/older/2604.pdf)
+### Further reading
+
+[Long Short-Term Memory](https://www.bioinf.jku.at/publications/older/2604.pdf)
 (Hochreiter & Schmidhuber); Pascanu et al., *On the difficulty of training
 recurrent neural networks*; Karpathy, *The Unreasonable Effectiveness of RNNs*.
 
@@ -116,6 +169,28 @@ recurrent neural networks*; Karpathy, *The Unreasonable Effectiveness of RNNs*.
 
 **Question.** How much does forcing a whole source sentence through one
 fixed-size vector actually cost?
+
+### The idea
+
+**Sequence-to-sequence (seq2seq)** models map one sequence to another, such as
+a sentence to its translation, or here a date written any which way ("on the 3rd
+of May, 1998") to its ISO form ("1998-05-03"). An **encoder** RNN reads the
+input, and a **decoder** RNN writes the output one character at a time.
+
+In the original design the encoder's *last* hidden state is the only thing
+handed to the decoder: the entire input must be compressed into one fixed-size
+vector, however long it is. **Attention** removes that bottleneck. At every
+output step the decoder scores each encoder state for relevance, turns the
+scores into weights that sum to 1 (softmax), and reads a weighted average. It
+can look straight at "May" when writing the month, instead of hoping the month
+survived compression.
+
+![Seq2seq with and without attention](figures/c/c2_concept_attention.png)
+
+*Left: every output step depends on the one vector $c$. Right: each output step
+draws on all source positions, weighted by learned relevance. The weights in
+this sketch are illustrative. The real ones, learned by the rung, are plotted
+under Results.*
 
 ### The math
 
@@ -150,8 +225,24 @@ span, so the correct alignment is known in advance and the attention map can be
 *scored* — the fraction of output characters whose attention peak sits on a
 matching input character — rather than admired.
 
-**Results** (date normalization, filler words around the date, medians over
-seeds 0–2):
+### What we measure, and why
+
+- **Exact-match accuracy** — the fraction of dates converted with every
+  character right. This is the metric that matters for the task, since a date
+  with one wrong digit is simply wrong.
+- **Character-level accuracy** — fraction of individual characters right. It is
+  reported *alongside* exact match because the gap between the two is
+  informative: it shows a model producing well-formed but wrong answers.
+- **Both, against source length** — the bottleneck argument predicts the fixed
+  vector fails as the input grows, so length is the variable to sweep.
+- **Alignment score** — for the attention model, the fraction of output
+  characters whose strongest attention lands on the input characters they were
+  copied from. The date task has a known correct alignment, so the attention map
+  can be *graded* instead of just admired.
+
+### Results
+
+*Setup: date normalization, filler words around the date, medians over seeds 0–2.*
 
 | filler | source length | bottleneck exact | attention exact | bottleneck char-level |
 | --- | --- | --- | --- | --- |
@@ -163,7 +254,9 @@ The attention model is perfect at every length; the bottleneck model falls off a
 cliff. Alignment score 0.729 median — high, and *not* 1.0 by construction, since
 the month digits must come from a month *name* and count as misses.
 
-**What surprised me.** The gap between the two accuracy measures. At 193
+### What surprised me
+
+The gap between the two accuracy measures. At 193
 characters the bottleneck model still gets **71% of characters** right while
 getting **0.5% of dates** right. It has learned the *shape* of the answer — four
 digits, dash, two digits, dash, two digits, roughly the right ranges — and lost
@@ -175,13 +268,17 @@ have made this look like a mild degradation; exact match shows it is total.
 ![Attention map](figures/c/c2_attention_map.png)
 ![Training loss](figures/c/c2_training.png)
 
-**Open threads.** Bahdanau's additive score, which has an extra parameter matrix
+### Open threads
+
+Bahdanau's additive score, which has an extra parameter matrix
 and is claimed to matter for longer sources. Coverage penalties, the standard fix
 for attention that revisits one position and drops another. And beam search
 instead of greedy decoding, which should matter most exactly where the bottleneck
 model is uncertain.
 
-**Reading:** [Neural Machine Translation by Jointly Learning to Align and
+### Further reading
+
+[Neural Machine Translation by Jointly Learning to Align and
 Translate](https://arxiv.org/abs/1409.0473) (Bahdanau et al.);
 [Effective Approaches to Attention-based NMT](https://arxiv.org/abs/1508.04025) (Luong et al.);
 [Sequence to Sequence Learning](https://arxiv.org/abs/1409.3215) (Sutskever et al.).
@@ -192,6 +289,35 @@ Translate](https://arxiv.org/abs/1409.0473) (Bahdanau et al.);
 
 **Question.** Does the implementation actually respect causality — and how much
 of a transformer's ability is the positional encoding?
+
+### The idea
+
+The **transformer** drops recurrence entirely. Every position looks at every
+other position directly through **self-attention**, so there is no chain of
+steps for information to fade along.
+
+Each token's vector is projected three ways: a **query** ("what am I looking
+for?"), a **key** ("what do I contain?") and a **value** ("what do I pass on if
+chosen?"). A token's new representation is the average of all values, weighted
+by how well its query matches each key. **Multi-head** attention runs several
+of these in parallel with different projections, so one head can track syntax
+while another tracks, say, the previous character. Between attention layers, a
+per-token **MLP** processes what was gathered. **Residual connections** (B4)
+and **LayerNorm** keep the stack trainable.
+
+Two details make it a *language model*:
+
+- the **causal mask** stops a position from attending to later positions, so
+  the model cannot cheat by reading the answer;
+- a **positional encoding** is added to each token, because attention by itself
+  is order-blind: it treats its input as a set, not a sequence.
+
+![One transformer block, its causal mask and its positional encoding](figures/c/c3_concept_transformer.png)
+
+*Left: one block, as C3 builds it. Middle: the causal mask, where each query
+row may only see keys at or before it. Right: C3's actual sinusoidal encoding.
+Each dimension oscillates at its own frequency, so every position gets a unique
+pattern, and "k steps back" is the same rotation wherever you are.*
 
 ### The math
 
@@ -235,8 +361,23 @@ $x \mapsto \mathrm{LN}(x + f(x))$. Post-LN puts a normalization on the skip path
 itself and needs learning-rate warmup to train at all; pre-LN keeps the identity
 path clean — B4's argument again.
 
-**Results** (same corpus, split, eval windows, steps, batch and context as C1;
-medians over seeds 0–2):
+### What we measure, and why
+
+- **Bits per character**, on the same text, split, windows and budget as C1,
+  so the RNN, LSTM and transformer numbers are directly comparable.
+- **The positional ablation** — the same model with learned, sinusoidal and *no*
+  positional encoding. The theory says removing it should hurt badly, and
+  measuring by how much turns the equivariance argument into a number.
+- **The causal check** — perturb the last input token and confirm no earlier
+  output moves, plus the attention weight above the diagonal. Both must be
+  exactly 0. A leak here would make every other number meaningless, and a leaky
+  model still trains beautifully, which is why it is tested rather than trusted.
+- **Parameter count** for every arm, because "transformer vs LSTM" is only a
+  fair question at matched size.
+
+### Results
+
+*Setup: same corpus, split, eval windows, steps, batch and context as C1; medians over seeds 0–2.*
 
 | variant | parameters | bits/char |
 | --- | --- | --- |
@@ -251,7 +392,9 @@ Learned beats sinusoidal by 0.040 at this scale. The causal check returns
 **exactly 0.0** on every seed, for both the logit perturbation and the attention
 mass above the diagonal.
 
-**What surprised me — and the result I cannot explain away.** Line up C1 and C3,
+### What surprised me — and the result I cannot explain away
+
+Line up C1 and C3,
 which share every training setting:
 
 | model | parameters | bits/char |
@@ -277,13 +420,17 @@ worth more than the flexibility of attention, and that regime is small.
 ![Positional similarity](figures/c/c3_positional_similarity.png)
 ![Bits per character](figures/c/c3_bits_per_char.png)
 
-**Open threads.** Warmup plus a cosine schedule, which would make the comparison
+### Open threads
+
+Warmup plus a cosine schedule, which would make the comparison
 above fair to the transformer — the obvious next run. Longer context, where the
 recurrent models must lose. RoPE instead of additive encodings. And KV caching,
 which is the difference between a sampler that is $O(T)$ per token and one that
 is $O(T^2)$.
 
-**Reading:** [Attention Is All You Need](https://arxiv.org/abs/1706.03762);
+### Further reading
+
+[Attention Is All You Need](https://arxiv.org/abs/1706.03762);
 [The Annotated Transformer](https://nlp.seas.harvard.edu/annotated-transformer/);
 Xiong et al., *On Layer Normalization in the Transformer Architecture* (pre-LN vs post-LN).
 
@@ -293,6 +440,32 @@ Xiong et al., *On Layer Normalization in the Transformer Architecture* (pre-LN v
 
 **Question.** A ViT is C3's block applied to image patches. Without a CNN's
 built-in priors, how much does it depend on pretraining?
+
+### The idea
+
+A **Vision Transformer (ViT)** is C3's transformer pointed at images. An image
+is cut into a grid of small patches (16×16 pixels in the pretrained model), each
+patch is flattened and linearly projected into a token, and the sequence of
+patch tokens goes through a standard transformer encoder. A special extra
+**[CLS] token** gathers information from all patches, and a linear layer on its
+output gives the class.
+
+Unlike a CNN (B3), a ViT has no built-in assumption that nearby pixels belong
+together or that a cat in the corner is still a cat. It has to *learn* those
+facts from data, which makes it data-hungry. The standard remedy is
+**pretraining** on a huge dataset (ImageNet here), then reusing the model:
+
+- **linear probe** — freeze the pretrained network and train only a new final
+  layer. This asks whether the pretrained features already separate the new
+  classes.
+- **fine-tuning** — keep training the whole network on the new task, gently,
+  with a small learning rate.
+
+![From an image to a sequence of tokens](figures/c/c4_concept_vit.png)
+
+*The image becomes a 16-token sentence plus a [CLS] token. From there on the
+model is identical to a text transformer. The classification is read off the
+[CLS] token's final state.*
 
 ### The math
 
@@ -322,8 +495,21 @@ fixed, a convex problem in $W$. Fine-tuning asks *can the representation itself
 be improved?*, at 7000× the trainable parameters and the risk of destroying
 pretrained features with too large a step (hence the much smaller learning rate).
 
-**Results** (ViT-Tiny, 4-class CIFAR subset — plane/car/ship/truck — 1500 train
-images, 2 epochs, medians over seeds 0–2):
+### What we measure, and why
+
+- **Test accuracy** on the four held-out classes (chance 0.25), for three arms:
+  from scratch, linear probe, full fine-tune. The differences between arms are
+  the point. *Probe − scratch* measures what pretraining contributed.
+  *Fine-tune − probe* measures what adapting the features adds on top.
+- **Trainable parameters** per arm — the probe trains 772 numbers and the
+  fine-tune 5.5 million. That ratio is what makes the probe result striking.
+- **Wall-clock seconds** on the T4 — the practical cost of each arm.
+- **Confusion matrix** — which classes get mixed up (cars and trucks, as it turns
+  out), which accuracy alone hides.
+
+### Results
+
+*Setup: ViT-Tiny, 4-class CIFAR subset — plane/car/ship/truck — 1500 train images, 2 epochs, medians over seeds 0–2.*
 
 | arm | test accuracy | trainable parameters | seconds (T4) |
 | --- | --- | --- | --- |
@@ -334,7 +520,9 @@ images, 2 epochs, medians over seeds 0–2):
 Pretraining is worth **+0.452** (probe over scratch, range 0.421–0.458);
 fine-tuning adds a further **+0.090** over the probe (range 0.073–0.100).
 
-**What surprised me.** Not the ordering — the *ratio*. The linear probe trains
+### What surprised me
+
+Not the ordering — the *ratio*. The linear probe trains
 **772 parameters**, four classes' worth of weights on a 192-dimensional feature,
 and lands within 9 points of a full fine-tune of 5.5 million. Essentially all of
 the task-relevant work was already done by ImageNet pretraining; the fine-tune is
@@ -347,12 +535,16 @@ edge is.
 ![Trainable parameters](figures/c/c4_trainable_parameters.png)
 ![Confusion](figures/c/c4_confusion.png)
 
-**Open threads.** Freezing progressively more blocks, to find where "probe" turns
+### Open threads
+
+Freezing progressively more blocks, to find where "probe" turns
 into "fine-tune". Data augmentation, which is how the ViT paper's own
 from-scratch results were rescued. DINO or MAE features instead of supervised
 ImageNet ones — that comparison is part D's business.
 
-**Reading:** [An Image is Worth 16x16 Words](https://arxiv.org/abs/2010.11929) (ViT);
+### Further reading
+
+[An Image is Worth 16x16 Words](https://arxiv.org/abs/2010.11929) (ViT);
 Steiner et al., *How to train your ViT*; [timm](https://github.com/huggingface/pytorch-image-models).
 
 ---
@@ -362,6 +554,38 @@ Steiner et al., *How to train your ViT*; [timm](https://github.com/huggingface/p
 **Question.** C3's transformer is eight years old as a design. Every production
 decoder since has changed the attention layer. What are those changes actually
 buying, in a quantity that can be computed rather than argued about?
+
+### The idea
+
+When a trained language model **generates** text, it produces one token at a
+time, and each new token attends over everything before it. Recomputing every
+earlier token's keys and values at every step would be wasteful, so they are
+stored: the **KV cache**. It grows by one entry per token per layer, and every
+new token has to read all of it. At long context, *memory*, not arithmetic,
+becomes the limit: how many bytes the cache takes, and how fast they can be
+read.
+
+Every major decoder design since C3 has changed attention to shrink one factor
+of that cache:
+
+- **Grouped-query attention (GQA)** — many query heads share a few key/value
+  heads. Fewer K/V heads, proportionally smaller cache.
+- **Sliding-window attention** — each layer only attends to the last $W$
+  tokens, so its cache stops growing at $W$.
+- **Multi-head latent attention (MLA)** — cache one compressed low-rank vector
+  per token instead of full per-head keys and values, and expand it on the fly.
+- **Linear attention / delta rule** — replace the cache with a fixed-size
+  state matrix, updated at each token. This is an RNN again (C1), with a much
+  larger state and a smarter update rule.
+
+![Decoding one token at a time](figures/c/c5_concept_kv_cache.png)
+
+*The new token's query must read every cached key and value. The cache's size
+is layers × KV heads × head width × context length, and each mechanism above
+removes or caps one of those factors.*
+
+This rung trains nothing. It reads the published configurations of real
+models and computes, exactly, what each design stores.
 
 ### The math
 
@@ -403,7 +627,23 @@ by the architect, not by how much text has been read — so the state is
 fixed state. What changed is not the bargain but the budget, and the update
 rule that fills it.
 
-**What I built.** No training. Five configurations — C3's own, measured from
+### What we measure, and why
+
+- **Decode state in MiB at a given context length** (1k to 256k tokens, fp16)
+  — everything the model must keep in memory to generate the next token. It is
+  the quantity that decides whether a long context fits on a GPU at all, and at
+  long context it can exceed the model's own weights.
+- **Shrink factor per mechanism**, each measured against *its own model with
+  that one mechanism removed*. Comparing two different models would credit a
+  mechanism with differences that come from ten other design choices.
+- **Crossover context** — for the fixed-state design, the context length at
+  which its constant state becomes cheaper than a growing cache.
+- **Parameter counts checked against published figures** — validation that the
+  accounting code reads configs correctly before its other numbers are trusted.
+
+### What I built
+
+No training. Five configurations — C3's own, measured from
 this repo, and four published ones recorded with their hub ids — reduced to
 layer lists and evaluated for decode state against context. Each mechanism is
 also ablated **against its own config with that mechanism removed**, rather than
@@ -411,7 +651,9 @@ against a different model, so the number attributed to it is not really a
 difference in ten other things. The accounting lives in
 `src/mlladder/archspec.py` and is shared with H6.
 
-**Results** (decode state in MiB, fp16):
+### Results
+
+*Setup: decode state in MiB, fp16.*
 
 | decoder | layers | 1k | 16k | 64k | 256k |
 | --- | --- | --- | --- | --- | --- |
@@ -435,7 +677,9 @@ Each mechanism against its own config without it, at 64k tokens:
 ![Mechanism savings](figures/c/c5_mechanism_savings.png)
 ![State per token](figures/c/c5_state_per_token.png)
 
-**What surprised me.** Three things.
+### What surprised me
+
+Three things.
 
 *The numbers are enormous and they are not about parameters.* Qwen3-8B carries
 **9.2 GiB of KV cache at 64k tokens** — larger than the 8B model's own weights
@@ -469,7 +713,9 @@ embedding and output head that DeepSeek's transformer-only figure omits, 2.32B
 validations on models with known answers is what makes the other numbers in
 these tables worth reading.
 
-**Open threads.** Gemma 4's ring-buffered sliding KV, which sizes the buffer at
+### Open threads
+
+Gemma 4's ring-buffered sliding KV, which sizes the buffer at
 window + prefill chunk rather than the full context and is implemented in the
 accompanying fork — the natural next arm. Actually *measuring* decode throughput
 against these predictions, since memory-bound is a claim about bandwidth that a
@@ -477,7 +723,9 @@ byte count only implies. And quality: none of this says whether a 512 MiB
 windowed cache answers questions as well as a 9 GiB full one, which is the
 question that decides anything.
 
-**Reading:** [GQA](https://arxiv.org/abs/2305.13245);
+### Further reading
+
+[GQA](https://arxiv.org/abs/2305.13245);
 [Mistral 7B](https://arxiv.org/abs/2310.06825) for sliding windows;
 [DeepSeek-V2](https://arxiv.org/abs/2405.04434) for MLA;
 [RoFormer](https://arxiv.org/abs/2104.09864);

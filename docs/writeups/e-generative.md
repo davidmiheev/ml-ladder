@@ -65,13 +65,17 @@ the randomness sits between them and the loss. Writing $z = \mu + \sigma\epsilon
 with $\epsilon \sim \mathcal{N}(0, I)$ makes the sample a *deterministic*
 function of the parameters plus parameter-free noise, and the gradient flows.
 
-**What I built.** A convolutional VAE with a 16-dimensional latent, swept over
+### What I built
+
+A convolutional VAE with a 16-dimensional latent, swept over
 $\beta$. The reconstruction is summed over pixels and the KL over latent
 dimensions — a test pins this, because averaging one and summing the other
 silently rescales $\beta$ by the pixel count, which is the most common way this
 loss is got wrong.
 
-**Results** (12k MNIST, 12 epochs; medians over seeds 0–2):
+### Results
+
+*Setup: 12k MNIST, 12 epochs; medians over seeds 0–2.*
 
 | $\beta$ | reconstruction | KL (rate) | active units | fd(samples) |
 | --- | --- | --- | --- | --- |
@@ -84,7 +88,9 @@ loss is got wrong.
 ![Active units](figures/e/e1_active_units.png)
 ![Samples](figures/e/e1_samples.png)
 
-**What surprised me.** Not the trade-off — that is the theory working — but how
+### What surprised me
+
+Not the trade-off — that is the theory working — but how
 *cleanly* the collapse arrives. At $\beta = 16$ the encoder has abandoned 10 of
 its 16 dimensions (range 9–12 across seeds), the rate has fallen to 1.1 nats,
 and sample quality is more than four times worse. The training loss went down
@@ -97,12 +103,16 @@ quality. `best/agree` is 1.0 on every seed — both pick $\beta = 1$. At this
 budget the bound and the proxy point the same way, and I have recorded that
 rather than the more interesting story I was looking for.
 
-**Open threads.** A free-bits or KL-warmup schedule, which is the standard fix
+### Open threads
+
+A free-bits or KL-warmup schedule, which is the standard fix
 for collapse and would show whether the abandoned dimensions can be recovered.
 A larger latent, where collapse should arrive earlier. And a discrete latent
 (VQ-VAE), which sidesteps the rate-distortion dial entirely.
 
-**Reading:** [Auto-Encoding Variational Bayes](https://arxiv.org/abs/1312.6114);
+### Further reading
+
+[Auto-Encoding Variational Bayes](https://arxiv.org/abs/1312.6114);
 [beta-VAE](https://openreview.net/forum?id=Sy2fzU9gl);
 Alemi et al., *Fixing a Broken ELBO*, on rate-distortion as the right frame.
 
@@ -131,13 +141,17 @@ $1 - \sigma(s) \to 1$ in that same limit. Identical fixed point, opposite
 behaviour where it matters. Both are implemented and tested here against that
 limit directly.
 
-**What I built.** A DCGAN at the paper's structural rules — strided convolutions,
+### What I built
+
+A DCGAN at the paper's structural rules — strided convolutions,
 batch norm everywhere except the generator's output and discriminator's input,
 Adam at $\beta_1 = 0.5$ — with both generator objectives as arms, quality scored
 *during* training as well as at the end, and mode coverage measured by
 classifying the samples.
 
-**Results** (12k MNIST, 14 epochs; medians over seeds 0–2):
+### Results
+
+*Setup: 12k MNIST, 14 epochs; medians over seeds 0–2.*
 
 | arm | fd | coverage | mode entropy |
 | --- | --- | --- | --- |
@@ -148,7 +162,8 @@ classifying the samples.
 ![Mode coverage](figures/e/e2_mode_coverage.png)
 ![Samples](figures/e/e2_samples.png)
 
-**What surprised me, and a claim I have to withdraw.**
+### What surprised me, and a claim I have to withdraw
+
 
 On a single CPU run at seed 0, the minimax arm **collapsed completely**: fd
 590.83, all ten thousand samples classified as one digit, mode entropy exactly
@@ -173,12 +188,16 @@ The honest summary: the non-saturating form is better by about 0.1 fd on
 average, and is dramatically more robust in a way a three-seed sweep on one
 device still understates.
 
-**Open threads.** Repeating the sweep on both devices to quantify how often
+### Open threads
+
+Repeating the sweep on both devices to quantify how often
 minimax collapses rather than noting that it can. WGAN-GP, whose entire premise
 is that the JS divergence is the wrong distance when the supports barely
 overlap. And a discriminator-to-generator update ratio sweep.
 
-**Reading:** [Generative Adversarial Networks](https://arxiv.org/abs/1406.2661);
+### Further reading
+
+[Generative Adversarial Networks](https://arxiv.org/abs/1406.2661);
 [DCGAN](https://arxiv.org/abs/1511.06434);
 [Wasserstein GAN](https://arxiv.org/abs/1701.07875).
 
@@ -221,7 +240,9 @@ there is little left to learn; the cosine schedule sets
 $\bar\alpha_t \propto \cos^2\!\left(\frac{t/T + s}{1 + s}\cdot\frac{\pi}{2}\right)$
 so signal survives longer.
 
-**What I built.** A 245k-parameter U-Net with a sinusoidal timestep embedding,
+### What I built
+
+A 245k-parameter U-Net with a sinusoidal timestep embedding,
 $T = 400$ training steps, both schedules as arms, and sampling swept over
 $\{10, 25, 50, 100, 400\}$ steps with quality and wall-clock recorded at each.
 
@@ -233,7 +254,9 @@ it shows up only as bad samples, and it would have turned the schedule compariso
 into a measurement of my own mistake. A test asserting $\bar\alpha_T < 0.01$ for
 every schedule failed, and the range is now scaled by $1000/T$.
 
-**Results** (12k MNIST, 16 epochs, 500 samples; medians over seeds 0–2):
+### Results
+
+*Setup: 12k MNIST, 16 epochs, 500 samples; medians over seeds 0–2.*
 
 | sampling steps | linear fd | cosine fd | seconds |
 | --- | --- | --- | --- |
@@ -247,7 +270,9 @@ every schedule failed, and the range is now scaled by $1000/T$.
 ![Steps against quality](figures/e/e3_steps_vs_quality.png)
 ![Samples](figures/e/e3_samples.png)
 
-**What surprised me.** Two things, and the second retracts a claim.
+### What surprised me
+
+Two things, and the second retracts a claim.
 
 *The knee is a property of the schedule, not of diffusion.* On the cosine
 schedule, quality is still improving at 400 steps — `steps/knee` is 400, meaning
@@ -269,12 +294,16 @@ the last few steps, which is exactly what makes it fragile under truncation. Bot
 schedules cover all ten digits on every seed, so this is a fidelity difference,
 not a collapse.
 
-**Open threads.** DDIM's deterministic sampler, which is the actual answer to the
+### Open threads
+
+DDIM's deterministic sampler, which is the actual answer to the
 step count and would separate "few steps" from "few steps with this sampler". A
 $T = 1000$ run to test the large-$T$ explanation for cosine directly. And $v$- or
 velocity-prediction, which is what E5's production descendants use.
 
-**Reading:** [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239);
+### Further reading
+
+[Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239);
 [Improved DDPM](https://arxiv.org/abs/2102.09672) for the cosine schedule;
 [DDIM](https://arxiv.org/abs/2010.02502).
 
@@ -309,12 +338,16 @@ wins fd and coverage dishonestly.
 real data is scored against the real reference too. That row is what makes any
 other row readable.
 
-**What I built.** All three models are imported from their own rungs, not
+### What I built
+
+All three models are imported from their own rungs, not
 reimplemented, trained on the same 12k MNIST images for 14 epochs, and scored on
 quality, coverage, novelty, training seconds and sampling seconds. Plus one
 control, which turned out to matter more than the scorecard.
 
-**Results** (medians over seeds 0–2):
+### Results
+
+*Setup: medians over seeds 0–2.*
 
 | | fd | coverage | mode entropy | nn distance | train | sample 1k |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -332,7 +365,8 @@ The cost column is the part that generalizes beyond this budget: diffusion's
 sampling costs **1,171× the GAN's** for a thousand images, because it runs its
 network once per denoising step and the GAN runs it once.
 
-**What surprised me, and what I had to go and check.**
+### What surprised me, and what I had to go and check
+
 
 I expected four distinct winners — one per column — as the cleanest possible
 demonstration that the question needs a column name. I got **two**:
@@ -371,14 +405,18 @@ row as the headline, because equalizing the budget is what the rung set out to d
 and quietly giving one arm more would be worse, but the control is now reported
 beside it and the claim is scoped to the budget.
 
-**Open threads.** The obvious one: sweep the budget itself and report each
+### Open threads
+
+The obvious one: sweep the budget itself and report each
 family's curve rather than one point on it, which is the only construction that
 would survive this objection. Wall-clock-equal rather than epoch-equal budgets,
 which would favour the VAE further. And a precision/recall decomposition of fd,
 which separates "blurry" from "missing modes" in a way a single Fréchet number
 cannot.
 
-**Reading:** [GANs Trained by a Two Time-Scale Update Rule](https://arxiv.org/abs/1706.08500) (FID);
+### Further reading
+
+[GANs Trained by a Two Time-Scale Update Rule](https://arxiv.org/abs/1706.08500) (FID);
 [Assessing Generative Models via Precision and Recall](https://arxiv.org/abs/1806.00035);
 [Pros and Cons of GAN Evaluation Measures](https://arxiv.org/abs/1802.03446).
 
@@ -422,7 +460,9 @@ added. Flow matching instead learns a velocity field along a straight path
 between noise and data, which is why its samplers need single-digit step counts
 where E3's cosine arm was still improving at 400.
 
-**What I built.** Parameter and position accounting for both architectures, read
+### What I built
+
+Parameter and position accounting for both architectures, read
 from their published configs and cross-checked against the implementations in
 the accompanying candle fork (`candle-transformers/src/models/{stable_diffusion,
 flux}`); both modules are present, and the rung records that rather than assuming
@@ -431,7 +471,8 @@ and H6 use for decoders.
 
 ![Architectures](figures/e/e5_architectures.png)
 
-**Results.**
+### Results
+
 
 | | E3 (pixels) | SD-1.5 U-Net | FLUX.1 MMDiT |
 | --- | --- | --- | --- |
@@ -450,7 +491,9 @@ single-stream blocks carry one over the concatenated sequence — and the two
 halves come out at **6.456B each**, 49.95% single-stream. Twice the blocks for
 the same parameters, exactly as the "two towers vs one" structure predicts.
 
-**What surprised me.** Not the numbers — the *asymmetry in how far I can trust
+### What surprised me
+
+Not the numbers — the *asymmetry in how far I can trust
 them*. The MMDiT total lands 7.7% under FLUX's published ~12B, close enough that
 the arithmetic is a real count of a uniform stack. The U-Net estimate lands at
 308M against a published ~860M, **64% low**, because it counts convolutions and
@@ -467,12 +510,16 @@ attend over 1,048,576 positions against FLUX's 4,096 — **65,536× the attentio
 work**. Latent diffusion is not an optimization on top of E3; it is what makes
 the family exist at that resolution.
 
-**Open threads.** Actually running FLUX under the candle fork's quantization to
+### Open threads
+
+Actually running FLUX under the candle fork's quantization to
 check the count against loaded weights rather than a config. The VAE's own
 parameters and its reconstruction floor, which upper-bounds everything downstream.
 And SD3's MMDiT, which is the missing rung between the two columns.
 
-**Reading:** [High-Resolution Image Synthesis with Latent Diffusion Models](https://arxiv.org/abs/2112.10752);
+### Further reading
+
+[High-Resolution Image Synthesis with Latent Diffusion Models](https://arxiv.org/abs/2112.10752);
 [Scaling Rectified Flow Transformers (SD3 / MMDiT)](https://arxiv.org/abs/2403.03206);
 [Flow Matching for Generative Modeling](https://arxiv.org/abs/2210.02747).
 
