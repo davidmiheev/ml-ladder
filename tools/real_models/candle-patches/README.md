@@ -1,5 +1,13 @@
 # Fixes and additions for the candle fork
 
+> **Superseded.** Everything here has since been committed to `ignite-perf`, and
+> `ignite-perf` has been split into 12 reviewable PRs on the fork:
+> [davidmiheev/candle#1](https://github.com/davidmiheev/candle/pull/1) to
+> [#12](https://github.com/davidmiheev/candle/pull/12). CUDA infrastructure, the
+> quantized fixes and the fused kernels are stacked, with the per-model PRs on top;
+> flux, DeepSeek-V2 and the symphonia pin sit directly on `main`. This file is kept
+> as the record of why each fix was needed.
+
 `ignite-perf-fixes.patch` applies to `davidmiheev/candle` at `ignite-perf`
 (9aa02f1); `unlimited-ocr-example.rs` is a new example that belongs at
 `candle-examples/examples/unlimited-ocr/main.rs`. All of it was found by
