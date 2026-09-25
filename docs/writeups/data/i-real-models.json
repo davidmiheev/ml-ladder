@@ -17,13 +17,13 @@
     }
   },
   "resampler_question": "The ignite-catalog transcription executor resamples 8 kHz to 16 kHz with plain linear interpolation and no anti-aliasing filter. Run against scipy's polyphase resampler on the same clips and the same engines, the two give IDENTICAL scores: 0.75 for transformers either way. On this corpus the crude resampler costs nothing.",
-  "lead_not_verified": "candle-examples/examples/whisper/main.rs in this fork carries a heavily rewritten apply_timestamp_rules with custom rule blocks that upstream does not have. A decoder that closes its first timestamp pair immediately would produce exactly what is observed -- a segment with no content tokens -- and would do so on short utterances while leaving long ones intact, which matches jfk and gb1 transcribing correctly. This was NOT verified; it is where to look.",
+  "lead_not_verified": "CORRECTED 2026-09-25. An earlier version said the fork carries a rewritten apply_timestamp_rules that upstream does not have. That is wrong: candle-examples/examples/whisper/main.rs is byte-identical between davidmiheev/candle main (upstream 0.11.0) and ignite-perf, and apply_timestamp_rules came from upstream huggingface/candle#3054. What the record does show: the example ran with timestamps on and, for every digit, printed one timestamped span with no text (e.g. '0.0s-1.8s: '), so the window was decoded and kept -- not dropped by the example's no-speech skip (no_speech_prob > 0.6 and avg_logprob < -1), whose 'no speech detected' message appears only for the trailing silent window of gb1. A decoder that closes its first timestamp pair immediately would produce exactly this on short utterances while leaving long ones intact. Still NOT verified; it is where to look, and it is upstream's code.",
   "build": {
     "seconds": 701.1,
     "features": "cuda symphonia",
     "fixes_required": [
-      "candle-transformers does not build without CUDA: candle_nn::fused::static_decode is #[cfg(feature = \"cuda\")] but called from ungated sites. 52 errors with --features mkl. This contradicts ignite-catalog's whisper-cpu.yaml, which declares gpu.required: false.",
-      "candle-examples declares symphonia 0.6.0 (which resolves to 0.6.1; the fork gitignores Cargo.lock, so nothing pins it) while its audio code uses the 0.5 API -- AudioBufferRef, codecs::DecoderOptions, core::conv, core::probe. 6 errors, breaking every symphonia example: whisper, encodec, mimi, snac. Pinned to 0.5.4 to build.",
+      "candle-transformers does not build without CUDA: candle_nn::fused::static_decode is #[cfg(feature = \"cuda\")] but called from ungated sites. 52 errors with --features mkl. This contradicts ignite-catalog's whisper-cpu.yaml, which declares gpu.required: false. The fork's ignite-perf has since added a CPU stub for static_decode that returns an error at call time.",
+      "candle-examples declares symphonia 0.6.0 (which resolves to 0.6.1; the fork gitignores Cargo.lock, so nothing pins it) while its audio code uses the 0.5 API -- AudioBufferRef, codecs::DecoderOptions, core::conv, core::probe. 6 errors, breaking every symphonia example: whisper, encodec, mimi, snac. The 0.6.0 declaration is upstream's (huggingface/candle#3546), not the fork's. Pinned to 0.5.4 to build; the fork's ignite-perf now carries that pin.",
       "the whisper target additionally requires --features symphonia alongside cuda",
       "CUDA 12.8 needs the compatibility.cuh __hmax_nan guard extended with CURART_VERSION < 12000",
       "the Kaggle image ships no Rust and no libcuda.so on the usual paths; the driver is at /usr/local/nvidia/lib64"
@@ -37,9 +37,9 @@
     "published the candle checkout into /kaggle/working, making the output undownloadable"
   ],
   "scope_correction": {
-    "what_was_run": "candle-examples/examples/whisper from davidmiheev/candle@ignite-perf",
+    "what_was_run": "candle-examples/examples/whisper built from davidmiheev/candle@ignite-perf (upstream code: the fork does not change this example)",
     "what_was_NOT_run": "models/executors/exp/candle-transcription from ignite-catalog@perf/exp-executors",
-    "why_it_matters": "They share the model (candle_transformers::models::whisper) and nothing else that decides this result. The executor carries its own Decoder (lib.rs:389) with zero references to apply_timestamp_rules -- the rewritten function this record names as the lead -- decodes each window at a single temperature with no fallback loop, and resolves a no_timestamps_token. So the empty-transcription finding most likely does NOT transfer to the executor, and an earlier version of this record said 'the fork's whisper' in a way that implied it did.",
+    "why_it_matters": "They share the model (candle_transformers::models::whisper) and nothing else that decides this result. The executor carries its own Decoder (lib.rs:389) with zero references to apply_timestamp_rules -- the upstream function this record names as the lead -- decodes each window at a single temperature with no fallback loop, and resolves a no_timestamps_token. So the empty-transcription finding most likely does NOT transfer to the executor, and an earlier version of this record said 'the fork's whisper' in a way that implied it did.",
     "status": "RESOLVED 2026-09-24: the executor itself has now been run -- see executor_run. It does not return empty transcriptions."
   },
   "executor_run": {

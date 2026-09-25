@@ -651,7 +651,8 @@ held-out speaker. Raw records:
 transcript).
 
 **Two different pieces of code, and the difference matters.** The first run used
-the fork's `candle-examples/examples/whisper`. The second ran the catalog's
+`candle-examples/examples/whisper`, built from the fork. The fork does not change
+that example, so it is upstream candle's code. The second ran the catalog's
 executor itself: its own request path (symphonia decode, a linear resampler,
 candle's mel), its own `Decoder`, one request per file exactly as the handler
 does, with only the ignite SDK plumbing removed (request parsing and the asset
@@ -660,14 +661,30 @@ the model weights and the network, and almost nothing that decides the output.
 
 ### The example: empty transcriptions
 
-The fork's whisper *example* returns an **empty transcription for all 40
+candle's whisper *example* returns an **empty transcription for all 40
 isolated digits**, while transformers reads the same files at 0.75. A control
 rules out the harness: the same binary transcribes the example's own long
-samples (JFK, a news clip) correctly. The unverified lead is a heavily rewritten
-`apply_timestamp_rules` in that example. Building it at all required two fixes:
-`candle-transformers` does not compile without CUDA (contradicting the catalog's
-own `whisper-cpu.yaml`, which declares `gpu.required: false`), and
-`candle-examples` declares symphonia 0.6 while its code uses the 0.5 API.
+samples (JFK, a news clip) correctly.
+
+The recorded output narrows down the cause. The example ran with timestamps on,
+and for every digit it printed one timestamped span with nothing in it
+(`0.0s-1.8s:`). So the window was decoded and kept, not dropped by the example's
+no-speech skip (which fires only when the no-speech probability is above 0.6 and
+the average log-probability below −1, and prints a message that never appeared
+for a digit). The decoder opened and closed a timestamp pair with no words
+between. That points at the example's timestamp rules, `apply_timestamp_rules`,
+which upstream candle added in huggingface/candle#3054. An earlier version of
+this section called that function the fork's rewrite. It is not: the fork's
+copy of the example is byte-identical to upstream's. It is still a lead, not a
+verified cause.
+
+Building the example at all required two fixes. `candle-transformers` in the
+fork did not compile without CUDA, contradicting the catalog's own
+`whisper-cpu.yaml`, which declares `gpu.required: false`. The fork has since
+added a CPU stub for the missing module. Also, `candle-examples` declares
+symphonia 0.6 while its audio code uses the 0.5 API. That declaration is
+upstream's too (a dependency bump, huggingface/candle#3546), so every symphonia
+example breaks there as well. The fork now pins 0.5.4.
 
 ### The executor: it transcribes, and it has four defects of its own
 
@@ -775,8 +792,9 @@ does against torchaudio, to locate the remaining disagreement.
 7. **Designing for a constraint beat retrofitting it.** A causal model with zero
    lookahead latency (0.673) beats chunking a bidirectional one (0.721), which is
    worth about four frames of delay for free.
-8. **Running the real models found defects no config could show.** The fork's
-   whisper *example* returns empty text for every isolated digit. The catalog's
+8. **Running the real models found defects no config could show.** candle's
+   whisper *example* (upstream code, unchanged in the fork) returns empty text
+   for every isolated digit. The catalog's
    executor does not (0 of 427 requests empty), and its static-decode and
    CUDA-graph paths match eager decoding byte for byte. It has four defects of
    its own: a language report that calls JFK Albanian on English-only models, a
