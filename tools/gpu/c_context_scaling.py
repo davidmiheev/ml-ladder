@@ -582,6 +582,53 @@ def plot(json_path: Path, figures: Path) -> None:
         plotting.save_fig(fig, figures / "c_gpu_shakespeare_warmup.png")
 
 
+def plot_budget(short_path: Path, long_path: Path, figures: Path) -> None:
+    """The same models at two training budgets: the 3000-step report and the 4x run."""
+    import matplotlib.pyplot as plt
+
+    from mlladder import plotting
+
+    plotting.use_house_style()
+    palette = plotting.PALETTE
+    short = json.loads(short_path.read_text())["enwik8"]
+    long = json.loads(long_path.read_text())["enwik8"]
+    models = [m for m in ENWIK8_MODELS if any(r["model"] == m for r in long)]
+    contexts = sorted({r["context"] for r in long})
+    fig, (left, right) = plt.subplots(1, 2, figsize=(12, 4.3))
+    for index, model in enumerate(models):
+        colour = palette[index % len(palette)]
+        for rows, steps, style in ((short, 3000, "--"), (long, 12000, "-")):
+            values = [
+                float(np.median([r["bits_per_byte"] for r in rows if r["model"] == model and r["context"] == c]))
+                for c in contexts
+            ]
+            left.plot(contexts, values, style, marker="o", color=colour, label=f"{model}, {steps} steps")
+            curves = [r["bits_by_position"] for r in rows if r["model"] == model and r["context"] == max(contexts)]
+            curve = np.median(np.array(curves), axis=0)
+            edges = np.unique(np.round(np.logspace(0, np.log10(len(curve)), 40)).astype(int))
+            centres = [np.sqrt(a * b) for a, b in itertools.pairwise(edges)]
+            right.plot(
+                centres,
+                [curve[a - 1 : b - 1].mean() for a, b in itertools.pairwise(edges)],
+                style,
+                color=colour,
+                label=f"{model}, {steps} steps",
+            )
+    left.set_xscale("log", base=2)
+    left.set_xticks(contexts, [str(c) for c in contexts])
+    left.set_xlabel("training context (bytes)")
+    left.set_ylabel("validation bits/byte (lower is better)")
+    left.set_title("4x the data: the transformer pulls away, and 1024 now beats 256")
+    left.legend(fontsize=8)
+    right.set_xscale("log")
+    right.set_xlabel("position in the window = bytes of context available")
+    right.set_ylabel("bits/byte at that position")
+    right.set_title(f"Loss by position, models trained at T={max(contexts)}")
+    right.legend(fontsize=8)
+    fig.tight_layout()
+    plotting.save_fig(fig, figures / "c_gpu_enwik8_budget.png")
+
+
 # ---------------------------------------------------------------------------
 
 
@@ -600,11 +647,20 @@ def main() -> None:
     parser.add_argument("--copy-lengths", nargs="+", type=int, default=[32, 128, 512])
     parser.add_argument("--copy-steps", type=int, default=1500)
     parser.add_argument("--plot", metavar="JSON", help="only draw figures from an existing report")
+    parser.add_argument(
+        "--plot-budget",
+        nargs=2,
+        metavar=("SHORT_JSON", "LONG_JSON"),
+        help="only draw the budget comparison from two enwik8 reports",
+    )
     parser.add_argument("--figures", default=str(ROOT / "docs/writeups/figures/c"))
     args = parser.parse_args()
 
     if args.plot:
         plot(Path(args.plot), Path(args.figures))
+        return
+    if args.plot_budget:
+        plot_budget(Path(args.plot_budget[0]), Path(args.plot_budget[1]), Path(args.figures))
         return
 
     import torch
@@ -613,7 +669,7 @@ def main() -> None:
     report = json.loads(Path(args.out).read_text()) if Path(args.out).exists() else {}
     report["device"] = torch.cuda.get_device_name(0) if device.type == "cuda" else "cpu"
     report["torch"] = torch.__version__
-    report["settings"] = {k: v for k, v in vars(args).items() if k not in ("plot", "figures")}
+    report["settings"] = {k: v for k, v in vars(args).items() if k not in ("plot", "plot_budget", "figures")}
     report["sdpa_vs_explicit_max_abs_diff"] = attention_equivalence(device)
     print("SDPA vs explicit attention, max |diff|:", report["sdpa_vs_explicit_max_abs_diff"], flush=True)
     for study in args.studies:

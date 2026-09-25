@@ -428,9 +428,11 @@ worth more than the flexibility of attention, and that regime is small.
 Warmup and longer context, the two runs this section
 called obvious, have been done in
 [Part C at scale](#part-c-at-scale-more-context-more-data-a-bigger-transformer).
-Warmup changed nothing (2.310 → 2.312), and longer context did *not* make the
-recurrent models lose at a 49M-token budget. The transformer is the one model
-using the long context, but it was too under-trained to profit. Still open: RoPE
+Warmup changed nothing (2.310 → 2.312). Longer context did *not* make the
+recurrent models lose at a 49M-token budget, where the transformer was using
+the long context but was too under-trained to profit. At four times the budget
+it did: the 25M transformer beats the GRU at 1024 bytes by 0.175 bits, and its
+1024-byte model beats its 256-byte one. Still open: RoPE
 instead of additive encodings. And KV caching,
 which is the difference between a sampler that is $O(T)$ per token and one that
 is $O(T^2)$.
@@ -873,6 +875,67 @@ The 25M transformer runs at 67–83k tokens/s throughout.
 
 ![Throughput against context](figures/c/c_gpu_enwik8_throughput.png)
 
+**4. Four times the budget: the transformer pulls away, and 1024 bytes now beat 256.**
+
+The diagnosis above makes a prediction: give the two leading models more data
+and the transformer should gain much more than the GRU, and its 1024-byte model
+should overtake its 256-byte one. The rerun trains the GRU and the 25M
+transformer at 256 and 1024 bytes for **12,000 steps instead of 3000**: 197M
+tokens, about two epochs of the 90 MB training split, and 7.7 tokens per
+parameter for the transformer. Everything else is unchanged: same tokens per
+step, same schedule shape, same held-out bytes, seeds 0–2. Raw values are in
+[`data/c-gpu-long.json`](data/c-gpu-long.json).
+
+| model, context | 3000 steps (49M tokens) | 12,000 steps (197M tokens) | gain |
+| --- | --- | --- | --- |
+| GRU, 256 | 1.701 | 1.627 | −0.074 |
+| GRU, 1024 | 1.687 | 1.598 | −0.089 |
+| transformer 25M, 256 | 1.668 | 1.448 | −0.220 |
+| transformer 25M, 1024 | 1.721 | **1.423** | **−0.298** |
+
+Both predictions hold. The transformer gains three to four times as much as the
+GRU from the same extra data. At 1024 bytes the GRU's 0.034-bit lead becomes a
+**0.175-bit deficit**. The transformer's context curve also turns the right way
+round: 1024 bytes now beat 256 (1.423 against 1.448; seed ranges 1.411–1.424 and
+1.446–1.451 do not overlap). The largest gain in the table is at the longest
+context, which is where the model had been most starved.
+
+![The same models at two budgets](figures/c/c_gpu_enwik8_budget.png)
+
+*Dashed: 3000 steps. Solid: 12,000. Left: final bits/byte. Right: loss by
+position for the models trained at 1024. The GRU's solid curve drops but stays
+flat after about 100 bytes, while the transformer's keeps falling to the end of
+the window.*
+
+Per position, trained at 1024:
+
+| 12,000 steps | positions 64–256 | 256–512 | 768–1024 |
+| --- | --- | --- | --- |
+| GRU | 1.581 | 1.593 | 1.577 |
+| transformer 25M | 1.439 | 1.409 | **1.368** |
+| *transformer 25M trained at 256, same positions* | *1.397* | — | — |
+
+The GRU is still flat: 1.581 at 64–256 bytes of history, 1.577 at 768–1024. The
+extra data made it better everywhere and made it use distant context no more
+than before. The transformer improves by 0.071 bits from the early positions to
+the late ones, and its last 256 positions reach 1.368, better than anything the
+256-byte model can do at any position (its best bin, 192–256, is 1.390).
+
+The short-range cost has not fully gone. At positions 64–256 the 1024-byte model
+still trails its 256-byte twin (1.439 against 1.397), though the gap shrank from
+0.129 bits to 0.042. The 1024-byte model spends capacity, and fewer sequences
+per step, on positions the 256-byte model never has to learn. It now recovers
+more than that at the far end of the window. One effect in these averages is
+not about memory. A window's score averages over all its positions, and the
+first 64 (little history, about 1.7 bits) are a quarter of a 256-byte window but
+a sixteenth of a 1024-byte one. That is most of why the GRU's 1024 score beats
+its 256 score even though its curve is flat. The per-position table, not the
+headline number, is what shows the transformer reading its context.
+
+At 7.7 tokens per parameter the transformer is still under Chinchilla's ~20, and
+its curve has not flattened, so this is not its ceiling. Cost: 55 minutes per
+seed on the T4 for the transformer at 1024, against 18 for the GRU.
+
 ### What surprised me
 
 C3 closed on a prediction ("longer context, where the recurrent models must
@@ -881,15 +944,21 @@ GRU beat a same-size transformer at 1024 bytes of context, on the benchmark
 where transformers made their name, and the transformer's own curve went the
 wrong way. Two things turned that from a contradiction into a diagnosis: the
 per-position loss, which shows the transformer is the one model that *uses* the
-long context, and the copy task, which shows its memory is not the problem. What
-is left is budget. The 4× longer run below tests that directly.
+long context, and the copy task, which shows its memory is not the problem. That
+left budget, and the 4× run confirmed it. With four times the data the 25M
+transformer beats the GRU at 1024 bytes by 0.175 bits, and 1024 bytes beat 256.
+The lesson is about how to read a result. "More context did not help" at 49M
+tokens was a statement about the budget, not the architecture, and the
+per-position curve showed that before the longer run did.
 
 ### Open threads
 
 A tokenised corpus, since byte-level modelling spends most of a small model's
 capacity on spelling. RoPE instead of learned positions, which do not have to be
-learned separately at every offset. And a learning-rate sweep for the matched
-transformer at 1024, whose seed spread says the setting is on an edge.
+learned separately at every offset, and should shrink the short-range cost the
+1024-byte model still pays. A learning-rate sweep for the matched transformer
+at 1024, whose seed spread says the setting is on an edge. And the 4× budget for
+the matched 4M transformer, which was only rerun for the 25M one.
 
 ---
 

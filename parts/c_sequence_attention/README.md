@@ -77,7 +77,9 @@ GPU rerun ruled it out (2.310 without, 2.312 with). The same study on enwik8
 then showed where attention does win: a 4M transformer copies a sequence 512
 symbols back perfectly where a same-size LSTM fails at 128, and a 25M
 transformer is the best language model at 64 and 256 bytes of context. At
-1024 bytes, with a 49M-token budget, it is still too under-trained to profit
+1024 bytes, with a 49M-token budget, it is still too under-trained to profit.
+At four times the budget it is not: 1.423 bits/byte at 1024 bytes against the
+GRU's 1.598, and better than its own 256-byte model
 ([writeup](../../docs/writeups/c-sequence-attention.md#part-c-at-scale-more-context-more-data-a-bigger-transformer),
 [`tools/gpu/c_context_scaling.py`](../../tools/gpu/c_context_scaling.py)).
 
