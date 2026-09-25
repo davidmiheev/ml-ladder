@@ -49,19 +49,24 @@ Whatever bounds the reference puts on the grid, this port does not have them.
 4. **`deepseek2.rs` + `examples/deepseekv2/main.rs`** — DeepSeek-V2-Lite is
    31.4 GB in f16 against a 15.4 GB card, and the example had no way to ask for
    less. Added the same load-time quantization `gemma4` and `qwen3_5` already
-   use: a `Proj` that quantizes on the CPU (so a full f32 copy never reaches the
-   GPU) and keeps a `QMatMul`, threaded through attention, the MLP, the MoE
+   use: a `Proj` that reads each weight onto the CPU, quantizes it there (so no
+   float copy reaches the GPU) and keeps a `QMatMul`, threaded through attention, the MLP, the MoE
    experts and `lm_head`, plus `DeepSeekV2::new_with_quant` and a `--quant`
    flag taking q8_0/q6k/q5k/q4k/q4_0/q3k/q2k. `--dtype` is there too, because
    the example hardcoded bf16 and bf16 needs sm_80.
 
    `quant_dtype_for` handles the case k-quants cannot: the dense MLP's
    `down_proj` reduces over 10944 and each expert's over 1408, neither a
-   multiple of 256. Both are multiples of 32, so those fall back to Q8_0.
+   multiple of 256. Both are multiples of 32, so those fall back to the block
+   format of the same width (Q4_0 for Q4_K, Q5_0 for Q5_K, Q8_0 for Q6_K).
 
-   **Status: compiles, and the flags are live on the binary — but not yet run
-   end to end.** The GPU session was reclaimed during the 31.4 GB download,
-   twice. The wiring is unverified against generated tokens.
+   **Status: run end to end on a Kaggle T4 (2026-09-25).** q4k, f16
+   activations: 8.97 GB peak, 10.5–15.1 tok/s, coherent, against bitsandbytes
+   NF4's 4.44 tok/s. It took two more fixes, both now on `ignite-perf`: the
+   CUDA quantized vector matmul rejects f16 activations, so `Proj` runs it in
+   f32 and casts back; and the first version read each weight onto the GPU
+   before copying it to the CPU, which ran the 15 GB card out of memory during
+   loading.
 
 5. **`examples/gemma4/main.rs`** — a nested-prefix constructor
    (`TextModel::new_nested`), because a multimodal checkpoint keeps its decoder
@@ -135,6 +140,7 @@ BOS from a broken kernel — and I had guessed the kernel.
 | gemma-4-E2B-it | candle, f16, BOS fix | correct answer, 5.89 tok/s |
 | Qwen3.5-4B | candle, q4k, new example | correct answer, 26.79 tok/s |
 | DeepSeek-V2-Lite | transformers, bnb NF4 | coherent, 4.49 tok/s, 9.62 GB |
+| DeepSeek-V2-Lite | candle, q4k at load | coherent, 10.5–15.1 tok/s, 8.97 GB peak |
 
 `Qwen3.6-8B-A1.6B` (a community REAP-pruned derivative) produces token soup
 through the same binary and flags that Qwen3.5-4B answers correctly with — the

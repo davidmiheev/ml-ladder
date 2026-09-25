@@ -14,7 +14,31 @@
       "tokens_per_second": 4.439352610585038,
       "note": "sum(p.numel()) reports 8.06B for a 15.7B model because bitsandbytes packs two 4-bit weights per byte; a parameter count read off a quantized model is a packed-element count",
       "completion": "Grouped-query attention is a technique used in the field of natural language processing (NLP) to reduce the size of the key-value (KV) cache in a neural network. The KV cache is a data structure used to store",
-      "candle_status": "quantization is now wired into candle's deepseekv2 example (--quant q8_0..q2k, --dtype), compiles and exposes the flags, but has not generated a token: the GPU session was reclaimed during the 31.4 GB download twice. Unverified."
+      "candle_status": "RUN 2026-09-25, see candle_run below. (Earlier: wired and compiled but never run -- Colab sessions ended during the download.)",
+      "candle_run": {
+        "kernel": "https://www.kaggle.com/code/davidmiheev/ml-ladder-deepseek-candle",
+        "hardware": "Kaggle Tesla T4 (sm_75), CUDA 12.8",
+        "candle_commit": "davidmiheev/candle@687da6a3 (ignite-perf)",
+        "command": "deepseekv2 --which lite --quant q4k --dtype f16 -n 96 --repeat-penalty 1.0",
+        "quantization": "q4k at load; the 1408- and 10944-wide down projections fall back to q4_0 (k-quants need k % 256 == 0)",
+        "load_seconds": [
+          539.1,
+          528.1
+        ],
+        "gpu_peak_mib": 8965,
+        "gpu_peak_how": "nvidia-smi memory.used polled every 0.5 s, CUDA context included",
+        "tokens_per_second": [
+          10.51,
+          15.06
+        ],
+        "tokens_per_second_how": "the example's own timer: whole generation of 96 tokens, prompt pass included",
+        "completions": {
+          "Grouped-query attention reduces the size of the KV cache because": " it only needs to store the keys for the first few tokens in the sequence. This reduces the amount of memory required to store the entire sequence, which can be useful for applications that have limited memory resources.\n\n## 3.2.2.2.2.2 [loops]",
+          "The three laws of thermodynamics are": ":\n- The first law of thermodynamics states that energy can neither be created nor destroyed, but can be changed from one form to another.\n- The second law of thermodynamics states that the total entropy of an isolated system always increases.\n- The third law of thermodynamics states that the entropy of a system approaches a constant value as the temperature approaches absolute zero.\n\n## What is the first law of thermodynamics?"
+        },
+        "first_attempt": "commit cfb988ad: CUDA_ERROR_OUT_OF_MEMORY during load (peak 14.9 GB), because Proj::new read each float weight onto the GPU before copying it to the CPU to quantize. Fixed in 687da6a3 by reading weights onto the CPU (VarBuilder::set_device(Cpu)).",
+        "comparison": "transformers + bnb NF4 on a Colab T4: 4.44 tok/s, 9.62 GB footprint, 189.8 s load. candle generates 2.4-3.4x faster and loads 2.8x slower (single-threaded CPU quantization of 15.7B weights)."
+      }
     },
     {
       "model": "google/gemma-4-E2B-it",
@@ -109,7 +133,6 @@
   "not_run": {
     "Qwen/Qwen3.8-Flash-Next": "360 GB of weights; out of reach on any accelerator available here",
     "bf16 or AWQ Qwen 27B": "55.6 GB bf16, and 20.4/21.0 GB as 4-bit AWQ, against a 15.4 GB T4 -- the GGUF route at 3 bpw is what made these runnable at all",
-    "deepseek-ai/DeepSeek-V2-Lite via candle": "quantization wired (see tools/real_models/candle-patches), compiles, flags live, never run end to end",
     "Qwen3.6 official (27B / 35B-A3B) via candle": "55.6 GB and ~70 GB of weights; a 50-minute Colab session cannot hold the download and a from-scratch candle build together"
   },
   "candle_build": {

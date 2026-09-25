@@ -1093,22 +1093,44 @@ already does for itself in the same fork: it detects the
 load-time quantization. `gemma4` is the sibling that fell behind.
 
 **DeepSeek-V2-Lite** needed the quantization the example did not have. It is
-now wired: the same load-time `Proj` that `gemma4` and `qwen3_5` use — quantize
-on the CPU so a full f32 copy never reaches the GPU, keep a `QMatMul` — threaded
-through attention, the MLP, the 64 MoE experts and `lm_head`, behind
+now wired: a load-time `Proj` (a plain `Linear` or a `QMatMul`) threaded through
+attention, the MLP, the 64 MoE experts and `lm_head`, behind
 `DeepSeekV2::new_with_quant` and a `--quant` flag. One detail the model forces:
 k-quants need the reduction dimension to be a multiple of 256, and DeepSeek's
 dense `down_proj` reduces over 10944 while each expert's reduces over 1408.
-Neither qualifies, both are multiples of 32, so those layers fall back to Q8_0
-rather than silently producing a broken tensor.
+Neither qualifies. Both are multiples of 32, so those layers take the 32-wide
+block format of the same bit width (Q4_0 when Q4_K was asked for) rather than
+failing or silently producing a broken tensor.
 
-**It compiles and the flags are live on the binary, and that is all I can say
-for it** — the GPU session was reclaimed during the 31.4 GB download, twice, so
-no token has been generated through candle's quantizer. Wiring that has never
-run is a claim, not a result, and it is recorded here as one.
+**It ran on the third attempt.** The first two, on Colab, lost the GPU during the
+31.4 GB download. The first Kaggle run downloaded and built, then ran out of GPU
+memory partway through loading: each float weight was read onto the GPU, copied
+back to the CPU and quantized there, and the staging copies filled the 15 GB
+card before the 9 GB quantized model was assembled. Reading each weight straight
+onto the CPU fixed it:
 
-What *did* run is the same model pre-quantized on the hub
-(`slowfastai/DeepSeek-V2-Lite-bnb-4bit`), and the comparison is the useful part:
+| DeepSeek-V2-Lite on a T4 | load | GPU memory | gen tok/s |
+| --- | --- | --- | --- |
+| candle fork, q4k at load, f16 activations | 528–539 s | 8.97 GB peak | **10.5–15.1** |
+| transformers, bitsandbytes NF4 | 189.8 s | 9.62 GB footprint | 4.44 |
+
+Both answer coherently. Asked for the three laws of thermodynamics, the candle
+run lists all three correctly and then starts a new heading. Asked why
+grouped-query attention shrinks the KV cache, it gives a wrong reason ("it only
+needs to store the keys for the first few tokens") and then loops on "2.2.2".
+This is the base model decoded greedily with no repetition penalty, so neither
+is a runtime defect. Two caveats on the table. The memory figures are measured
+differently: candle's is the `nvidia-smi` peak, CUDA context included, while
+transformers' is the model's own footprint. candle's rate is timed over the
+whole generation, prompt pass included, and differs between the two prompts.
+Candle generates 2.4–3.4 times faster; the likely reason is GGML's fused
+quantized matrix-vector kernels against bitsandbytes dequantizing NF4 for each
+matmul, but that was not profiled. It loads 2.8 times slower, because it
+quantizes 15.7B weights on the CPU in one thread while bitsandbytes quantizes on
+the GPU.
+
+Through transformers the same model also ran pre-quantized from the hub
+(`slowfastai/DeepSeek-V2-Lite-bnb-4bit`), and that comparison is useful too:
 
 | | load | resident | gen tok/s |
 | --- | --- | --- | --- |
