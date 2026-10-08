@@ -7,7 +7,7 @@ regime with neither the context nor the data attention is built for -- and
 lists "warmup" and "longer context, where the recurrent models must lose" as
 open threads. This script runs those threads.
 
-Three studies, each over seeds 0-2:
+Four studies, each over seeds 0-2:
 
 ``shakespeare``
     C1/C3's exact regime (same corpus slice, context, batch, steps, peak
@@ -30,7 +30,17 @@ Three studies, each over seeds 0-2:
     The second half is predictable only by looking exactly n positions back,
     so accuracy there measures usable memory and nothing else.
 
-Writes one JSON file (``--out``); ``--plot`` turns it into the figures.
+``bpe``
+    The GRU and the 25M transformer on a 4096-token BPE vocabulary instead of
+    bytes, scored in bits per byte on the same held-out bytes.
+
+Also: ``transformer-25M-rope`` (rotary positions instead of the learned
+table) as an enwik8 model, and ``--peak-lr`` to override a model's learning
+rate for sweeps.
+
+Writes one JSON file (``--out``); ``--plot`` turns it into the figures,
+``--plot-budget`` draws the 4x comparison and ``--plot-followups`` the RoPE,
+learning-rate and BPE figures.
 """
 
 from __future__ import annotations
@@ -849,6 +859,135 @@ def plot_budget(short_path: Path, long_path: Path, figures: Path) -> None:
     plotting.save_fig(fig, figures / "c_gpu_enwik8_budget.png")
 
 
+def plot_followups(data: Path, figures: Path) -> None:
+    """RoPE, the learning-rate sweep and BPE, from the follow-up reports in ``data``."""
+    import matplotlib
+    import matplotlib.pyplot as plt
+
+    from mlladder import plotting
+
+    plotting.use_house_style()
+    palette = plotting.PALETTE
+
+    def rows(name, key="enwik8"):
+        path = data / name
+        return json.loads(path.read_text()).get(key, []) if path.exists() else []
+
+    def med(values):
+        return float(np.median(values)) if values else float("nan")
+
+    def binned(curve):
+        edges = np.unique(np.round(np.logspace(0, np.log10(len(curve)), 40)).astype(int))
+        centres = [np.sqrt(a * b) for a, b in itertools.pairwise(edges)]
+        return centres, [curve[a - 1 : b - 1].mean() for a, b in itertools.pairwise(edges)]
+
+    long = rows("c-gpu-long.json")
+    rope = rows("c-gpu-rope-256.json") + rows("c-gpu-rope-1024.json")
+    if rope:
+        fig, (left, right) = plt.subplots(1, 2, figsize=(12, 4.3))
+        for index, (label, group, model) in enumerate(
+            (("learned positions", long, "transformer-25M"), ("RoPE", rope, "transformer-25M-rope"))
+        ):
+            colour = palette[index]
+            contexts = sorted({r["context"] for r in group if r["model"] == model})
+            values = [
+                med([r["bits_per_byte"] for r in group if r["model"] == model and r["context"] == c]) for c in contexts
+            ]
+            left.plot(contexts, values, marker="o", color=colour, label=label)
+            for context, style in ((256, "--"), (1024, "-")):
+                curves = [r["bits_by_position"] for r in group if r["model"] == model and r["context"] == context]
+                if curves:
+                    x, y = binned(np.median(np.array(curves), axis=0))
+                    right.plot(x, y, style, color=colour, label=f"{label}, trained at T={context}")
+        left.set_xscale("log", base=2)
+        left.set_xticks([256, 1024], ["256", "1024"])
+        left.set_xlabel("training context (bytes)")
+        left.set_ylabel("validation bits/byte (lower is better)")
+        left.set_title("25M transformer, 12,000 steps: learned positions vs RoPE")
+        left.legend(fontsize=8)
+        right.set_xscale("log")
+        right.set_xlabel("position in the window = bytes of context available")
+        right.set_ylabel("bits/byte at that position")
+        right.set_title("Loss by position")
+        right.legend(fontsize=8)
+        fig.tight_layout()
+        plotting.save_fig(fig, figures / "c_gpu_rope.png")
+
+    sweep = rows("c-gpu-lr.json") + rows("c-gpu-lr2-1024.json") + rows("c-gpu-lr2-256.json")
+    sweep += rows("c-gpu-lr3-gru-1024.json") + rows("c-gpu-lr3-gru-256.json")
+    if sweep:
+        short = rows("c-gpu.json")
+        # The 3000-step originals ran at each model's default learning rate.
+        defaults = {"transformer-4M": 1e-3, "gru": 2e-3}
+        sweep += [r | {"peak_lr": defaults[r["model"]]} for r in short if r["model"] in defaults]
+        sweep = [r for r in sweep if r["context"] in (256, 1024)]
+        fig, ax = plt.subplots(figsize=(7.5, 4.4))
+        for index, context in enumerate((256, 1024)):
+            colour = palette[index]
+            for model, style, marker in (("transformer-4M", "-", "o"), ("gru", "--", "s")):
+                lrs = sorted({r["peak_lr"] for r in sweep if r["context"] == context and r["model"] == model})
+                per = [
+                    [
+                        r["bits_per_byte"]
+                        for r in sweep
+                        if r["context"] == context and r["model"] == model and r["peak_lr"] == lr
+                    ]
+                    for lr in lrs
+                ]
+                ax.errorbar(
+                    lrs,
+                    [med(v) for v in per],
+                    yerr=[[med(v) - min(v) for v in per], [max(v) - med(v) for v in per]],
+                    linestyle=style,
+                    marker=marker,
+                    capsize=3,
+                    color=colour,
+                    label=f"{'transformer 4M' if model != 'gru' else 'GRU'}, T={context}",
+                )
+        lrs = sorted({r["peak_lr"] for r in sweep})
+        ax.set_xscale("log")
+        ax.set_xticks(lrs, [f"{lr:g}" for lr in lrs])
+        ax.xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
+        ax.set_xlabel("peak learning rate (defaults: transformer 1e-3, GRU 2e-3)")
+        ax.set_ylabel("validation bits/byte, 3000 steps")
+        ax.set_title("Learning rate, matched ~4M models, 3000 steps (49M tokens)")
+        ax.legend(fontsize=8)
+        plotting.save_fig(fig, figures / "c_gpu_lr_sweep.png")
+
+    bpe = rows("c-gpu-bpe.json", "bpe")
+    if bpe:
+        short = rows("c-gpu.json")
+        fig, ax = plt.subplots(figsize=(10, 4.4))
+        for index, model in enumerate(("gru", "transformer-25M")):
+            colour = palette[index]
+            for group, style, marker, label in (
+                (short, ":", "s", "bytes, 3000 steps"),
+                (long, "--", "o", "bytes, 12,000 steps"),
+            ):
+                points = sorted({r["context"] for r in group if r["model"] == model})
+                ys = [
+                    med([r["bits_per_byte"] for r in group if r["model"] == model and r["context"] == c])
+                    for c in points
+                ]
+                ax.plot(points, ys, style, marker=marker, color=colour, label=f"{model}, {label}")
+            contexts = sorted({r["context"] for r in bpe if r["model"] == model})
+            xs = [
+                med([r["context_bytes_mean"] for r in bpe if r["model"] == model and r["context"] == c])
+                for c in contexts
+            ]
+            ys = [med([r["bits_per_byte"] for r in bpe if r["model"] == model and r["context"] == c]) for c in contexts]
+            ax.plot(xs, ys, "-", marker="D", color=colour, label=f"{model}, BPE tokens, 3000 steps")
+        ax.set_xscale("log", base=2)
+        ticks = [64, 256, 1024, 4096]
+        ax.set_xticks(ticks, [str(t) for t in ticks])
+        ax.set_xlabel("context, in bytes of text")
+        ax.set_ylabel("validation bits/byte (lower is better)")
+        ax.set_title("Bytes vs BPE tokens, scored on the same held-out bytes")
+        ax.legend(fontsize=7, loc="center left", bbox_to_anchor=(1.01, 0.5))
+        fig.tight_layout()
+        plotting.save_fig(fig, figures / "c_gpu_bpe.png")
+
+
 # ---------------------------------------------------------------------------
 
 
@@ -870,6 +1009,7 @@ def main() -> None:
     parser.add_argument("--bpe-vocab", type=int, default=4096)
     parser.add_argument("--bpe-train-bytes", type=int, default=20_000_000, help="bytes the tokenizer is fitted on")
     parser.add_argument("--plot", metavar="JSON", help="only draw figures from an existing report")
+    parser.add_argument("--plot-followups", metavar="DATA_DIR", help="only draw the RoPE / LR / BPE figures")
     parser.add_argument(
         "--plot-budget",
         nargs=2,
@@ -882,6 +1022,9 @@ def main() -> None:
     if args.plot:
         plot(Path(args.plot), Path(args.figures))
         return
+    if args.plot_followups:
+        plot_followups(Path(args.plot_followups), Path(args.figures))
+        return
     if args.plot_budget:
         plot_budget(Path(args.plot_budget[0]), Path(args.plot_budget[1]), Path(args.figures))
         return
@@ -892,7 +1035,9 @@ def main() -> None:
     report = json.loads(Path(args.out).read_text()) if Path(args.out).exists() else {}
     report["device"] = torch.cuda.get_device_name(0) if device.type == "cuda" else "cpu"
     report["torch"] = torch.__version__
-    report["settings"] = {k: v for k, v in vars(args).items() if k not in ("plot", "plot_budget", "figures")}
+    report["settings"] = {
+        k: v for k, v in vars(args).items() if k not in ("plot", "plot_budget", "plot_followups", "figures")
+    }
     report["sdpa_vs_explicit_max_abs_diff"] = attention_equivalence(device)
     report["rope_relative_max_abs_dev"] = rope_relative_check(device)
     print("RoPE score depends only on offset, max |dev|:", report["rope_relative_max_abs_dev"], flush=True)

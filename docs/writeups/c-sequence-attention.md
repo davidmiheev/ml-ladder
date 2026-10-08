@@ -432,8 +432,9 @@ Warmup changed nothing (2.310 → 2.312). Longer context did *not* make the
 recurrent models lose at a 49M-token budget, where the transformer was using
 the long context but was too under-trained to profit. At four times the budget
 it did: the 25M transformer beats the GRU at 1024 bytes by 0.175 bits, and its
-1024-byte model beats its 256-byte one. Still open: RoPE
-instead of additive encodings. And KV caching,
+1024-byte model beats its 256-byte one. RoPE instead of additive encodings has
+been run there too: better at both contexts, and it removes the short-range cost
+of the longer window. Still open: KV caching,
 which is the difference between a sampler that is $O(T)$ per token and one that
 is $O(T^2)$.
 
@@ -838,7 +839,8 @@ C2's bottleneck, measured on the architecture that removed it.
 ![Bits per byte against context](figures/c/c_gpu_enwik8_context.png)
 
 The 25M transformer posts the best number in the table, 1.668 at 256 bytes.
-Among the size-matched ~4M models, however, the **GRU wins at every context**,
+Among the size-matched ~4M models, however, the **GRU wins at every context**
+(at the original learning rates; section 7 revisits this),
 and the matched transformer gets *worse* as context grows, ending unstable at
 1024 (seed range 2.01–2.18). So the promised crossover, "longer context, where
 the recurrent models must lose", did not happen at this budget, and the bigger
@@ -936,6 +938,129 @@ At 7.7 tokens per parameter the transformer is still under Chinchilla's ~20, and
 its curve has not flattened, so this is not its ceiling. Cost: 55 minutes per
 seed on the T4 for the transformer at 1024, against 18 for the GRU.
 
+Sections 5–8 follow up the four open threads the 4× run left, on the same T4s
+and protocol (seeds 0–2, medians). Raw values:
+[`data/c-gpu-rope-256.json`](data/c-gpu-rope-256.json) and
+[`-1024`](data/c-gpu-rope-1024.json) (RoPE),
+[`data/c-gpu-4m-long.json`](data/c-gpu-4m-long.json) (the 4M transformer at 4×),
+[`data/c-gpu-lr.json`](data/c-gpu-lr.json),
+[`c-gpu-lr2-*.json`](data/c-gpu-lr2-1024.json) and
+[`c-gpu-lr3-gru-*.json`](data/c-gpu-lr3-gru-1024.json) (learning rates), and
+[`data/c-gpu-bpe.json`](data/c-gpu-bpe.json) (BPE).
+
+**5. Rotary positions remove the short-range cost.**
+
+C3's transformer learns one position vector per offset, so a 1024-byte model has
+1024 of them to fit, and the model trained at 1024 paid for that at short range
+(above). **Rotary position embeddings (RoPE)** drop the table. Instead, each
+query and key vector is rotated by an angle proportional to its position, pair
+of channels by pair of channels, at a different frequency per pair. The dot
+product of a query at position $p$ and a key at position $r$ then depends only
+on $p - r$, so what the model learns about "two bytes back" applies at every
+position. Checked numerically before training: with the same query and key at
+every position, scores along each diagonal agree to $9\times10^{-6}$. The rerun
+repeats the 4× protocol with only this change.
+
+| 25M transformer, 12,000 steps | T=256 | T=1024 | T=1024 model, positions 64–256 | its positions 768–1024 |
+| --- | --- | --- | --- | --- |
+| learned positions | 1.448 | 1.423 | 1.439 (256-model: 1.397) | 1.368 |
+| RoPE | **1.399** | **1.325** | **1.339** (256-model: 1.343) | **1.279** |
+
+![Learned positions vs RoPE](figures/c/c_gpu_rope.png)
+
+RoPE helps at both contexts, and twice as much at 1024 (−0.098 bits) as at 256
+(−0.049), which is where the learned table had the most offsets to learn. The
+prediction holds exactly where it was aimed. At positions 64–256 the
+1024-byte RoPE model scores 1.339 against its 256-byte twin's 1.343: the
+short-range cost, 0.042 bits with learned positions, is gone. It also reaches
+1.279 over its last 256 positions. Seed ranges are 0.01 or less throughout.
+The cost was speed: 44k against 60k tokens/s at 1024 (75 against 55 minutes per
+seed), because this implementation recomputes the rotation unfused, in fp32, in
+every layer. A fused kernel would remove most of that; it is not a property of
+RoPE.
+
+**6. The matched 4M transformer at 4× the budget.**
+
+Section 3's matched comparison, the GRU winning at every context, was made at
+49M tokens. Rerun at 12,000 steps:
+
+| ~4M models, 12,000 steps | T=256 | T=1024 |
+| --- | --- | --- |
+| GRU | 1.627 | 1.598 |
+| transformer 4M, LR 1e-3 (the original setting) | **1.603** | 1.602 (1.599–1.692) |
+| transformer 4M, LR 2e-3 (the sweep's best, below) | — | **1.544** |
+
+With more data the matched transformer catches the GRU: ahead at 256 bytes,
+level at 1024 with its original learning rate (one seed of three still
+unstable), and 0.054 bits ahead at 1024 with the learning rate the next
+experiment found. So at a size-matched 4M parameters, too, "the GRU wins" was a
+statement about the 49M-token budget.
+
+**7. Learning rate: what section 3's matched comparison was partly measuring.**
+
+The matched transformer's seed spread at 1024 (2.01–2.18) suggested its
+learning rate was on an edge. Both ~4M models were swept at the original 49M-token
+budget, the transformer from 3e-4 to 8e-3 and the GRU from 1e-3 to 8e-3, three
+seeds each:
+
+| peak learning rate | 3e-4 | 6e-4 | 1e-3 | 2e-3 | 4e-3 | 8e-3 |
+| --- | --- | --- | --- | --- | --- | --- |
+| transformer 4M, T=256 | | | 1.863 | 1.704 | 1.644 | **1.631** |
+| transformer 4M, T=1024 | 3.028 | 2.435 | 2.044 | **1.825** | 1.843 | 2.127 |
+| GRU, T=256 | | | 1.730 | **1.701** | 1.745 | 1.903 |
+| GRU, T=1024 | | | 1.725 | **1.687** | 1.737 | 1.911 |
+
+![Learning-rate sweeps](figures/c/c_gpu_lr_sweep.png)
+
+The GRU's original setting (2e-3) is its optimum at both contexts, so it was
+fairly tuned. The transformer's (1e-3) was not: half its best value at 1024,
+an eighth at 256. Tuned, the matched transformer **beats the GRU at 256 bytes
+even at 49M tokens** (1.631 against 1.701), and the unstable seeds at 1024
+vanish (2e-3: 1.823–1.828). At 1024 bytes the GRU still wins at this budget
+(1.687 against 1.825), and higher learning rates make the transformer worse and
+noisy again. So section 3's "the GRU wins at every context" was half a
+learning-rate artefact. The half that survives tuning is the 1024-byte result,
+which section 6 shows was the budget. At 256 the transformer's curve has not
+turned yet at 8e-3, so its optimum may lie higher.
+
+**8. BPE tokens instead of bytes.**
+
+A byte-level model spends much of its capacity and context on spelling. A
+**tokenizer** moves spelling out of the model: **byte-pair encoding (BPE)**
+starts from single bytes and repeatedly merges the most frequent adjacent pair
+into a new token, here until there are 4096. It was fitted on the first 20 MB of
+the training split, on the bytes read one character each (latin-1), with
+splits at word, number, punctuation and whitespace boundaries. On held-out text
+one token averages **2.89 bytes**. Scoring stays in bits per *byte*: the total
+loss of the predicted tokens divided by the number of bytes they spell, on the
+same held-out bytes as every model above. A check in the code asserts that the
+tokens spell every byte exactly once. Same 16,384 tokens per step and 3000 steps
+as the original byte runs, so about the same compute per step, but each step now
+covers 2.89 times more text: 142M bytes in all, against 49M (3000 steps) and
+197M (12,000 steps) on bytes.
+
+| | bytes, 3000 steps | bytes, 12,000 steps | BPE, 3000 steps |
+| --- | --- | --- | --- |
+| GRU, ~256 / ~1024 bytes of context | 1.701 / 1.687 | 1.627 / 1.598 | **1.520** / **1.514** |
+| transformer 25M | 1.668 / 1.721 | 1.448 / 1.423 | **1.424** / 1.552 |
+| wall-clock per run, transformer (T4) | 11–12 min | 47–55 min | 14–16 min |
+
+*BPE contexts are 256 and 1024 tokens, which spell 818 and 3272 bytes on
+average.*
+
+![Bytes vs BPE tokens](figures/c/c_gpu_bpe.png)
+
+Tokenizing buys what the 4× byte budget bought, at a quarter of the steps and
+under a third of the wall-clock: the 25M transformer at 256 tokens (1.424)
+matches the byte model at 12,000 steps and 1024 bytes (1.423). The GRU gains
+even more: it beats its own 4× byte result by 0.08–0.11 bits, for 4–6 minutes of
+training. Two caveats. Parameters are not matched: the 4096-entry input and
+output layers double the GRU to 9.1M and take the transformer to 29.5M, and
+the larger output layer costs compute too. And the transformer at 1024 tokens
+(1.552) is worse than at 256 (1.424). That is the same pattern section 3 found
+on bytes at this budget: 16 sequences per step instead of 64 and 1024 learned
+offsets to fit. RoPE and the longer budget are the measured remedies for it.
+
 ### What surprised me
 
 C3 closed on a prediction ("longer context, where the recurrent models must
@@ -951,14 +1076,23 @@ The lesson is about how to read a result. "More context did not help" at 49M
 tokens was a statement about the budget, not the architecture, and the
 per-position curve showed that before the longer run did.
 
+The follow-ups found the same thing three more times. "The GRU wins at 256
+bytes" was the transformer's learning rate. "The 1024-byte model pays at short
+range" was its position table: RoPE removes the cost and is better everywhere.
+And "the model needs 4× the steps" turned out to be "the model needs 4× the
+text", which a tokenizer supplies at a quarter of the steps. Each was a property
+of one setting that I would have reported as a property of the architecture.
+
 ### Open threads
 
-A tokenised corpus, since byte-level modelling spends most of a small model's
-capacity on spelling. RoPE instead of learned positions, which do not have to be
-learned separately at every offset, and should shrink the short-range cost the
-1024-byte model still pays. A learning-rate sweep for the matched transformer
-at 1024, whose seed spread says the setting is on an edge. And the 4× budget for
-the matched 4M transformer, which was only rerun for the 25M one.
+The four listed here before (a tokenized corpus, RoPE, the learning-rate sweep
+and the matched transformer at 4×) are sections 5–8. Still open: the
+combination, RoPE and BPE together at the 4× budget, which this section
+measured only one at a time. Parameter-matched BPE models, since the larger
+vocabulary adds parameters. A fused rotary kernel, to separate RoPE's quality
+from this implementation's 27% speed cost. The transformer's learning rate at
+256 above 8e-3, where its curve had not yet turned. And the learning rate at
+the 4× budget, which was swept only at 49M tokens.
 
 ---
 
