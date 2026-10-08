@@ -659,32 +659,91 @@ does, with only the ignite SDK plumbing removed (request parsing and the asset
 loader, replaced by a local directory holding the same four files). They share
 the model weights and the network, and almost nothing that decides the output.
 
-### The example: empty transcriptions
+### The example: empty transcriptions, and why
 
 candle's whisper *example* returns an **empty transcription for all 40
 isolated digits**, while transformers reads the same files at 0.75. A control
 rules out the harness: the same binary transcribes the example's own long
 samples (JFK, a news clip) correctly.
 
-The recorded output narrows down the cause. The example ran with timestamps on,
-and for every digit it printed one timestamped span with nothing in it
-(`0.0s-1.8s:`). So the window was decoded and kept, not dropped by the example's
-no-speech skip (which fires only when the no-speech probability is above 0.6 and
-the average log-probability below −1, and prints a message that never appeared
-for a digit). The decoder opened and closed a timestamp pair with no words
-between. That points at the example's timestamp rules, `apply_timestamp_rules`,
-which upstream candle added in huggingface/candle#3054. An earlier version of
-this section called that function the fork's rewrite. It is not: the fork's
-copy of the example is byte-identical to upstream's. It is still a lead, not a
-verified cause.
+**The cause, measured.** The example ran with timestamps on (its
+`--timestamps` flag defaults to true and cannot be switched off), and every
+digit came back as one timestamped span with nothing in it. So the
+window was decoded and kept, not dropped by the no-speech skip. To find out
+why, upstream's current example (huggingface/candle@c68b2499; the fork's copy
+is identical in these lines) was built on CPU and run over this part's clips
+with each suspected defect toggled separately, printing the token ids.
 
-Building the example at all required two fixes. `candle-transformers` in the
+The ids show what happens. For `tiny.en`, `50358` is `<|transcribe|>`,
+`50363` is `<|0.00|>` and `50256` is end-of-text:
+
+```
+"zero", take 1   [SOT, <|transcribe|>, <|1.78|>, EOT]                 -> ""
+"zero", take 0   [SOT, <|transcribe|>, <|1.80|>, <|1.80|>, text ...]  -> empty segment, then a hallucination
+```
+
+Two defects compound:
+
+1. **The prompt.** English-only checkpoints were trained on
+   `<|startoftranscript|>` alone, with no language and no task token. The
+   example always appends `<|transcribe|>`, which these models never saw, and
+   with it `tiny.en` opens with a late timestamp, around 1.8 s on clips whose
+   speech starts at 0 s. This is the same out-of-distribution token as the
+   executor's defect 4 below.
+2. **The pairing rule.** Whisper's timestamps come in pairs that bracket a
+   segment. The rule that enforces this (openai/whisper's `ApplyTimestampRules`,
+   transformers' `WhisperTimeStampLogitsProcessor`) checks whether the previous
+   token was also a timestamp, and when fewer than two tokens have been sampled
+   it answers *yes* (`len(seq) < 2 or ...`). So after the initial timestamp the
+   next token must be text. candle's port answers *no*. It therefore reads the
+   initial timestamp as an open pair, masks out every text token, and leaves
+   the model only two moves: close an empty segment or stop.
+
+![Empty transcriptions: each fix toggled](figures/i/i_whisper_example_rules.png)
+
+| `tiny.en`, CPU | digits exact | sequence WER | JFK | clips with an empty segment | words equal to transformers' |
+| --- | --- | --- | --- | --- | --- |
+| upstream example | 0.00 | 0.925 | perfect | 61/61 | 2/61 |
+| pairing rule fixed only | 0.00 | 1.000 | **empty** | 61/61 | 0/61 |
+| prompt fixed only | 0.02 | 0.375 | perfect | 61/61 | 9/61 |
+| **both fixed** | **0.42** | **0.200** | perfect | **1/61** | **42/61** |
+| both, temperature fallback off | 0.44 | 0.200 | perfect | 0/61 | 44/61 |
+| transformers, timestamps on | 0.44 | 0.150 | perfect | 0/61 | — |
+
+*Ten four-digit sequences, the 50 digit clips (resampled to 16 kHz, which the
+example requires), JFK. "Empty segment" counts a timestamp pair with no text
+between, or an opening timestamp followed by end-of-text, read off the token
+ids.*
+
+Neither fix works alone, which is why this was hard to see. With only the
+pairing rule fixed, the model still opens late, and now that text is required
+after the first timestamp it ends the transcript instead, so even JFK comes
+back empty. With only the prompt fixed, every clip still has an empty segment.
+Together they come within one digit clip and two sequence words of transformers' scores. The reference's
+default cap on the first timestamp (1 s, which the example leaves unset)
+changes nothing once the prompt is right, because the first timestamp is then
+0.00 s, as in transformers. The multilingual `tiny` improves too: digits
+0.12 → 0.26, and empty segments 59 → 0 of 61. A smaller third bug: printed span
+times run 40 ms late, because `<|0.00|>` is the token *after*
+`<|notimestamps|>`, not two after.
+
+The fix is 17 lines and is on the fork as
+[davidmiheev/candle#13](https://github.com/davidmiheev/candle/pull/13), ready to
+send upstream; the patch is also in
+[`tools/real_models/candle-patches/`](../../tools/real_models/candle-patches/whisper-example-timestamps.patch).
+Raw token ids and transcripts for every arm:
+[`data/i-whisper-example-rules.json`](data/i-whisper-example-rules.json),
+made with
+[`tools/real_models/whisper_example_rules.py`](../../tools/real_models/whisper_example_rules.py).
+
+Building the example at all required two fixes at the time. `candle-transformers` in the
 fork did not compile without CUDA, contradicting the catalog's own
 `whisper-cpu.yaml`, which declares `gpu.required: false`. The fork has since
-added a CPU stub for the missing module. Also, `candle-examples` declares
-symphonia 0.6 while its audio code uses the 0.5 API. That declaration is
-upstream's too (a dependency bump, huggingface/candle#3546), so every symphonia
-example breaks there as well. The fork now pins 0.5.4.
+added a CPU stub for the missing module. Also, `candle-examples` declared
+symphonia 0.6 while its audio code used the 0.5 API. That declaration is
+upstream's (a dependency bump, huggingface/candle#3546), and upstream has since
+ported the audio code to 0.6 (huggingface/candle#3945), so the fork's 0.5.4 pin
+is no longer needed once it syncs.
 
 ### The executor: it transcribes, and it has four defects of its own
 
@@ -748,20 +807,55 @@ with the language given), and omitting the language token changes 13 of 61
 turbo transcripts (`Oui.` against `We.` for a spoken "three", `3.` against
 `three.`).
 
+### The executor's defects, fixed and re-measured
+
+The four defects are fixed on ignite-catalog's
+`fix/candle-transcription-executor` branch:
+- the English-only prompt is `[SOT, notimestamps]`, and language detection is
+  skipped for `.en` models;
+- `suppress_tokens` and `begin_suppress_tokens` come from
+  `generation_config.json`;
+- the mel filters are chosen by `num_mel_bins` and checked before the weights
+  load;
+- the first window's encoder output is reused instead of computed twice;
+- the fallback re-decodes a window only when its output repeats (compression
+  ratio above 2.4), never just for low confidence.
+
+Run again on CPU over the same 61 clips:
+
+| `tiny.en` executor | digits exact | sequence WER | JFK | words equal to transformers' | reported language |
+| --- | --- | --- | --- | --- | --- |
+| before | 0.58 | 0.250 | perfect | 37/61 | `ms`, `km`, `hi`, `ca`, … |
+| after | **0.48** | **0.225** | perfect | **41/61** | `en`, 61/61 |
+| transformers | 0.48 | 0.100 | perfect | — | — |
+
+Digit accuracy *falls*, and that is the fix working: 0.48 is exactly what
+transformers scores with the prompt `tiny.en` was trained on, and the 0.58 came
+from the out-of-distribution `<|transcribe|>` token, which defect 4 showed
+helps single words and hurts sequences. One window in 61 needed the repetition
+fallback. Raw transcripts: the `tiny.en/cpu-after-fixes` arm of
+[`data/i-whisper-executor.json`](data/i-whisper-executor.json).
+
 **What is not explained.** With prompts matched, candle and transformers still
 disagree on 15 of 61 tiny.en transcripts, including hallucinations only candle
 produces for a single spoken digit ("Thank you for watching.", "for the next
 couple of months."). The candidates are the mel front end (candle's own FFT,
 padding and filter file, against transformers' feature extractor) and f32
-against fp16. That comparison was not run.
+against fp16. That comparison was not run. One clue: two candle decoders that
+share only the model and `pcm_to_mel` (not the resampler, not the decoding
+loop) land at the same distance from transformers: this executor at 41 of 61
+transcripts, and the fixed example, with its timestamp rules, at 42 of 61 (44
+greedy). That points at what they share.
 
 ### Open threads
 
-Fix and re-measure: skip detection for `.en` checkpoints, drop the task token
-where the model was not trained with it, read `generation_config.json`, and name
-the mel asset by `num_mel_bins`. Then diff candle's `pcm_to_mel` against
-transformers' feature extractor on the same waveform, stage by stage as I1
-does against torchaudio, to locate the remaining disagreement.
+The executor's defects are fixed and re-measured, and the example's empty
+transcriptions are explained and patched; both are above. Still open: diff
+candle's `pcm_to_mel` against transformers' feature extractor on the same
+waveform, stage by stage as I1 does against torchaudio, to locate the
+remaining disagreement that both candle decoders share. Sending the example's
+fix upstream to huggingface/candle. And the executor's turbo path, re-measured
+here only through the `tiny.en` model it shares its code with.
 
 ---
 
@@ -794,7 +888,10 @@ does against torchaudio, to locate the remaining disagreement.
    worth about four frames of delay for free.
 8. **Running the real models found defects no config could show.** candle's
    whisper *example* (upstream code, unchanged in the fork) returns empty text
-   for every isolated digit. The catalog's
+   for every isolated digit, because of two defects that only fail together: an
+   English-only prompt carrying `<|transcribe|>`, and a timestamp-pairing rule
+   inverted for the first token. Fixing both takes digits from 0.00 to 0.42
+   against transformers' 0.44 (patch on the fork as davidmiheev/candle#13). The catalog's
    executor does not (0 of 427 requests empty), and its static-decode and
    CUDA-graph paths match eager decoding byte for byte. It has four defects of
    its own: a language report that calls JFK Albanian on English-only models, a

@@ -1,0 +1,11921 @@
+{
+ "what": "Why candle's whisper example returns empty transcriptions for short utterances: each suspected defect toggled separately, on the I-part clips, CPU",
+ "date": "2026-10-08",
+ "candle": "huggingface/candle@c68b2499 (upstream main); the fork's copy is identical apart from upstream changes since 0.11.0 unrelated to these lines",
+ "clips": "FSDD speaker yweweler digits 0-9 x 5, resampled 8 -> 16 kHz with scipy resample_poly (the example requires 16 kHz input); ten 4-digit sequences rebuilt with default_rng(0) as in i-whisper-executor.json; samples_jfk.wav",
+ "metrics": "digit exact / WER / sequence WER / JFK WER with i-whisper-executor.json's normalisation; clips_with_empty_segment = a timestamp-delimited segment with no text tokens, or an opening timestamp followed by end-of-text, counted from the token ids",
+ "arms": {
+  "upstream": {
+   "description": "huggingface/candle@c68b2499 examples/whisper, unmodified, tiny.en (timestamps on: the flag cannot be turned off)",
+   "scores": {
+    "digit": {
+     "n": 50,
+     "empty": 48,
+     "wer": 1.94,
+     "exact": 0.0
+    },
+    "sequence": {
+     "n": 10,
+     "empty": 6,
+     "wer": 0.925
+    },
+    "long": {
+     "n": 1,
+     "empty": 0,
+     "wer": 0.0
+    },
+    "clips_with_empty_segment": 61
+   },
+   "transcripts": {
+    "0_yweweler_0.wav": {
+     "text": "for watching the Burgundy Cere cheers. W == Calm down. Want to show l In the plain dammed The Melchized My reg Creative mortise connector S Atticus E ferocious",
+     "tokens": [
+      50257,
+      50358,
+      50453,
+      50453,
+      329,
+      4964,
+      262,
+      21435,
+      45459,
+      50612,
+      50612,
+      26532,
+      34550,
+      13,
+      50660,
+      50660,
+      370,
+      6624,
+      50762,
+      50762,
+      38280,
+      866,
+      13,
+      50880,
+      50880,
+      16168,
+      284,
+      905,
+      50905,
+      50905,
+      300,
+      554,
+      262,
+      8631,
+      51008,
+      51008,
+      1801,
+      1150,
+      51037,
+      51037,
+      383,
+      51046,
+      51046,
+      5616,
+      354,
+      1143,
+      51190,
+      51190,
+      2011,
+      51306,
+      51306,
+      842,
+      17404,
+      51462,
+      51462,
+      5596,
+      786,
+      51503,
+      51503,
+      21716,
+      51752,
+      51752,
+      311,
+      3460,
+      24552,
+      51783,
+      51783,
+      412,
+      40831,
+      51847,
+      51847,
+      50256
+     ]
+    },
+    "0_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "0_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "0_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "0_yweweler_4.wav": {
+     "text": "stinging EEP inhITH HIM ON GET GOeducated STOP nothing without fast we ha ha osa gold vector which pant a n",
+     "tokens": [
+      50257,
+      50358,
+      50453,
+      50453,
+      336,
+      14146,
+      50529,
+      50529,
+      35238,
+      50633,
+      50633,
+      25783,
+      10554,
+      50653,
+      50653,
+      45909,
+      50685,
+      50685,
+      6177,
+      50748,
+      50748,
+      17151,
+      50768,
+      50768,
+      10351,
+      27317,
+      50797,
+      50797,
+      44934,
+      50943,
+      50943,
+      2147,
+      50995,
+      50995,
+      1231,
+      51065,
+      51065,
+      3049,
+      51106,
+      51106,
+      356,
+      387,
+      51171,
+      51171,
+      387,
+      51217,
+      51217,
+      8546,
+      51249,
+      51249,
+      24267,
+      51276,
+      51276,
+      15879,
+      51303,
+      51303,
+      543,
+      51321,
+      51321,
+      15857,
+      51633,
+      51653,
+      257,
+      51709,
+      51709,
+      299,
+      51759,
+      51759,
+      50256
+     ]
+    },
+    "1_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "1_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "1_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "1_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "1_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "2_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "2_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "2_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "2_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "2_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "3_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "3_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "3_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "3_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "3_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "4_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "4_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "4_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "4_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "4_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "5_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "5_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "5_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "5_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "5_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50456,
+      50256
+     ]
+    },
+    "6_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "6_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "6_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "6_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "6_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "7_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50460,
+      50256
+     ]
+    },
+    "7_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "7_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "7_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "7_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      51257,
+      50256
+     ]
+    },
+    "8_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "8_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "8_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50461,
+      50256
+     ]
+    },
+    "8_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50464,
+      50256
+     ]
+    },
+    "8_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50464,
+      50256
+     ]
+    },
+    "9_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "9_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "9_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "9_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "9_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "seq_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50460,
+      50256
+     ]
+    },
+    "seq_1.wav": {
+     "text": "2",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50452,
+      362,
+      50542,
+      50256
+     ]
+    },
+    "seq_2.wav": {
+     "text": "ex",
+     "tokens": [
+      50257,
+      50358,
+      50460,
+      50460,
+      409,
+      50627,
+      50256
+     ]
+    },
+    "seq_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50461,
+      50256
+     ]
+    },
+    "seq_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      51234,
+      50256
+     ]
+    },
+    "seq_5.wav": {
+     "text": "2 5 or zero",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50452,
+      362,
+      642,
+      393,
+      6632,
+      50565,
+      50256
+     ]
+    },
+    "seq_6.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      51284,
+      50256
+     ]
+    },
+    "seq_7.wav": {
+     "text": "this July what surely",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50452,
+      428,
+      2901,
+      644,
+      10403,
+      50787,
+      50256
+     ]
+    },
+    "seq_8.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "seq_9.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      51107,
+      50256
+     ]
+    },
+    "samples_jfk.wav": {
+     "text": "and so my fellow Americans ask not what your country can do for you ask what you can do for your country",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50452,
+      290,
+      523,
+      616,
+      5891,
+      3399,
+      1265,
+      407,
+      644,
+      534,
+      1499,
+      460,
+      466,
+      329,
+      345,
+      1265,
+      644,
+      345,
+      460,
+      466,
+      329,
+      534,
+      1499,
+      50882,
+      50256
+     ]
+    }
+   }
+  },
+  "fixed": {
+   "description": "pairing rule only (penultimate_was_timestamp defaults to true with < 2 sampled tokens)",
+   "scores": {
+    "digit": {
+     "n": 50,
+     "empty": 50,
+     "wer": 1.0,
+     "exact": 0.0
+    },
+    "sequence": {
+     "n": 10,
+     "empty": 10,
+     "wer": 1.0
+    },
+    "long": {
+     "n": 1,
+     "empty": 1,
+     "wer": 1.0
+    },
+    "clips_with_empty_segment": 61
+   },
+   "transcripts": {
+    "0_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50453,
+      50256
+     ]
+    },
+    "0_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "0_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "0_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "0_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50453,
+      50256
+     ]
+    },
+    "1_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "1_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "1_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "1_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "1_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "2_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "2_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "2_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "2_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "2_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "3_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "3_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "3_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "3_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "3_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "4_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "4_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "4_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "4_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "4_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "5_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "5_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "5_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "5_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "5_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50456,
+      50256
+     ]
+    },
+    "6_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "6_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "6_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "6_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "6_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "7_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50460,
+      50256
+     ]
+    },
+    "7_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "7_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "7_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "7_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50461,
+      50256
+     ]
+    },
+    "8_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "8_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "8_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50461,
+      50256
+     ]
+    },
+    "8_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50464,
+      50256
+     ]
+    },
+    "8_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50464,
+      50256
+     ]
+    },
+    "9_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "9_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "9_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "9_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "9_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "seq_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50460,
+      50256
+     ]
+    },
+    "seq_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "seq_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50460,
+      50256
+     ]
+    },
+    "seq_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50461,
+      50256
+     ]
+    },
+    "seq_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "seq_5.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "seq_6.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "seq_7.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "seq_8.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "seq_9.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50460,
+      50256
+     ]
+    },
+    "samples_jfk.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    }
+   }
+  },
+  "upstream+cap50": {
+   "description": "--max-initial-timestamp-index 50 (the reference's 1.0 s default) only",
+   "scores": {
+    "digit": {
+     "n": 50,
+     "empty": 50,
+     "wer": 1.0,
+     "exact": 0.0
+    },
+    "sequence": {
+     "n": 10,
+     "empty": 4,
+     "wer": 0.7
+    },
+    "long": {
+     "n": 1,
+     "empty": 0,
+     "wer": 0.0
+    },
+    "clips_with_empty_segment": 61
+   },
+   "transcripts": {
+    "0_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "0_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "0_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "0_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "0_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "1_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "1_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "1_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "1_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "1_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "2_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "2_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "2_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "2_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "2_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "3_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "3_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "3_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "3_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "3_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "4_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "4_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "4_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "4_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "4_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "5_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "5_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "5_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "5_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "5_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "6_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "6_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "6_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "6_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "6_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "7_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "7_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "7_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "7_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "7_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "8_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "8_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "8_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "8_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "8_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "9_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "9_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "9_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "9_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "9_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "seq_0.wav": {
+     "text": "5, 7, 6",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50409,
+      642,
+      11,
+      767,
+      11,
+      718,
+      50463,
+      50256
+     ]
+    },
+    "seq_1.wav": {
+     "text": "1",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50409,
+      352,
+      50469,
+      50256
+     ]
+    },
+    "seq_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "seq_3.wav": {
+     "text": "7, 3, 3",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50409,
+      767,
+      11,
+      513,
+      11,
+      513,
+      50469,
+      50256
+     ]
+    },
+    "seq_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "seq_5.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "seq_6.wav": {
+     "text": "1 9",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50409,
+      352,
+      50463,
+      50463,
+      860,
+      50513,
+      50256
+     ]
+    },
+    "seq_7.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "seq_8.wav": {
+     "text": "9",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50409,
+      860,
+      50463,
+      50256
+     ]
+    },
+    "seq_9.wav": {
+     "text": "851",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50409,
+      807,
+      4349,
+      50459,
+      50256
+     ]
+    },
+    "samples_jfk.wav": {
+     "text": "And so my fellow Americans ask not what your country can do for you ask what you can do for your country",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50409,
+      843,
+      523,
+      616,
+      5891,
+      3399,
+      1265,
+      407,
+      644,
+      534,
+      1499,
+      460,
+      466,
+      329,
+      345,
+      1265,
+      644,
+      345,
+      460,
+      466,
+      329,
+      534,
+      1499,
+      50883,
+      50256
+     ]
+    }
+   }
+  },
+  "fixed+cap50": {
+   "description": "pairing rule + cap",
+   "scores": {
+    "digit": {
+     "n": 50,
+     "empty": 50,
+     "wer": 1.0,
+     "exact": 0.0
+    },
+    "sequence": {
+     "n": 10,
+     "empty": 10,
+     "wer": 1.0
+    },
+    "long": {
+     "n": 1,
+     "empty": 1,
+     "wer": 1.0
+    },
+    "clips_with_empty_segment": 61
+   },
+   "transcripts": {
+    "0_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "0_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "0_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "0_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "0_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "1_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "1_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "1_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "1_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "1_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "2_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "2_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "2_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "2_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "2_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "3_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "3_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "3_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "3_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "3_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "4_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "4_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "4_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "4_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "4_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "5_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "5_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "5_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "5_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "5_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "6_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "6_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "6_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "6_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "6_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "7_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "7_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "7_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "7_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "7_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "8_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "8_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "8_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "8_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "8_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "9_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "9_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "9_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "9_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "9_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "seq_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "seq_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "seq_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "seq_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "seq_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "seq_5.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "seq_6.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "seq_7.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "seq_8.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "seq_9.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    },
+    "samples_jfk.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50409,
+      50256
+     ]
+    }
+   }
+  },
+  "prompt": {
+   "description": "English-only prompt only ([SOT], no <|transcribe|>, sample_begin 1)",
+   "scores": {
+    "digit": {
+     "n": 50,
+     "empty": 4,
+     "wer": 4.56,
+     "exact": 0.02
+    },
+    "sequence": {
+     "n": 10,
+     "empty": 1,
+     "wer": 0.375
+    },
+    "long": {
+     "n": 1,
+     "empty": 0,
+     "wer": 0.0
+    },
+    "clips_with_empty_segment": 61
+   },
+   "transcripts": {
+    "0_yweweler_0.wav": {
+     "text": "Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      50363,
+      6952,
+      345,
+      13,
+      50413,
+      50413,
+      6952,
+      345,
+      13,
+      50463,
+      50463,
+      6952,
+      345,
+      13,
+      50513,
+      50513,
+      6952,
+      345,
+      13,
+      50563,
+      50563,
+      6952,
+      345,
+      13,
+      50613,
+      50613,
+      6952,
+      345,
+      13,
+      50663,
+      50663,
+      6952,
+      345,
+      13,
+      50713,
+      50713,
+      6952,
+      345,
+      13,
+      50763,
+      50256
+     ]
+    },
+    "0_yweweler_1.wav": {
+     "text": "umo",
+     "tokens": [
+      50257,
+      50363,
+      50569,
+      43712,
+      50582,
+      50256
+     ]
+    },
+    "0_yweweler_2.wav": {
+     "text": "Alright, That's your surpassed",
+     "tokens": [
+      50257,
+      50363,
+      50597,
+      40967,
+      11,
+      1320,
+      338,
+      534,
+      30612,
+      50741,
+      50256
+     ]
+    },
+    "0_yweweler_3.wav": {
+     "text": "neuroties.",
+     "tokens": [
+      50257,
+      50363,
+      50567,
+      42181,
+      444,
+      13,
+      50635,
+      50256
+     ]
+    },
+    "0_yweweler_4.wav": {
+     "text": ".",
+     "tokens": [
+      50257,
+      50363,
+      50824,
+      764,
+      51210,
+      50256
+     ]
+    },
+    "1_yweweler_0.wav": {
+     "text": "Bye!",
+     "tokens": [
+      50257,
+      50363,
+      50582,
+      47843,
+      0,
+      50631,
+      50256
+     ]
+    },
+    "1_yweweler_1.wav": {
+     "text": "our",
+     "tokens": [
+      50257,
+      50457,
+      50553,
+      674,
+      50620,
+      50256
+     ]
+    },
+    "1_yweweler_2.wav": {
+     "text": "last two months learned through our ACTU Job of 1.",
+     "tokens": [
+      50257,
+      50364,
+      50431,
+      938,
+      734,
+      1933,
+      4499,
+      50541,
+      50541,
+      832,
+      674,
+      11741,
+      52,
+      50703,
+      50719,
+      15768,
+      286,
+      352,
+      13,
+      50888,
+      50256
+     ]
+    },
+    "1_yweweler_3.wav": {
+     "text": "Christmas.",
+     "tokens": [
+      50257,
+      50363,
+      51782,
+      44614,
+      13,
+      51832,
+      50256
+     ]
+    },
+    "1_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50363,
+      51785,
+      50256
+     ]
+    },
+    "2_yweweler_0.wav": {
+     "text": "Intro",
+     "tokens": [
+      50257,
+      50363,
+      50611,
+      37219,
+      50643,
+      50256
+     ]
+    },
+    "2_yweweler_1.wav": {
+     "text": "Commence Transmitted by",
+     "tokens": [
+      50257,
+      50363,
+      50592,
+      1520,
+      594,
+      3602,
+      3291,
+      416,
+      50721,
+      50256
+     ]
+    },
+    "2_yweweler_2.wav": {
+     "text": "Khan",
+     "tokens": [
+      50257,
+      50363,
+      51783,
+      11356,
+      51803,
+      50256
+     ]
+    },
+    "2_yweweler_3.wav": {
+     "text": "Pauxley",
+     "tokens": [
+      50257,
+      50363,
+      51445,
+      350,
+      14644,
+      1636,
+      51517,
+      51521,
+      50256
+     ]
+    },
+    "2_yweweler_4.wav": {
+     "text": ".",
+     "tokens": [
+      50257,
+      50363,
+      51454,
+      764,
+      51579,
+      50256
+     ]
+    },
+    "3_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50363,
+      51768,
+      50256
+     ]
+    },
+    "3_yweweler_1.wav": {
+     "text": "Hmm, many other countries historically has been",
+     "tokens": [
+      50257,
+      50363,
+      50594,
+      43352,
+      11,
+      867,
+      584,
+      2678,
+      15074,
+      468,
+      587,
+      50845,
+      50256
+     ]
+    },
+    "3_yweweler_2.wav": {
+     "text": "Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching.",
+     "tokens": [
+      50257,
+      50363,
+      50363,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      50413,
+      50413,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      50463,
+      50463,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      50513,
+      50513,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      50563,
+      50563,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      50613,
+      50613,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      50663,
+      50663,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      50713,
+      50713,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      50763,
+      50763,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      50813,
+      50813,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      50863,
+      50863,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      50913,
+      50913,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      50963,
+      50963,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51013,
+      51013,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51063,
+      51063,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51113,
+      51113,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51163,
+      51163,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51213,
+      51213,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51263,
+      51263,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51313,
+      51313,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51363,
+      51363,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51413,
+      51413,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51463,
+      51463,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51513,
+      51513,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51563,
+      51563,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51613,
+      51613,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51663,
+      51663,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51713,
+      51713,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51763,
+      51763,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51813,
+      51813,
+      50256
+     ]
+    },
+    "3_yweweler_3.wav": {
+     "text": "you",
+     "tokens": [
+      50257,
+      50363,
+      50763,
+      345,
+      50971,
+      50256
+     ]
+    },
+    "3_yweweler_4.wav": {
+     "text": ".",
+     "tokens": [
+      50257,
+      50363,
+      51836,
+      764,
+      51853,
+      50256
+     ]
+    },
+    "4_yweweler_0.wav": {
+     "text": "Magnetic",
+     "tokens": [
+      50257,
+      50363,
+      50558,
+      44629,
+      50572,
+      50256
+     ]
+    },
+    "4_yweweler_1.wav": {
+     "text": "you",
+     "tokens": [
+      50257,
+      50363,
+      50718,
+      345,
+      50925,
+      50256
+     ]
+    },
+    "4_yweweler_2.wav": {
+     "text": "shameless.",
+     "tokens": [
+      50257,
+      50363,
+      50571,
+      41564,
+      13,
+      50626,
+      50256
+     ]
+    },
+    "4_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50363,
+      50363,
+      6952,
+      345,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "4_yweweler_4.wav": {
+     "text": "Alright, another body for syndorgan.",
+     "tokens": [
+      50257,
+      50363,
+      50592,
+      40967,
+      11,
+      1194,
+      1767,
+      329,
+      11150,
+      9971,
+      13,
+      50750,
+      50256
+     ]
+    },
+    "5_yweweler_0.wav": {
+     "text": "The OK",
+     "tokens": [
+      50257,
+      50363,
+      50860,
+      383,
+      51716,
+      51716,
+      7477,
+      51817,
+      51817,
+      50256
+     ]
+    },
+    "5_yweweler_1.wav": {
+     "text": "log",
+     "tokens": [
+      50257,
+      50371,
+      50491,
+      2604,
+      50613,
+      50256
+     ]
+    },
+    "5_yweweler_2.wav": {
+     "text": "you",
+     "tokens": [
+      50257,
+      50363,
+      50694,
+      345,
+      50897,
+      50256
+     ]
+    },
+    "5_yweweler_3.wav": {
+     "text": "check out my Occupy",
+     "tokens": [
+      50257,
+      50371,
+      50491,
+      2198,
+      503,
+      616,
+      25551,
+      50636,
+      50256
+     ]
+    },
+    "5_yweweler_4.wav": {
+     "text": "you",
+     "tokens": [
+      50257,
+      50363,
+      50820,
+      345,
+      50924,
+      50256
+     ]
+    },
+    "6_yweweler_0.wav": {
+     "text": "you",
+     "tokens": [
+      50257,
+      50363,
+      50993,
+      345,
+      51198,
+      50256
+     ]
+    },
+    "6_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50363,
+      50363,
+      6952,
+      345,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "6_yweweler_2.wav": {
+     "text": "you",
+     "tokens": [
+      50257,
+      50363,
+      50757,
+      345,
+      50881,
+      50256
+     ]
+    },
+    "6_yweweler_3.wav": {
+     "text": "Thanks.",
+     "tokens": [
+      50257,
+      50363,
+      51779,
+      6930,
+      13,
+      51829,
+      50256
+     ]
+    },
+    "6_yweweler_4.wav": {
+     "text": "Thank you",
+     "tokens": [
+      50257,
+      50363,
+      51779,
+      6952,
+      345,
+      51804,
+      50256
+     ]
+    },
+    "7_yweweler_0.wav": {
+     "text": "7.",
+     "tokens": [
+      50257,
+      50363,
+      50363,
+      767,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "7_yweweler_1.wav": {
+     "text": "You",
+     "tokens": [
+      50257,
+      50388,
+      50493,
+      921,
+      50593,
+      50256
+     ]
+    },
+    "7_yweweler_2.wav": {
+     "text": ".",
+     "tokens": [
+      50257,
+      50363,
+      51827,
+      764,
+      51837,
+      50256
+     ]
+    },
+    "7_yweweler_3.wav": {
+     "text": "ta",
+     "tokens": [
+      50257,
+      50363,
+      51717,
+      20486,
+      51769,
+      50256
+     ]
+    },
+    "7_yweweler_4.wav": {
+     "text": ",",
+     "tokens": [
+      50257,
+      50363,
+      50759,
+      837,
+      51193,
+      50256
+     ]
+    },
+    "8_yweweler_0.wav": {
+     "text": "You",
+     "tokens": [
+      50257,
+      50363,
+      51751,
+      921,
+      51823,
+      50256
+     ]
+    },
+    "8_yweweler_1.wav": {
+     "text": "Don't forget to subscribe.",
+     "tokens": [
+      50257,
+      50363,
+      51757,
+      2094,
+      470,
+      6044,
+      284,
+      12383,
+      13,
+      51813,
+      51813,
+      50256
+     ]
+    },
+    "8_yweweler_2.wav": {
+     "text": "they",
+     "tokens": [
+      50257,
+      50363,
+      50834,
+      484,
+      50867,
+      50256
+     ]
+    },
+    "8_yweweler_3.wav": {
+     "text": "min in perfect community theory.",
+     "tokens": [
+      50257,
+      50363,
+      51752,
+      949,
+      287,
+      2818,
+      2055,
+      4583,
+      13,
+      51804,
+      51804,
+      50256
+     ]
+    },
+    "8_yweweler_4.wav": {
+     "text": "The sparks think of trust and museum. involvement of the city's production is a reality.",
+     "tokens": [
+      50257,
+      50363,
+      50875,
+      383,
+      38306,
+      892,
+      286,
+      3774,
+      290,
+      13257,
+      13,
+      50993,
+      51035,
+      9750,
+      286,
+      262,
+      1748,
+      338,
+      51148,
+      51148,
+      3227,
+      318,
+      257,
+      3950,
+      13,
+      51180,
+      50256
+     ]
+    },
+    "9_yweweler_0.wav": {
+     "text": "You",
+     "tokens": [
+      50257,
+      50375,
+      50472,
+      921,
+      50527,
+      50256
+     ]
+    },
+    "9_yweweler_1.wav": {
+     "text": "you",
+     "tokens": [
+      50257,
+      50363,
+      51500,
+      345,
+      51603,
+      50256
+     ]
+    },
+    "9_yweweler_2.wav": {
+     "text": "fiance.",
+     "tokens": [
+      50257,
+      50363,
+      50577,
+      47819,
+      13,
+      50635,
+      50256
+     ]
+    },
+    "9_yweweler_3.wav": {
+     "text": "you",
+     "tokens": [
+      50257,
+      50363,
+      50901,
+      345,
+      51011,
+      50256
+     ]
+    },
+    "9_yweweler_4.wav": {
+     "text": "you",
+     "tokens": [
+      50257,
+      50363,
+      50672,
+      345,
+      50784,
+      50256
+     ]
+    },
+    "seq_0.wav": {
+     "text": "2 5 7 6",
+     "tokens": [
+      50257,
+      50363,
+      50363,
+      362,
+      642,
+      767,
+      718,
+      50463,
+      50256
+     ]
+    },
+    "seq_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50363,
+      50363,
+      352,
+      11,
+      362,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11
+     ]
+    },
+    "seq_2.wav": {
+     "text": "7, 9, 5, 6.",
+     "tokens": [
+      50257,
+      50363,
+      50363,
+      767,
+      11,
+      860,
+      11,
+      642,
+      11,
+      718,
+      13,
+      50463,
+      50256
+     ]
+    },
+    "seq_3.wav": {
+     "text": "0, 7, 6, 3.",
+     "tokens": [
+      50257,
+      50363,
+      50363,
+      657,
+      11,
+      767,
+      11,
+      718,
+      11,
+      513,
+      13,
+      50463,
+      50256
+     ]
+    },
+    "seq_4.wav": {
+     "text": "Thank you much for watching!",
+     "tokens": [
+      50257,
+      50363,
+      51775,
+      6952,
+      345,
+      881,
+      329,
+      4964,
+      0,
+      51825,
+      51825,
+      50256
+     ]
+    },
+    "seq_5.wav": {
+     "text": "2, 5, or 0.",
+     "tokens": [
+      50257,
+      50363,
+      50365,
+      362,
+      11,
+      642,
+      11,
+      393,
+      657,
+      13,
+      50465,
+      50256
+     ]
+    },
+    "seq_6.wav": {
+     "text": "you",
+     "tokens": [
+      50257,
+      50363,
+      51545,
+      345,
+      51643,
+      51643,
+      50256
+     ]
+    },
+    "seq_7.wav": {
+     "text": "5, 7, 3, 4.",
+     "tokens": [
+      50257,
+      50363,
+      50363,
+      642,
+      11,
+      767,
+      11,
+      513,
+      11,
+      604,
+      13,
+      50463,
+      50256
+     ]
+    },
+    "seq_8.wav": {
+     "text": "3, 2, 9, 9.",
+     "tokens": [
+      50257,
+      50363,
+      50388,
+      513,
+      11,
+      362,
+      11,
+      860,
+      11,
+      860,
+      13,
+      50463,
+      50256
+     ]
+    },
+    "seq_9.wav": {
+     "text": "3, 8, 5, 1.",
+     "tokens": [
+      50257,
+      50363,
+      50463,
+      513,
+      11,
+      807,
+      11,
+      642,
+      11,
+      352,
+      13,
+      50513,
+      50256
+     ]
+    },
+    "samples_jfk.wav": {
+     "text": "And so my fellow Americans ask not what your country can do for you ask what you can do for your country.",
+     "tokens": [
+      50257,
+      50363,
+      50363,
+      843,
+      523,
+      616,
+      5891,
+      3399,
+      1265,
+      407,
+      644,
+      534,
+      1499,
+      460,
+      466,
+      329,
+      345,
+      50763,
+      50763,
+      1265,
+      644,
+      345,
+      460,
+      466,
+      329,
+      534,
+      1499,
+      13,
+      50913,
+      50256
+     ]
+    }
+   }
+  },
+  "prompt+cap50": {
+   "description": "prompt + cap",
+   "scores": {
+    "digit": {
+     "n": 50,
+     "empty": 4,
+     "wer": 4.64,
+     "exact": 0.02
+    },
+    "sequence": {
+     "n": 10,
+     "empty": 1,
+     "wer": 0.375
+    },
+    "long": {
+     "n": 1,
+     "empty": 0,
+     "wer": 0.0
+    },
+    "clips_with_empty_segment": 61
+   },
+   "transcripts": {
+    "0_yweweler_0.wav": {
+     "text": "Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      50363,
+      6952,
+      345,
+      13,
+      50413,
+      50413,
+      6952,
+      345,
+      13,
+      50463,
+      50463,
+      6952,
+      345,
+      13,
+      50513,
+      50513,
+      6952,
+      345,
+      13,
+      50563,
+      50563,
+      6952,
+      345,
+      13,
+      50613,
+      50613,
+      6952,
+      345,
+      13,
+      50663,
+      50663,
+      6952,
+      345,
+      13,
+      50713,
+      50713,
+      6952,
+      345,
+      13,
+      50763,
+      50256
+     ]
+    },
+    "0_yweweler_1.wav": {
+     "text": "umo",
+     "tokens": [
+      50257,
+      50363,
+      50569,
+      43712,
+      50582,
+      50256
+     ]
+    },
+    "0_yweweler_2.wav": {
+     "text": "Alright, That's your surpassed",
+     "tokens": [
+      50257,
+      50363,
+      50597,
+      40967,
+      11,
+      1320,
+      338,
+      534,
+      30612,
+      50741,
+      50256
+     ]
+    },
+    "0_yweweler_3.wav": {
+     "text": "neuroties.",
+     "tokens": [
+      50257,
+      50363,
+      50567,
+      42181,
+      444,
+      13,
+      50635,
+      50256
+     ]
+    },
+    "0_yweweler_4.wav": {
+     "text": ".",
+     "tokens": [
+      50257,
+      50363,
+      50824,
+      764,
+      51210,
+      50256
+     ]
+    },
+    "1_yweweler_0.wav": {
+     "text": "Bye!",
+     "tokens": [
+      50257,
+      50363,
+      50582,
+      47843,
+      0,
+      50631,
+      50256
+     ]
+    },
+    "1_yweweler_1.wav": {
+     "text": "Shane knee incident state K Josh There's a T K Melissa",
+     "tokens": [
+      50257,
+      50364,
+      50454,
+      911,
+      1531,
+      50509,
+      50512,
+      10329,
+      50553,
+      50557,
+      4519,
+      50662,
+      50664,
+      1181,
+      51002,
+      51055,
+      509,
+      51193,
+      51197,
+      8518,
+      51326,
+      51331,
+      1318,
+      338,
+      257,
+      51458,
+      51461,
+      309,
+      51533,
+      51537,
+      509,
+      51604,
+      51608,
+      24164,
+      51657,
+      51661,
+      50256
+     ]
+    },
+    "1_yweweler_2.wav": {
+     "text": "12th",
+     "tokens": [
+      50257,
+      50363,
+      50412,
+      1105,
+      400,
+      50470,
+      50256
+     ]
+    },
+    "1_yweweler_3.wav": {
+     "text": "Christmas.",
+     "tokens": [
+      50257,
+      50363,
+      51782,
+      44614,
+      13,
+      51832,
+      50256
+     ]
+    },
+    "1_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50363,
+      51785,
+      50256
+     ]
+    },
+    "2_yweweler_0.wav": {
+     "text": "Intro",
+     "tokens": [
+      50257,
+      50363,
+      50611,
+      37219,
+      50643,
+      50256
+     ]
+    },
+    "2_yweweler_1.wav": {
+     "text": "Commence Transmitted by",
+     "tokens": [
+      50257,
+      50363,
+      50592,
+      1520,
+      594,
+      3602,
+      3291,
+      416,
+      50721,
+      50256
+     ]
+    },
+    "2_yweweler_2.wav": {
+     "text": "Khan",
+     "tokens": [
+      50257,
+      50363,
+      51783,
+      11356,
+      51803,
+      50256
+     ]
+    },
+    "2_yweweler_3.wav": {
+     "text": "Pauxley",
+     "tokens": [
+      50257,
+      50363,
+      51445,
+      350,
+      14644,
+      1636,
+      51517,
+      51521,
+      50256
+     ]
+    },
+    "2_yweweler_4.wav": {
+     "text": ".",
+     "tokens": [
+      50257,
+      50363,
+      51454,
+      764,
+      51579,
+      50256
+     ]
+    },
+    "3_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50363,
+      51768,
+      50256
+     ]
+    },
+    "3_yweweler_1.wav": {
+     "text": "Hmm, many other countries historically has been",
+     "tokens": [
+      50257,
+      50363,
+      50594,
+      43352,
+      11,
+      867,
+      584,
+      2678,
+      15074,
+      468,
+      587,
+      50845,
+      50256
+     ]
+    },
+    "3_yweweler_2.wav": {
+     "text": "Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching. Thank you for watching.",
+     "tokens": [
+      50257,
+      50363,
+      50363,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      50413,
+      50413,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      50463,
+      50463,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      50513,
+      50513,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      50563,
+      50563,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      50613,
+      50613,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      50663,
+      50663,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      50713,
+      50713,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      50763,
+      50763,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      50813,
+      50813,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      50863,
+      50863,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      50913,
+      50913,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      50963,
+      50963,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51013,
+      51013,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51063,
+      51063,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51113,
+      51113,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51163,
+      51163,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51213,
+      51213,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51263,
+      51263,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51313,
+      51313,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51363,
+      51363,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51413,
+      51413,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51463,
+      51463,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51513,
+      51513,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51563,
+      51563,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51613,
+      51613,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51663,
+      51663,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51713,
+      51713,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51763,
+      51763,
+      6952,
+      345,
+      329,
+      4964,
+      13,
+      51813,
+      51813,
+      50256
+     ]
+    },
+    "3_yweweler_3.wav": {
+     "text": "you",
+     "tokens": [
+      50257,
+      50363,
+      50763,
+      345,
+      50971,
+      50256
+     ]
+    },
+    "3_yweweler_4.wav": {
+     "text": ".",
+     "tokens": [
+      50257,
+      50363,
+      51836,
+      764,
+      51853,
+      50256
+     ]
+    },
+    "4_yweweler_0.wav": {
+     "text": "Magnetic",
+     "tokens": [
+      50257,
+      50363,
+      50558,
+      44629,
+      50572,
+      50256
+     ]
+    },
+    "4_yweweler_1.wav": {
+     "text": "you",
+     "tokens": [
+      50257,
+      50363,
+      50718,
+      345,
+      50925,
+      50256
+     ]
+    },
+    "4_yweweler_2.wav": {
+     "text": "shameless.",
+     "tokens": [
+      50257,
+      50363,
+      50571,
+      41564,
+      13,
+      50626,
+      50256
+     ]
+    },
+    "4_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50363,
+      50363,
+      6952,
+      345,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "4_yweweler_4.wav": {
+     "text": "Alright, another body for syndorgan.",
+     "tokens": [
+      50257,
+      50363,
+      50592,
+      40967,
+      11,
+      1194,
+      1767,
+      329,
+      11150,
+      9971,
+      13,
+      50750,
+      50256
+     ]
+    },
+    "5_yweweler_0.wav": {
+     "text": "The OK",
+     "tokens": [
+      50257,
+      50363,
+      50860,
+      383,
+      51716,
+      51716,
+      7477,
+      51817,
+      51817,
+      50256
+     ]
+    },
+    "5_yweweler_1.wav": {
+     "text": "Paulum",
+     "tokens": [
+      50257,
+      50365,
+      50488,
+      3362,
+      388,
+      50564,
+      50256
+     ]
+    },
+    "5_yweweler_2.wav": {
+     "text": "you",
+     "tokens": [
+      50257,
+      50363,
+      50694,
+      345,
+      50897,
+      50256
+     ]
+    },
+    "5_yweweler_3.wav": {
+     "text": "Yes, this literally continues.",
+     "tokens": [
+      50257,
+      50363,
+      50474,
+      3363,
+      11,
+      428,
+      7360,
+      4477,
+      13,
+      50613,
+      50256
+     ]
+    },
+    "5_yweweler_4.wav": {
+     "text": "you",
+     "tokens": [
+      50257,
+      50363,
+      50820,
+      345,
+      50924,
+      50256
+     ]
+    },
+    "6_yweweler_0.wav": {
+     "text": "you",
+     "tokens": [
+      50257,
+      50363,
+      50993,
+      345,
+      51198,
+      50256
+     ]
+    },
+    "6_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50363,
+      50363,
+      6952,
+      345,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "6_yweweler_2.wav": {
+     "text": "you",
+     "tokens": [
+      50257,
+      50363,
+      50757,
+      345,
+      50881,
+      50256
+     ]
+    },
+    "6_yweweler_3.wav": {
+     "text": "Thanks.",
+     "tokens": [
+      50257,
+      50363,
+      51779,
+      6930,
+      13,
+      51829,
+      50256
+     ]
+    },
+    "6_yweweler_4.wav": {
+     "text": "Thank you",
+     "tokens": [
+      50257,
+      50363,
+      51779,
+      6952,
+      345,
+      51804,
+      50256
+     ]
+    },
+    "7_yweweler_0.wav": {
+     "text": "7.",
+     "tokens": [
+      50257,
+      50363,
+      50363,
+      767,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "7_yweweler_1.wav": {
+     "text": "All right, bye.",
+     "tokens": [
+      50257,
+      50363,
+      50432,
+      1439,
+      826,
+      11,
+      33847,
+      13,
+      50466,
+      50256
+     ]
+    },
+    "7_yweweler_2.wav": {
+     "text": ".",
+     "tokens": [
+      50257,
+      50363,
+      51827,
+      764,
+      51837,
+      50256
+     ]
+    },
+    "7_yweweler_3.wav": {
+     "text": "ta",
+     "tokens": [
+      50257,
+      50363,
+      51717,
+      20486,
+      51769,
+      50256
+     ]
+    },
+    "7_yweweler_4.wav": {
+     "text": ",",
+     "tokens": [
+      50257,
+      50363,
+      50759,
+      837,
+      51193,
+      50256
+     ]
+    },
+    "8_yweweler_0.wav": {
+     "text": "You",
+     "tokens": [
+      50257,
+      50363,
+      51751,
+      921,
+      51823,
+      50256
+     ]
+    },
+    "8_yweweler_1.wav": {
+     "text": "Don't forget to subscribe.",
+     "tokens": [
+      50257,
+      50363,
+      51757,
+      2094,
+      470,
+      6044,
+      284,
+      12383,
+      13,
+      51813,
+      51813,
+      50256
+     ]
+    },
+    "8_yweweler_2.wav": {
+     "text": "they",
+     "tokens": [
+      50257,
+      50363,
+      50834,
+      484,
+      50867,
+      50256
+     ]
+    },
+    "8_yweweler_3.wav": {
+     "text": "min in perfect community theory.",
+     "tokens": [
+      50257,
+      50363,
+      51752,
+      949,
+      287,
+      2818,
+      2055,
+      4583,
+      13,
+      51804,
+      51804,
+      50256
+     ]
+    },
+    "8_yweweler_4.wav": {
+     "text": "The sparks think of trust and museum. involvement of the city's production is a reality.",
+     "tokens": [
+      50257,
+      50363,
+      50875,
+      383,
+      38306,
+      892,
+      286,
+      3774,
+      290,
+      13257,
+      13,
+      50993,
+      51035,
+      9750,
+      286,
+      262,
+      1748,
+      338,
+      51148,
+      51148,
+      3227,
+      318,
+      257,
+      3950,
+      13,
+      51180,
+      50256
+     ]
+    },
+    "9_yweweler_0.wav": {
+     "text": "You",
+     "tokens": [
+      50257,
+      50363,
+      50445,
+      921,
+      50545,
+      50256
+     ]
+    },
+    "9_yweweler_1.wav": {
+     "text": "you",
+     "tokens": [
+      50257,
+      50363,
+      51500,
+      345,
+      51603,
+      50256
+     ]
+    },
+    "9_yweweler_2.wav": {
+     "text": "fiance.",
+     "tokens": [
+      50257,
+      50363,
+      50577,
+      47819,
+      13,
+      50635,
+      50256
+     ]
+    },
+    "9_yweweler_3.wav": {
+     "text": "you",
+     "tokens": [
+      50257,
+      50363,
+      50901,
+      345,
+      51011,
+      50256
+     ]
+    },
+    "9_yweweler_4.wav": {
+     "text": "you",
+     "tokens": [
+      50257,
+      50363,
+      50672,
+      345,
+      50784,
+      50256
+     ]
+    },
+    "seq_0.wav": {
+     "text": "2 5 7 6",
+     "tokens": [
+      50257,
+      50363,
+      50363,
+      362,
+      642,
+      767,
+      718,
+      50463,
+      50256
+     ]
+    },
+    "seq_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50363,
+      50363,
+      352,
+      11,
+      362,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11,
+      513,
+      11
+     ]
+    },
+    "seq_2.wav": {
+     "text": "7, 9, 5, 6.",
+     "tokens": [
+      50257,
+      50363,
+      50363,
+      767,
+      11,
+      860,
+      11,
+      642,
+      11,
+      718,
+      13,
+      50463,
+      50256
+     ]
+    },
+    "seq_3.wav": {
+     "text": "0, 7, 6, 3.",
+     "tokens": [
+      50257,
+      50363,
+      50363,
+      657,
+      11,
+      767,
+      11,
+      718,
+      11,
+      513,
+      13,
+      50463,
+      50256
+     ]
+    },
+    "seq_4.wav": {
+     "text": "Thank you much for watching!",
+     "tokens": [
+      50257,
+      50363,
+      51775,
+      6952,
+      345,
+      881,
+      329,
+      4964,
+      0,
+      51825,
+      51825,
+      50256
+     ]
+    },
+    "seq_5.wav": {
+     "text": "2, 5, or 0.",
+     "tokens": [
+      50257,
+      50363,
+      50365,
+      362,
+      11,
+      642,
+      11,
+      393,
+      657,
+      13,
+      50465,
+      50256
+     ]
+    },
+    "seq_6.wav": {
+     "text": "you",
+     "tokens": [
+      50257,
+      50363,
+      51545,
+      345,
+      51643,
+      51643,
+      50256
+     ]
+    },
+    "seq_7.wav": {
+     "text": "5, 7, 3, 4.",
+     "tokens": [
+      50257,
+      50363,
+      50363,
+      642,
+      11,
+      767,
+      11,
+      513,
+      11,
+      604,
+      13,
+      50463,
+      50256
+     ]
+    },
+    "seq_8.wav": {
+     "text": "3, 2, 9, 9.",
+     "tokens": [
+      50257,
+      50363,
+      50388,
+      513,
+      11,
+      362,
+      11,
+      860,
+      11,
+      860,
+      13,
+      50463,
+      50256
+     ]
+    },
+    "seq_9.wav": {
+     "text": "3, 8, 5, 1.",
+     "tokens": [
+      50257,
+      50363,
+      50463,
+      513,
+      11,
+      807,
+      11,
+      642,
+      11,
+      352,
+      13,
+      50513,
+      50256
+     ]
+    },
+    "samples_jfk.wav": {
+     "text": "And so my fellow Americans ask not what your country can do for you ask what you can do for your country.",
+     "tokens": [
+      50257,
+      50363,
+      50363,
+      843,
+      523,
+      616,
+      5891,
+      3399,
+      1265,
+      407,
+      644,
+      534,
+      1499,
+      460,
+      466,
+      329,
+      345,
+      50763,
+      50763,
+      1265,
+      644,
+      345,
+      460,
+      466,
+      329,
+      534,
+      1499,
+      13,
+      50913,
+      50256
+     ]
+    }
+   }
+  },
+  "prompt+pair": {
+   "description": "prompt + pairing rule",
+   "scores": {
+    "digit": {
+     "n": 50,
+     "empty": 0,
+     "wer": 1.96,
+     "exact": 0.42
+    },
+    "sequence": {
+     "n": 10,
+     "empty": 0,
+     "wer": 0.2
+    },
+    "long": {
+     "n": 1,
+     "empty": 0,
+     "wer": 0.0
+    },
+    "clips_with_empty_segment": 1
+   },
+   "transcripts": {
+    "0_yweweler_0.wav": {
+     "text": "You're welcome. Thank you. We're welcome. We're welcome. Thank you. Thank you. We're welcome. We're welcome. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      921,
+      821,
+      7062,
+      13,
+      50413,
+      50413,
+      6952,
+      345,
+      13,
+      50463,
+      50463,
+      775,
+      821,
+      7062,
+      13,
+      50513,
+      50513,
+      775,
+      821,
+      7062,
+      13,
+      50563,
+      50563,
+      6952,
+      345,
+      13,
+      50613,
+      50613,
+      6952,
+      345,
+      13,
+      50663,
+      50663,
+      775,
+      821,
+      7062,
+      13,
+      50713,
+      50713,
+      775,
+      821,
+      7062,
+      13,
+      50763,
+      50763,
+      6952,
+      345,
+      13,
+      50813,
+      50813,
+      6952,
+      345,
+      13,
+      50863,
+      50863,
+      6952,
+      345,
+      13,
+      50913,
+      50913,
+      6952,
+      345,
+      13,
+      50963,
+      50963,
+      6952,
+      345,
+      13,
+      51013,
+      51013,
+      6952,
+      345,
+      13,
+      51063,
+      51063,
+      6952,
+      345,
+      13,
+      51113,
+      51113,
+      6952,
+      345,
+      13,
+      51163,
+      51163,
+      6952,
+      345,
+      13,
+      51213,
+      51213,
+      6952,
+      345,
+      13,
+      51263,
+      51263,
+      6952,
+      345,
+      13,
+      51313,
+      51313,
+      6952,
+      345,
+      13,
+      51363,
+      51363,
+      6952,
+      345,
+      13,
+      51413,
+      51413,
+      6952,
+      345,
+      13,
+      51463,
+      51463,
+      6952,
+      345,
+      13,
+      51513,
+      51513,
+      6952,
+      345,
+      13,
+      51563,
+      51563,
+      6952,
+      345,
+      13,
+      51613,
+      51613,
+      6952,
+      345,
+      13,
+      51663,
+      51663,
+      6952,
+      345,
+      13,
+      51713,
+      51713,
+      6952,
+      345,
+      13,
+      51763,
+      51763,
+      6952,
+      345,
+      13,
+      51813,
+      51813,
+      50256
+     ]
+    },
+    "0_yweweler_1.wav": {
+     "text": "You're welcome.",
+     "tokens": [
+      50257,
+      50363,
+      921,
+      821,
+      7062,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "0_yweweler_2.wav": {
+     "text": "You're welcome.",
+     "tokens": [
+      50257,
+      50363,
+      921,
+      821,
+      7062,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "0_yweweler_3.wav": {
+     "text": "You're all.",
+     "tokens": [
+      50257,
+      50363,
+      921,
+      821,
+      477,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "0_yweweler_4.wav": {
+     "text": "zero.",
+     "tokens": [
+      50257,
+      50363,
+      6632,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "1_yweweler_0.wav": {
+     "text": "one.",
+     "tokens": [
+      50257,
+      50363,
+      530,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "1_yweweler_1.wav": {
+     "text": "one.",
+     "tokens": [
+      50257,
+      50363,
+      530,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "1_yweweler_2.wav": {
+     "text": "1.",
+     "tokens": [
+      50257,
+      50363,
+      352,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "1_yweweler_3.wav": {
+     "text": "one.",
+     "tokens": [
+      50257,
+      50363,
+      530,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "1_yweweler_4.wav": {
+     "text": "one.",
+     "tokens": [
+      50257,
+      50363,
+      530,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "2_yweweler_0.wav": {
+     "text": "to.",
+     "tokens": [
+      50257,
+      50363,
+      284,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "2_yweweler_1.wav": {
+     "text": "complicit.",
+     "tokens": [
+      50257,
+      50363,
+      42927,
+      13,
+      50417,
+      50256
+     ]
+    },
+    "2_yweweler_2.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "2_yweweler_3.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "2_yweweler_4.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "3_yweweler_0.wav": {
+     "text": "free.",
+     "tokens": [
+      50257,
+      50363,
+      1479,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "3_yweweler_1.wav": {
+     "text": "Three.",
+     "tokens": [
+      50257,
+      50363,
+      7683,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "3_yweweler_2.wav": {
+     "text": "me.",
+     "tokens": [
+      50257,
+      50363,
+      502,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "3_yweweler_3.wav": {
+     "text": "We.",
+     "tokens": [
+      50257,
+      50363,
+      775,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "3_yweweler_4.wav": {
+     "text": "free.",
+     "tokens": [
+      50257,
+      50363,
+      1479,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "4_yweweler_0.wav": {
+     "text": "for.",
+     "tokens": [
+      50257,
+      50363,
+      329,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "4_yweweler_1.wav": {
+     "text": "Oh.",
+     "tokens": [
+      50257,
+      50363,
+      3966,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "4_yweweler_2.wav": {
+     "text": "Four.",
+     "tokens": [
+      50257,
+      50363,
+      6675,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "4_yweweler_3.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "4_yweweler_4.wav": {
+     "text": "Oh.",
+     "tokens": [
+      50257,
+      50363,
+      3966,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "5_yweweler_0.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50257,
+      50363,
+      47843,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "5_yweweler_1.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50257,
+      50363,
+      47843,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "5_yweweler_2.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50257,
+      50363,
+      47843,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "5_yweweler_3.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50257,
+      50363,
+      47843,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "5_yweweler_4.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50257,
+      50363,
+      47843,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "6_yweweler_0.wav": {
+     "text": "Take.",
+     "tokens": [
+      50257,
+      50363,
+      7214,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "6_yweweler_1.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "6_yweweler_2.wav": {
+     "text": "See.",
+     "tokens": [
+      50257,
+      50363,
+      4091,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "6_yweweler_3.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "6_yweweler_4.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "7_yweweler_0.wav": {
+     "text": "7.",
+     "tokens": [
+      50257,
+      50363,
+      767,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "7_yweweler_1.wav": {
+     "text": "7.",
+     "tokens": [
+      50257,
+      50363,
+      767,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "7_yweweler_2.wav": {
+     "text": "Heaven.",
+     "tokens": [
+      50257,
+      50363,
+      11225,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "7_yweweler_3.wav": {
+     "text": "7.",
+     "tokens": [
+      50257,
+      50363,
+      767,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "7_yweweler_4.wav": {
+     "text": "Evan.",
+     "tokens": [
+      50257,
+      50363,
+      21523,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "8_yweweler_0.wav": {
+     "text": "8.",
+     "tokens": [
+      50257,
+      50363,
+      807,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "8_yweweler_1.wav": {
+     "text": "8.",
+     "tokens": [
+      50257,
+      50363,
+      807,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "8_yweweler_2.wav": {
+     "text": "8.",
+     "tokens": [
+      50257,
+      50363,
+      807,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "8_yweweler_3.wav": {
+     "text": "aid.",
+     "tokens": [
+      50257,
+      50363,
+      6133,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "8_yweweler_4.wav": {
+     "text": "8.",
+     "tokens": [
+      50257,
+      50363,
+      807,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "9_yweweler_0.wav": {
+     "text": "9.",
+     "tokens": [
+      50257,
+      50363,
+      860,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "9_yweweler_1.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50257,
+      50363,
+      47843,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "9_yweweler_2.wav": {
+     "text": "9.",
+     "tokens": [
+      50257,
+      50363,
+      860,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "9_yweweler_3.wav": {
+     "text": "Nine.",
+     "tokens": [
+      50257,
+      50363,
+      16431,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "9_yweweler_4.wav": {
+     "text": "9.",
+     "tokens": [
+      50257,
+      50363,
+      860,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "seq_0.wav": {
+     "text": "2 5 7 6",
+     "tokens": [
+      50257,
+      50363,
+      362,
+      642,
+      767,
+      718,
+      50463,
+      50256
+     ]
+    },
+    "seq_1.wav": {
+     "text": "1, take.",
+     "tokens": [
+      50257,
+      50363,
+      352,
+      11,
+      1011,
+      13,
+      50463,
+      50256
+     ]
+    },
+    "seq_2.wav": {
+     "text": "7, 9, 5, 6.",
+     "tokens": [
+      50257,
+      50363,
+      767,
+      11,
+      860,
+      11,
+      642,
+      11,
+      718,
+      13,
+      50475,
+      50256
+     ]
+    },
+    "seq_3.wav": {
+     "text": "7, 6, 3.",
+     "tokens": [
+      50257,
+      50363,
+      767,
+      11,
+      718,
+      11,
+      513,
+      13,
+      50470,
+      50256
+     ]
+    },
+    "seq_4.wav": {
+     "text": "9 1 8 7",
+     "tokens": [
+      50257,
+      50363,
+      860,
+      352,
+      807,
+      767,
+      50469,
+      50256
+     ]
+    },
+    "seq_5.wav": {
+     "text": "2, 5, or 0.",
+     "tokens": [
+      50257,
+      50363,
+      362,
+      11,
+      642,
+      11,
+      393,
+      657,
+      13,
+      50463,
+      50256
+     ]
+    },
+    "seq_6.wav": {
+     "text": "1. 9.",
+     "tokens": [
+      50257,
+      50363,
+      352,
+      13,
+      860,
+      13,
+      50475,
+      50256
+     ]
+    },
+    "seq_7.wav": {
+     "text": "5, 7, 3, 4.",
+     "tokens": [
+      50257,
+      50363,
+      642,
+      11,
+      767,
+      11,
+      513,
+      11,
+      604,
+      13,
+      50475,
+      50256
+     ]
+    },
+    "seq_8.wav": {
+     "text": "3, 2, 9, 9.",
+     "tokens": [
+      50257,
+      50363,
+      513,
+      11,
+      362,
+      11,
+      860,
+      11,
+      860,
+      13,
+      50463,
+      50256
+     ]
+    },
+    "seq_9.wav": {
+     "text": "3 8 5 1",
+     "tokens": [
+      50257,
+      50363,
+      513,
+      807,
+      642,
+      352,
+      50463,
+      50256
+     ]
+    },
+    "samples_jfk.wav": {
+     "text": "And so my fellow Americans ask not what your country can do for you ask what you can do for your country.",
+     "tokens": [
+      50257,
+      50363,
+      843,
+      523,
+      616,
+      5891,
+      3399,
+      1265,
+      407,
+      644,
+      534,
+      1499,
+      460,
+      466,
+      329,
+      345,
+      50763,
+      50763,
+      1265,
+      644,
+      345,
+      460,
+      466,
+      329,
+      534,
+      1499,
+      13,
+      50913,
+      50256
+     ]
+    }
+   }
+  },
+  "prompt+pair+cap50": {
+   "description": "prompt + pairing rule + cap",
+   "scores": {
+    "digit": {
+     "n": 50,
+     "empty": 0,
+     "wer": 1.96,
+     "exact": 0.42
+    },
+    "sequence": {
+     "n": 10,
+     "empty": 0,
+     "wer": 0.2
+    },
+    "long": {
+     "n": 1,
+     "empty": 0,
+     "wer": 0.0
+    },
+    "clips_with_empty_segment": 1
+   },
+   "transcripts": {
+    "0_yweweler_0.wav": {
+     "text": "You're welcome. Thank you. We're welcome. We're welcome. Thank you. Thank you. We're welcome. We're welcome. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      921,
+      821,
+      7062,
+      13,
+      50413,
+      50413,
+      6952,
+      345,
+      13,
+      50463,
+      50463,
+      775,
+      821,
+      7062,
+      13,
+      50513,
+      50513,
+      775,
+      821,
+      7062,
+      13,
+      50563,
+      50563,
+      6952,
+      345,
+      13,
+      50613,
+      50613,
+      6952,
+      345,
+      13,
+      50663,
+      50663,
+      775,
+      821,
+      7062,
+      13,
+      50713,
+      50713,
+      775,
+      821,
+      7062,
+      13,
+      50763,
+      50763,
+      6952,
+      345,
+      13,
+      50813,
+      50813,
+      6952,
+      345,
+      13,
+      50863,
+      50863,
+      6952,
+      345,
+      13,
+      50913,
+      50913,
+      6952,
+      345,
+      13,
+      50963,
+      50963,
+      6952,
+      345,
+      13,
+      51013,
+      51013,
+      6952,
+      345,
+      13,
+      51063,
+      51063,
+      6952,
+      345,
+      13,
+      51113,
+      51113,
+      6952,
+      345,
+      13,
+      51163,
+      51163,
+      6952,
+      345,
+      13,
+      51213,
+      51213,
+      6952,
+      345,
+      13,
+      51263,
+      51263,
+      6952,
+      345,
+      13,
+      51313,
+      51313,
+      6952,
+      345,
+      13,
+      51363,
+      51363,
+      6952,
+      345,
+      13,
+      51413,
+      51413,
+      6952,
+      345,
+      13,
+      51463,
+      51463,
+      6952,
+      345,
+      13,
+      51513,
+      51513,
+      6952,
+      345,
+      13,
+      51563,
+      51563,
+      6952,
+      345,
+      13,
+      51613,
+      51613,
+      6952,
+      345,
+      13,
+      51663,
+      51663,
+      6952,
+      345,
+      13,
+      51713,
+      51713,
+      6952,
+      345,
+      13,
+      51763,
+      51763,
+      6952,
+      345,
+      13,
+      51813,
+      51813,
+      50256
+     ]
+    },
+    "0_yweweler_1.wav": {
+     "text": "You're welcome.",
+     "tokens": [
+      50257,
+      50363,
+      921,
+      821,
+      7062,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "0_yweweler_2.wav": {
+     "text": "You're welcome.",
+     "tokens": [
+      50257,
+      50363,
+      921,
+      821,
+      7062,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "0_yweweler_3.wav": {
+     "text": "You're all.",
+     "tokens": [
+      50257,
+      50363,
+      921,
+      821,
+      477,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "0_yweweler_4.wav": {
+     "text": "zero.",
+     "tokens": [
+      50257,
+      50363,
+      6632,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "1_yweweler_0.wav": {
+     "text": "one.",
+     "tokens": [
+      50257,
+      50363,
+      530,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "1_yweweler_1.wav": {
+     "text": "one.",
+     "tokens": [
+      50257,
+      50363,
+      530,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "1_yweweler_2.wav": {
+     "text": "1.",
+     "tokens": [
+      50257,
+      50363,
+      352,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "1_yweweler_3.wav": {
+     "text": "one.",
+     "tokens": [
+      50257,
+      50363,
+      530,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "1_yweweler_4.wav": {
+     "text": "one.",
+     "tokens": [
+      50257,
+      50363,
+      530,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "2_yweweler_0.wav": {
+     "text": "to.",
+     "tokens": [
+      50257,
+      50363,
+      284,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "2_yweweler_1.wav": {
+     "text": "complicit.",
+     "tokens": [
+      50257,
+      50363,
+      42927,
+      13,
+      50417,
+      50256
+     ]
+    },
+    "2_yweweler_2.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "2_yweweler_3.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "2_yweweler_4.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "3_yweweler_0.wav": {
+     "text": "free.",
+     "tokens": [
+      50257,
+      50363,
+      1479,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "3_yweweler_1.wav": {
+     "text": "Three.",
+     "tokens": [
+      50257,
+      50363,
+      7683,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "3_yweweler_2.wav": {
+     "text": "me.",
+     "tokens": [
+      50257,
+      50363,
+      502,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "3_yweweler_3.wav": {
+     "text": "We.",
+     "tokens": [
+      50257,
+      50363,
+      775,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "3_yweweler_4.wav": {
+     "text": "free.",
+     "tokens": [
+      50257,
+      50363,
+      1479,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "4_yweweler_0.wav": {
+     "text": "for.",
+     "tokens": [
+      50257,
+      50363,
+      329,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "4_yweweler_1.wav": {
+     "text": "Oh.",
+     "tokens": [
+      50257,
+      50363,
+      3966,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "4_yweweler_2.wav": {
+     "text": "Four.",
+     "tokens": [
+      50257,
+      50363,
+      6675,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "4_yweweler_3.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "4_yweweler_4.wav": {
+     "text": "Oh.",
+     "tokens": [
+      50257,
+      50363,
+      3966,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "5_yweweler_0.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50257,
+      50363,
+      47843,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "5_yweweler_1.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50257,
+      50363,
+      47843,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "5_yweweler_2.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50257,
+      50363,
+      47843,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "5_yweweler_3.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50257,
+      50363,
+      47843,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "5_yweweler_4.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50257,
+      50363,
+      47843,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "6_yweweler_0.wav": {
+     "text": "Take.",
+     "tokens": [
+      50257,
+      50363,
+      7214,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "6_yweweler_1.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "6_yweweler_2.wav": {
+     "text": "See.",
+     "tokens": [
+      50257,
+      50363,
+      4091,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "6_yweweler_3.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "6_yweweler_4.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "7_yweweler_0.wav": {
+     "text": "7.",
+     "tokens": [
+      50257,
+      50363,
+      767,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "7_yweweler_1.wav": {
+     "text": "7.",
+     "tokens": [
+      50257,
+      50363,
+      767,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "7_yweweler_2.wav": {
+     "text": "Heaven.",
+     "tokens": [
+      50257,
+      50363,
+      11225,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "7_yweweler_3.wav": {
+     "text": "7.",
+     "tokens": [
+      50257,
+      50363,
+      767,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "7_yweweler_4.wav": {
+     "text": "Evan.",
+     "tokens": [
+      50257,
+      50363,
+      21523,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "8_yweweler_0.wav": {
+     "text": "8.",
+     "tokens": [
+      50257,
+      50363,
+      807,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "8_yweweler_1.wav": {
+     "text": "8.",
+     "tokens": [
+      50257,
+      50363,
+      807,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "8_yweweler_2.wav": {
+     "text": "8.",
+     "tokens": [
+      50257,
+      50363,
+      807,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "8_yweweler_3.wav": {
+     "text": "aid.",
+     "tokens": [
+      50257,
+      50363,
+      6133,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "8_yweweler_4.wav": {
+     "text": "8.",
+     "tokens": [
+      50257,
+      50363,
+      807,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "9_yweweler_0.wav": {
+     "text": "9.",
+     "tokens": [
+      50257,
+      50363,
+      860,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "9_yweweler_1.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50257,
+      50363,
+      47843,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "9_yweweler_2.wav": {
+     "text": "9.",
+     "tokens": [
+      50257,
+      50363,
+      860,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "9_yweweler_3.wav": {
+     "text": "Nine.",
+     "tokens": [
+      50257,
+      50363,
+      16431,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "9_yweweler_4.wav": {
+     "text": "9.",
+     "tokens": [
+      50257,
+      50363,
+      860,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "seq_0.wav": {
+     "text": "2 5 7 6",
+     "tokens": [
+      50257,
+      50363,
+      362,
+      642,
+      767,
+      718,
+      50463,
+      50256
+     ]
+    },
+    "seq_1.wav": {
+     "text": "1, take.",
+     "tokens": [
+      50257,
+      50363,
+      352,
+      11,
+      1011,
+      13,
+      50463,
+      50256
+     ]
+    },
+    "seq_2.wav": {
+     "text": "7, 9, 5, 6.",
+     "tokens": [
+      50257,
+      50363,
+      767,
+      11,
+      860,
+      11,
+      642,
+      11,
+      718,
+      13,
+      50475,
+      50256
+     ]
+    },
+    "seq_3.wav": {
+     "text": "7, 6, 3.",
+     "tokens": [
+      50257,
+      50363,
+      767,
+      11,
+      718,
+      11,
+      513,
+      13,
+      50470,
+      50256
+     ]
+    },
+    "seq_4.wav": {
+     "text": "9 1 8 7",
+     "tokens": [
+      50257,
+      50363,
+      860,
+      352,
+      807,
+      767,
+      50469,
+      50256
+     ]
+    },
+    "seq_5.wav": {
+     "text": "2, 5, or 0.",
+     "tokens": [
+      50257,
+      50363,
+      362,
+      11,
+      642,
+      11,
+      393,
+      657,
+      13,
+      50463,
+      50256
+     ]
+    },
+    "seq_6.wav": {
+     "text": "1. 9.",
+     "tokens": [
+      50257,
+      50363,
+      352,
+      13,
+      860,
+      13,
+      50475,
+      50256
+     ]
+    },
+    "seq_7.wav": {
+     "text": "5, 7, 3, 4.",
+     "tokens": [
+      50257,
+      50363,
+      642,
+      11,
+      767,
+      11,
+      513,
+      11,
+      604,
+      13,
+      50475,
+      50256
+     ]
+    },
+    "seq_8.wav": {
+     "text": "3, 2, 9, 9.",
+     "tokens": [
+      50257,
+      50363,
+      513,
+      11,
+      362,
+      11,
+      860,
+      11,
+      860,
+      13,
+      50463,
+      50256
+     ]
+    },
+    "seq_9.wav": {
+     "text": "3 8 5 1",
+     "tokens": [
+      50257,
+      50363,
+      513,
+      807,
+      642,
+      352,
+      50463,
+      50256
+     ]
+    },
+    "samples_jfk.wav": {
+     "text": "And so my fellow Americans ask not what your country can do for you ask what you can do for your country.",
+     "tokens": [
+      50257,
+      50363,
+      843,
+      523,
+      616,
+      5891,
+      3399,
+      1265,
+      407,
+      644,
+      534,
+      1499,
+      460,
+      466,
+      329,
+      345,
+      50763,
+      50763,
+      1265,
+      644,
+      345,
+      460,
+      466,
+      329,
+      534,
+      1499,
+      13,
+      50913,
+      50256
+     ]
+    }
+   }
+  },
+  "upstream-greedy": {
+   "description": "upstream with the temperature fallback disabled (t = 0 only)",
+   "scores": {
+    "digit": {
+     "n": 50,
+     "empty": 50,
+     "wer": 1.0,
+     "exact": 0.0
+    },
+    "sequence": {
+     "n": 10,
+     "empty": 6,
+     "wer": 0.9
+    },
+    "long": {
+     "n": 1,
+     "empty": 0,
+     "wer": 0.0
+    },
+    "clips_with_empty_segment": 61
+   },
+   "transcripts": {
+    "0_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "0_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "0_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "0_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "0_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "1_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "1_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "1_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "1_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "1_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "2_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "2_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "2_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "2_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "2_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "3_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "3_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "3_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "3_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "3_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "4_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "4_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "4_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "4_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "4_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "5_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "5_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "5_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "5_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "5_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50461,
+      50256
+     ]
+    },
+    "6_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "6_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "6_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "6_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "6_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "7_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "7_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "7_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "7_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "7_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "8_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "8_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "8_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "8_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "8_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "9_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "9_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "9_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "9_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "9_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "seq_0.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50717,
+      50256
+     ]
+    },
+    "seq_1.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "seq_2.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "seq_3.wav": {
+     "text": "3",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50452,
+      513,
+      50469,
+      50256
+     ]
+    },
+    "seq_4.wav": {
+     "text": "7",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50452,
+      767,
+      50474,
+      50256
+     ]
+    },
+    "seq_5.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "seq_6.wav": {
+     "text": "9",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50452,
+      860,
+      50477,
+      50256
+     ]
+    },
+    "seq_7.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "seq_8.wav": {
+     "text": "",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50256
+     ]
+    },
+    "seq_9.wav": {
+     "text": "1",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50452,
+      352,
+      50463,
+      50256
+     ]
+    },
+    "samples_jfk.wav": {
+     "text": "and so my fellow Americans ask not what your country can do for you ask what you can do for your country",
+     "tokens": [
+      50257,
+      50358,
+      50452,
+      50452,
+      290,
+      523,
+      616,
+      5891,
+      3399,
+      1265,
+      407,
+      644,
+      534,
+      1499,
+      460,
+      466,
+      329,
+      345,
+      1265,
+      644,
+      345,
+      460,
+      466,
+      329,
+      534,
+      1499,
+      50882,
+      50256
+     ]
+    }
+   }
+  },
+  "prompt+pair-greedy": {
+   "description": "prompt + pairing rule, fallback disabled",
+   "scores": {
+    "digit": {
+     "n": 50,
+     "empty": 0,
+     "wer": 0.84,
+     "exact": 0.44
+    },
+    "sequence": {
+     "n": 10,
+     "empty": 0,
+     "wer": 0.2
+    },
+    "long": {
+     "n": 1,
+     "empty": 0,
+     "wer": 0.0
+    },
+    "clips_with_empty_segment": 0
+   },
+   "transcripts": {
+    "0_yweweler_0.wav": {
+     "text": "You're welcome.",
+     "tokens": [
+      50257,
+      50363,
+      921,
+      821,
+      7062,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "0_yweweler_1.wav": {
+     "text": "You're welcome.",
+     "tokens": [
+      50257,
+      50363,
+      921,
+      821,
+      7062,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "0_yweweler_2.wav": {
+     "text": "You're welcome.",
+     "tokens": [
+      50257,
+      50363,
+      921,
+      821,
+      7062,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "0_yweweler_3.wav": {
+     "text": "You're all.",
+     "tokens": [
+      50257,
+      50363,
+      921,
+      821,
+      477,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "0_yweweler_4.wav": {
+     "text": "zero.",
+     "tokens": [
+      50257,
+      50363,
+      6632,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "1_yweweler_0.wav": {
+     "text": "one.",
+     "tokens": [
+      50257,
+      50363,
+      530,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "1_yweweler_1.wav": {
+     "text": "one.",
+     "tokens": [
+      50257,
+      50363,
+      530,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "1_yweweler_2.wav": {
+     "text": "1.",
+     "tokens": [
+      50257,
+      50363,
+      352,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "1_yweweler_3.wav": {
+     "text": "one.",
+     "tokens": [
+      50257,
+      50363,
+      530,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "1_yweweler_4.wav": {
+     "text": "one.",
+     "tokens": [
+      50257,
+      50363,
+      530,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "2_yweweler_0.wav": {
+     "text": "to.",
+     "tokens": [
+      50257,
+      50363,
+      284,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "2_yweweler_1.wav": {
+     "text": "to.",
+     "tokens": [
+      50257,
+      50363,
+      284,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "2_yweweler_2.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "2_yweweler_3.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "2_yweweler_4.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "3_yweweler_0.wav": {
+     "text": "free.",
+     "tokens": [
+      50257,
+      50363,
+      1479,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "3_yweweler_1.wav": {
+     "text": "Three.",
+     "tokens": [
+      50257,
+      50363,
+      7683,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "3_yweweler_2.wav": {
+     "text": "me.",
+     "tokens": [
+      50257,
+      50363,
+      502,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "3_yweweler_3.wav": {
+     "text": "We.",
+     "tokens": [
+      50257,
+      50363,
+      775,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "3_yweweler_4.wav": {
+     "text": "free.",
+     "tokens": [
+      50257,
+      50363,
+      1479,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "4_yweweler_0.wav": {
+     "text": "for.",
+     "tokens": [
+      50257,
+      50363,
+      329,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "4_yweweler_1.wav": {
+     "text": "Oh.",
+     "tokens": [
+      50257,
+      50363,
+      3966,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "4_yweweler_2.wav": {
+     "text": "Four.",
+     "tokens": [
+      50257,
+      50363,
+      6675,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "4_yweweler_3.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "4_yweweler_4.wav": {
+     "text": "Oh.",
+     "tokens": [
+      50257,
+      50363,
+      3966,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "5_yweweler_0.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50257,
+      50363,
+      47843,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "5_yweweler_1.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50257,
+      50363,
+      47843,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "5_yweweler_2.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50257,
+      50363,
+      47843,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "5_yweweler_3.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50257,
+      50363,
+      47843,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "5_yweweler_4.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50257,
+      50363,
+      47843,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "6_yweweler_0.wav": {
+     "text": "Take.",
+     "tokens": [
+      50257,
+      50363,
+      7214,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "6_yweweler_1.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "6_yweweler_2.wav": {
+     "text": "See.",
+     "tokens": [
+      50257,
+      50363,
+      4091,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "6_yweweler_3.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "6_yweweler_4.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "7_yweweler_0.wav": {
+     "text": "7.",
+     "tokens": [
+      50257,
+      50363,
+      767,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "7_yweweler_1.wav": {
+     "text": "7.",
+     "tokens": [
+      50257,
+      50363,
+      767,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "7_yweweler_2.wav": {
+     "text": "Heaven.",
+     "tokens": [
+      50257,
+      50363,
+      11225,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "7_yweweler_3.wav": {
+     "text": "7.",
+     "tokens": [
+      50257,
+      50363,
+      767,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "7_yweweler_4.wav": {
+     "text": "Evan.",
+     "tokens": [
+      50257,
+      50363,
+      21523,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "8_yweweler_0.wav": {
+     "text": "8.",
+     "tokens": [
+      50257,
+      50363,
+      807,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "8_yweweler_1.wav": {
+     "text": "8.",
+     "tokens": [
+      50257,
+      50363,
+      807,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "8_yweweler_2.wav": {
+     "text": "8.",
+     "tokens": [
+      50257,
+      50363,
+      807,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "8_yweweler_3.wav": {
+     "text": "aid.",
+     "tokens": [
+      50257,
+      50363,
+      6133,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "8_yweweler_4.wav": {
+     "text": "8.",
+     "tokens": [
+      50257,
+      50363,
+      807,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "9_yweweler_0.wav": {
+     "text": "9.",
+     "tokens": [
+      50257,
+      50363,
+      860,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "9_yweweler_1.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50257,
+      50363,
+      47843,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "9_yweweler_2.wav": {
+     "text": "9.",
+     "tokens": [
+      50257,
+      50363,
+      860,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "9_yweweler_3.wav": {
+     "text": "Nine.",
+     "tokens": [
+      50257,
+      50363,
+      16431,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "9_yweweler_4.wav": {
+     "text": "9.",
+     "tokens": [
+      50257,
+      50363,
+      860,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "seq_0.wav": {
+     "text": "2 5 7 6",
+     "tokens": [
+      50257,
+      50363,
+      362,
+      642,
+      767,
+      718,
+      50463,
+      50256
+     ]
+    },
+    "seq_1.wav": {
+     "text": "1, take.",
+     "tokens": [
+      50257,
+      50363,
+      352,
+      11,
+      1011,
+      13,
+      50463,
+      50256
+     ]
+    },
+    "seq_2.wav": {
+     "text": "7, 9, 5, 6.",
+     "tokens": [
+      50257,
+      50363,
+      767,
+      11,
+      860,
+      11,
+      642,
+      11,
+      718,
+      13,
+      50475,
+      50256
+     ]
+    },
+    "seq_3.wav": {
+     "text": "7, 6, 3.",
+     "tokens": [
+      50257,
+      50363,
+      767,
+      11,
+      718,
+      11,
+      513,
+      13,
+      50470,
+      50256
+     ]
+    },
+    "seq_4.wav": {
+     "text": "9 1 8 7",
+     "tokens": [
+      50257,
+      50363,
+      860,
+      352,
+      807,
+      767,
+      50469,
+      50256
+     ]
+    },
+    "seq_5.wav": {
+     "text": "2, 5, or 0.",
+     "tokens": [
+      50257,
+      50363,
+      362,
+      11,
+      642,
+      11,
+      393,
+      657,
+      13,
+      50463,
+      50256
+     ]
+    },
+    "seq_6.wav": {
+     "text": "1. 9.",
+     "tokens": [
+      50257,
+      50363,
+      352,
+      13,
+      860,
+      13,
+      50475,
+      50256
+     ]
+    },
+    "seq_7.wav": {
+     "text": "5, 7, 3, 4.",
+     "tokens": [
+      50257,
+      50363,
+      642,
+      11,
+      767,
+      11,
+      513,
+      11,
+      604,
+      13,
+      50475,
+      50256
+     ]
+    },
+    "seq_8.wav": {
+     "text": "3, 2, 9, 9.",
+     "tokens": [
+      50257,
+      50363,
+      513,
+      11,
+      362,
+      11,
+      860,
+      11,
+      860,
+      13,
+      50463,
+      50256
+     ]
+    },
+    "seq_9.wav": {
+     "text": "3 8 5 1",
+     "tokens": [
+      50257,
+      50363,
+      513,
+      807,
+      642,
+      352,
+      50463,
+      50256
+     ]
+    },
+    "samples_jfk.wav": {
+     "text": "And so my fellow Americans ask not what your country can do for you ask what you can do for your country.",
+     "tokens": [
+      50257,
+      50363,
+      843,
+      523,
+      616,
+      5891,
+      3399,
+      1265,
+      407,
+      644,
+      534,
+      1499,
+      460,
+      466,
+      329,
+      345,
+      50763,
+      50763,
+      1265,
+      644,
+      345,
+      460,
+      466,
+      329,
+      534,
+      1499,
+      13,
+      50913,
+      50256
+     ]
+    }
+   }
+  },
+  "patched": {
+   "description": "the clean patch (tools/real_models/candle-patches/whisper-example-timestamps.patch): prompt + pairing rule + 40 ms print offset",
+   "scores": {
+    "digit": {
+     "n": 50,
+     "empty": 0,
+     "wer": 1.96,
+     "exact": 0.42
+    },
+    "sequence": {
+     "n": 10,
+     "empty": 0,
+     "wer": 0.2
+    },
+    "long": {
+     "n": 1,
+     "empty": 0,
+     "wer": 0.0
+    },
+    "clips_with_empty_segment": 1
+   },
+   "transcripts": {
+    "0_yweweler_0.wav": {
+     "text": "You're welcome. Thank you. We're welcome. We're welcome. Thank you. Thank you. We're welcome. We're welcome. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you. Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      921,
+      821,
+      7062,
+      13,
+      50413,
+      50413,
+      6952,
+      345,
+      13,
+      50463,
+      50463,
+      775,
+      821,
+      7062,
+      13,
+      50513,
+      50513,
+      775,
+      821,
+      7062,
+      13,
+      50563,
+      50563,
+      6952,
+      345,
+      13,
+      50613,
+      50613,
+      6952,
+      345,
+      13,
+      50663,
+      50663,
+      775,
+      821,
+      7062,
+      13,
+      50713,
+      50713,
+      775,
+      821,
+      7062,
+      13,
+      50763,
+      50763,
+      6952,
+      345,
+      13,
+      50813,
+      50813,
+      6952,
+      345,
+      13,
+      50863,
+      50863,
+      6952,
+      345,
+      13,
+      50913,
+      50913,
+      6952,
+      345,
+      13,
+      50963,
+      50963,
+      6952,
+      345,
+      13,
+      51013,
+      51013,
+      6952,
+      345,
+      13,
+      51063,
+      51063,
+      6952,
+      345,
+      13,
+      51113,
+      51113,
+      6952,
+      345,
+      13,
+      51163,
+      51163,
+      6952,
+      345,
+      13,
+      51213,
+      51213,
+      6952,
+      345,
+      13,
+      51263,
+      51263,
+      6952,
+      345,
+      13,
+      51313,
+      51313,
+      6952,
+      345,
+      13,
+      51363,
+      51363,
+      6952,
+      345,
+      13,
+      51413,
+      51413,
+      6952,
+      345,
+      13,
+      51463,
+      51463,
+      6952,
+      345,
+      13,
+      51513,
+      51513,
+      6952,
+      345,
+      13,
+      51563,
+      51563,
+      6952,
+      345,
+      13,
+      51613,
+      51613,
+      6952,
+      345,
+      13,
+      51663,
+      51663,
+      6952,
+      345,
+      13,
+      51713,
+      51713,
+      6952,
+      345,
+      13,
+      51763,
+      51763,
+      6952,
+      345,
+      13,
+      51813,
+      51813,
+      50256
+     ]
+    },
+    "0_yweweler_1.wav": {
+     "text": "You're welcome.",
+     "tokens": [
+      50257,
+      50363,
+      921,
+      821,
+      7062,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "0_yweweler_2.wav": {
+     "text": "You're welcome.",
+     "tokens": [
+      50257,
+      50363,
+      921,
+      821,
+      7062,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "0_yweweler_3.wav": {
+     "text": "You're all.",
+     "tokens": [
+      50257,
+      50363,
+      921,
+      821,
+      477,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "0_yweweler_4.wav": {
+     "text": "zero.",
+     "tokens": [
+      50257,
+      50363,
+      6632,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "1_yweweler_0.wav": {
+     "text": "one.",
+     "tokens": [
+      50257,
+      50363,
+      530,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "1_yweweler_1.wav": {
+     "text": "one.",
+     "tokens": [
+      50257,
+      50363,
+      530,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "1_yweweler_2.wav": {
+     "text": "1.",
+     "tokens": [
+      50257,
+      50363,
+      352,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "1_yweweler_3.wav": {
+     "text": "one.",
+     "tokens": [
+      50257,
+      50363,
+      530,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "1_yweweler_4.wav": {
+     "text": "one.",
+     "tokens": [
+      50257,
+      50363,
+      530,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "2_yweweler_0.wav": {
+     "text": "to.",
+     "tokens": [
+      50257,
+      50363,
+      284,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "2_yweweler_1.wav": {
+     "text": "complicit.",
+     "tokens": [
+      50257,
+      50363,
+      42927,
+      13,
+      50417,
+      50256
+     ]
+    },
+    "2_yweweler_2.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "2_yweweler_3.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "2_yweweler_4.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "3_yweweler_0.wav": {
+     "text": "free.",
+     "tokens": [
+      50257,
+      50363,
+      1479,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "3_yweweler_1.wav": {
+     "text": "Three.",
+     "tokens": [
+      50257,
+      50363,
+      7683,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "3_yweweler_2.wav": {
+     "text": "me.",
+     "tokens": [
+      50257,
+      50363,
+      502,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "3_yweweler_3.wav": {
+     "text": "We.",
+     "tokens": [
+      50257,
+      50363,
+      775,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "3_yweweler_4.wav": {
+     "text": "free.",
+     "tokens": [
+      50257,
+      50363,
+      1479,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "4_yweweler_0.wav": {
+     "text": "for.",
+     "tokens": [
+      50257,
+      50363,
+      329,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "4_yweweler_1.wav": {
+     "text": "Oh.",
+     "tokens": [
+      50257,
+      50363,
+      3966,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "4_yweweler_2.wav": {
+     "text": "Four.",
+     "tokens": [
+      50257,
+      50363,
+      6675,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "4_yweweler_3.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "4_yweweler_4.wav": {
+     "text": "Oh.",
+     "tokens": [
+      50257,
+      50363,
+      3966,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "5_yweweler_0.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50257,
+      50363,
+      47843,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "5_yweweler_1.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50257,
+      50363,
+      47843,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "5_yweweler_2.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50257,
+      50363,
+      47843,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "5_yweweler_3.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50257,
+      50363,
+      47843,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "5_yweweler_4.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50257,
+      50363,
+      47843,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "6_yweweler_0.wav": {
+     "text": "Take.",
+     "tokens": [
+      50257,
+      50363,
+      7214,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "6_yweweler_1.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "6_yweweler_2.wav": {
+     "text": "See.",
+     "tokens": [
+      50257,
+      50363,
+      4091,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "6_yweweler_3.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "6_yweweler_4.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "7_yweweler_0.wav": {
+     "text": "7.",
+     "tokens": [
+      50257,
+      50363,
+      767,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "7_yweweler_1.wav": {
+     "text": "7.",
+     "tokens": [
+      50257,
+      50363,
+      767,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "7_yweweler_2.wav": {
+     "text": "Heaven.",
+     "tokens": [
+      50257,
+      50363,
+      11225,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "7_yweweler_3.wav": {
+     "text": "7.",
+     "tokens": [
+      50257,
+      50363,
+      767,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "7_yweweler_4.wav": {
+     "text": "Evan.",
+     "tokens": [
+      50257,
+      50363,
+      21523,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "8_yweweler_0.wav": {
+     "text": "8.",
+     "tokens": [
+      50257,
+      50363,
+      807,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "8_yweweler_1.wav": {
+     "text": "8.",
+     "tokens": [
+      50257,
+      50363,
+      807,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "8_yweweler_2.wav": {
+     "text": "8.",
+     "tokens": [
+      50257,
+      50363,
+      807,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "8_yweweler_3.wav": {
+     "text": "aid.",
+     "tokens": [
+      50257,
+      50363,
+      6133,
+      13,
+      50413,
+      50256
+     ]
+    },
+    "8_yweweler_4.wav": {
+     "text": "8.",
+     "tokens": [
+      50257,
+      50363,
+      807,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "9_yweweler_0.wav": {
+     "text": "9.",
+     "tokens": [
+      50257,
+      50363,
+      860,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "9_yweweler_1.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50257,
+      50363,
+      47843,
+      13,
+      50405,
+      50256
+     ]
+    },
+    "9_yweweler_2.wav": {
+     "text": "9.",
+     "tokens": [
+      50257,
+      50363,
+      860,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "9_yweweler_3.wav": {
+     "text": "Nine.",
+     "tokens": [
+      50257,
+      50363,
+      16431,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "9_yweweler_4.wav": {
+     "text": "9.",
+     "tokens": [
+      50257,
+      50363,
+      860,
+      13,
+      50388,
+      50256
+     ]
+    },
+    "seq_0.wav": {
+     "text": "2 5 7 6",
+     "tokens": [
+      50257,
+      50363,
+      362,
+      642,
+      767,
+      718,
+      50463,
+      50256
+     ]
+    },
+    "seq_1.wav": {
+     "text": "1, take.",
+     "tokens": [
+      50257,
+      50363,
+      352,
+      11,
+      1011,
+      13,
+      50463,
+      50256
+     ]
+    },
+    "seq_2.wav": {
+     "text": "7, 9, 5, 6.",
+     "tokens": [
+      50257,
+      50363,
+      767,
+      11,
+      860,
+      11,
+      642,
+      11,
+      718,
+      13,
+      50475,
+      50256
+     ]
+    },
+    "seq_3.wav": {
+     "text": "7, 6, 3.",
+     "tokens": [
+      50257,
+      50363,
+      767,
+      11,
+      718,
+      11,
+      513,
+      13,
+      50470,
+      50256
+     ]
+    },
+    "seq_4.wav": {
+     "text": "9 1 8 7",
+     "tokens": [
+      50257,
+      50363,
+      860,
+      352,
+      807,
+      767,
+      50469,
+      50256
+     ]
+    },
+    "seq_5.wav": {
+     "text": "2, 5, or 0.",
+     "tokens": [
+      50257,
+      50363,
+      362,
+      11,
+      642,
+      11,
+      393,
+      657,
+      13,
+      50463,
+      50256
+     ]
+    },
+    "seq_6.wav": {
+     "text": "1. 9.",
+     "tokens": [
+      50257,
+      50363,
+      352,
+      13,
+      860,
+      13,
+      50475,
+      50256
+     ]
+    },
+    "seq_7.wav": {
+     "text": "5, 7, 3, 4.",
+     "tokens": [
+      50257,
+      50363,
+      642,
+      11,
+      767,
+      11,
+      513,
+      11,
+      604,
+      13,
+      50475,
+      50256
+     ]
+    },
+    "seq_8.wav": {
+     "text": "3, 2, 9, 9.",
+     "tokens": [
+      50257,
+      50363,
+      513,
+      11,
+      362,
+      11,
+      860,
+      11,
+      860,
+      13,
+      50463,
+      50256
+     ]
+    },
+    "seq_9.wav": {
+     "text": "3 8 5 1",
+     "tokens": [
+      50257,
+      50363,
+      513,
+      807,
+      642,
+      352,
+      50463,
+      50256
+     ]
+    },
+    "samples_jfk.wav": {
+     "text": "And so my fellow Americans ask not what your country can do for you ask what you can do for your country.",
+     "tokens": [
+      50257,
+      50363,
+      843,
+      523,
+      616,
+      5891,
+      3399,
+      1265,
+      407,
+      644,
+      534,
+      1499,
+      460,
+      466,
+      329,
+      345,
+      50763,
+      50763,
+      1265,
+      644,
+      345,
+      460,
+      466,
+      329,
+      534,
+      1499,
+      13,
+      50913,
+      50256
+     ]
+    }
+   }
+  },
+  "tiny-upstream": {
+   "description": "multilingual tiny, --language en, unmodified",
+   "scores": {
+    "digit": {
+     "n": 50,
+     "empty": 16,
+     "wer": 1.44,
+     "exact": 0.12
+    },
+    "sequence": {
+     "n": 10,
+     "empty": 2,
+     "wer": 0.925
+    },
+    "long": {
+     "n": 1,
+     "empty": 0,
+     "wer": 0.0
+    },
+    "clips_with_empty_segment": 59
+   },
+   "transcripts": {
+    "0_yweweler_0.wav": {
+     "text": "Okay.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      51505,
+      1033,
+      13,
+      51555,
+      50257
+     ]
+    },
+    "0_yweweler_1.wav": {
+     "text": "Whoever wins.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      51203,
+      24743,
+      10641,
+      13,
+      51316,
+      50257
+     ]
+    },
+    "0_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      51714,
+      50257
+     ]
+    },
+    "0_yweweler_3.wav": {
+     "text": "Now again,",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      51547,
+      823,
+      797,
+      11,
+      51659,
+      51784,
+      50257
+     ]
+    },
+    "0_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50364,
+      291,
+      434,
+      439,
+      13,
+      50414,
+      50257
+     ]
+    },
+    "1_yweweler_0.wav": {
+     "text": "One.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50367,
+      1485,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "1_yweweler_1.wav": {
+     "text": "Get up, I hope you've been",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50364,
+      3240,
+      493,
+      11,
+      286,
+      1454,
+      291,
+      600,
+      668,
+      50534,
+      50257
+     ]
+    },
+    "1_yweweler_2.wav": {
+     "text": "1.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      51831,
+      502,
+      13,
+      51855,
+      50257
+     ]
+    },
+    "1_yweweler_3.wav": {
+     "text": "that",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50705,
+      300,
+      50862,
+      50257
+     ]
+    },
+    "1_yweweler_4.wav": {
+     "text": "one.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      51831,
+      472,
+      13,
+      51855,
+      50257
+     ]
+    },
+    "2_yweweler_0.wav": {
+     "text": "everyone in round one to",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50573,
+      1518,
+      294,
+      3098,
+      472,
+      281,
+      51166,
+      50257
+     ]
+    },
+    "2_yweweler_1.wav": {
+     "text": "you",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50384,
+      291,
+      50464,
+      50257
+     ]
+    },
+    "2_yweweler_2.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50389,
+      1044,
+      291,
+      13,
+      50414,
+      50257
+     ]
+    },
+    "2_yweweler_3.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50389,
+      1044,
+      291,
+      13,
+      50414,
+      50257
+     ]
+    },
+    "2_yweweler_4.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50389,
+      1044,
+      291,
+      13,
+      50414,
+      50257
+     ]
+    },
+    "3_yweweler_0.wav": {
+     "text": "please",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50366,
+      1767,
+      50464,
+      50257
+     ]
+    },
+    "3_yweweler_1.wav": {
+     "text": "Three.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50371,
+      6244,
+      13,
+      50406,
+      50257
+     ]
+    },
+    "3_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50366,
+      291,
+      50464,
+      50257
+     ]
+    },
+    "3_yweweler_3.wav": {
+     "text": "good",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50819,
+      665,
+      50821,
+      50257
+     ]
+    },
+    "3_yweweler_4.wav": {
+     "text": "Free.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50371,
+      11551,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "4_yweweler_0.wav": {
+     "text": "4",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50378,
+      1017,
+      50389,
+      50257
+     ]
+    },
+    "4_yweweler_1.wav": {
+     "text": "you",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      51020,
+      291,
+      51172,
+      50257
+     ]
+    },
+    "4_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50366,
+      544,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "4_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50366,
+      291,
+      50464,
+      50257
+     ]
+    },
+    "4_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      51740,
+      50257
+     ]
+    },
+    "5_yweweler_0.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50378,
+      4621,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "5_yweweler_1.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50369,
+      4621,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "5_yweweler_2.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50369,
+      4621,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "5_yweweler_3.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50369,
+      4621,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "5_yweweler_4.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50378,
+      4621,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "6_yweweler_0.wav": {
+     "text": "Thank you. Rohit, what are you doing? Hey, I'm living in some sort of space.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      51325,
+      1044,
+      291,
+      13,
+      51400,
+      51450,
+      27490,
+      270,
+      11,
+      437,
+      366,
+      291,
+      884,
+      30,
+      51563,
+      51563,
+      1911,
+      11,
+      286,
+      478,
+      2647,
+      294,
+      512,
+      1333,
+      295,
+      1901,
+      13,
+      51782,
+      51782,
+      50257
+     ]
+    },
+    "6_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50374,
+      291,
+      50464,
+      50257
+     ]
+    },
+    "6_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50378,
+      291,
+      50464,
+      50257
+     ]
+    },
+    "6_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50374,
+      291,
+      50464,
+      50257
+     ]
+    },
+    "6_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50374,
+      291,
+      50464,
+      50257
+     ]
+    },
+    "7_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      51806,
+      50257
+     ]
+    },
+    "7_yweweler_1.wav": {
+     "text": "Dae- �",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50547,
+      42361,
+      12,
+      2417,
+      50606,
+      50257
+     ]
+    },
+    "7_yweweler_2.wav": {
+     "text": "Heaven.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50367,
+      13676,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "7_yweweler_3.wav": {
+     "text": "Heaven.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50374,
+      13676,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "7_yweweler_4.wav": {
+     "text": "Evan.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50366,
+      22613,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "8_yweweler_0.wav": {
+     "text": "",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50389,
+      1649,
+      50414,
+      50257
+     ]
+    },
+    "8_yweweler_1.wav": {
+     "text": "You",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      51087,
+      509,
+      51200,
+      50257
+     ]
+    },
+    "8_yweweler_2.wav": {
+     "text": "",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50389,
+      1044,
+      291,
+      13,
+      50464,
+      50257
+     ]
+    },
+    "8_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      51714,
+      50257
+     ]
+    },
+    "8_yweweler_4.wav": {
+     "text": "saved.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      51830,
+      6624,
+      13,
+      51855,
+      50257
+     ]
+    },
+    "9_yweweler_0.wav": {
+     "text": "like",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50814,
+      411,
+      51012,
+      50257
+     ]
+    },
+    "9_yweweler_1.wav": {
+     "text": "",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50289,
+      50414,
+      50257
+     ]
+    },
+    "9_yweweler_2.wav": {
+     "text": ".",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50289,
+      13,
+      50414,
+      50257
+     ]
+    },
+    "9_yweweler_3.wav": {
+     "text": "",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      51656,
+      50257
+     ]
+    },
+    "9_yweweler_4.wav": {
+     "text": "9.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50289,
+      24,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "seq_0.wav": {
+     "text": "5, 7, 6.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50389,
+      1025,
+      11,
+      1614,
+      11,
+      1386,
+      13,
+      50464,
+      50257
+     ]
+    },
+    "seq_1.wav": {
+     "text": "7, 1, take.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50364,
+      1614,
+      11,
+      502,
+      11,
+      747,
+      13,
+      50464,
+      50257
+     ]
+    },
+    "seq_2.wav": {
+     "text": "",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      51814,
+      50257
+     ]
+    },
+    "seq_3.wav": {
+     "text": "Hello, okay friends. You see? Okay, thank you, thank you. Have a great weekend, and see you in 8pm to their careers,",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      51156,
+      2425,
+      11,
+      1392,
+      1855,
+      13,
+      51228,
+      51228,
+      509,
+      536,
+      30,
+      51316,
+      51316,
+      1033,
+      11,
+      1309,
+      291,
+      11,
+      1309,
+      291,
+      13,
+      51424,
+      51424,
+      3560,
+      257,
+      869,
+      6711,
+      11,
+      51596,
+      51596,
+      293,
+      536,
+      291,
+      294,
+      1649,
+      14395,
+      51612,
+      51644,
+      281,
+      641,
+      16409,
+      11,
+      51736,
+      51736,
+      50257
+     ]
+    },
+    "seq_4.wav": {
+     "text": "1, 8, 7.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50383,
+      502,
+      11,
+      1649,
+      11,
+      1614,
+      13,
+      50473,
+      50257
+     ]
+    },
+    "seq_5.wav": {
+     "text": "",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      51714,
+      50257
+     ]
+    },
+    "seq_6.wav": {
+     "text": "0, 1, 9.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50364,
+      1958,
+      11,
+      502,
+      11,
+      1722,
+      13,
+      50474,
+      50257
+     ]
+    },
+    "seq_7.wav": {
+     "text": "Five, seven, three, four.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50371,
+      9436,
+      11,
+      3407,
+      11,
+      1045,
+      11,
+      1451,
+      13,
+      50471,
+      50257
+     ]
+    },
+    "seq_8.wav": {
+     "text": "Three, two, nine, nine.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50371,
+      6244,
+      11,
+      732,
+      11,
+      4949,
+      11,
+      4949,
+      13,
+      50464,
+      50257
+     ]
+    },
+    "seq_9.wav": {
+     "text": "8, 5, 1.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50389,
+      1649,
+      11,
+      1025,
+      11,
+      502,
+      13,
+      50464,
+      50257
+     ]
+    },
+    "samples_jfk.wav": {
+     "text": "And so my fellow Americans ask not what your country can do for you ask what you can do for your country",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      50385,
+      400,
+      370,
+      452,
+      7177,
+      6280,
+      50485,
+      50519,
+      1029,
+      406,
+      50592,
+      50625,
+      437,
+      428,
+      1941,
+      393,
+      360,
+      337,
+      291,
+      50746,
+      50771,
+      1029,
+      437,
+      291,
+      393,
+      360,
+      337,
+      428,
+      1941,
+      50896,
+      50257
+     ]
+    }
+   }
+  },
+  "tiny-patched": {
+   "description": "multilingual tiny, --language en, with the patch",
+   "scores": {
+    "digit": {
+     "n": 50,
+     "empty": 1,
+     "wer": 1.0,
+     "exact": 0.26
+    },
+    "sequence": {
+     "n": 10,
+     "empty": 0,
+     "wer": 0.25
+    },
+    "long": {
+     "n": 1,
+     "empty": 0,
+     "wer": 0.0
+    },
+    "clips_with_empty_segment": 0
+   },
+   "transcripts": {
+    "0_yweweler_0.wav": {
+     "text": "Thank you, Earl.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      1044,
+      291,
+      11,
+      38936,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "0_yweweler_1.wav": {
+     "text": "you're all.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      291,
+      434,
+      439,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "0_yweweler_2.wav": {
+     "text": "you're all.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      291,
+      434,
+      439,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "0_yweweler_3.wav": {
+     "text": "you're welcome.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      291,
+      434,
+      2928,
+      13,
+      50464,
+      50257
+     ]
+    },
+    "0_yweweler_4.wav": {
+     "text": "",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      291,
+      434,
+      439,
+      13,
+      50414,
+      50257
+     ]
+    },
+    "1_yweweler_0.wav": {
+     "text": "One.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      1485,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "1_yweweler_1.wav": {
+     "text": "one.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      472,
+      13,
+      50414,
+      50257
+     ]
+    },
+    "1_yweweler_2.wav": {
+     "text": "one.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      472,
+      13,
+      50414,
+      50257
+     ]
+    },
+    "1_yweweler_3.wav": {
+     "text": "one.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      472,
+      13,
+      50414,
+      50257
+     ]
+    },
+    "1_yweweler_4.wav": {
+     "text": "one.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      472,
+      13,
+      50414,
+      50257
+     ]
+    },
+    "2_yweweler_0.wav": {
+     "text": "too.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      886,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "2_yweweler_1.wav": {
+     "text": "you",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      291,
+      50464,
+      50257
+     ]
+    },
+    "2_yweweler_2.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      1044,
+      291,
+      13,
+      50414,
+      50257
+     ]
+    },
+    "2_yweweler_3.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      1044,
+      291,
+      13,
+      50414,
+      50257
+     ]
+    },
+    "2_yweweler_4.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      1044,
+      291,
+      13,
+      50414,
+      50257
+     ]
+    },
+    "3_yweweler_0.wav": {
+     "text": "Please.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      2555,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "3_yweweler_1.wav": {
+     "text": "Three.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      6244,
+      13,
+      50414,
+      50257
+     ]
+    },
+    "3_yweweler_2.wav": {
+     "text": "you.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      291,
+      13,
+      50414,
+      50257
+     ]
+    },
+    "3_yweweler_3.wav": {
+     "text": "We.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      492,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "3_yweweler_4.wav": {
+     "text": "free.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      1737,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "4_yweweler_0.wav": {
+     "text": "4",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      1017,
+      50389,
+      50257
+     ]
+    },
+    "4_yweweler_1.wav": {
+     "text": "Oh.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      876,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "4_yweweler_2.wav": {
+     "text": "more.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      544,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "4_yweweler_3.wav": {
+     "text": "you.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      291,
+      13,
+      50414,
+      50257
+     ]
+    },
+    "4_yweweler_4.wav": {
+     "text": "or",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      420,
+      50464,
+      50257
+     ]
+    },
+    "5_yweweler_0.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      4621,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "5_yweweler_1.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      4621,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "5_yweweler_2.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      4621,
+      13,
+      50406,
+      50257
+     ]
+    },
+    "5_yweweler_3.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      4621,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "5_yweweler_4.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      4621,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "6_yweweler_0.wav": {
+     "text": "Take.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      3664,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "6_yweweler_1.wav": {
+     "text": "you",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      291,
+      50464,
+      50257
+     ]
+    },
+    "6_yweweler_2.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      1044,
+      291,
+      13,
+      50414,
+      50257
+     ]
+    },
+    "6_yweweler_3.wav": {
+     "text": "you",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      291,
+      50464,
+      50257
+     ]
+    },
+    "6_yweweler_4.wav": {
+     "text": "you.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      291,
+      13,
+      50414,
+      50257
+     ]
+    },
+    "7_yweweler_0.wav": {
+     "text": "7",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      1614,
+      50389,
+      50257
+     ]
+    },
+    "7_yweweler_1.wav": {
+     "text": "11.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      2975,
+      13,
+      50414,
+      50257
+     ]
+    },
+    "7_yweweler_2.wav": {
+     "text": "heaven.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      7162,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "7_yweweler_3.wav": {
+     "text": "Heaven.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      13676,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "7_yweweler_4.wav": {
+     "text": "Evan.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      22613,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "8_yweweler_0.wav": {
+     "text": "8",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      1649,
+      50389,
+      50257
+     ]
+    },
+    "8_yweweler_1.wav": {
+     "text": "date.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      4002,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "8_yweweler_2.wav": {
+     "text": "8.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      1649,
+      13,
+      50414,
+      50257
+     ]
+    },
+    "8_yweweler_3.wav": {
+     "text": "paid.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      4835,
+      13,
+      50414,
+      50257
+     ]
+    },
+    "8_yweweler_4.wav": {
+     "text": "paid.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      4835,
+      13,
+      50414,
+      50257
+     ]
+    },
+    "9_yweweler_0.wav": {
+     "text": "9.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      1722,
+      13,
+      50414,
+      50257
+     ]
+    },
+    "9_yweweler_1.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      4621,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "9_yweweler_2.wav": {
+     "text": "Don't mind.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      1468,
+      380,
+      1575,
+      13,
+      50389,
+      50257
+     ]
+    },
+    "9_yweweler_3.wav": {
+     "text": "Now in.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      823,
+      294,
+      13,
+      50414,
+      50257
+     ]
+    },
+    "9_yweweler_4.wav": {
+     "text": "9.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      1722,
+      13,
+      50414,
+      50257
+     ]
+    },
+    "seq_0.wav": {
+     "text": "2, 5, 7, 6.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      568,
+      11,
+      1025,
+      11,
+      1614,
+      11,
+      1386,
+      13,
+      50464,
+      50257
+     ]
+    },
+    "seq_1.wav": {
+     "text": "1, 2, 3.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      502,
+      11,
+      568,
+      11,
+      805,
+      13,
+      50464,
+      50257
+     ]
+    },
+    "seq_2.wav": {
+     "text": "7, 9, 5, 6.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      1614,
+      11,
+      1722,
+      11,
+      1025,
+      11,
+      1386,
+      13,
+      50478,
+      50257
+     ]
+    },
+    "seq_3.wav": {
+     "text": "10, 3.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      1266,
+      11,
+      805,
+      13,
+      50464,
+      50257
+     ]
+    },
+    "seq_4.wav": {
+     "text": "9, 1, 8, 7.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      1722,
+      11,
+      502,
+      11,
+      1649,
+      11,
+      1614,
+      13,
+      50472,
+      50257
+     ]
+    },
+    "seq_5.wav": {
+     "text": "2, 5, or 0.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      568,
+      11,
+      1025,
+      11,
+      420,
+      1958,
+      13,
+      50464,
+      50257
+     ]
+    },
+    "seq_6.wav": {
+     "text": "0, 1, 9.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      1958,
+      11,
+      502,
+      11,
+      1722,
+      13,
+      50476,
+      50257
+     ]
+    },
+    "seq_7.wav": {
+     "text": "5, 7, 3, 4.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      1025,
+      11,
+      1614,
+      11,
+      805,
+      11,
+      1017,
+      13,
+      50474,
+      50257
+     ]
+    },
+    "seq_8.wav": {
+     "text": "3, 2, 9, 9.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      805,
+      11,
+      568,
+      11,
+      1722,
+      11,
+      1722,
+      13,
+      50464,
+      50257
+     ]
+    },
+    "seq_9.wav": {
+     "text": "3, 8, 5, 1.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      805,
+      11,
+      1649,
+      11,
+      1025,
+      11,
+      502,
+      13,
+      50464,
+      50257
+     ]
+    },
+    "samples_jfk.wav": {
+     "text": "And so my fellow Americans ask not what your country can do for you ask what you can do for your country.",
+     "tokens": [
+      50258,
+      50259,
+      50359,
+      50364,
+      400,
+      370,
+      452,
+      7177,
+      6280,
+      1029,
+      406,
+      437,
+      428,
+      1941,
+      393,
+      360,
+      337,
+      291,
+      1029,
+      437,
+      291,
+      393,
+      360,
+      337,
+      428,
+      1941,
+      13,
+      50889,
+      50257
+     ]
+    }
+   }
+  },
+  "hf-timestamps": {
+   "description": "transformers WhisperForConditionalGeneration.generate(return_timestamps=True), tiny.en, greedy",
+   "scores": {
+    "clips_with_empty_segment": 0,
+    "digit": {
+     "empty": 0,
+     "wer": 0.82,
+     "exact": 0.44
+    },
+    "sequence": {
+     "empty": 0,
+     "wer": 0.15
+    },
+    "long": {
+     "empty": 0,
+     "wer": 0.0
+    }
+   },
+   "transcripts": {
+    "0_yweweler_0.wav": {
+     "text": "You're welcome.",
+     "tokens": [
+      50257,
+      50363,
+      921,
+      821,
+      7062,
+      13,
+      50413
+     ]
+    },
+    "0_yweweler_1.wav": {
+     "text": "hero.",
+     "tokens": [
+      50257,
+      50363,
+      4293,
+      13,
+      50413
+     ]
+    },
+    "0_yweweler_2.wav": {
+     "text": "You're all.",
+     "tokens": [
+      50257,
+      50363,
+      921,
+      821,
+      477,
+      13,
+      50413
+     ]
+    },
+    "0_yweweler_3.wav": {
+     "text": "You're all.",
+     "tokens": [
+      50257,
+      50363,
+      921,
+      821,
+      477,
+      13,
+      50413
+     ]
+    },
+    "0_yweweler_4.wav": {
+     "text": "Zero.",
+     "tokens": [
+      50257,
+      50363,
+      12169,
+      13,
+      50413
+     ]
+    },
+    "1_yweweler_0.wav": {
+     "text": "One.",
+     "tokens": [
+      50257,
+      50363,
+      1881,
+      13,
+      50413
+     ]
+    },
+    "1_yweweler_1.wav": {
+     "text": "One.",
+     "tokens": [
+      50257,
+      50363,
+      1881,
+      13,
+      50405
+     ]
+    },
+    "1_yweweler_2.wav": {
+     "text": "1.",
+     "tokens": [
+      50257,
+      50363,
+      352,
+      13,
+      50388
+     ]
+    },
+    "1_yweweler_3.wav": {
+     "text": "one.",
+     "tokens": [
+      50257,
+      50363,
+      530,
+      13,
+      50388
+     ]
+    },
+    "1_yweweler_4.wav": {
+     "text": "one.",
+     "tokens": [
+      50257,
+      50363,
+      530,
+      13,
+      50388
+     ]
+    },
+    "2_yweweler_0.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50413
+     ]
+    },
+    "2_yweweler_1.wav": {
+     "text": "to.",
+     "tokens": [
+      50257,
+      50363,
+      284,
+      13,
+      50388
+     ]
+    },
+    "2_yweweler_2.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50413
+     ]
+    },
+    "2_yweweler_3.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50413
+     ]
+    },
+    "2_yweweler_4.wav": {
+     "text": "to.",
+     "tokens": [
+      50257,
+      50363,
+      284,
+      13,
+      50388
+     ]
+    },
+    "3_yweweler_0.wav": {
+     "text": "free.",
+     "tokens": [
+      50257,
+      50363,
+      1479,
+      13,
+      50413
+     ]
+    },
+    "3_yweweler_1.wav": {
+     "text": "Three.",
+     "tokens": [
+      50257,
+      50363,
+      7683,
+      13,
+      50405
+     ]
+    },
+    "3_yweweler_2.wav": {
+     "text": "Be.",
+     "tokens": [
+      50257,
+      50363,
+      1355,
+      13,
+      50405
+     ]
+    },
+    "3_yweweler_3.wav": {
+     "text": "We.",
+     "tokens": [
+      50257,
+      50363,
+      775,
+      13,
+      50388
+     ]
+    },
+    "3_yweweler_4.wav": {
+     "text": "free.",
+     "tokens": [
+      50257,
+      50363,
+      1479,
+      13,
+      50413
+     ]
+    },
+    "4_yweweler_0.wav": {
+     "text": "Four.",
+     "tokens": [
+      50257,
+      50363,
+      6675,
+      13,
+      50405
+     ]
+    },
+    "4_yweweler_1.wav": {
+     "text": "for.",
+     "tokens": [
+      50257,
+      50363,
+      329,
+      13,
+      50388
+     ]
+    },
+    "4_yweweler_2.wav": {
+     "text": "Four.",
+     "tokens": [
+      50257,
+      50363,
+      6675,
+      13,
+      50405
+     ]
+    },
+    "4_yweweler_3.wav": {
+     "text": "Oh.",
+     "tokens": [
+      50257,
+      50363,
+      3966,
+      13,
+      50405
+     ]
+    },
+    "4_yweweler_4.wav": {
+     "text": "Oh.",
+     "tokens": [
+      50257,
+      50363,
+      3966,
+      13,
+      50405
+     ]
+    },
+    "5_yweweler_0.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50257,
+      50363,
+      47843,
+      13,
+      50405
+     ]
+    },
+    "5_yweweler_1.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50257,
+      50363,
+      47843,
+      13,
+      50405
+     ]
+    },
+    "5_yweweler_2.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50257,
+      50363,
+      47843,
+      13,
+      50405
+     ]
+    },
+    "5_yweweler_3.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50257,
+      50363,
+      47843,
+      13,
+      50405
+     ]
+    },
+    "5_yweweler_4.wav": {
+     "text": "5.",
+     "tokens": [
+      50257,
+      50363,
+      642,
+      13,
+      50388
+     ]
+    },
+    "6_yweweler_0.wav": {
+     "text": "See.",
+     "tokens": [
+      50257,
+      50363,
+      4091,
+      13,
+      50405
+     ]
+    },
+    "6_yweweler_1.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50413
+     ]
+    },
+    "6_yweweler_2.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50405
+     ]
+    },
+    "6_yweweler_3.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50405
+     ]
+    },
+    "6_yweweler_4.wav": {
+     "text": "Thank you.",
+     "tokens": [
+      50257,
+      50363,
+      6952,
+      345,
+      13,
+      50413
+     ]
+    },
+    "7_yweweler_0.wav": {
+     "text": "Seven.",
+     "tokens": [
+      50257,
+      50363,
+      13723,
+      13,
+      50405
+     ]
+    },
+    "7_yweweler_1.wav": {
+     "text": "7.",
+     "tokens": [
+      50257,
+      50363,
+      767,
+      13,
+      50388
+     ]
+    },
+    "7_yweweler_2.wav": {
+     "text": "Heaven.",
+     "tokens": [
+      50257,
+      50363,
+      11225,
+      13,
+      50413
+     ]
+    },
+    "7_yweweler_3.wav": {
+     "text": "Seven.",
+     "tokens": [
+      50257,
+      50363,
+      13723,
+      13,
+      50405
+     ]
+    },
+    "7_yweweler_4.wav": {
+     "text": "Evan.",
+     "tokens": [
+      50257,
+      50363,
+      21523,
+      13,
+      50388
+     ]
+    },
+    "8_yweweler_0.wav": {
+     "text": "8.",
+     "tokens": [
+      50257,
+      50363,
+      807,
+      13,
+      50388
+     ]
+    },
+    "8_yweweler_1.wav": {
+     "text": "aid.",
+     "tokens": [
+      50257,
+      50363,
+      6133,
+      13,
+      50388
+     ]
+    },
+    "8_yweweler_2.wav": {
+     "text": "8.",
+     "tokens": [
+      50257,
+      50363,
+      807,
+      13,
+      50388
+     ]
+    },
+    "8_yweweler_3.wav": {
+     "text": "paid.",
+     "tokens": [
+      50257,
+      50363,
+      3432,
+      13,
+      50413
+     ]
+    },
+    "8_yweweler_4.wav": {
+     "text": "aid.",
+     "tokens": [
+      50257,
+      50363,
+      6133,
+      13,
+      50388
+     ]
+    },
+    "9_yweweler_0.wav": {
+     "text": "9.",
+     "tokens": [
+      50257,
+      50363,
+      860,
+      13,
+      50388
+     ]
+    },
+    "9_yweweler_1.wav": {
+     "text": "Bye.",
+     "tokens": [
+      50257,
+      50363,
+      47843,
+      13,
+      50405
+     ]
+    },
+    "9_yweweler_2.wav": {
+     "text": "9.",
+     "tokens": [
+      50257,
+      50363,
+      860,
+      13,
+      50388
+     ]
+    },
+    "9_yweweler_3.wav": {
+     "text": "Nine.",
+     "tokens": [
+      50257,
+      50363,
+      16431,
+      13,
+      50388
+     ]
+    },
+    "9_yweweler_4.wav": {
+     "text": "9.",
+     "tokens": [
+      50257,
+      50363,
+      860,
+      13,
+      50388
+     ]
+    },
+    "seq_0.wav": {
+     "text": "5, 7, 6.",
+     "tokens": [
+      50257,
+      50363,
+      642,
+      11,
+      767,
+      11,
+      718,
+      13,
+      50463
+     ]
+    },
+    "seq_1.wav": {
+     "text": "zero, seven, one, take.",
+     "tokens": [
+      50257,
+      50363,
+      6632,
+      11,
+      3598,
+      11,
+      530,
+      11,
+      1011,
+      13,
+      50463
+     ]
+    },
+    "seq_2.wav": {
+     "text": "7, 9, 5, 6.",
+     "tokens": [
+      50257,
+      50363,
+      767,
+      11,
+      860,
+      11,
+      642,
+      11,
+      718,
+      13,
+      50477
+     ]
+    },
+    "seq_3.wav": {
+     "text": "0, 7, 6, 3.",
+     "tokens": [
+      50257,
+      50363,
+      657,
+      11,
+      767,
+      11,
+      718,
+      11,
+      513,
+      13,
+      50471
+     ]
+    },
+    "seq_4.wav": {
+     "text": "9 1 8 7",
+     "tokens": [
+      50257,
+      50363,
+      860,
+      352,
+      807,
+      767,
+      50469
+     ]
+    },
+    "seq_5.wav": {
+     "text": "2, 5 or 0.",
+     "tokens": [
+      50257,
+      50363,
+      362,
+      11,
+      642,
+      393,
+      657,
+      13,
+      50463
+     ]
+    },
+    "seq_6.wav": {
+     "text": "1. 9.",
+     "tokens": [
+      50257,
+      50363,
+      352,
+      13,
+      860,
+      13,
+      50475
+     ]
+    },
+    "seq_7.wav": {
+     "text": "5, 7, 3, 4.",
+     "tokens": [
+      50257,
+      50363,
+      642,
+      11,
+      767,
+      11,
+      513,
+      11,
+      604,
+      13,
+      50475
+     ]
+    },
+    "seq_8.wav": {
+     "text": "3, 2, 9, 9.",
+     "tokens": [
+      50257,
+      50363,
+      513,
+      11,
+      362,
+      11,
+      860,
+      11,
+      860,
+      13,
+      50463
+     ]
+    },
+    "seq_9.wav": {
+     "text": "3 8 5 1",
+     "tokens": [
+      50257,
+      50363,
+      513,
+      807,
+      642,
+      352,
+      50463
+     ]
+    },
+    "samples_jfk.wav": {
+     "text": "And so my fellow Americans ask not what your country can do for you ask what you can do for your country.",
+     "tokens": [
+      50257,
+      50363,
+      843,
+      523,
+      616,
+      5891,
+      3399,
+      1265,
+      407,
+      644,
+      534,
+      1499,
+      460,
+      466,
+      329,
+      345,
+      50763,
+      50763,
+      1265,
+      644,
+      345,
+      460,
+      466,
+      329,
+      534,
+      1499,
+      13,
+      50913
+     ]
+    }
+   }
+  }
+ },
+ "agreement_with_transformers": {
+  "upstream": 2,
+  "fixed": 0,
+  "upstream+cap50": 3,
+  "fixed+cap50": 0,
+  "prompt": 9,
+  "prompt+cap50": 9,
+  "prompt+pair": 42,
+  "prompt+pair+cap50": 42,
+  "upstream-greedy": 1,
+  "prompt+pair-greedy": 44,
+  "patched": 42,
+  "tiny-upstream": 19,
+  "tiny-patched": 33,
+  "hf-timestamps": 61
+ },
+ "agreement_how": "clips whose normalised words (words_of: lower-case, numerals to words) equal transformers' with timestamps on"
+}

@@ -8,6 +8,15 @@
 > flux, DeepSeek-V2 and the symphonia pin sit directly on `main`. This file is kept
 > as the record of why each fix was needed.
 
+## The whisper example's empty transcriptions
+
+`whisper-example-timestamps.patch` (the same change as
+[davidmiheev/candle#13](https://github.com/davidmiheev/candle/pull/13)) applies to
+upstream `huggingface/candle` `main` as well as the fork. It drops `<|transcribe|>`
+from the English-only prompt, restores the reference timestamp-pairing rule for
+the first sampled token, and removes a 40 ms offset from printed span times.
+Measured in [`../../../docs/writeups/data/i-whisper-example-rules.json`](../../../docs/writeups/data/i-whisper-example-rules.json).
+
 `ignite-perf-fixes.patch` applies to `davidmiheev/candle` at `ignite-perf`
 (9aa02f1); `unlimited-ocr-example.rs` is a new example that belongs at
 `candle-examples/examples/unlimited-ocr/main.rs`. All of it was found by

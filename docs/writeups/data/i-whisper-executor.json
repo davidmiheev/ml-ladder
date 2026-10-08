@@ -4357,6 +4357,332 @@
      "seconds": 0.0
     }
    }
+  },
+  "tiny.en/cpu-after-fixes": {
+   "scores": {
+    "digit_exact": 0.48,
+    "sequence_wer": 0.225,
+    "long_wer": 0.0,
+    "empty": 0,
+    "agree_with_transformers_hf_generate": 41,
+    "agree_before_fixes_same_normalisation": 37,
+    "languages_reported": {
+     "en": 61
+    },
+    "windows_redecoded_by_fallback": 1
+   },
+   "env": {
+    "IGNITE_DEVICE": "cpu"
+   },
+   "code": "ignite-catalog fix/candle-transcription-executor @ 0b65f13, exp executor with only the ignite SDK stripped, candle davidmiheev/candle@ignite-perf 1f53799f",
+   "date": "2026-10-08",
+   "transcripts": {
+    "0_yweweler_0.wav": {
+     "text": " Bureau.",
+     "seconds": 12.754,
+     "language": "en"
+    },
+    "0_yweweler_1.wav": {
+     "text": " Thank you.",
+     "seconds": 1.284,
+     "language": "en"
+    },
+    "0_yweweler_2.wav": {
+     "text": " You're welcome.",
+     "seconds": 1.424,
+     "language": "en"
+    },
+    "0_yweweler_3.wav": {
+     "text": " You're all.",
+     "seconds": 1.41,
+     "language": "en"
+    },
+    "0_yweweler_4.wav": {
+     "text": " Zero.",
+     "seconds": 1.277,
+     "language": "en"
+    },
+    "1_yweweler_0.wav": {
+     "text": " 1.",
+     "seconds": 1.335,
+     "language": "en"
+    },
+    "1_yweweler_1.wav": {
+     "text": " one.",
+     "seconds": 1.343,
+     "language": "en"
+    },
+    "1_yweweler_2.wav": {
+     "text": " 1.",
+     "seconds": 1.196,
+     "language": "en"
+    },
+    "1_yweweler_3.wav": {
+     "text": " one.",
+     "seconds": 1.155,
+     "language": "en"
+    },
+    "1_yweweler_4.wav": {
+     "text": " one.",
+     "seconds": 1.21,
+     "language": "en"
+    },
+    "2_yweweler_0.wav": {
+     "text": " 2",
+     "seconds": 1.253,
+     "language": "en"
+    },
+    "2_yweweler_1.wav": {
+     "text": " to",
+     "seconds": 1.142,
+     "language": "en"
+    },
+    "2_yweweler_2.wav": {
+     "text": " to.",
+     "seconds": 1.318,
+     "language": "en"
+    },
+    "2_yweweler_3.wav": {
+     "text": " Thank you.",
+     "seconds": 1.301,
+     "language": "en"
+    },
+    "2_yweweler_4.wav": {
+     "text": " Thank you.",
+     "seconds": 1.343,
+     "language": "en"
+    },
+    "3_yweweler_0.wav": {
+     "text": " B.",
+     "seconds": 1.28,
+     "language": "en"
+    },
+    "3_yweweler_1.wav": {
+     "text": " Three.",
+     "seconds": 1.239,
+     "language": "en"
+    },
+    "3_yweweler_2.wav": {
+     "text": " Be",
+     "seconds": 1.249,
+     "language": "en"
+    },
+    "3_yweweler_3.wav": {
+     "text": " We",
+     "seconds": 1.152,
+     "language": "en"
+    },
+    "3_yweweler_4.wav": {
+     "text": " free.",
+     "seconds": 1.286,
+     "language": "en"
+    },
+    "4_yweweler_0.wav": {
+     "text": " Poor.",
+     "seconds": 1.325,
+     "language": "en"
+    },
+    "4_yweweler_1.wav": {
+     "text": " All.",
+     "seconds": 1.206,
+     "language": "en"
+    },
+    "4_yweweler_2.wav": {
+     "text": " Or...",
+     "seconds": 1.265,
+     "language": "en"
+    },
+    "4_yweweler_3.wav": {
+     "text": " Thank you.",
+     "seconds": 1.222,
+     "language": "en"
+    },
+    "4_yweweler_4.wav": {
+     "text": " Oh.",
+     "seconds": 1.241,
+     "language": "en"
+    },
+    "5_yweweler_0.wav": {
+     "text": " Bye.",
+     "seconds": 1.249,
+     "language": "en"
+    },
+    "5_yweweler_1.wav": {
+     "text": " Bye.",
+     "seconds": 1.273,
+     "language": "en"
+    },
+    "5_yweweler_2.wav": {
+     "text": " Bye.",
+     "seconds": 1.239,
+     "language": "en"
+    },
+    "5_yweweler_3.wav": {
+     "text": " Bye.",
+     "seconds": 1.288,
+     "language": "en"
+    },
+    "5_yweweler_4.wav": {
+     "text": " five.",
+     "seconds": 1.158,
+     "language": "en"
+    },
+    "6_yweweler_0.wav": {
+     "text": " Take.",
+     "seconds": 1.306,
+     "language": "en"
+    },
+    "6_yweweler_1.wav": {
+     "text": " Thank you.",
+     "seconds": 1.292,
+     "language": "en"
+    },
+    "6_yweweler_2.wav": {
+     "text": " Hey.",
+     "seconds": 1.265,
+     "language": "en"
+    },
+    "6_yweweler_3.wav": {
+     "text": " Thank you.",
+     "seconds": 1.407,
+     "language": "en"
+    },
+    "6_yweweler_4.wav": {
+     "text": " Thank you.",
+     "seconds": 1.323,
+     "language": "en"
+    },
+    "7_yweweler_0.wav": {
+     "text": " 7.",
+     "seconds": 1.25,
+     "language": "en"
+    },
+    "7_yweweler_1.wav": {
+     "text": " 7",
+     "seconds": 1.249,
+     "language": "en"
+    },
+    "7_yweweler_2.wav": {
+     "text": " Evan.",
+     "seconds": 1.166,
+     "language": "en"
+    },
+    "7_yweweler_3.wav": {
+     "text": " 7",
+     "seconds": 1.172,
+     "language": "en"
+    },
+    "7_yweweler_4.wav": {
+     "text": " Evan.",
+     "seconds": 1.261,
+     "language": "en"
+    },
+    "8_yweweler_0.wav": {
+     "text": " 8.",
+     "seconds": 1.352,
+     "language": "en"
+    },
+    "8_yweweler_1.wav": {
+     "text": " 8.",
+     "seconds": 1.293,
+     "language": "en"
+    },
+    "8_yweweler_2.wav": {
+     "text": " 8.",
+     "seconds": 1.287,
+     "language": "en"
+    },
+    "8_yweweler_3.wav": {
+     "text": " 8.",
+     "seconds": 1.324,
+     "language": "en"
+    },
+    "8_yweweler_4.wav": {
+     "text": " 8.",
+     "seconds": 1.284,
+     "language": "en"
+    },
+    "9_yweweler_0.wav": {
+     "text": " 9.",
+     "seconds": 1.278,
+     "language": "en"
+    },
+    "9_yweweler_1.wav": {
+     "text": " 9.",
+     "seconds": 1.26,
+     "language": "en"
+    },
+    "9_yweweler_2.wav": {
+     "text": " 9.",
+     "seconds": 1.286,
+     "language": "en"
+    },
+    "9_yweweler_3.wav": {
+     "text": " 9",
+     "seconds": 1.289,
+     "language": "en"
+    },
+    "9_yweweler_4.wav": {
+     "text": " 9.",
+     "seconds": 1.312,
+     "language": "en"
+    },
+    "seq_0.wav": {
+     "text": " 2 5 7 6",
+     "seconds": 1.406,
+     "language": "en"
+    },
+    "seq_1.wav": {
+     "text": " 11 1, take a",
+     "seconds": 82.106,
+     "language": "en"
+    },
+    "seq_2.wav": {
+     "text": " 7, 9, 5, 6.",
+     "seconds": 1.61,
+     "language": "en"
+    },
+    "seq_3.wav": {
+     "text": " 7, 6, 3.",
+     "seconds": 1.449,
+     "language": "en"
+    },
+    "seq_4.wav": {
+     "text": " 8-7",
+     "seconds": 1.264,
+     "language": "en"
+    },
+    "seq_5.wav": {
+     "text": " 2, 5, or 0.",
+     "seconds": 1.522,
+     "language": "en"
+    },
+    "seq_6.wav": {
+     "text": " 0 1 9",
+     "seconds": 1.268,
+     "language": "en"
+    },
+    "seq_7.wav": {
+     "text": " 5, 7, 3, 4.",
+     "seconds": 1.554,
+     "language": "en"
+    },
+    "seq_8.wav": {
+     "text": " 3, 6, 9, 9.",
+     "seconds": 1.506,
+     "language": "en"
+    },
+    "seq_9.wav": {
+     "text": " 3 8 5 1",
+     "seconds": 1.443,
+     "language": "en"
+    },
+    "samples_jfk.wav": {
+     "text": " And so my fellow Americans ask not what your country can do for you, ask what you can do for your country.",
+     "seconds": 2.527,
+     "language": "en"
+    }
+   }
   }
  }
 }
