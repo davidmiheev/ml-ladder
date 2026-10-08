@@ -53,6 +53,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT / "src"), str(ROOT)]
 
 ENWIK8_URL = "http://mattmahoney.net/dc/enwik8.zip"
+TRAIN_BYTES, VAL_BYTES = 90_000_000, 5_000_000  # the standard enwik8 split
 
 # ---------------------------------------------------------------------------
 # models
@@ -85,24 +86,43 @@ def recurrent_lm(kind: str, hidden: int, layers: int, vocab: int = 256):
     return RecurrentLM()
 
 
-def transformer_lm(width: int, depth: int, heads: int, block_size: int, vocab: int = 256, dropout: float = 0.0):
-    """C3's CharTransformer, learned positions, with attention through SDPA.
+def transformer_lm(
+    width: int,
+    depth: int,
+    heads: int,
+    block_size: int,
+    vocab: int = 256,
+    dropout: float = 0.0,
+    positional: str = "learned",
+):
+    """C3's CharTransformer with attention through SDPA.
 
     Same computation as C3's explicit softmax(QK^T/sqrt(d) + M)V -- checked
     numerically by ``attention_equivalence`` -- but through PyTorch's fused
     kernel, which does not materialise the T x T score matrix and is what makes
     1024-byte windows fit on a 16 GB T4.
+
+    ``positional="rope"`` drops C3's learned position table and rotates queries
+    and keys instead (rotary embeddings), so attention scores depend on the
+    offset between two positions rather than on either position alone.
     """
     from parts.c_sequence_attention.c3_transformer_from_scratch import make_transformer
 
     CharTransformer, _ = make_transformer()
     model = CharTransformer(
-        vocab, width=width, heads=heads, depth=depth, block_size=block_size, positional="learned", dropout=dropout
+        vocab,
+        width=width,
+        heads=heads,
+        depth=depth,
+        block_size=block_size,
+        positional="none" if positional == "rope" else positional,
+        dropout=dropout,
     )
+    forward = _sdpa_rope_forward if positional == "rope" else _sdpa_forward
     for module in model.modules():
         if type(module).__name__ == "MultiHeadSelfAttention":
             module.explicit_forward = module.forward
-            module.forward = types.MethodType(_sdpa_forward, module)
+            module.forward = types.MethodType(forward, module)
     return model
 
 
@@ -114,6 +134,52 @@ def _sdpa_forward(self, x, *, causal: bool = True, return_weights: bool = False)
     q, k, v = (t.view(batch, length, self.heads, self.head_width).transpose(1, 2) for t in (q, k, v))
     out = F.scaled_dot_product_attention(q, k, v, is_causal=causal)
     return self.projection(out.transpose(1, 2).reshape(batch, length, width)), None
+
+
+def rotary(t, base: float = 10000.0):
+    """Rotate [batch, heads, length, dim] by position (the half-split RoPE form).
+
+    Channel pair (i, i + dim/2) at position p is rotated by p * base^(-2i/dim),
+    so q_p . k_r depends on p and r only through p - r.
+    """
+    import torch
+
+    length, dim = t.shape[-2], t.shape[-1]
+    half = dim // 2
+    inv_freq = base ** (-torch.arange(half, device=t.device, dtype=torch.float32) / half)
+    angles = torch.arange(length, device=t.device, dtype=torch.float32)[:, None] * inv_freq[None, :]
+    cos, sin = angles.cos(), angles.sin()
+    # Rotate in fp32 even under fp16 autocast: angles reach ~1000 radians.
+    first, second = t[..., :half].float(), t[..., half:].float()
+    return torch.cat([first * cos - second * sin, first * sin + second * cos], dim=-1).to(t.dtype)
+
+
+def _sdpa_rope_forward(self, x, *, causal: bool = True, return_weights: bool = False):
+    import torch.nn.functional as F
+
+    batch, length, width = x.shape
+    q, k, v = self.qkv(x).chunk(3, dim=-1)
+    q, k, v = (t.view(batch, length, self.heads, self.head_width).transpose(1, 2) for t in (q, k, v))
+    out = F.scaled_dot_product_attention(rotary(q), rotary(k), v, is_causal=causal)
+    return self.projection(out.transpose(1, 2).reshape(batch, length, width)), None
+
+
+def rope_relative_check(device) -> float:
+    """RoPE's defining property, measured: with the same query and key vector
+    at every position, the score at (p, r) must depend only on p - r. Returns
+    the largest deviation from that, in fp32."""
+    import torch
+
+    torch.manual_seed(0)
+    length, dim = 64, 32
+    q = torch.randn(1, 1, 1, dim, device=device).expand(1, 1, length, dim).contiguous()
+    k = torch.randn(1, 1, 1, dim, device=device).expand(1, 1, length, dim).contiguous()
+    scores = (rotary(q) @ rotary(k).transpose(-1, -2))[0, 0]
+    worst = 0.0
+    for offset in range(-length + 1, length):
+        diagonal = torch.diagonal(scores, offset=offset)
+        worst = max(worst, float((diagonal - diagonal[0]).abs().max()))
+    return worst
 
 
 def attention_equivalence(device) -> float:
@@ -307,6 +373,7 @@ ENWIK8_MODELS = {
     "lstm": (lambda block: recurrent_lm("lstm", 512, 2), 2e-3, 0.0),
     "transformer-4M": (lambda block: transformer_lm(256, 5, 4, block), 1e-3, 0.1),
     "transformer-25M": (lambda block: transformer_lm(512, 8, 8, block), 6e-4, 0.1),
+    "transformer-25M-rope": (lambda block: transformer_lm(512, 8, 8, block, positional="rope"), 6e-4, 0.1),
 }
 
 
@@ -314,9 +381,9 @@ def study_enwik8(args, device, report):
     import torch
 
     data = load_enwik8(args)
-    train_ids, val_ids = data[:90_000_000], data[90_000_000:95_000_000]
+    train_ids, val_ids = data[:TRAIN_BYTES], data[TRAIN_BYTES : TRAIN_BYTES + VAL_BYTES]
     rows = report.setdefault("enwik8", [])
-    done = {(r["seed"], r["model"], r["context"]) for r in rows}
+    done = {(r["seed"], r["model"], r["context"], r.get("peak_lr")) for r in rows}
     for seed in args.seeds:
         for context in args.contexts:
             batch = args.tokens_per_step // context
@@ -326,9 +393,10 @@ def study_enwik8(args, device, report):
             starts = np.arange(n_windows) * (context + 1)
             windows = np.stack([val_ids[s : s + context + 1] for s in starts])
             for name in args.models:
-                if (seed, name, context) in done:
-                    continue
                 build, peak_lr, weight_decay = ENWIK8_MODELS[name]
+                peak_lr = args.peak_lr or peak_lr
+                if (seed, name, context, peak_lr) in done:
+                    continue
                 torch.manual_seed(seed)
                 model = build(context)
                 rng = np.random.default_rng(seed)
@@ -357,6 +425,7 @@ def study_enwik8(args, device, report):
                         "model": name,
                         "context": context,
                         "batch": batch,
+                        "peak_lr": peak_lr,
                         "parameters": count(model),
                         "steps": args.enwik8_steps,
                         "tokens_seen": args.enwik8_steps * batch * context,
@@ -371,6 +440,157 @@ def study_enwik8(args, device, report):
                     f"[enwik8] s{seed} T={context:<5} {name:<16} {rows[-1]['bits_per_byte']:.4f} bits/byte "
                     f"(last quarter {rows[-1]['bits_last_quarter']:.4f}) params={count(model):,} "
                     f"{info['train_seconds']:.0f}s {info['peak_memory_mb']:.0f}MB",
+                    flush=True,
+                )
+                del model
+                if device.type == "cuda":
+                    torch.cuda.empty_cache()
+                save(args, report)
+
+
+BPE_MODELS = {
+    # The two leaders on bytes, with the input and output layers resized to the
+    # tokenizer's vocabulary; the same learning rates as on bytes.
+    "gru": (lambda block, vocab: recurrent_lm("gru", 592, 2, vocab=vocab), 2e-3, 0.0),
+    "transformer-25M": (lambda block, vocab: transformer_lm(512, 8, 8, block, vocab=vocab), 6e-4, 0.1),
+}
+
+
+def train_bpe(text: str, vocab_size: int):
+    """Byte-pair encoding over enwik8 read as latin-1, so one character is one
+    byte and a token's length in characters is its length in bytes. All 256
+    byte values are in the base alphabet, so nothing is ever out of vocabulary
+    and the bytes-per-token bookkeeping below is exact."""
+    from tokenizers import Regex, Tokenizer, models, pre_tokenizers, trainers
+
+    tokenizer = Tokenizer(models.BPE())
+    tokenizer.pre_tokenizer = pre_tokenizers.Split(
+        Regex(r" ?[A-Za-z]+| ?[0-9]+| ?[^A-Za-z0-9\s]+|\s+"), behavior="isolated"
+    )
+    trainer = trainers.BpeTrainer(
+        vocab_size=vocab_size, initial_alphabet=[chr(i) for i in range(256)], show_progress=False
+    )
+    tokenizer.train_from_iterator(_newline_chunks(text), trainer)
+    return tokenizer
+
+
+def _newline_chunks(text: str, size: int = 1 << 20):
+    start = 0
+    while start < len(text):
+        end = text.find("\n", start + size)
+        end = len(text) if end < 0 else end + 1
+        yield text[start:end]
+        start = end
+
+
+def bpe_encode(tokenizer, text: str) -> np.ndarray:
+    ids = [np.asarray(e.ids, dtype=np.int64) for e in tokenizer.encode_batch(list(_newline_chunks(text)))]
+    return np.concatenate(ids)
+
+
+def study_bpe(args, device, report):
+    """The 4x study's two leaders on BPE tokens instead of bytes.
+
+    Same tokens per step and steps as the byte runs it is compared with, so
+    roughly the same compute, but every step now sees several times more text.
+    Scored in bits per *byte* on the same held-out bytes as the byte models:
+    total NLL of the target tokens divided by the bytes those tokens spell.
+    """
+    import torch
+
+    data = load_enwik8(args)
+    text_train = data[:TRAIN_BYTES].astype(np.uint8).tobytes().decode("latin-1")
+    # The first 2 MB of the validation split: far more than the 256 KiB scored.
+    text_val = data[TRAIN_BYTES : TRAIN_BYTES + 2_000_000].astype(np.uint8).tobytes().decode("latin-1")
+    started = time.time()
+    tokenizer = train_bpe(text_train[: args.bpe_train_bytes], args.bpe_vocab)
+    vocab = tokenizer.get_vocab_size()
+    lengths = np.array([len(tokenizer.id_to_token(i)) for i in range(vocab)], dtype=np.int64)
+    train_tokens = bpe_encode(tokenizer, text_train)
+    val_tokens = bpe_encode(tokenizer, text_val)
+    # Exactness check: the tokens must spell every byte, no more and no fewer.
+    assert int(lengths[train_tokens].sum()) == len(text_train), "BPE lost or duplicated training bytes"
+    assert int(lengths[val_tokens].sum()) == len(text_val), "BPE lost or duplicated validation bytes"
+    meta = report.setdefault(
+        "bpe_tokenizer",
+        {
+            "vocab": vocab,
+            "trained_on_bytes": args.bpe_train_bytes,
+            "train_tokens": len(train_tokens),
+            "bytes_per_token_train": len(text_train) / len(train_tokens),
+            "bytes_per_token_val": len(text_val) / len(val_tokens),
+            "seconds": time.time() - started,
+        },
+    )
+    print(f"[bpe] {meta}", flush=True)
+    rows = report.setdefault("bpe", [])
+    done = {(r["seed"], r["model"], r["context"]) for r in rows}
+    for seed in args.seeds:
+        for context in args.contexts:
+            batch = args.tokens_per_step // context
+            windows, covered, start = [], 0, 0
+            while covered < args.eval_tokens:  # at least 256 KiB of target bytes
+                window = val_tokens[start : start + context + 1]
+                windows.append(window)
+                covered += int(lengths[window[1:]].sum())
+                start += context + 1
+            windows = np.stack(windows)
+            target_bytes = lengths[windows[:, 1:]]  # [n_windows, context]
+            for name in args.models:
+                if (seed, name, context) in done:
+                    continue
+                build, peak_lr, weight_decay = BPE_MODELS[name]
+                torch.manual_seed(seed)
+                model = build(context, vocab)
+                rng = np.random.default_rng(seed)
+
+                def sample_batch(rng=rng, context=context, batch=batch):
+                    starts = rng.integers(0, len(train_tokens) - context - 1, size=batch)
+                    chunk = np.stack([train_tokens[s : s + context + 1] for s in starts])
+                    tensor = torch.from_numpy(chunk).to(device)
+                    return tensor[:, :-1], tensor[:, 1:]
+
+                info = train(
+                    model,
+                    sample_batch,
+                    steps=args.enwik8_steps,
+                    peak_lr=peak_lr,
+                    schedule="warmup-cosine",
+                    device=device,
+                    weight_decay=weight_decay,
+                    label=f"bpe {name} T={context} s{seed}",
+                )
+                curve = per_position_loss(model, windows, device=device, batch_size=max(1, 65536 // context))
+                nats_by_position = curve * len(windows)  # summed over windows
+                bytes_by_position = target_bytes.sum(axis=0)
+                quarter = max(1, context // 4)
+                tokens_seen = args.enwik8_steps * batch * context
+                rows.append(
+                    {
+                        "seed": seed,
+                        "model": name,
+                        "context": context,
+                        "context_bytes_mean": float(target_bytes.sum(axis=1).mean()),
+                        "batch": batch,
+                        "peak_lr": peak_lr,
+                        "parameters": count(model),
+                        "steps": args.enwik8_steps,
+                        "tokens_seen": tokens_seen,
+                        "bytes_seen": tokens_seen * meta["bytes_per_token_train"],
+                        "eval_bytes": int(target_bytes.sum()),
+                        "bits_per_byte": float(nats_by_position.sum() / math.log(2) / bytes_by_position.sum()),
+                        "bits_per_byte_last_quarter": float(
+                            nats_by_position[-quarter:].sum() / math.log(2) / bytes_by_position[-quarter:].sum()
+                        ),
+                        "bits_per_token_by_position": [round(float(b), 4) for b in curve / math.log(2)],
+                        "bytes_per_token_by_position": [round(float(b), 4) for b in bytes_by_position / len(windows)],
+                        **info,
+                        "tokens_per_second": tokens_seen / info["train_seconds"],
+                    }
+                )
+                print(
+                    f"[bpe] s{seed} T={context:<5} {name:<16} {rows[-1]['bits_per_byte']:.4f} bits/byte "
+                    f"({rows[-1]['context_bytes_mean']:.0f} bytes of context) {info['train_seconds']:.0f}s",
                     flush=True,
                 )
                 del model
@@ -646,6 +866,9 @@ def main() -> None:
     parser.add_argument("--shakespeare-steps", type=int, default=500)
     parser.add_argument("--copy-lengths", nargs="+", type=int, default=[32, 128, 512])
     parser.add_argument("--copy-steps", type=int, default=1500)
+    parser.add_argument("--peak-lr", type=float, default=None, help="override every model's peak learning rate")
+    parser.add_argument("--bpe-vocab", type=int, default=4096)
+    parser.add_argument("--bpe-train-bytes", type=int, default=20_000_000, help="bytes the tokenizer is fitted on")
     parser.add_argument("--plot", metavar="JSON", help="only draw figures from an existing report")
     parser.add_argument(
         "--plot-budget",
@@ -671,9 +894,13 @@ def main() -> None:
     report["torch"] = torch.__version__
     report["settings"] = {k: v for k, v in vars(args).items() if k not in ("plot", "plot_budget", "figures")}
     report["sdpa_vs_explicit_max_abs_diff"] = attention_equivalence(device)
+    report["rope_relative_max_abs_dev"] = rope_relative_check(device)
+    print("RoPE score depends only on offset, max |dev|:", report["rope_relative_max_abs_dev"], flush=True)
     print("SDPA vs explicit attention, max |diff|:", report["sdpa_vs_explicit_max_abs_diff"], flush=True)
     for study in args.studies:
-        {"shakespeare": study_shakespeare, "enwik8": study_enwik8, "copy": study_copy}[study](args, device, report)
+        {"shakespeare": study_shakespeare, "enwik8": study_enwik8, "copy": study_copy, "bpe": study_bpe}[study](
+            args, device, report
+        )
     report["finished"] = time.strftime("%Y-%m-%d %H:%M:%S")
     save(args, report)
 
