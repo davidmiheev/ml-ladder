@@ -1,0 +1,163 @@
+% writeupstyle.sty
+% Visual style for the ml-ladder writeup PDFs. Adapted from lecturestyle.sty in
+% davidmiheev/atcoder_lectures (same layout: title band, sans-serif accent
+% headings, tinted boxes, ruled header and footer) with its own palette, and
+% extended for what pandoc emits from the markdown writeups: longtables,
+% figures, highlighted code and blockquotes.
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{writeupstyle}[2026/10/30 ml-ladder writeup style]
+
+\RequirePackage{fontspec}
+% DejaVu Serif ships no italic face, so emphasis uses a slanted upright
+% (otherwise \emph silently renders upright and LaTeX warns on every build).
+\setmainfont{DejaVu Serif}[
+  ItalicFont={DejaVu Serif}, ItalicFeatures={FakeSlant=0.2},
+  BoldItalicFont={DejaVu Serif Bold}, BoldItalicFeatures={FakeSlant=0.2}]
+\setsansfont{DejaVu Sans}
+\setmonofont{DejaVu Sans Mono}[Scale=0.86]
+\RequirePackage[a4paper,margin=2.2cm,headheight=14pt]{geometry}
+\RequirePackage{amsmath,amssymb}
+\RequirePackage{unicode-math}
+% Termes math is smaller than DejaVu text at the same size; match x-heights.
+\setmathfont{TeX Gyre Termes Math}[Scale=MatchLowercase]
+\RequirePackage{mathtools}
+\RequirePackage{calc}
+\RequirePackage{etoolbox}
+\RequirePackage{xcolor}
+\RequirePackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\RequirePackage{fancyhdr}
+\RequirePackage{titlesec}
+\RequirePackage{enumitem}
+\RequirePackage{longtable,booktabs,array,colortbl}
+\RequirePackage{graphicx}
+\RequirePackage{float}
+\RequirePackage[font={small,sf},labelfont=bf,labelsep=period,margin=1em,skip=4pt]{caption}
+% Keep each rung's figures inside its own section instead of drifting forward.
+\RequirePackage[section]{placeins}
+\RequirePackage{fancyvrb}
+\RequirePackage{xurl} % long URLs and paths break at any character
+\RequirePackage{hyperref}
+\RequirePackage{bookmark}
+
+% ---- palette: deep teal accent, terracotta second accent ----
+\definecolor{writeupink}{HTML}{1C2629}
+\definecolor{writeupaccent}{HTML}{1F5F63}
+\definecolor{writeupbg}{HTML}{EEF5F4}
+\definecolor{writeupwarn}{HTML}{A0472A}
+\definecolor{codebg}{HTML}{F5F7F7}
+\definecolor{coderule}{HTML}{D3DEDD}
+
+\AtBeginDocument{\color{writeupink}}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=writeupaccent,
+  urlcolor=writeupaccent,
+  citecolor=writeupaccent,
+  bookmarksnumbered=false
+}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt plus 2pt minus 1pt}
+\setlist{itemsep=2pt,topsep=3pt,parsep=1pt}
+\linespread{1.04}
+\setlength{\emergencystretch}{3em} % fewer overfull lines in the wide serif face
+
+% ---- title band ----
+% #1 = series label (left)  #2 = title  #3 = right-hand label  #4 = source note
+\newcommand{\writeuptitleband}[4]{%
+  \begin{tcolorbox}[colback=writeupaccent,colframe=writeupaccent,
+      sharp corners,boxrule=0pt,left=10pt,right=10pt,top=8pt,bottom=9pt]
+    {\color{white}\small\sffamily #1 \hfill #3}\\[4pt]
+    {\color{white}\LARGE\sffamily\bfseries #2}
+  \end{tcolorbox}
+  \vspace{2pt}
+  {\small\color{writeupink!70} #4\par}
+  \vspace{6pt}
+  {\color{writeupaccent!60}\hrule}
+  \vspace{10pt}
+}
+
+% ---- header, footer, headings ----
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.2pt}
+\renewcommand{\headrule}{{\color{writeupaccent!50}\hrule height\headrulewidth}}
+\renewcommand{\footrule}{{\color{writeupink!30}\hrule height\footrulewidth}}
+\fancyhead[L]{\small\sffamily\color{writeupaccent}\writeupheadleft}
+\fancyhead[R]{\small\sffamily\color{writeupink!60}\nouppercase{\leftmark}}
+\fancyfoot[C]{\small\thepage}
+\fancyfoot[L]{\small\color{writeupink!60}ml-ladder writeups}
+\fancypagestyle{plain}{} % title page keeps the same header and footer
+\newcommand{\writeupheadleft}{}
+\renewcommand{\sectionmark}[1]{\markboth{#1}{}}
+
+% The writeups carry their own labels ("A1 — ..."), so headings are unnumbered.
+\setcounter{secnumdepth}{0}
+\titleformat{\section}{\Large\sffamily\bfseries\color{writeupaccent}}{}{0pt}{}
+\titleformat{\subsection}{\large\sffamily\bfseries\color{writeupink}}{}{0pt}{}
+\titleformat{\subsubsection}{\normalsize\sffamily\bfseries\color{writeupaccent!85!black}}{}{0pt}{}
+\titleformat{\paragraph}[runin]{\normalsize\sffamily\bfseries\color{writeupink}}{}{0pt}{}
+\titlespacing*{\section}{0pt}{14pt}{6pt}
+\titlespacing*{\subsection}{0pt}{12pt}{4pt}
+\titlespacing*{\subsubsection}{0pt}{10pt}{3pt}
+
+% ---- boxes ----
+\newcommand{\boxtitle}[2]{#1\ifx\relax#2\relax\else\,---\,#2\fi}
+% The status block at the top of each writeup (its leading blockquote).
+\newtcolorbox{statusbox}{
+  enhanced, breakable, colback=writeupbg, colframe=writeupaccent,
+  boxrule=0.6pt, left=8pt, right=8pt, top=5pt, bottom=5pt,
+  fonttitle=\sffamily\bfseries\small, title={Status}, fontupper=\small
+}
+% Every other blockquote: a quoted passage, ruled on the left in the second accent.
+\renewenvironment{quote}{%
+  \begin{tcolorbox}[enhanced, breakable, frame hidden, colback=white,
+    borderline west={2pt}{0pt}{writeupwarn!70}, sharp corners,
+    left=10pt, right=4pt, top=2pt, bottom=2pt, fontupper=\small]}
+  {\end{tcolorbox}}
+\newtcolorbox{notebox}[1][]{
+  enhanced, breakable, colback=white, colframe=writeupwarn,
+  boxrule=0.6pt, left=8pt, right=8pt, top=6pt, bottom=6pt,
+  fonttitle=\sffamily\bfseries, coltitle=white, title={\boxtitle{Note}{#1}}
+}
+
+% ---- figures ----
+\setkeys{Gin}{width=0.62\linewidth,keepaspectratio}
+\floatplacement{figure}{htbp}
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.08}
+\renewcommand{\floatpagefraction}{0.6}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
+
+% ---- tables (pandoc longtables) ----
+\renewcommand{\arraystretch}{1.18}
+\setlength{\LTpre}{6pt}
+\setlength{\LTpost}{6pt}
+\AtBeginEnvironment{longtable}{\small\sffamily}
+\renewcommand{\toprule}{\arrayrulecolor{writeupaccent}\specialrule{0.8pt}{0pt}{2pt}\arrayrulecolor{writeupink!45}}
+\renewcommand{\bottomrule}{\arrayrulecolor{writeupaccent}\specialrule{0.8pt}{2pt}{0pt}\arrayrulecolor{black}}
+
+% ---- code (pandoc's Shaded/Highlighting) ----
+\newtcolorbox{writeupcode}{
+  enhanced, breakable, colback=codebg, colframe=coderule, boxrule=0.5pt,
+  arc=1pt, left=6pt, right=6pt, top=3pt, bottom=3pt
+}
+% pandoc defines Shaded with its highlighting macros, after this package loads;
+% the template calls this right after them.
+\newcommand{\writeupstylecode}{%
+  \renewenvironment{Shaded}{\begin{writeupcode}}{\end{writeupcode}}}
+\DefineVerbatimEnvironment{verbatim}{Verbatim}{fontsize=\small}
+
+% ---- horizontal rules between parts of a writeup ----
+\newcommand{\writeuprule}{%
+  \par\vspace{4pt}\noindent\hfil{\color{writeupaccent!45}\rule{0.3\linewidth}{0.5pt}}\hfil\par\vspace{4pt}}
+
+% pandoc helpers
+\providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+\endinput

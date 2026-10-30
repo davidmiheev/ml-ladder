@@ -1,0 +1,27 @@
+% pandoc template for the ml-ladder writeup PDFs (tools/build_pdf.py fills it).
+\documentclass[11pt]{article}
+\usepackage{writeupstyle}
+\graphicspath{{$graphics-root$/}}
+$if(highlighting-macros)$
+$highlighting-macros$
+\writeupstylecode
+$endif$
+\renewcommand{\writeupheadleft}{$header-label$}
+\hypersetup{pdftitle={$header-label$ --- $title$},pdfauthor={ml-ladder}}
+
+\begin{document}
+\thispagestyle{fancy}
+\writeuptitleband{$band-left$}{$title$}{$band-right$}{$source-note$}
+
+$if(status)$
+\begin{statusbox}
+$status$
+\end{statusbox}
+$endif$
+$if(toc)$
+{\hypersetup{linkcolor=writeupink}\setcounter{tocdepth}{$toc-depth$}
+\renewcommand{\contentsname}{Contents}\tableofcontents}
+\clearpage
+$endif$
+$body$
+\end{document}

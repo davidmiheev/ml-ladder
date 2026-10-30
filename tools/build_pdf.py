@@ -8,9 +8,14 @@ figures land as numbered floats with their alt text as captions.
     uv run python tools/build_pdf.py --all      # every part with a finished writeup
     uv run python tools/build_pdf.py A --keep   # keep the intermediate .tex
 
+The look (title band, accent headings, status box, table and code styling) is
+docs/writeups/tex/writeupstyle.sty, adapted from the lecture-note style of
+davidmiheev/atcoder_lectures, plus a pandoc template, filter and code theme
+beside it.
+
 Requires pandoc and XeLaTeX on PATH (Debian/Ubuntu: pandoc texlive-xetex
-texlive-latex-extra texlive-fonts-recommended). The committed PDFs mean readers
-never need either.
+texlive-latex-extra texlive-fonts-recommended fonts-dejavu fonts-texgyre-math).
+The committed PDFs mean readers never need either.
 """
 
 from __future__ import annotations
@@ -32,52 +37,11 @@ from mlladder.ladder import Part
 ROOT = Path(__file__).resolve().parents[1]
 PDF_DIR = ROOT / spec.WRITEUPS_DIR / "pdf"
 
-# Figure sizing, float placement and a caption style pandoc's default template
-# does not set. Included verbatim in the preamble.
-PREAMBLE = r"""
-\usepackage{graphicx}
-\graphicspath{{@GRAPHICS@/}}
-\usepackage{float}
-\usepackage{caption}
-% Keep each rung's figures inside its own section instead of drifting forward.
-\usepackage[section]{placeins}
-\setkeys{Gin}{width=0.62\linewidth,keepaspectratio}
-\captionsetup{font=small,labelfont=bf,skip=4pt}
-\floatplacement{figure}{htbp}
-\renewcommand{\topfraction}{0.9}
-\renewcommand{\bottomfraction}{0.8}
-\renewcommand{\textfraction}{0.08}
-\renewcommand{\floatpagefraction}{0.6}
-% Let several figures share a page rather than each claiming one.
-\setcounter{topnumber}{3}
-\setcounter{bottomnumber}{2}
-\setcounter{totalnumber}{4}
-% Start the body on a fresh page after the table of contents.
-\usepackage{etoolbox}
-\pretocmd{\section}{}{}{}
-\let\mlladderoldtoc\tableofcontents
-\renewcommand{\tableofcontents}{\mlladderoldtoc\clearpage}
-% Blockquotes (the status header) as a tinted, indented block.
-\usepackage{mdframed}
-\renewenvironment{quote}{\begin{mdframed}[leftmargin=0pt,innerleftmargin=8pt,
-  innerrightmargin=8pt,linewidth=0.8pt,linecolor=black!25,backgroundcolor=black!3]\small}
-  {\end{mdframed}}
-"""
-
-PANDOC_VARIABLES = {
-    "documentclass": "article",
-    "geometry": "a4paper,margin=2.4cm",
-    "fontsize": "11pt",
-    "linestretch": "1.05",
-    "mainfont": "TeX Gyre Pagella",
-    "sansfont": "TeX Gyre Heros",
-    "monofont": "DejaVu Sans Mono",
-    "monofontoptions": "Scale=0.85",
-    "colorlinks": "true",
-    "linkcolor": "MidnightBlue",
-    "urlcolor": "MidnightBlue",
-    "toccolor": "black",
-}
+# The look lives in docs/writeups/tex: writeupstyle.sty (adapted from the
+# lecture-note style in davidmiheev/atcoder_lectures), the pandoc template that
+# loads it, a filter that boxes the status block, and a code-highlighting theme
+# in the same palette.
+TEX_DIR = ROOT / spec.WRITEUPS_DIR / "tex"
 
 
 def require(tool: str) -> str:
@@ -130,39 +94,49 @@ def build(part: Part, *, keep_tex: bool) -> Path:
     if not source.exists():
         raise SystemExit(f"no writeup at {spec.writeup_path(part)}")
 
-    title, markdown = prepare_markdown(source)
+    _title, markdown = prepare_markdown(source)
     PDF_DIR.mkdir(parents=True, exist_ok=True)
     destination = PDF_DIR / f"{spec.part_slug(part)}.pdf"
 
     with tempfile.TemporaryDirectory(prefix="mlladder-pdf-") as scratch:
         work = Path(scratch)
         (work / "body.md").write_text(markdown)
-        # xelatex runs in the scratch directory, so figures need an absolute root.
-        (work / "preamble.tex").write_text(PREAMBLE.replace("@GRAPHICS@", source.parent.as_posix()))
+        # xelatex runs in the scratch directory: the style file goes beside the
+        # .tex, and figures need an absolute root.
+        shutil.copyfile(TEX_DIR / "writeupstyle.sty", work / "writeupstyle.sty")
+        relative_source = source.relative_to(ROOT).as_posix()
 
         command = [
             require("pandoc"),
             str(work / "body.md"),
             "-o",
             str(work / "writeup.tex"),
-            "--standalone",
             "--from=markdown+tex_math_dollars+pipe_tables+raw_tex",
             "--to=latex",
+            f"--template={TEX_DIR / 'template.tex'}",
+            f"--lua-filter={TEX_DIR / 'writeup.lua'}",
+            f"--highlight-style={TEX_DIR / 'writeup.theme'}",
             "--toc",
-            "--toc-depth=2",
+            "-V",
+            "toc-depth=2",
             "--shift-heading-level-by=-1",  # "## A1" becomes a \section
             f"--resource-path={source.parent}",
-            "--include-in-header",
-            str(work / "preamble.tex"),
+            "-V",
+            f"graphics-root={source.parent.as_posix()}",
+            # Metadata (-M) is escaped for LaTeX ("&" in a title); variables (-V) are not.
             "-M",
-            f"title={title}",
+            f"title={part.title}",
             "-M",
-            f"subtitle=ml-ladder writeup · part {part.id}",
+            f"header-label=Part {part.id}",
             "-M",
-            f"date={date.today().isoformat()}",
+            f"band-left=ml-ladder · Part {part.id}",
+            "-M",
+            f"band-right=writeup · compiled {date.today().isoformat()}",
+            "-V",
+            f"source-note=Compiled from \\texttt{{{relative_source}}}. Every number in it comes from"
+            " the JSON under \\texttt{docs/writeups/data/}, and every figure from"
+            " \\texttt{docs/writeups/figures/}.",
         ]
-        for key, value in PANDOC_VARIABLES.items():
-            command += ["-V", f"{key}={value}"]
         subprocess.run(command, check=True)
 
         # Two passes so the table of contents and float numbering settle.
@@ -183,6 +157,11 @@ def build(part: Part, *, keep_tex: bool) -> Path:
             # XeTeX drops unmapped glyphs silently; never let that reach a PDF.
             raise SystemExit(f"font is missing glyphs {missing} — fix the source or change mainfont")
 
+        overfull = [float(width) for width in re.findall(r"Overfull \\hbox \((\d+\.\d+)pt too wide\)", log)]
+        wide = [width for width in overfull if width > 10]
+        if wide:
+            # Not fatal (the PDF is still readable), but something runs into the margin.
+            print(f"warning: part {part.id}: {len(wide)} line(s) overrun the margin by >10pt (max {max(wide):.0f}pt)")
         shutil.copyfile(work / "writeup.pdf", destination)
         if keep_tex:
             shutil.copyfile(work / "writeup.tex", destination.with_suffix(".tex"))

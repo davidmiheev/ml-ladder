@@ -104,8 +104,14 @@ make pdf                                    # every finished part
 uv run python tools/build_pdf.py A --keep   # also keep the intermediate .tex
 ```
 
+The look lives in [`tex/`](tex/): `writeupstyle.sty` (title band, accent
+headings, the status block as a box, styled tables and code, adapted from the
+lecture-note style of `davidmiheev/atcoder_lectures` with its own teal and
+terracotta palette), the pandoc template that loads it, a filter (`writeup.lua`)
+and a matching code-highlighting theme.
+
 The pipeline is markdown → LaTeX (pandoc) → PDF (XeLaTeX), which needs
-`pandoc texlive-xetex texlive-latex-extra texlive-fonts-recommended` installed;
+`pandoc texlive-xetex texlive-latex-extra texlive-fonts-recommended fonts-dejavu fonts-texgyre-math` installed;
 readers need none of it, since the PDF is in the repo. The build fails rather
 than silently dropping glyphs: XeTeX reports unmapped characters as *Missing
 character* log lines, and `tools/build_pdf.py` turns those into an error — so
